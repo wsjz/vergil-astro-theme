@@ -28,10 +28,17 @@ const isArticle = head.pageType === 'article';
                 window.scrollTo(0, 0);
             })();
         </script>
-        <script>
-            if (localStorage.theme === 'dark') {
-                document.documentElement.classList.add('dark');
-            }
+        <script is:inline>
+            (function() {
+                try {
+                    var scheme = localStorage.getItem('colorScheme') || 'C';
+                    var isDark = localStorage.getItem('darkMode');
+                    document.documentElement.setAttribute('data-theme', scheme);
+                    if (isDark === 'true' || (isDark === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                        document.documentElement.classList.add('dark');
+                    }
+                } catch(e) {}
+            })();
         </script>
         <ViewTransitions />
         <script is:inline src="/theme-toggle.js"></script>
@@ -70,8 +77,8 @@ const isArticle = head.pageType === 'article';
 
             <div class={`flex min-h-screen ${showTopNav ? 'pt-16' : ''}`}>
                 {showSidebar && <Sidebar />}
-                <div class="flex-1 lg:ml-[calc(14rem+2%+12px)] xl:ml-[calc(15rem+2%+16px)] xl:mr-[calc(12rem+2%+16px)] 2xl:mr-[calc(14rem+2%+16px)]">
-                    <div class="flex flex-col min-h-screen px-4 md:px-8">
+                <div class="flex-1 lg:ml-[calc(14rem+5%+4px)] xl:ml-[calc(15rem+5%+4px)] xl:mr-[calc(12rem+5%+4px)] 2xl:mr-[calc(14rem+5%+4px)]">
+                    <div class="flex flex-col min-h-screen px-4 lg:px-6">
                         <div class="flex items-center justify-end gap-3 py-4">
                             <ThemeToggle />
                         </div>
@@ -83,7 +90,7 @@ const isArticle = head.pageType === 'article';
                 </div>
 
                 {showRightSidebar && (
-                    <div class="hidden xl:block fixed right-[2%] top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-52 2xl:w-56 bg-main overflow-y-auto z-40">
+                    <div class="right-sidebar-container hidden xl:block fixed right-[5%] top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-52 2xl:w-56 bg-main overflow-y-auto z-40">
                         <slot name="right-sidebar">
                             <RightSidebar />
                         </slot>

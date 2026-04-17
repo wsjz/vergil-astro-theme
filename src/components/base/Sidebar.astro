@@ -89,10 +89,10 @@ function isActive(href: string): boolean {
 }
 ---
 
-<aside id="main-sidebar" class="sidebar flex flex-col fixed left-0 lg:left-[2%] top-14 h-[calc(100vh-3.5rem)] w-64 lg:w-56 xl:w-60 2xl:w-64 border-r border-light bg-main overflow-y-auto z-40 transition-transform duration-300 translate-x-0">
+<aside id="main-sidebar" class="sidebar flex flex-col fixed left-0 lg:left-[5%] top-14 h-[calc(100vh-3.5rem)] w-64 lg:w-56 xl:w-60 2xl:w-64 bg-main overflow-y-auto z-40 transition-transform duration-300 translate-x-0">
   <div class="flex-1 p-3 pt-4">
     <!-- Profile Card -->
-    <div class="bg-card rounded-xl p-4 mb-3 text-center">
+    <div class="bg-card/80 backdrop-blur-md rounded-xl p-4 mb-3 text-center">
       <a href="/" class="inline-block mb-3 group" transition:name="brand">
         <div class="w-16 h-16 mx-auto rounded-full overflow-hidden border border-light shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:scale-105">
           {siteConfig.avatar ? (
@@ -133,7 +133,7 @@ function isActive(href: string): boolean {
       </div>
     </div>
 
-    <div class="bg-card rounded-xl p-3">
+    <div class="bg-card/80 backdrop-blur-md rounded-xl p-3">
       <div class="flex items-center gap-1.5 mb-3">
         <Flag class="w-3.5 h-3.5 text-red-500" />
         <h3 class="text-sm font-medium text-main">站内导航</h3>
@@ -162,7 +162,7 @@ function isActive(href: string): boolean {
       </nav>
     </div>
 
-    <div class="bg-card rounded-xl p-3 mt-3">
+    <div class="bg-card/80 backdrop-blur-md rounded-xl p-3 mt-3">
       <div class="flex items-center gap-1.5 mb-2.5">
         <Info class="w-3.5 h-3.5 text-accent" />
         <h3 class="text-sm font-medium text-main">站点信息</h3>
@@ -185,7 +185,7 @@ function isActive(href: string): boolean {
           <span class="text-muted">最后活动时间：</span>
           <span class="text-main">{getLastActive()}</span>
         </div>
-          <div class="bg-card rounded-xl mt-5">
+          <div class="bg-card/80 backdrop-blur-md rounded-xl mt-5">
               <div class="flex items-center gap-1.5 mb-2.5">
                   <Award class="w-3.5 h-3.5 text-accent" />
                   <h3 class="text-sm font-medium text-main">备案信息</h3>
@@ -211,7 +211,7 @@ function isActive(href: string): boolean {
 <!-- Sidebar Toggle -->
 <button
   id="sidebar-toggle"
-  class="flex fixed top-16 z-50 w-10 h-10 items-center justify-center bg-card/95 backdrop-blur-sm border border-light rounded-full shadow-md shadow-black/5 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-main active:scale-95 group left-[calc(16rem+1.25rem)] lg:left-[calc(2%+14rem+1.25rem)] xl:left-[calc(2%+15rem+1.25rem)] 2xl:left-[calc(2%+16rem+1.25rem)]"
+  class="flex fixed top-16 z-50 w-10 h-10 items-center justify-center bg-card/95 backdrop-blur-sm border border-light rounded-full shadow-md shadow-black/5 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-main active:scale-95 group left-[calc(16rem+1.25rem)] lg:left-[calc(5%+14rem+1.25rem)] xl:left-[calc(5%+15rem+1.25rem)] 2xl:left-[calc(5%+16rem+1.25rem)]"
   aria-label="收起侧边栏"
 >
   <ChevronsLeft class="w-5 h-5 text-secondary group-hover:text-accent transition-colors duration-300 sidebar-collapse-icon" />
@@ -238,11 +238,11 @@ function isActive(href: string): boolean {
       const width = window.innerWidth;
       let leftOffset;
       if (width >= 1536) {
-        leftOffset = 'calc(2% + 16rem + 0.75rem)'; // 2xl
+        leftOffset = 'calc(5% + 16rem + 0.75rem)'; // 2xl
       } else if (width >= 1280) {
-        leftOffset = 'calc(2% + 15rem + 0.75rem)'; // xl
+        leftOffset = 'calc(5% + 15rem + 0.75rem)'; // xl
       } else if (width >= 1024) {
-        leftOffset = 'calc(2% + 14rem + 0.75rem)'; // lg
+        leftOffset = 'calc(5% + 14rem + 0.75rem)'; // lg
       } else {
         leftOffset = 'calc(16rem + 0.75rem)'; // sm/md: w-64 + offset
       }
@@ -258,7 +258,7 @@ function isActive(href: string): boolean {
       const collapseIcon = toggle.querySelector('.sidebar-collapse-icon');
       const expandIcon = toggle.querySelector('.sidebar-expand-icon');
       const isMobile = window.innerWidth < 1024;
-      const mainContent = document.querySelector('.flex-1.lg\\:ml-\\[calc\\(14rem\\+2\\%\\+12px\\)\\]');
+      const mainContent = document.querySelector('.flex-1.lg\\:ml-\\[calc\\(14rem\\+5\\%\\+4px\\)\\]');
 
       if (isCollapsed) {
         sidebar.classList.add('-translate-x-full');

@@ -16,6 +16,28 @@
     background: var(--text-muted);
 }
 
+/* Right sidebar container: hide scrollbar until hover */
+.right-sidebar-container {
+    scrollbar-width: none;
+}
+.right-sidebar-container:hover {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+}
+.right-sidebar-container::-webkit-scrollbar {
+    width: 0;
+}
+.right-sidebar-container:hover::-webkit-scrollbar {
+    width: 4px;
+}
+.right-sidebar-container::-webkit-scrollbar-thumb {
+    background: transparent;
+}
+.right-sidebar-container:hover::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 3px;
+}
+
 .font-display {
     font-family: var(--font-display);
 }
