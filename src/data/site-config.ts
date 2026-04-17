@@ -166,6 +166,12 @@ const siteConfig: SiteConfig = {
             { text: '关于', href: '/about', icon: 'user' },
             { text: 'Travelling', href: '/travelling', icon: 'train' }
         ]
+    },
+    agent: {
+        enabled: false,
+        provider: 'rive',
+        // rive: { src: '/model.riv' },
+        // live2d: { modelPath: '/model.json' },
     }
 };
 

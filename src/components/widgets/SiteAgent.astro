@@ -1,0 +1,448 @@
+---
+import siteConfig from '../../data/site-config';
+
+const agent = siteConfig.agent;
+const enabled = agent?.enabled ?? false;
+const provider = agent?.provider ?? 'rive';
+const riveSrc = agent?.rive?.src ?? '';
+const live2dModelPath = agent?.live2d?.modelPath ?? '';
+---
+
+{enabled && (
+    <div
+        id="agent-root"
+        class="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-2 pointer-events-none"
+        data-agent-collapsed="true"
+        data-provider={provider}
+        data-rive-src={riveSrc}
+        data-live2d-model={live2dModelPath}
+    >
+        <div id="agent-bubble" class="agent-bubble pointer-events-auto max-w-[260px] sm:max-w-[300px] rounded-2xl rounded-br-sm bg-surface2 text-main px-4 py-3 shadow-lg opacity-0 translate-y-2 transition-all duration-300 scale-95 origin-bottom-right">
+            <div id="agent-bubble-text" class="text-sm leading-relaxed min-h-[1.5em]"></div>
+            <div id="agent-bubble-cursor" class="inline-block w-0.5 h-4 bg-accent ml-0.5 align-middle animate-blink hidden"></div>
+            <div class="mt-2 flex items-center justify-between gap-2">
+                <span id="agent-name" class="text-xs text-muted opacity-60">V</span>
+                <button id="agent-next-btn" class="text-xs text-accent hover:opacity-80 transition-opacity hidden">Next →</button>
+            </div>
+        </div>
+
+        <div id="agent-character" class="agent-character pointer-events-auto relative cursor-pointer group" title="Click to interact">
+            {provider === 'rive' && (
+                <canvas id="agent-rive-canvas" class="w-24 h-24" width="300" height="300"></canvas>
+            )}
+
+            {provider === 'live2d' && (
+                <div id="agent-live2d-mount" class="w-24 h-24"></div>
+            )}
+        </div>
+    </div>
+
+    <style>
+        #agent-root {
+            transition: left 0.3s ease, top 0.3s ease;
+        }
+        #agent-root.agent-dragging {
+            transition: none;
+            cursor: grabbing;
+        }
+        #agent-root.agent-dragging .agent-bubble {
+            opacity: 0 !important;
+            pointer-events: none;
+        }
+
+        #agent-root[data-agent-collapsed="false"] .agent-bubble {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .animate-blink {
+            animation: blink 1s step-end infinite;
+        }
+
+        #agent-character {
+            animation: agent-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            animation-delay: 1s;
+        }
+        @keyframes agent-enter {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .agent-bubble {
+            animation: bubble-breathe 3s ease-in-out infinite;
+        }
+        @keyframes bubble-breathe {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-2px) scale(1.01); }
+        }
+    </style>
+
+    <script>
+        import { agentConfig, getDialogueForPath } from '../../data/agent-dialogue';
+
+        const rootEl = document.getElementById('agent-root');
+        if (!rootEl) {
+            console.warn('[Agent] Root element not found, skipping');
+            (() => {})();
+        } else {
+            const provider = rootEl.dataset.provider as 'rive' | 'live2d';
+            const riveSrc = rootEl.dataset.riveSrc || '';
+            const live2dModelPath = rootEl.dataset.live2dModel || '';
+
+            type DialogueLine = import('../../data/agent-dialogue').DialogueLine;
+
+            interface AgentState {
+                isCollapsed: boolean;
+                isTyping: boolean;
+                currentLines: DialogueLine[];
+                currentIndex: number;
+                idleTimer: ReturnType<typeof setTimeout> | null;
+                riveInstance: any | null;
+                riveStateMachineName: string | null;
+                live2dWidget: any | null;
+                hasShownGreeting: boolean;
+            }
+
+            const state: AgentState = {
+                isCollapsed: true,
+                isTyping: false,
+                currentLines: [],
+                currentIndex: 0,
+                idleTimer: null,
+                riveInstance: null,
+                riveStateMachineName: null,
+                live2dWidget: null,
+                hasShownGreeting: false,
+            };
+
+            const bubbleEl = document.getElementById('agent-bubble')!;
+            const textEl = document.getElementById('agent-bubble-text')!;
+            const cursorEl = document.getElementById('agent-bubble-cursor')!;
+            const nextBtn = document.getElementById('agent-next-btn')! as HTMLButtonElement;
+            const charEl = document.getElementById('agent-character')!;
+
+            function initAgent() {
+                const savedCollapsed = localStorage.getItem(agentConfig.collapsedKey);
+                if (savedCollapsed !== null) {
+                    state.isCollapsed = savedCollapsed === 'true';
+                }
+
+                charEl.addEventListener('click', toggleAgent);
+
+                nextBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showNextLine();
+                });
+
+                if (provider === 'rive' && riveSrc) {
+                    initRive();
+                } else if (provider === 'live2d' && live2dModelPath) {
+                    initLive2d();
+                }
+
+                const isFirstVisit = !localStorage.getItem(agentConfig.firstVisitKey);
+                if (isFirstVisit) {
+                    localStorage.setItem(agentConfig.firstVisitKey, 'true');
+                    setTimeout(() => {
+                        expandAgent();
+                        showDialogueForCurrentRoute();
+                    }, 2000);
+                } else if (!state.isCollapsed) {
+                    expandAgent();
+                    showDialogueForCurrentRoute();
+                }
+
+                document.addEventListener('astro:page-load', () => {
+                    if (rootEl) {
+                        if (!state.isCollapsed) {
+                            showDialogueForCurrentRoute();
+                        }
+                    }
+                });
+
+                initDraggable();
+            }
+
+            function expandAgent() {
+                state.isCollapsed = false;
+                rootEl.dataset.agentCollapsed = 'false';
+                localStorage.setItem(agentConfig.collapsedKey, 'false');
+            }
+
+            function collapseAgent() {
+                state.isCollapsed = true;
+                rootEl.dataset.agentCollapsed = 'true';
+                localStorage.setItem(agentConfig.collapsedKey, 'true');
+                clearIdleTimer();
+            }
+
+            function toggleAgent() {
+                if (state.isCollapsed) {
+                    expandAgent();
+                    if (!state.hasShownGreeting) {
+                        showDialogueForCurrentRoute();
+                    }
+                } else {
+                    collapseAgent();
+                }
+            }
+
+            function showDialogueForCurrentRoute() {
+                const path = window.location.pathname;
+                const dialogue = getDialogueForPath(path);
+                state.currentLines = dialogue.lines;
+                state.currentIndex = 0;
+                state.hasShownGreeting = true;
+                showLine(state.currentLines[0]);
+                startIdleTimer(dialogue.idleLines || []);
+            }
+
+            function showLine(line: DialogueLine) {
+                if (!line) return;
+                state.isTyping = true;
+                rootEl.dataset.agentSpeaking = 'true';
+                textEl.textContent = '';
+                cursorEl.classList.remove('hidden');
+                nextBtn.classList.add('hidden');
+
+                triggerCharacterReaction();
+
+                const chars = line.text.split('');
+                let i = 0;
+
+                const typeNext = () => {
+                    if (i < chars.length) {
+                        textEl.textContent += chars[i];
+                        i++;
+                        setTimeout(typeNext, agentConfig.typeSpeed);
+                    } else {
+                        state.isTyping = false;
+                        rootEl.dataset.agentSpeaking = 'false';
+                        cursorEl.classList.add('hidden');
+                        if (state.currentIndex < state.currentLines.length - 1) {
+                            nextBtn.classList.remove('hidden');
+                        }
+                    }
+                };
+
+                typeNext();
+            }
+
+            function showNextLine() {
+                if (state.currentIndex < state.currentLines.length - 1) {
+                    state.currentIndex++;
+                    showLine(state.currentLines[state.currentIndex]);
+                }
+            }
+
+            function startIdleTimer(idleLines: DialogueLine[]) {
+                clearIdleTimer();
+                if (idleLines.length === 0) return;
+
+                state.idleTimer = setTimeout(() => {
+                    if (state.isCollapsed || state.isTyping) {
+                        startIdleTimer(idleLines);
+                        return;
+                    }
+                    const randomLine = idleLines[Math.floor(Math.random() * idleLines.length)];
+                    showLine(randomLine);
+                    startIdleTimer(idleLines);
+                }, agentConfig.idleInterval);
+            }
+
+            function clearIdleTimer() {
+                if (state.idleTimer) {
+                    clearTimeout(state.idleTimer);
+                    state.idleTimer = null;
+                }
+            }
+
+            function triggerCharacterReaction() {
+                if (provider === 'rive' && state.riveInstance) {
+                    triggerRiveClick();
+                }
+            }
+
+            function triggerRiveClick() {
+                const canvas = document.getElementById('agent-rive-canvas') as HTMLCanvasElement;
+                if (!canvas) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+
+                ['mousedown', 'mouseup', 'click'].forEach((type, idx) => {
+                    setTimeout(() => {
+                        const evt = new MouseEvent(type, {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window,
+                            clientX: x,
+                            clientY: y,
+                        });
+                        canvas.dispatchEvent(evt);
+                    }, idx * 50);
+                });
+            }
+
+            async function initRive() {
+                const canvas = document.getElementById('agent-rive-canvas') as HTMLCanvasElement;
+                if (!canvas || !riveSrc) return;
+
+                try {
+                    const response = await fetch(riveSrc, { method: 'HEAD' });
+                    if (!response.ok) {
+                        console.warn('[Agent] Rive model not found:', riveSrc);
+                        return;
+                    }
+
+                    const { Rive } = await import('@rive-app/canvas');
+
+                    const rive = new Rive({
+                        src: riveSrc,
+                        canvas,
+                        autoplay: true,
+                        onLoad: () => {
+                            const smNames = rive.stateMachineNames;
+                            console.log('[Agent] Rive state machines:', smNames);
+                            if (smNames.length > 0) {
+                                state.riveStateMachineName = smNames[0];
+                                rive.play(smNames[0]);
+                            }
+                            rive.resizeDrawingSurfaceToCanvas();
+                        },
+                        onStateChange: (event: any) => {
+                            console.log('[Agent] Rive state:', event.data);
+                        },
+                    });
+
+                    state.riveInstance = rive;
+
+                    window.addEventListener('resize', () => {
+                        rive.resizeDrawingSurfaceToCanvas();
+                    });
+                } catch (err) {
+                    console.error('[Agent] Rive load failed:', err);
+                }
+            }
+
+            async function initLive2d() {
+                if (!live2dModelPath) return;
+
+                try {
+                    const L2DWidget = await import('live2d-widget');
+                    state.live2dWidget = L2DWidget;
+
+                    L2DWidget.init({
+                        model: {
+                            jsonPath: live2dModelPath,
+                            scale: 1,
+                        },
+                        display: {
+                            position: 'right',
+                            width: 180,
+                            height: 360,
+                            hOffset: 0,
+                            vOffset: -20,
+                        },
+                        mobile: {
+                            show: true,
+                            scale: 0.6,
+                        },
+                        react: {
+                            opacityDefault: 0.9,
+                            opacityOnHover: 0.5,
+                        },
+                        dialog: {
+                            enable: false,
+                            hitokoto: false,
+                        },
+                    });
+                } catch (err) {
+                    console.error('[Agent] Live2D load failed:', err);
+                }
+            }
+
+            function initDraggable() {
+                let isDragging = false;
+                let startX = 0, startY = 0;
+                let initialLeft = 0, initialTop = 0;
+                let hasMoved = false;
+
+                const onPointerDown = (e: PointerEvent) => {
+                    isDragging = true;
+                    hasMoved = false;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    const rect = rootEl.getBoundingClientRect();
+                    initialLeft = rect.left;
+                    initialTop = rect.top;
+                    rootEl.style.transition = 'none';
+                    rootEl.setPointerCapture(e.pointerId);
+                    rootEl.classList.add('agent-dragging');
+                };
+
+                const onPointerMove = (e: PointerEvent) => {
+                    if (!isDragging) return;
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+                        hasMoved = true;
+                    }
+                    let newLeft = initialLeft + dx;
+                    let newTop = initialTop + dy;
+                    const maxLeft = window.innerWidth - rootEl.offsetWidth;
+                    const maxTop = window.innerHeight - rootEl.offsetHeight;
+                    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+                    newTop = Math.max(0, Math.min(newTop, maxTop));
+                    rootEl.style.left = newLeft + 'px';
+                    rootEl.style.top = newTop + 'px';
+                    rootEl.style.right = 'auto';
+                    rootEl.style.bottom = 'auto';
+                };
+
+                const onPointerUp = (e: PointerEvent) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    rootEl.style.transition = '';
+                    rootEl.classList.remove('agent-dragging');
+                    rootEl.releasePointerCapture(e.pointerId);
+
+                    const rect = rootEl.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const maxLeft = window.innerWidth - rect.width;
+                    const snapLeft = centerX < window.innerWidth / 2 ? 0 : maxLeft;
+                    rootEl.style.left = snapLeft + 'px';
+                    rootEl.style.top = rect.top + 'px';
+                    rootEl.style.right = 'auto';
+                    rootEl.style.bottom = 'auto';
+
+                    if (hasMoved) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                };
+
+                rootEl.addEventListener('pointerdown', onPointerDown);
+                rootEl.addEventListener('pointermove', onPointerMove);
+                rootEl.addEventListener('pointerup', onPointerUp);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initAgent);
+            } else {
+                initAgent();
+            }
+        }
+    </script>
+)

@@ -104,6 +104,21 @@ export type SiteConfig = {
         enabled: boolean;
     };
     splash?: SplashConfig;
+    agent?: AgentConfig;
+};
+
+export type AgentProvider = 'rive' | 'live2d';
+
+export type AgentConfig = {
+    enabled?: boolean;
+    provider: AgentProvider;
+    rive?: {
+        src: string;
+        stateMachine?: string;
+    };
+    live2d?: {
+        modelPath: string;
+    };
 };
 
 export type Album = {
