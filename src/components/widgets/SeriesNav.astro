@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import { getPostsBySeries } from '../../utils/data-utils';
+import { slugify } from '../../utils/common-utils';
+
+interface Props {
+    currentPostId: string;
+    series: string;
+}
+
+const { currentPostId, series } = Astro.props;
+const seriesId = slugify(series);
+const allPosts = await getCollection('blog');
+const seriesPosts = getPostsBySeries(allPosts, seriesId);
+const currentIndex = seriesPosts.findIndex((p) => p.id === currentPostId);
+---
+
+<div class="my-6 rounded-xl border border-accent/20 bg-accent/5 p-4">
+    <div class="flex items-center justify-between mb-3">
+        <a href={`/series/${seriesId}`} class="text-xs font-medium text-accent hover:underline">
+            专栏：{series}
+        </a>
+        <span class="text-xs text-secondary">{currentIndex + 1} / {seriesPosts.length}</span>
+    </div>
+    <ol class="space-y-1.5">
+        {seriesPosts.map((post, index) => {
+            const isCurrent = post.id === currentPostId;
+            return (
+                <li class="flex items-center gap-2">
+                    <span class={`shrink-0 w-5 h-5 rounded-full text-[10px] font-medium flex items-center justify-center ${isCurrent ? 'bg-accent text-white' : 'bg-accent/10 text-accent'}`}>
+                        {index + 1}
+                    </span>
+                    {isCurrent ? (
+                        <span class="text-xs font-medium text-main line-clamp-1">{post.data.title}</span>
+                    ) : (
+                        <a href={`/blog/${post.id}/`} class="text-xs text-secondary hover:text-accent transition-colors line-clamp-1">
+                            {post.data.title}
+                        </a>
+                    )}
+                </li>
+            );
+        })}
+    </ol>
+</div>

@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Now from '../../components/content/Now.astro';
+
+---
+
+<BaseLayout
+    title="Now"
+    description="What I'm doing now - my current focus, projects, and activities."
+    showHeader={false}
+>
+    <h1 class="mb-12 font-display text-xl sm:mb-16 sm:text-2xl">Now</h1>
+    
+    <p class="text-secondary mb-8">
+        这是我在 <a href="https://nownownow.com/about" target="_blank" rel="noopener noreferrer" class="underline hover:decoration-solid">/now</a> 页面的内容，
+        记录我目前正在做的事情和关注点。
+    </p>
+
+    <Now 
+        items={[
+            "正在学习和探索 **Astro** 和 **Tailwind CSS** 的现代网站构建方式",
+            "保持运动，保持健康的生活方式",
+            "探索数字花园和知识管理的新方法"
+        ]}
+        date="2025年4月"
+    />
+
+    <Now
+        items={[
+            "享受阅读和写作的时光，整理技术笔记",
+        ]}
+        date="2025年3月21日"
+    />
+
+    <div class="mt-12 prose max-w-none">
+        <h2 class="font-display text-xl mb-4">关于 /now 页面</h2>
+        <p>
+            这个概念来自 Derek Sivers 的 <a href="https://nownownow.com/" target="_blank" rel="noopener noreferrer">nownownow.com</a>。
+            与通常的"关于我"页面不同，/now 页面回答的是"你现在在做什么？"这个问题。
+        </p>
+        <p>
+            如果你也有自己的网站，建议你也添加一个 /now 页面！
+        </p>
+    </div>
+
+</BaseLayout>

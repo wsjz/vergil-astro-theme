@@ -1,0 +1,47 @@
+---
+import { ArrowLeft, ArrowRight } from '@lucide/astro';
+import type { DocArticleNode } from '../../utils/docs-utils';
+
+interface Props {
+    docId: string;
+    prev: DocArticleNode | null;
+    next: DocArticleNode | null;
+}
+
+const { docId, prev, next } = Astro.props;
+---
+
+<nav class="my-16 sm:my-24 grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-dashed border-main pt-8">
+    {prev ? (
+        <a
+            href={`/docs/${docId}/${prev.slug}`}
+            class="group flex flex-col gap-1 rounded-xl border border-light p-5 hover:border-accent/40 hover:bg-accent/5 transition-all"
+        >
+            <span class="text-xs text-secondary flex items-center gap-1">
+                <ArrowLeft class="w-3 h-3" />
+                上一篇
+            </span>
+            <span class="font-display text-base font-medium text-main group-hover:text-accent transition-colors line-clamp-2">
+                {prev.title}
+            </span>
+        </a>
+    ) : (
+        <div />
+    )}
+    {next ? (
+        <a
+            href={`/docs/${docId}/${next.slug}`}
+            class="group flex flex-col gap-1 rounded-xl border border-light p-5 hover:border-accent/40 hover:bg-accent/5 transition-all text-right sm:text-right"
+        >
+            <span class="text-xs text-secondary flex items-center justify-end gap-1">
+                下一篇
+                <ArrowRight class="w-3 h-3" />
+            </span>
+            <span class="font-display text-base font-medium text-main group-hover:text-accent transition-colors line-clamp-2">
+                {next.title}
+            </span>
+        </a>
+    ) : (
+        <div />
+    )}
+</nav>

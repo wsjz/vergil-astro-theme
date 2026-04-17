@@ -1,0 +1,123 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Button from '../../components/ui/Button.astro';
+import FormattedDate from '../../components/ui/FormattedDate.astro';
+import ReadingTime from '../../components/ui/ReadingTime.astro';
+import Comments from '../../components/widgets/Comments.astro';
+import TocSidebar from '../../components/widgets/TocSidebar.astro';
+import FloatingToc from '../../components/widgets/FloatingToc.astro';
+import RelatedPosts from '../../components/widgets/RelatedPosts.astro';
+import FeaturedPosts from '../../components/widgets/FeaturedPosts.astro';
+import SeriesNav from '../../components/widgets/SeriesNav.astro';
+import siteConfig from '../../data/site-config';
+import { sortItemsByDateDesc } from '../../utils/data-utils';
+import { slugify } from '../../utils/common-utils';
+
+export async function getStaticPaths() {
+    const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+    const postCount = posts.length;
+    return posts.map((post, index) => ({
+        params: { id: post.id },
+        props: {
+            post,
+            prevPost: index + 1 !== postCount ? posts[index + 1] : null,
+            nextPost: index !== 0 ? posts[index - 1] : null
+        }
+    }));
+}
+
+type Props = { post: CollectionEntry<'blog'>; prevPost: CollectionEntry<'blog'>; nextPost: CollectionEntry<'blog'> };
+
+const { href } = Astro.url;
+const { post, prevPost, nextPost } = Astro.props;
+const { title, publishDate, updatedDate, excerpt, tags = [], seo, series, category, fonts } = post.data;
+const { Content, headings } = await render(post);
+---
+
+<BaseLayout
+    title={seo?.title ?? title}
+    description={seo?.description ?? excerpt}
+    image={seo?.image}
+    pageType="article"
+    showHeader={false}
+    showRightSidebar={true}
+    articleTitle={title}
+    commentsEnabled={siteConfig.comments?.enabled}
+    fonts={fonts}
+>
+    <div slot="right-sidebar">
+        <TocSidebar headings={headings} />
+        <FeaturedPosts />
+        <RelatedPosts currentPostId={post.id} tags={tags} />
+    </div>
+
+    <FloatingToc headings={headings} />
+
+    <article class="mb-16 sm:mb-24">
+        <header class="mb-8">
+            <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{title}</h1>
+            <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-secondary">
+                <FormattedDate date={publishDate} />
+                <ReadingTime content={post.body || ''} />
+                {updatedDate && (
+                    <span>
+                        Updated on <FormattedDate date={updatedDate} />
+                    </span>
+                )}
+            </div>
+        </header>
+        {series && <SeriesNav currentPostId={post.id} series={series} />}
+        <div class="prose sm:prose-lg max-w-none">
+            <Content />
+        </div>
+        <div class="mt-8 flex flex-wrap items-center justify-between gap-6 text-sm sm:mt-12 sm:text-base">
+            {tags.length > 0 && (
+                <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm">
+                    {tags.map((tag) => (
+                        <a class="text-main hover:underline" href={`/tags/${slugify(tag)}`}>
+                            #{tag}
+                        </a>
+                    ))}
+                </div>
+            )}
+            <Button class="copy-url-button" aria-label="Copy link" data-url={href} data-tooltip-default="Copy link" data-tooltip-success="Copied">Share</Button>
+        </div>
+    </article>
+    {(prevPost || nextPost) && (
+        <nav class="my-16 sm:my-24 grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-dashed border-main pt-8">
+            {prevPost ? (
+                <a href={`/blog/${prevPost.id}/`} class="group flex flex-col gap-1 rounded-xl border border-light p-5 hover:border-accent/40 hover:bg-accent/5 transition-all">
+                    <span class="text-xs text-secondary">← Prev</span>
+                    <span class="font-display text-base font-medium text-main group-hover:text-accent transition-colors line-clamp-2">{prevPost.data.title}</span>
+                </a>
+            ) : <div />}
+            {nextPost ? (
+                <a href={`/blog/${nextPost.id}/`} class="group flex flex-col gap-1 rounded-xl border border-light p-5 hover:border-accent/40 hover:bg-accent/5 transition-all text-right sm:text-right">
+                    <span class="text-xs text-secondary">Next →</span>
+                    <span class="font-display text-base font-medium text-main group-hover:text-accent transition-colors line-clamp-2">{nextPost.data.title}</span>
+                </a>
+            ) : <div />}
+        </nav>
+    )}
+    {siteConfig.comments?.enabled && <Comments pageId={`/blog/${post.id}/`} pageTitle={title} />}
+</BaseLayout>
+
+<script>
+    document.addEventListener('astro:page-load', () => {
+        const copyUrlButton = document.querySelector('.copy-url-button') as HTMLButtonElement;
+        copyUrlButton?.addEventListener('click', async () => {
+            await copyUrl(copyUrlButton);
+        });
+
+        async function copyUrl(button: HTMLButtonElement) {
+            let url = button.getAttribute('data-url') || '';
+            let label = button.innerText;
+            await navigator.clipboard.writeText(url);
+            button.innerText = 'Copied';
+            setTimeout(() => {
+                button.innerText = label;
+            }, 2500);
+        }
+    });
+</script>

@@ -1,0 +1,225 @@
+---
+interface Heading {
+    depth: number;
+    slug: string;
+    text: string;
+}
+
+interface Props {
+    headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
+---
+
+<button
+    id="back-to-top-btn"
+    class="fixed right-4 xl:right-64 2xl:right-72 bottom-10 z-50 flex items-center justify-center w-10 h-10 bg-card border border-light rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/50 hover:shadow-xl transition-all duration-300 opacity-0 invisible translate-y-4"
+    aria-label="Back to top"
+>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+    </svg>
+</button>
+
+{tocHeadings.length > 0 && (
+    <>
+        <button
+            id="floating-toc-btn"
+            class="fixed right-4 xl:right-[max(1rem,calc(2%+320px))] bottom-24 z-40 xl:hidden flex items-center justify-center w-10 h-10 bg-card border border-light rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/50 hover:shadow-xl transition-all duration-200"
+            aria-label="Open TOC"
+            aria-expanded="false"
+        >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+        </button>
+
+        <div
+            id="floating-toc-panel"
+            class="fixed right-4 bottom-36 z-40 xl:hidden w-72 max-h-[60vh] bg-card border border-light rounded-2xl shadow-2xl opacity-0 invisible translate-y-4 transition-all duration-300 overflow-hidden"
+            aria-hidden="true"
+        >
+            <div class="flex items-center justify-between px-4 py-3 border-b border-light">
+                <h3 class="text-sm font-medium text-main">目录</h3>
+                <button
+                    id="floating-toc-close"
+                    class="p-1 text-muted hover:text-accent transition-colors"
+                    aria-label="Close TOC"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="p-4 overflow-y-auto max-h-[calc(60vh-3rem)]">
+                <ul class="space-y-2">
+                    {tocHeadings.map((heading) => {
+                        const indentClass = heading.depth === 4 ? 'pl-8' : heading.depth === 3 ? 'pl-4' : '';
+                        const colorClass = heading.depth === 2 ? 'text-secondary font-medium' : 'text-muted';
+                        return (
+                            <li>
+                                <a
+                                    href={`#${heading.slug}`}
+                                    class={`block text-sm transition-colors hover:text-accent ${indentClass} ${colorClass}`}
+                                    data-heading-id={heading.slug}
+                                >
+                                    {heading.text}
+                                </a>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </nav>
+        </div>
+
+        <div
+            id="floating-toc-backdrop"
+            class="fixed inset-0 z-30 xl:hidden bg-black/20 backdrop-blur-sm opacity-0 invisible transition-opacity duration-300"
+            aria-hidden="true"
+        />
+    </>
+)}
+
+<script is:inline>
+    (function() {
+        let scrollListenerAdded = false;
+
+        function toggleBackToTop() {
+            const backToTopBtn = document.getElementById('back-to-top-btn');
+            if (!backToTopBtn) return;
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.remove('opacity-0', 'invisible', 'translate-y-4');
+                backToTopBtn.classList.add('opacity-100', 'visible', 'translate-y-0');
+            } else {
+                backToTopBtn.classList.add('opacity-0', 'invisible', 'translate-y-4');
+                backToTopBtn.classList.remove('opacity-100', 'visible', 'translate-y-0');
+            }
+        }
+
+        if (!scrollListenerAdded) {
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        toggleBackToTop();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+            scrollListenerAdded = true;
+        }
+
+        (function setupEscapeOnce() {
+            if (window.__floatingTocEscapeSetup) return;
+            window.__floatingTocEscapeSetup = true;
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const panel = document.getElementById('floating-toc-panel');
+                    const btn = document.getElementById('floating-toc-btn');
+                    const backdrop = document.getElementById('floating-toc-backdrop');
+                    if (panel && !panel.classList.contains('invisible')) {
+                        panel.classList.add('opacity-0', 'invisible', 'translate-y-4');
+                        panel.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                        panel.setAttribute('aria-hidden', 'true');
+                        backdrop?.classList.add('opacity-0', 'invisible');
+                        backdrop?.classList.remove('opacity-100', 'visible');
+                        btn?.classList.remove('hidden');
+                        btn?.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+        })();
+
+        function initFloatingToc() {
+            const btn = document.getElementById('floating-toc-btn');
+            const panel = document.getElementById('floating-toc-panel');
+            const closeBtn = document.getElementById('floating-toc-close');
+            const backdrop = document.getElementById('floating-toc-backdrop');
+            const backToTopBtn = document.getElementById('back-to-top-btn');
+
+            if (backToTopBtn) {
+                backToTopBtn.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            if (!btn || !panel || !closeBtn || !backdrop) return;
+
+            function open() {
+                btn.setAttribute('aria-expanded', 'true');
+                panel.classList.remove('opacity-0', 'invisible', 'translate-y-4');
+                panel.classList.add('opacity-100', 'visible', 'translate-y-0');
+                panel.setAttribute('aria-hidden', 'false');
+                backdrop.classList.remove('opacity-0', 'invisible');
+                backdrop.classList.add('opacity-100', 'visible');
+                btn.classList.add('hidden');
+            }
+
+            function close() {
+                btn.setAttribute('aria-expanded', 'false');
+                panel.classList.add('opacity-0', 'invisible', 'translate-y-4');
+                panel.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                panel.setAttribute('aria-hidden', 'true');
+                backdrop.classList.add('opacity-0', 'invisible');
+                backdrop.classList.remove('opacity-100', 'visible');
+                btn.classList.remove('hidden');
+            }
+
+            btn.addEventListener('click', open);
+            closeBtn.addEventListener('click', close);
+            backdrop.addEventListener('click', close);
+
+            panel.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    close();
+                    const href = link.getAttribute('href');
+                    if (href) {
+                        const id = href.slice(1);
+                        const target = document.getElementById(id);
+                        if (target) {
+                            const topNavHeight = 80;
+                            const targetPosition = target.getBoundingClientRect().top + window.scrollY - topNavHeight;
+                            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                            history.pushState(null, '', href);
+                        }
+                    }
+                });
+            });
+
+            const links = panel.querySelectorAll('a[data-heading-id]');
+            const headings = document.querySelectorAll('h2[id], h3[id], h4[id]');
+
+            if (headings.length > 0 && links.length > 0) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const id = entry.target.getAttribute('id');
+                            links.forEach(link => {
+                                link.classList.remove('text-accent', 'font-medium');
+                                link.classList.add('text-muted');
+                            });
+                            const activeLink = panel.querySelector(`a[data-heading-id="${id}"]`);
+                            if (activeLink) {
+                                activeLink.classList.remove('text-muted');
+                                activeLink.classList.add('text-accent', 'font-medium');
+                            }
+                        }
+                    });
+                }, {
+                    rootMargin: '-100px 0px -60% 0px',
+                    threshold: 0
+                });
+
+                headings.forEach(heading => observer.observe(heading));
+            }
+        }
+
+        initFloatingToc();
+        document.addEventListener('astro:page-load', initFloatingToc);
+    })();
+</script>

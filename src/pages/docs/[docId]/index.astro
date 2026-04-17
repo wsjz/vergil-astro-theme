@@ -1,0 +1,17 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getDocSets, getFirstDocSlug } from '../../../utils/docs-utils';
+
+export const getStaticPaths = (async () => {
+    const sets = await getDocSets();
+    return sets.map((set) => ({
+        params: { docId: set.id }
+    }));
+}) satisfies GetStaticPaths;
+
+const { docId } = Astro.params;
+const firstSlug = await getFirstDocSlug(docId);
+const target = firstSlug ? `/docs/${docId}/${firstSlug}` : `/docs/${docId}`;
+---
+
+<meta http-equiv="refresh" content={`0;url=${target}`} />

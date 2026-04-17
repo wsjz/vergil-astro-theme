@@ -1,0 +1,61 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MasonryGallery from '../../components/widgets/MasonryGallery.astro';
+import FormattedDate from '../../components/ui/FormattedDate.astro';
+import Comments from '../../components/widgets/Comments.astro';
+
+export const getStaticPaths = (async () => {
+    const albums = await getCollection('albums');
+    return albums.map(album => ({
+        params: { id: album.id },
+        props: { album }
+    }));
+}) satisfies GetStaticPaths;
+
+const { album } = Astro.props;
+const { Content } = await render(album);
+const { title, description, date, images, tags, fonts } = album.data;
+---
+
+<BaseLayout title={title} description={description} showHeader={false} articleTitle={title} commentsEnabled={true} fonts={fonts}>
+    <article>
+        <header class="mb-8">
+            <h1 class="font-display text-2xl font-medium">{title}</h1>
+            {description && <p class="mt-2 text-lg text-secondary">{description}</p>}
+            <div class="mt-4 flex flex-wrap items-center gap-4 text-sm text-secondary">
+                <FormattedDate date={date} />
+                {tags && tags.length > 0 && (
+                    <div class="flex gap-2">
+                        {tags.map(tag => (
+                            <span class="rounded-full bg-secondary px-3 py-1">{tag}</span>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </header>
+        <div class="prose mb-8">
+            <Content />
+        </div>
+        {images && images.length > 0 && (
+            <MasonryGallery
+                images={images.map(img => ({
+                    src: typeof img.src === 'string' ? img.src : img.src.src,
+                    alt: img.alt || title,
+                    caption: img.caption
+                }))}
+                columns={3}
+            />
+        )}
+        <Comments pageId={`/albums/${album.id}/`} pageTitle={title} />
+    </article>
+</BaseLayout>
+
+<script is:inline>
+    import mediumZoom from 'medium-zoom';
+    mediumZoom('.masonry-gallery img', {
+        background: 'var(--color-bg-main)',
+        margin: 24
+    });
+</script>

@@ -1,0 +1,368 @@
+---
+import { Home, Folder, BookOpen, Tags, Image, Clock, Sparkles, MapPin, Archive, Users, Rss, Github, Search as SearchIcon, Flag, MessageCircle, Eye, Info, Award, ChevronsLeft, ChevronsRight, Menu, X, LayoutGrid } from '@lucide/astro';
+import { getCollection } from 'astro:content';
+import siteConfig from '../../data/site-config';
+import CustomImage from '../ui/CustomImage.astro';
+
+const currentPath = Astro.url.pathname;
+
+const posts = await getCollection('blog');
+const totalPosts = posts.length;
+const totalWords = posts.reduce((sum, post) => {
+  const content = post.body || '';
+  return sum + content.replace(/[\s\n\r\t]/g, '').length;
+}, 0);
+
+function formatNumber(num: number): string {
+  if (num >= 10000) {
+    return (num / 10000).toFixed(1) + 'w';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'k';
+  }
+  return num.toString();
+}
+
+function getRunningTime(): string {
+  if (posts.length === 0) return '0 天';
+  const sortedPosts = [...posts].sort((a, b) =>
+    new Date(a.data.publishDate).getTime() - new Date(b.data.publishDate).getTime()
+  );
+  const firstPost = sortedPosts[0];
+  const startDate = new Date(firstPost.data.publishDate);
+  const now = new Date();
+  const diffTime = now.getTime() - startDate.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const years = (diffDays / 365).toFixed(2);
+  return years + ' 年';
+}
+
+function getLastActive(): string {
+  if (posts.length === 0) return '从未';
+  const sortedPosts = [...posts].sort((a, b) =>
+    new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+  );
+  const lastPost = sortedPosts[0];
+  const lastDate = new Date(lastPost.data.publishDate);
+  const now = new Date();
+  const diffTime = now.getTime() - lastDate.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return '今天';
+  if (diffDays === 1) return '昨天';
+  return diffDays + ' 天前';
+}
+
+const iconMap: Record<string, any> = {
+  'Home': Home,
+  'Blog': BookOpen,
+  'Projects': Folder,
+  'Archives': Archive,
+  'Tags': Tags,
+  'Albums': Image,
+  'Now': Clock,
+};
+
+const nameMap: Record<string, string> = {
+  'Home': '首页',
+  'Blog': '笔记',
+  'Projects': '项目',
+  'Archives': '归档',
+  'Tags': '标签',
+  'Albums': '相册',
+  'Now': '现在',
+};
+
+const navItems = [
+  { key: 'Home', href: '/' },
+  { key: 'Blog', href: '/blog' },
+  { key: 'Archives', href: '/archives' },
+  { key: 'categories', href: '/categories', icon: LayoutGrid, name: '分类' },
+  { key: 'contact', href: '/contact', icon: MessageCircle, name: '留言' },
+  { key: 'rss', href: '/rss.xml', icon: Rss, name: '订阅' },
+];
+
+function isActive(href: string): boolean {
+  if (href === '/') {
+    return currentPath === '/';
+  }
+  return currentPath.startsWith(href);
+}
+---
+
+<aside id="main-sidebar" class="sidebar flex flex-col fixed left-0 lg:left-[2%] top-14 h-[calc(100vh-3.5rem)] w-64 lg:w-56 xl:w-60 2xl:w-64 border-r border-light bg-main overflow-y-auto z-40 transition-transform duration-300 translate-x-0">
+  <div class="flex-1 p-3 pt-4">
+    <!-- Profile Card -->
+    <div class="bg-card rounded-xl p-4 mb-3 text-center">
+      <a href="/" class="inline-block mb-3 group" transition:name="brand">
+        <div class="w-16 h-16 mx-auto rounded-full overflow-hidden border border-light shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:scale-105">
+          {siteConfig.avatar ? (
+            <CustomImage
+              src={siteConfig.avatar.src}
+              alt={siteConfig.avatar.alt}
+              class="w-full h-full object-cover"
+              width={64}
+              height={64}
+            />
+          ) : (
+            <div class="w-full h-full bg-accent/10 flex items-center justify-center">
+              <Sparkles class="w-7 h-7 text-accent" />
+            </div>
+          )}
+        </div>
+      </a>
+
+      <h1 class="font-display text-base font-medium text-main mb-1">{siteConfig.title}</h1>
+
+      {siteConfig.subtitle && (
+        <p class="text-xs text-muted mb-3">{siteConfig.subtitle}</p>
+      )}
+
+      <div class="flex items-center justify-center gap-3">
+        <a href="https://github.com" class="text-accent hover:opacity-70 transition-opacity" aria-label="Github">
+          <Github class="w-4 h-4" />
+        </a>
+        <a href="/rss.xml" class="text-accent hover:opacity-70 transition-opacity" aria-label="RSS">
+          <Rss class="w-4 h-4" />
+        </a>
+        <a href="/now" class="text-accent hover:opacity-70 transition-opacity" aria-label="Now">
+          <Clock class="w-4 h-4" />
+        </a>
+        <a href="#" class="text-accent hover:opacity-70 transition-opacity" aria-label="Eye">
+          <Eye class="w-4 h-4" />
+        </a>
+      </div>
+    </div>
+
+    <div class="bg-card rounded-xl p-3">
+      <div class="flex items-center gap-1.5 mb-3">
+        <Flag class="w-3.5 h-3.5 text-red-500" />
+        <h3 class="text-sm font-medium text-main">站内导航</h3>
+      </div>
+
+      <nav class="grid grid-cols-3 gap-1.5">
+        {navItems.map((item) => {
+          const Icon = item.icon || iconMap[item.key] || Home;
+          const name = item.name || nameMap[item.key] || item.key;
+          const active = isActive(item.href);
+          return (
+            <a
+              href={item.href}
+              class={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all duration-200 ${
+                active
+                  ? 'bg-accent/10 text-accent'
+                  : 'text-secondary hover:bg-hover hover:text-accent'
+              }`}
+              aria-current={active ? 'page' : undefined}
+            >
+              <Icon class="w-4 h-4 mb-0.5" />
+              <span class="text-[11px]">{name}</span>
+            </a>
+          );
+        })}
+      </nav>
+    </div>
+
+    <div class="bg-card rounded-xl p-3 mt-3">
+      <div class="flex items-center gap-1.5 mb-2.5">
+        <Info class="w-3.5 h-3.5 text-accent" />
+        <h3 class="text-sm font-medium text-main">站点信息</h3>
+      </div>
+
+      <div class="space-y-1.5 text-xs">
+        <div class="flex justify-between">
+          <span class="text-muted">文章数目：</span>
+          <span class="text-main">{totalPosts} 篇</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-muted">已运行时间：</span>
+          <span class="text-main">{getRunningTime()}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-muted">本站总字数：</span>
+          <span class="text-main">{formatNumber(totalWords)}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-muted">最后活动时间：</span>
+          <span class="text-main">{getLastActive()}</span>
+        </div>
+          <div class="bg-card rounded-xl mt-5">
+              <div class="flex items-center gap-1.5 mb-2.5">
+                  <Award class="w-3.5 h-3.5 text-accent" />
+                  <h3 class="text-sm font-medium text-main">备案信息</h3>
+              </div>
+              <div class="space-y-1 text-xs text-muted">
+                  <p>皖ICP备2021008088号-2</p>
+                  <p>辽公网安备21021702000331号</p>
+              </div>
+          </div>
+      </div>
+      </div>
+    </div>
+
+
+  <div class="p-3 pt-0">
+    <p class="text-[10px] text-muted text-center">
+      © 2024 {siteConfig.title}<br/>
+      Power by Astro
+    </p>
+  </div>
+</aside>
+
+<!-- Sidebar Toggle -->
+<button
+  id="sidebar-toggle"
+  class="flex fixed top-16 z-50 w-10 h-10 items-center justify-center bg-card/95 backdrop-blur-sm border border-light rounded-full shadow-md shadow-black/5 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-main active:scale-95 group left-[calc(16rem+1.25rem)] lg:left-[calc(2%+14rem+1.25rem)] xl:left-[calc(2%+15rem+1.25rem)] 2xl:left-[calc(2%+16rem+1.25rem)]"
+  aria-label="收起侧边栏"
+>
+  <ChevronsLeft class="w-5 h-5 text-secondary group-hover:text-accent transition-colors duration-300 sidebar-collapse-icon" />
+  <ChevronsRight class="w-5 h-5 text-accent hidden sidebar-expand-icon" />
+</button>
+
+<!-- Overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 z-30 hidden opacity-0 transition-opacity duration-300 bg-black/20 backdrop-blur-sm"></div>
+
+<script is:inline>
+  (function() {
+    let wasMobile = window.innerWidth < 1024;
+    let isCollapsed = false;
+
+    function getElements() {
+      return {
+        toggle: document.getElementById('sidebar-toggle'),
+        sidebar: document.getElementById('main-sidebar'),
+        overlay: document.getElementById('sidebar-overlay'),
+      };
+    }
+
+    function updateTogglePosition(toggle) {
+      const width = window.innerWidth;
+      let leftOffset;
+      if (width >= 1536) {
+        leftOffset = 'calc(2% + 16rem + 0.75rem)'; // 2xl
+      } else if (width >= 1280) {
+        leftOffset = 'calc(2% + 15rem + 0.75rem)'; // xl
+      } else if (width >= 1024) {
+        leftOffset = 'calc(2% + 14rem + 0.75rem)'; // lg
+      } else {
+        leftOffset = 'calc(16rem + 0.75rem)'; // sm/md: w-64 + offset
+      }
+      if (!isCollapsed) {
+        toggle.style.left = leftOffset;
+      }
+    }
+
+    function setCollapsed(collapsed) {
+      isCollapsed = collapsed;
+      const { toggle, sidebar, overlay } = getElements();
+      if (!toggle || !sidebar) return;
+      const collapseIcon = toggle.querySelector('.sidebar-collapse-icon');
+      const expandIcon = toggle.querySelector('.sidebar-expand-icon');
+      const isMobile = window.innerWidth < 1024;
+      const mainContent = document.querySelector('.flex-1.lg\\:ml-\\[calc\\(14rem\\+2\\%\\+12px\\)\\]');
+
+      if (isCollapsed) {
+        sidebar.classList.add('-translate-x-full');
+        sidebar.classList.remove('translate-x-0');
+        sidebar.classList.add('border-transparent');
+        sidebar.classList.remove('border-light');
+        sidebar.style.left = '0px';
+        toggle.style.left = '1rem';
+        collapseIcon?.classList.add('hidden');
+        expandIcon?.classList.remove('hidden');
+        toggle.setAttribute('aria-label', '展开侧边栏');
+        overlay?.classList.add('hidden', 'opacity-0');
+        mainContent?.classList.add('sidebar-collapsed');
+      } else {
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+        sidebar.classList.remove('border-transparent');
+        sidebar.classList.add('border-light');
+        sidebar.style.left = '';
+        updateTogglePosition(toggle);
+        collapseIcon?.classList.remove('hidden');
+        expandIcon?.classList.add('hidden');
+        toggle.setAttribute('aria-label', '收起侧边栏');
+        if (isMobile) {
+          overlay?.classList.remove('hidden');
+          setTimeout(() => overlay?.classList.remove('opacity-0'), 10);
+        }
+        mainContent?.classList.remove('sidebar-collapsed');
+      }
+    }
+
+    function toggleSidebar() {
+      setCollapsed(!isCollapsed);
+    }
+
+    function initSidebar() {
+      const { toggle, sidebar, overlay } = getElements();
+      if (!toggle || !sidebar) return;
+
+      // Remove old listeners to avoid duplicates
+      toggle.removeEventListener('click', toggleSidebar);
+      toggle.addEventListener('click', toggleSidebar);
+      overlay?.removeEventListener('click', overlayClickHandler);
+      overlay?.addEventListener('click', overlayClickHandler);
+
+      updateTogglePosition(toggle);
+    }
+
+    function overlayClickHandler() {
+      setCollapsed(true);
+    }
+
+    // One-time global listeners
+    if (!window.__sidebarGlobalListeners) {
+      window.__sidebarGlobalListeners = true;
+
+      window.addEventListener('resize', () => {
+        const isMobile = window.innerWidth < 1024;
+        if (isMobile && !wasMobile) {
+          setCollapsed(true);
+        } else if (!isMobile && wasMobile) {
+          setCollapsed(false);
+        }
+        wasMobile = isMobile;
+        const { toggle } = getElements();
+        if (toggle && !isCollapsed) {
+          updateTogglePosition(toggle);
+        }
+      });
+
+      document.addEventListener('astro:before-preparation', () => {
+        if (window.innerWidth < 1024 && !isCollapsed) {
+          setCollapsed(true);
+        }
+      });
+    }
+
+    // Initialize on first load and after each transition
+    initSidebar();
+    document.addEventListener('astro:page-load', initSidebar);
+
+    // Default collapse on small screens on first load
+    if (wasMobile) {
+      setCollapsed(true);
+    }
+  })();
+</script>
+
+<style>
+  .sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background-color: var(--border-light);
+    border-radius: 2px;
+  }
+</style>

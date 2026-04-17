@@ -1,0 +1,66 @@
+---
+import { type CollectionEntry } from 'astro:content';
+import { Calendar, Clock } from '@lucide/astro';
+import FormattedDate from '../ui/FormattedDate.astro';
+import { slugify } from '../../utils/common-utils';
+
+type Props = { post: CollectionEntry<'blog'>; class?: string; headingLevel?: 'h2' | 'h3' };
+
+const { post, class: className, headingLevel = 'h2' } = Astro.props;
+const { title, publishDate, updatedDate, excerpt, tags } = post.data;
+const TitleTag = headingLevel;
+
+function calculateReadingTime(content: string): number {
+    const chineseChars = (content.match(/[\u4e00-\u9fa5]/g) || []).length;
+    const englishWords = (content.match(/[a-zA-Z]+/g) || []).length;
+    const total = chineseChars + englishWords;
+    return Math.ceil(total / 300) || 1;
+}
+
+const readingTime = calculateReadingTime(post.body || '');
+---
+
+<div class:list={['py-6', className]}>
+    <a href={`/blog/${post.id}/`} class="block mb-4">
+        <TitleTag class="font-display text-xl font-medium text-main hover:text-accent transition-colors line-clamp-2">
+            {title}
+        </TitleTag>
+    </a>
+
+    <div class="flex items-center gap-4 text-sm text-secondary mb-3">
+        <span class="flex items-center gap-1">
+            <Calendar class="w-4 h-4" />
+            <FormattedDate date={publishDate} />
+        </span>
+        {updatedDate && (
+            <span class="text-muted">更新于 <FormattedDate date={updatedDate} /></span>
+        )}
+        <span class="flex items-center gap-1">
+            <Clock class="w-4 h-4" />
+            {readingTime} min
+        </span>
+    </div>
+    
+    {tags && tags.length > 0 && (
+        <div class="flex items-center gap-1 text-sm mb-4">
+            {tags.map((tag, index) => (
+                <span>
+                    {index > 0 && <span class="text-secondary">, </span>}
+                    <a
+                        href={`/tags/${slugify(tag)}`}
+                        class="text-accent hover:underline"
+                        onclick="event.stopPropagation();"
+                    >
+                        #{tag}
+                    </a>
+                </span>
+            ))}
+        </div>
+    )}
+    
+    {excerpt && (
+        <a href={`/blog/${post.id}/`} class="block text-base text-secondary leading-relaxed line-clamp-3 hover:text-accent transition-colors">
+            {excerpt}
+        </a>
+    )}
+</div>

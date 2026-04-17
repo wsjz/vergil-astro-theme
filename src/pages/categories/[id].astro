@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import PostPreview from '../../components/content/PostPreview.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllCategories, getPostsByCategory, sortItemsByDateDesc } from '../../utils/data-utils';
+
+export async function getStaticPaths() {
+    const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+    const categories = getAllCategories(posts);
+    const paths = categories.map((category) => ({
+        params: { id: category.id },
+        props: { categoryName: category.name }
+    }));
+    // Astro 5 requires at least one path for dynamic routes
+    if (paths.length === 0) {
+        return [{ params: { id: '_' }, props: { categoryName: '' } }];
+    }
+    return paths;
+}
+
+interface Props { categoryName: string }
+const { categoryName } = Astro.props;
+const { id } = Astro.params;
+
+const allPosts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const posts = getPostsByCategory(allPosts, id);
+---
+
+<BaseLayout
+    title={`分类：${categoryName}`}
+    description={`浏览「${categoryName}」分类下的所有文章`}
+    showHeader={false}
+>
+    <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '分类', href: '/categories' }, { text: categoryName }]} />
+    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">
+        分类：{categoryName}
+    </h1>
+    {posts.map((post) => <PostPreview post={post} class="mb-10 sm:mb-12" />)}
+</BaseLayout>

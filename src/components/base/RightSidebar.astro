@@ -1,0 +1,212 @@
+---
+import { getCollection } from 'astro:content';
+import { ArrowRight } from '@lucide/astro';
+import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
+
+const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const tags = getAllTags(posts).sort((tagA, tagB) => {
+    const postCountTagA = getPostsByTag(posts, tagA.id).length;
+    const postCountTagB = getPostsByTag(posts, tagB.id).length;
+    return postCountTagB - postCountTagA;
+}).slice(0, 15);
+
+const generateHeatmap = (posts: any[]) => {
+    const days = ['一', '二', '三', '四', '五', '六', '日'];
+    const today = new Date();
+    const weeks: { date: Date; posts: any[]; count: number; totalWords: number }[][] = [];
+    for (let w = 0; w < 8; w++) {
+        const week: { date: Date; posts: any[]; count: number; totalWords: number }[] = [];
+        for (let d = 0; d < 7; d++) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - (7 - w) * 7 - (6 - d));
+            const dayPosts = posts.filter(post => {
+                const postDate = new Date(post.data.publishDate);
+                return postDate.toDateString() === date.toDateString();
+            });
+            const totalWords = dayPosts.reduce((sum, post) => {
+                const content = post.body || '';
+                const chineseChars = content.replace(/[\s\n\r\t]/g, '').length;
+                return sum + chineseChars;
+            }, 0);
+            week.push({ date, posts: dayPosts, count: dayPosts.length, totalWords });
+        }
+        weeks.push(week);
+    }
+    return { weeks, days };
+};
+
+const heatmap = generateHeatmap(posts);
+
+const getLevelColor = (count: number) => {
+    if (count === 0) return 'bg-[#e8e7e3] dark:bg-[#2a2a2a]';
+    if (count === 1) return 'bg-[#c8e6c9] dark:bg-[#1b5e20]/40';
+    if (count === 2) return 'bg-[#81c784] dark:bg-[#2e7d32]/50';
+    if (count === 3) return 'bg-[#4caf50] dark:bg-[#388e3c]/60';
+    return 'bg-[#2e7d32] dark:bg-[#4caf50]/80';
+};
+
+const totalPosts = posts.length;
+
+function formatDate(date: Date): string {
+    return date.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).replace(/\//g, '-');
+}
+---
+
+<aside class="hidden xl:block fixed right-[2%] top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-52 2xl:w-56 bg-main overflow-y-auto z-40">
+    <div class="p-4 pt-6">
+        <div class="mb-6">
+            <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">热力图</h3>
+            <div class="flex items-start gap-1">
+                <div class="flex gap-0.5">
+                    {heatmap.weeks.map((week) => (
+                        <div class="flex flex-col gap-0.5">
+                            {week.map((day) => (
+                                <div
+                                    class={`heatmap-cell w-4 h-4 rounded-sm ${getLevelColor(day.count)} relative cursor-pointer hover:ring-2 hover:ring-accent/50 transition-all`}
+                                    data-date={formatDate(day.date)}
+                                    data-count={day.count}
+                                    data-words={day.totalWords}
+                                    data-titles={day.posts.map(p => p.data.title).join('|')}
+                                    data-links={day.posts.map(p => `/blog/${p.id}/`).join('|')}
+                                />
+                            ))}
+                        </div>
+                    ))}
+                </div>
+                <div class="flex flex-col gap-0.5 ml-1">
+                    {heatmap.days.map((day) => (
+                        <span class="w-3 h-4 flex items-center justify-center text-[10px] text-secondary">
+                            {day}
+                        </span>
+                    ))}
+                </div>
+            </div>
+            <p class="text-xs text-secondary mt-4">写写停停，博主已记录 {totalPosts} 篇文章！</p>
+        </div>
+
+        <div id="heatmap-tooltip" class="fixed hidden z-50 bg-card border border-light rounded-lg shadow-lg p-3 max-w-xs">
+            <div class="text-sm">
+                <p id="tooltip-date" class="text-muted mb-1 text-xs"></p>
+                <p id="tooltip-stats" class="font-medium text-main"></p>
+                <div id="tooltip-titles" class="mt-2 space-y-1 text-xs max-h-32 overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <div>
+            <a href="/tags" class="flex items-center gap-1 text-xs font-medium text-muted uppercase tracking-wider mb-3 hover:text-accent transition-colors group">
+                <span>标签</span>
+                <ArrowRight class="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
+            </a>
+            <div class="space-y-0">
+                {tags.map((tag) => {
+                    const postCount = getPostsByTag(posts, tag.id).length;
+                    return (
+                        <a
+                            href={`/tags/${tag.id}`}
+                            class="flex items-center justify-between py-0.5 group"
+                        >
+                            <span class="text-[11px] text-secondary group-hover:text-accent transition-colors">
+                                #{tag.name}
+                            </span>
+                            <span class="text-[10px] text-muted">{postCount}</span>
+                        </a>
+                    );
+                })}
+            </div>
+        </div>
+    </div>
+</aside>
+
+<script>
+    function initHeatmap() {
+        const tooltip = document.getElementById('heatmap-tooltip');
+        const tooltipDate = document.getElementById('tooltip-date');
+        const tooltipStats = document.getElementById('tooltip-stats');
+        const tooltipTitles = document.getElementById('tooltip-titles');
+        if (!tooltip || !tooltipDate || !tooltipStats || !tooltipTitles) return;
+
+        const cells = document.querySelectorAll('.heatmap-cell');
+        cells.forEach(cell => {
+            cell.addEventListener('mouseenter', () => {
+                const date = cell.getAttribute('data-date');
+                const count = parseInt(cell.getAttribute('data-count') || '0');
+                const words = parseInt(cell.getAttribute('data-words') || '0');
+                const titles = cell.getAttribute('data-titles') || '';
+                const links = cell.getAttribute('data-links') || '';
+                if (!date) return;
+
+                tooltipDate.textContent = date;
+                tooltipStats.textContent = `共 ${count} 篇，${words.toLocaleString()} 字`;
+                tooltipTitles.innerHTML = '';
+                if (titles && titles !== '') {
+                    const titleList = titles.split('|').filter(t => t);
+                    const linkList = links.split('|').filter(l => l);
+                    titleList.forEach((title, index) => {
+                        const link = linkList[index] || '#';
+                        const a = document.createElement('a');
+                        a.href = link;
+                        a.className = 'block truncate hover:text-accent hover:underline cursor-pointer py-0.5';
+                        a.textContent = `• ${title}`;
+                        tooltipTitles.appendChild(a);
+                    });
+                } else {
+                    tooltipTitles.innerHTML = '<div class="text-muted">无文章</div>';
+                }
+                tooltip.classList.remove('hidden');
+            });
+
+            cell.addEventListener('mousemove', () => {
+                const cellRect = cell.getBoundingClientRect();
+                const tooltipRect = tooltip.getBoundingClientRect();
+                const x = cellRect.left - tooltipRect.width + 10;
+                const y = cellRect.top;
+                tooltip.style.left = `${x < 10 ? cellRect.right - 10 : x}px`;
+                tooltip.style.top = `${y}px`;
+            });
+
+            cell.addEventListener('mouseleave', (e) => {
+                const tooltipRect = tooltip.getBoundingClientRect();
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                const isOverTooltip = mouseX >= tooltipRect.left && mouseX <= tooltipRect.right && mouseY >= tooltipRect.top && mouseY <= tooltipRect.bottom;
+                if (!isOverTooltip) {
+                    tooltip.classList.add('hidden');
+                }
+            });
+        });
+
+        tooltip.addEventListener('mouseleave', (e) => {
+            const cells = document.querySelectorAll('.heatmap-cell');
+            for (const c of cells) {
+                const cellRect = c.getBoundingClientRect();
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                if (mouseX >= cellRect.left && mouseX <= cellRect.right && mouseY >= cellRect.top && mouseY <= cellRect.bottom) {
+                    return;
+                }
+            }
+            tooltip.classList.add('hidden');
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHeatmap);
+    } else {
+        initHeatmap();
+    }
+    document.addEventListener('astro:page-load', initHeatmap);
+</script>
+
+<style>
+    .heatmap-cell {
+        transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .heatmap-cell:hover {
+        transform: scale(1.2);
+        z-index: 10;
+    }
+</style>

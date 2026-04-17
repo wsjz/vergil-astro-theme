@@ -1,0 +1,39 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
+import { getAllCategories, getPostsByCategory, sortItemsByDateDesc } from '../../utils/data-utils';
+
+const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const categories = getAllCategories(posts).sort((a, b) => {
+    return getPostsByCategory(posts, b.id).length - getPostsByCategory(posts, a.id).length;
+});
+---
+
+<BaseLayout title="分类" description="浏览所有文章分类" showHeader={false}>
+    <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '分类' }]} />
+    <h1 class="mb-12 font-display text-xl sm:mb-16 sm:text-2xl">分类</h1>
+    {categories.length === 0 ? (
+        <p class="text-secondary">暂无分类</p>
+    ) : (
+        <div class="space-y-4">
+            {categories.map((cat) => {
+                const count = getPostsByCategory(posts, cat.id).length;
+                return (
+                    <a
+                        href={`/categories/${cat.id}`}
+                        class="group flex items-center justify-between py-4 border-b border-light hover:border-accent/40 transition-colors"
+                    >
+                        <div>
+                            <h2 class="font-display text-xl font-medium group-hover:text-accent transition-colors">
+                                {cat.name}
+                            </h2>
+                            <p class="text-sm text-secondary mt-0.5">{count} 篇文章</p>
+                        </div>
+                        <span class="text-secondary group-hover:text-accent transition-colors text-sm">→</span>
+                    </a>
+                );
+            })}
+        </div>
+    )}
+</BaseLayout>

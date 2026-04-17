@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getDocSets } from '../../utils/docs-utils';
+import { BookOpen } from '@lucide/astro';
+
+const docSets = await getDocSets();
+---
+
+<BaseLayout title="文档" description="所有文档集列表">
+    <div class="mb-8">
+        <h1 class="font-display text-2xl font-medium mb-2">文档</h1>
+        <p class="text-sm text-secondary">共 {docSets.length} 个文档集</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {docSets.map((set) => (
+            <a
+                href={`/docs/${set.id}/`}
+                class="group flex items-start gap-4 p-5 rounded-xl border border-light hover:border-accent/40 hover:bg-accent/5 transition-all"
+            >
+                <div class="shrink-0 w-10 h-10 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
+                    <BookOpen class="w-5 h-5" />
+                </div>
+                <div class="min-w-0">
+                    <h2 class="font-display text-base font-medium text-main group-hover:text-accent transition-colors line-clamp-1">
+                        {set.meta.data.title}
+                    </h2>
+                    {set.meta.data.description && (
+                        <p class="text-xs text-secondary mt-1 line-clamp-2">{set.meta.data.description}</p>
+                    )}
+                </div>
+            </a>
+        ))}
+    </div>
+</BaseLayout>

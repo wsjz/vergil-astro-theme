@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import { sortItemsByDateDesc } from '../../utils/data-utils';
+import { slugify } from '../../utils/common-utils';
+
+interface Props {
+    currentPostId: string;
+    tags: string[];
+    limit?: number;
+}
+
+const { currentPostId, tags, limit = 3 } = Astro.props;
+
+const allPosts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+
+const related = allPosts
+    .filter((p) => p.id !== currentPostId && p.data.tags?.some((t) => tags.map(slugify).includes(slugify(t))))
+    .slice(0, limit);
+---
+
+{related.length > 0 && (
+    <div class="px-4 py-4">
+        <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">相关文章</h3>
+        <ul class="space-y-2">
+            {related.map((post) => (
+                <li>
+                    <a
+                        href={`/blog/${post.id}/`}
+                        class="text-[12px] text-secondary hover:text-accent transition-colors line-clamp-2 leading-snug block"
+                    >
+                        {post.data.title}
+                    </a>
+                </li>
+            ))}
+        </ul>
+    </div>
+)}

@@ -1,0 +1,50 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import ProjectPreview from '../../components/content/ProjectPreview.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Comments from '../../components/widgets/Comments.astro';
+import siteConfig from '../../data/site-config';
+import { sortItemsByDateDesc } from '../../utils/data-utils';
+
+export async function getStaticPaths() {
+    const projects = (await getCollection('projects')).sort(sortItemsByDateDesc);
+    const projectCount = projects.length;
+    return projects.map((project, index) => ({
+        params: { id: project.id },
+        props: {
+            project,
+            prevProject: index + 1 !== projectCount ? projects[index + 1] : null,
+            nextProject: index !== 0 ? projects[index - 1] : null
+        }
+    }));
+}
+
+type Props = {
+    project: CollectionEntry<'projects'>;
+    prevProject: CollectionEntry<'projects'>;
+    nextProject: CollectionEntry<'projects'>;
+};
+
+const { project, prevProject, nextProject } = Astro.props;
+const { title, description, seo, fonts } = project.data;
+const { Content } = await render(project);
+---
+
+<BaseLayout title={seo?.title ?? title} description={seo?.description ?? description} image={seo?.image} pageType="article" showHeader={false} articleTitle={title} commentsEnabled={siteConfig.comments?.enabled} fonts={fonts}>
+    <article class="mb-16 sm:mb-24">
+        <header class="mb-8">
+            <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{title}</h1>
+        </header>
+        <div class="prose sm:prose-lg max-w-none">
+            <Content />
+        </div>
+    </article>
+    {(prevProject || nextProject) && (
+        <div class="my-16 sm:my-24">
+            <h2 class="mb-12 font-display text-lg sm:mb-16 sm:text-xl">View Next</h2>
+            {nextProject && <ProjectPreview project={nextProject} class="mb-10 sm:mb-12" headingLevel="h3" />}
+            {prevProject && <ProjectPreview project={prevProject} class="mb-10 sm:mb-12" headingLevel="h3" />}
+        </div>
+    )}
+    {siteConfig.comments?.enabled && <Comments pageId={`/projects/${project.id}/`} pageTitle={title} />}
+</BaseLayout>

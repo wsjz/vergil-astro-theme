@@ -1,0 +1,195 @@
+---
+import { BookOpen, Menu, X, ChevronsLeft, ChevronsRight } from '@lucide/astro';
+import { getDocTree, type DocTreeNode } from '../../utils/docs-utils';
+import DocsTreeNode from './DocsTreeNode.astro';
+
+interface Props {
+    docId: string;
+    currentSlug?: string;
+}
+
+const { docId, currentSlug = '' } = Astro.props;
+const tree = await getDocTree(docId);
+
+const metaEntry = tree.length > 0 ? undefined : undefined;
+// meta is loaded inside getDocTree but not exposed; we fetch it via getDocSets in page,
+// here we just render the tree. Title comes from parent page via slot or we can read collection.
+---
+
+<!-- Mobile drawer toggle -->
+<button
+    id="docs-sidebar-toggle"
+    class="md:hidden fixed left-4 bottom-6 z-50 flex items-center justify-center w-10 h-10 bg-card border border-light rounded-full shadow-lg text-secondary hover:text-accent transition-colors"
+    aria-label="Open docs menu"
+    aria-expanded="false"
+>
+    <Menu class="w-5 h-5 open-icon" />
+    <X class="w-5 h-5 close-icon hidden" />
+</button>
+
+<!-- Desktop collapse toggle -->
+<button
+    id="docs-sidebar-desktop-toggle"
+    class="hidden md:flex fixed top-16 z-50 w-9 h-9 items-center justify-center bg-card/95 backdrop-blur-sm border border-light rounded-full shadow-md transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-main active:scale-95 group left-[calc(14rem+2%+12px-1.125rem)] xl:left-[calc(15rem+2%+16px-1.125rem)] 2xl:left-[calc(16rem+2%+16px-1.125rem)]"
+    aria-label="收起文档侧边栏"
+>
+    <ChevronsLeft class="w-4 h-4 text-secondary group-hover:text-accent transition-colors duration-300 sidebar-collapse-icon" />
+    <ChevronsRight class="w-4 h-4 text-accent hidden sidebar-expand-icon" />
+</button>
+
+<aside
+    id="docs-sidebar"
+    class="sidebar flex flex-col fixed left-0 lg:left-[2%] top-14 h-[calc(100vh-3.5rem)] w-64 lg:w-56 xl:w-60 2xl:w-64 border-r border-light bg-main overflow-y-auto z-40 transition-transform duration-300 translate-x-0"
+>
+    <div class="flex-1 p-4">
+        <slot name="title">
+            <div class="flex items-center gap-2 mb-4 pb-3 border-b border-light">
+                <BookOpen class="w-5 h-5 text-accent" />
+                <span class="font-display text-sm font-medium text-main">文档</span>
+            </div>
+        </slot>
+
+        {tree.length > 0 ? (
+            <DocsTreeNode nodes={tree} currentSlug={currentSlug} docId={docId} />
+        ) : (
+            <p class="text-xs text-muted">暂无文档</p>
+        )}
+    </div>
+</aside>
+
+<!-- Overlay for mobile -->
+<div id="docs-sidebar-overlay" class="fixed inset-0 z-30 hidden opacity-0 transition-opacity duration-300 bg-black/20 backdrop-blur-sm"></div>
+
+<script is:inline>
+    (function () {
+        let isCollapsed = false;
+
+        function getElements() {
+            return {
+                sidebar: document.getElementById('docs-sidebar'),
+                overlay: document.getElementById('docs-sidebar-overlay'),
+                mobileToggle: document.getElementById('docs-sidebar-toggle'),
+                desktopToggle: document.getElementById('docs-sidebar-desktop-toggle'),
+            };
+        }
+
+        function updateMainMargin(collapsed) {
+            const main = document.querySelector('#main-stage > div.flex > div.flex-1');
+            if (!main) return;
+            if (collapsed) {
+                main.classList.remove('lg:ml-[calc(14rem+2%+12px)]', 'xl:ml-[calc(15rem+2%+16px)]');
+            } else {
+                if (!main.classList.contains('lg:ml-[calc(14rem+2%+12px)]')) {
+                    main.classList.add('lg:ml-[calc(14rem+2%+12px)]');
+                }
+                if (!main.classList.contains('xl:ml-[calc(15rem+2%+16px)]')) {
+                    main.classList.add('xl:ml-[calc(15rem+2%+16px)]');
+                }
+            }
+        }
+
+        function setCollapsed(collapsed) {
+            isCollapsed = collapsed;
+            const { sidebar, overlay, desktopToggle } = getElements();
+            if (!sidebar) return;
+            const collapseIcon = desktopToggle?.querySelector('.sidebar-collapse-icon');
+            const expandIcon = desktopToggle?.querySelector('.sidebar-expand-icon');
+            const isMobile = window.innerWidth < 768;
+
+            if (collapsed) {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0');
+                collapseIcon?.classList.add('hidden');
+                expandIcon?.classList.remove('hidden');
+                desktopToggle?.setAttribute('aria-label', '展开文档侧边栏');
+                if (isMobile) {
+                    overlay?.classList.add('hidden', 'opacity-0');
+                }
+                updateMainMargin(true);
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                collapseIcon?.classList.remove('hidden');
+                expandIcon?.classList.add('hidden');
+                desktopToggle?.setAttribute('aria-label', '收起文档侧边栏');
+                if (isMobile) {
+                    overlay?.classList.remove('hidden');
+                    setTimeout(() => overlay?.classList.remove('opacity-0'), 10);
+                }
+                updateMainMargin(false);
+            }
+        }
+
+        function toggleSidebar() {
+            setCollapsed(!isCollapsed);
+        }
+
+        function toggleMobile() {
+            const { mobileToggle } = getElements();
+            const openIcon = mobileToggle?.querySelector('.open-icon');
+            const closeIcon = mobileToggle?.querySelector('.close-icon');
+            if (isCollapsed) {
+                setCollapsed(false);
+                openIcon?.classList.add('hidden');
+                closeIcon?.classList.remove('hidden');
+                mobileToggle?.setAttribute('aria-expanded', 'true');
+            } else {
+                setCollapsed(true);
+                openIcon?.classList.remove('hidden');
+                closeIcon?.classList.add('hidden');
+                mobileToggle?.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function init() {
+            const { mobileToggle, desktopToggle, overlay } = getElements();
+            mobileToggle?.addEventListener('click', toggleMobile);
+            desktopToggle?.addEventListener('click', toggleSidebar);
+            overlay?.addEventListener('click', () => {
+                setCollapsed(true);
+                const openIcon = mobileToggle?.querySelector('.open-icon');
+                const closeIcon = mobileToggle?.querySelector('.close-icon');
+                openIcon?.classList.remove('hidden');
+                closeIcon?.classList.add('hidden');
+                mobileToggle?.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        if (!window.__docsSidebarInit) {
+            window.__docsSidebarInit = true;
+            init();
+            if (window.innerWidth < 768) {
+                setCollapsed(true);
+                const { mobileToggle } = getElements();
+                const openIcon = mobileToggle?.querySelector('.open-icon');
+                const closeIcon = mobileToggle?.querySelector('.close-icon');
+                openIcon?.classList.remove('hidden');
+                closeIcon?.classList.add('hidden');
+                mobileToggle?.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        document.addEventListener('astro:page-load', () => {
+            if (window.innerWidth < 768 && !isCollapsed) {
+                setCollapsed(true);
+            }
+        });
+    })();
+</script>
+
+<style>
+    .sidebar {
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-light) transparent;
+    }
+    .sidebar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+        background-color: var(--border-light);
+        border-radius: 2px;
+    }
+</style>

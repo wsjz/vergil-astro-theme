@@ -1,0 +1,65 @@
+---
+import { getCollection, render } from 'astro:content';
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import DocsNav from '../../../components/docs/DocsNav.astro';
+import TocSidebar from '../../../components/widgets/TocSidebar.astro';
+import FloatingToc from '../../../components/widgets/FloatingToc.astro';
+import { getDocSets, getDocEntry, getAdjacentDocs } from '../../../utils/docs-utils';
+
+export async function getStaticPaths() {
+    const entries = await getCollection('docs');
+    const nonMeta = entries.filter((e) => !(e.id.endsWith('/_meta') || e.id === '_meta'));
+    return nonMeta.map((entry) => {
+        const parts = entry.id.split('/');
+        const docId = parts[0];
+        const slug = parts.slice(1).join('/');
+        return { params: { docId, slug } };
+    });
+}
+
+const { docId, slug } = Astro.params;
+const entry = await getDocEntry(docId, slug);
+if (!entry) {
+    return new Response('Not Found', { status: 404 });
+}
+
+const { Content, headings } = await render(entry);
+const { prev, next } = await getAdjacentDocs(docId, slug);
+const sets = await getDocSets();
+const currentSet = sets.find((s) => s.id === docId);
+const metaTitle = (currentSet?.meta.data.title as string) ?? docId;
+---
+
+<DocsLayout
+    title={entry.data.title as string}
+    description={(entry.data.excerpt as string) ?? ''}
+    pageType="article"
+    docId={docId}
+    currentSlug={slug}
+    articleTitle={entry.data.title as string}
+>
+    <div slot="right-sidebar">
+        <TocSidebar headings={headings} />
+    </div>
+
+    <FloatingToc headings={headings} />
+
+    <div slot="title" class="flex items-center gap-2 mb-4 pb-3 border-b border-light">
+        <span class="font-display text-sm font-medium text-main">{metaTitle}</span>
+    </div>
+
+    <article class="mb-16 sm:mb-24">
+        <header class="mb-8">
+            <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{entry.data.title}</h1>
+            {entry.data.excerpt && (
+                <p class="mt-3 text-sm text-secondary">{entry.data.excerpt}</p>
+            )}
+        </header>
+
+        <div class="prose sm:prose-lg max-w-none">
+            <Content />
+        </div>
+    </article>
+
+    <DocsNav docId={docId} prev={prev} next={next} />
+</DocsLayout>

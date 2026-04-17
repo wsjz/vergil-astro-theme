@@ -1,0 +1,64 @@
+---
+import { Sparkles } from '@lucide/astro';
+import { marked } from 'marked';
+
+export interface Props {
+    title?: string;
+    items?: string[];
+    date?: string;
+    href?: string;
+}
+
+const {
+    title = "Now",
+    items = [],
+    date = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' }),
+    href = "/now/"
+} = Astro.props;
+
+const defaultItems = [
+    "正在学习和探索新的技术栈",
+    "享受阅读和写作的时光",
+    "保持运动，保持健康"
+];
+
+const contentItems = items.length > 0 ? items : defaultItems;
+
+const renderMarkdown = async (text: string) => {
+    return marked.parse(text, { async: false }) as string;
+};
+
+const processedItems = await Promise.all(
+    contentItems.map(async (item) => await renderMarkdown(item))
+);
+---
+
+<div class="now">
+    <div class="flex items-center justify-between mb-2">
+        <span class="text-sm text-secondary">{date}</span>
+    </div>
+    
+    <ul class="space-y-2 text-secondary">
+        {processedItems.map((item, index) => (
+            <li class="flex items-start gap-2">
+                <span class="text-main mt-1">•</span>
+                <span set:html={item} />
+            </li>
+        ))}
+    </ul>
+</div>
+
+<style>
+    .now :global(a) {
+        text-decoration: underline;
+        text-decoration-style: dashed;
+        text-underline-offset: 2px;
+    }
+    .now :global(a:hover) {
+        text-decoration-style: solid;
+    }
+    .now :global(strong) {
+        color: var(--text-main);
+        font-weight: 500;
+    }
+</style>

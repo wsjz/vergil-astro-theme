@@ -1,0 +1,49 @@
+.md-directive-poetry {
+    margin: 1.5rem auto;
+    max-width: 520px;
+    text-align: left;
+    padding: 1.5rem 1.25rem;
+    border-radius: var(--md-radius);
+    background: var(--bg-card);
+    border: var(--md-border);
+    position: relative;
+}
+
+.md-directive-poetry::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+    background: var(--accent-color);
+    border-radius: 0 3px 3px 0;
+}
+
+.md-poetry-header {
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+.md-poetry-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+    color: var(--text-main);
+}
+
+.md-poetry-meta {
+    font-size: var(--md-text-xs);
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.md-poetry-body {
+    border-top: 1px dashed var(--border-light);
+    border-bottom: 1px dashed var(--border-light);
+    padding: 0.75rem 0;
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 2;
+    color: var(--text-secondary);
+}

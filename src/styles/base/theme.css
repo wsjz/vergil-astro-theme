@@ -1,0 +1,98 @@
+@import '@fontsource-variable/inter' layer(base);
+@import 'open-props/style' layer(base);
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+    --font-sans:    var(--font-body);
+    --font-serif:   var(--font-display);
+    --font-mono:    var(--font-mono);
+
+    --text-main: #2d2d2d;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --bg-main: #f5f4f0;
+    --bg-card: #ffffff;
+    --bg-muted: #e8e7e3;
+    --bg-hover: #f0efeb;
+    --border-main: #2d2d2d;
+    --border-light: #e0dfdb;
+    --accent-color: #4a7c59;
+    --accent-hover: #3d6649;
+}
+
+html.dark {
+    --text-main: #f0f0f0;
+    --text-secondary: #a0a0a0;
+    --text-muted: #707070;
+    --bg-main: #1a1a1a;
+    --bg-card: #242424;
+    --bg-muted: #2a2a2a;
+    --bg-hover: #333333;
+    --border-main: #f0f0f0;
+    --border-light: #333333;
+    --accent-color: #6b9b7a;
+    --accent-hover: #7ab389;
+}
+
+@theme inline {
+    --font-sans:  var(--font-body,  sans-serif);
+    --font-serif: var(--font-display, serif);
+    --font-mono:  var(--font-mono,  monospace);
+    --text-color-main: var(--text-main);
+    --text-color-secondary: var(--text-secondary);
+    --text-color-muted: var(--text-muted);
+    --background-color-main: var(--bg-main);
+    --background-color-card: var(--bg-card);
+    --background-color-muted: var(--bg-muted);
+    --background-color-hover: var(--bg-hover);
+    --border-color-main: var(--border-main);
+    --border-color-light: var(--border-light);
+    --color-accent: var(--accent-color);
+    --color-accent-hover: var(--accent-hover);
+}
+
+@layer utilities {
+    body {
+        font-family: var(--font-ui, var(--font-sans));
+        font-size: 0.9375rem;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    .text-secondary {
+        color: var(--text-secondary);
+    }
+    .text-muted {
+        color: var(--text-muted);
+    }
+    .bg-card {
+        background-color: var(--bg-card);
+    }
+    .bg-hover {
+        background-color: var(--bg-hover);
+    }
+    .border-light {
+        border-color: var(--border-light);
+    }
+    .text-accent {
+        color: var(--accent-color);
+    }
+    .bg-accent {
+        background-color: var(--accent-color);
+    }
+    .hover\:text-accent:hover {
+        color: var(--accent-color);
+    }
+    .hover\:bg-accent:hover {
+        background-color: var(--accent-color);
+    }
+
+    .card {
+        @apply bg-card rounded-xl border border-light shadow-sm transition-all duration-300;
+    }
+    .card:hover {
+        @apply shadow-md border-main/20;
+    }
+}

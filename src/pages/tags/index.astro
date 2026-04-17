@@ -1,0 +1,43 @@
+---
+import { getCollection } from 'astro:content';
+import ArrowRight from '../../assets/icons/arrow-right.svg';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
+
+const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const tags = getAllTags(posts).sort((tagA, tagB) => {
+    const postCountTagA = getPostsByTag(posts, tagA.id).length;
+    const postCountTagB = getPostsByTag(posts, tagB.id).length;
+    return postCountTagB - postCountTagA;
+});
+---
+
+<BaseLayout
+    title="标签"
+    description="浏览所有标签，发现感兴趣的内容"
+    showHeader={false}
+>
+    <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '标签' }]} />
+    <h1 class="mb-12 font-display text-xl sm:mb-16 sm:text-2xl">标签</h1>
+    {
+        tags.map((tag) => {
+            const postCount = getPostsByTag(posts, tag.id).length;
+            return (
+                <a class="group mb-10 flex items-start justify-between gap-8 sm:mb-12" href={`/tags/${tag.id}`}>
+                    <div class="grow">
+                        <h2 class="font-display text-lg leading-tight font-medium group-hover:underline group-hover:decoration-dashed group-hover:decoration-1 group-hover:underline-offset-4 sm:text-xl">
+                            {tag.name}
+                        </h2>
+                        <div class="mt-1 text-sm leading-normal">
+                            {postCount} 篇
+                        </div>
+                    </div>
+                    <div class="hidden font-display opacity-0 transition group-hover:opacity-100 sm:inline-flex sm:shrink-0 sm:items-center sm:gap-1">
+                        查看文章 <ArrowRight class="h-4 w-4 fill-current" />
+                    </div>
+                </a>
+            );
+        })
+    }
+</BaseLayout>

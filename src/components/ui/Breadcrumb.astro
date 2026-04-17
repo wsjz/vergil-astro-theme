@@ -1,0 +1,25 @@
+---
+interface Crumb {
+    text: string;
+    href?: string;
+}
+
+interface Props {
+    crumbs: Crumb[];
+}
+
+const { crumbs } = Astro.props;
+---
+
+<nav class="mb-8 flex items-center gap-2 text-sm text-secondary flex-wrap">
+    {crumbs.map((crumb, index) => (
+        <>
+            {index > 0 && <span class="text-muted">/</span>}
+            {crumb.href ? (
+                <a href={crumb.href} class="hover:text-accent transition-colors">{crumb.text}</a>
+            ) : (
+                <span class="text-main">{crumb.text}</span>
+            )}
+        </>
+    ))}
+</nav>

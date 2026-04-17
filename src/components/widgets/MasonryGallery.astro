@@ -1,0 +1,67 @@
+---
+// MasonryGallery
+import CustomImage from '../ui/CustomImage.astro';
+
+export interface Props {
+    images: {
+        src: string;
+        alt?: string;
+        caption?: string;
+    }[];
+    columns?: 2 | 3 | 4;
+}
+
+const { images, columns = 3 } = Astro.props;
+
+const distributeImages = (imgs: typeof images, colCount: number) => {
+    const cols: typeof images[] = Array.from({ length: colCount }, () => []);
+    const colHeights = Array(colCount).fill(0);
+
+    imgs.forEach((img) => {
+        const shortestCol = colHeights.indexOf(Math.min(...colHeights));
+        cols[shortestCol].push(img);
+        colHeights[shortestCol] += 1.5;
+    });
+    
+    return cols;
+};
+
+const columns_data = distributeImages(images, columns);
+
+const colClass = {
+    2: 'sm:columns-2',
+    3: 'sm:columns-2 lg:columns-3',
+    4: 'sm:columns-2 lg:columns-3 xl:columns-4'
+}[columns];
+---
+
+<div class={`masonry-gallery ${colClass} columns-1 gap-4 space-y-4`}>
+    {images.map((image, index) => (
+        <div class="masonry-item break-inside-avoid mb-4 group">
+            <figure class="relative overflow-hidden rounded-lg">
+                <CustomImage 
+                    src={image.src} 
+                    alt={image.alt || ''}
+                    class="w-full h-auto transition-transform duration-500 group-hover:scale-105"
+                    loading={index < 4 ? 'eager' : 'lazy'}
+                />
+                {image.caption && (
+                    <figcaption class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {image.caption}
+                    </figcaption>
+                )}
+            </figure>
+        </div>
+    ))}
+</div>
+
+<style>
+    .masonry-gallery {
+        column-fill: balance;
+    }
+    
+    .masonry-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+</style>

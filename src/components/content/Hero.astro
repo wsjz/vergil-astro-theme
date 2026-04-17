@@ -1,0 +1,99 @@
+---
+import {
+    ArrowRight,
+    Sparkles,
+    Zap,
+    Star,
+    Heart,
+    Code2,
+    Coffee,
+    Rocket,
+    Smile,
+    Sun,
+    Music,
+    Camera,
+    Gamepad2,
+    Plane,
+    Mountain,
+    BookOpen,
+    PenTool,
+    Film,
+    Dumbbell,
+    Globe
+} from '@lucide/astro';
+
+const ICONS: Record<string, any> = {
+    Sparkles, Zap, Star, Heart, Code2, Coffee, Rocket, Smile, Sun,
+    Music, Camera, Gamepad2, Plane, Mountain, BookOpen, PenTool, Film, Dumbbell, Globe
+};
+
+export interface Props {
+    title?: string;
+    text?: string;
+    image?: {
+        src: string | ImageMetadata;
+        alt?: string;
+    };
+    actions?: {
+        text: string;
+        href: string;
+    }[];
+    titleIcon?: string;
+    textIcon?: string;
+}
+
+const {
+    title = 'Hello，我是 **Ethan**!',
+    text = 'A passionate web developer exploring the digital world.',
+    titleIcon = 'Sparkles',
+    textIcon = 'Zap',
+    actions = [{ text: 'Get in Touch', href: '/contact' }]
+} = Astro.props;
+
+const TitleIcon = titleIcon ? ICONS[titleIcon] || null : null;
+const TextIcon = textIcon ? ICONS[textIcon] || null : null;
+
+const titleHtml = title.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+const paragraphs = text.split(/\n\n+/).map(p => p.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'));
+---
+
+<div class="hero mb-12">
+    <div class="flex items-start gap-2 mb-4">
+        <h1 class="font-display text-2xl sm:text-3xl font-medium leading-tight" set:html={titleHtml} />
+        {TitleIcon && <TitleIcon class="w-5 h-5 text-accent mt-1.5 hidden sm:block" />}
+    </div>
+
+    <div class="prose prose-lg max-w-none mb-6 text-secondary">
+        {paragraphs.map((p, i) => (
+            <p class="flex items-start gap-2">
+                {i === 0 && TextIcon && <TextIcon class="w-4 h-4 text-accent mt-1.5 shrink-0" />}
+                <span set:html={p} />
+            </p>
+        ))}
+    </div>
+
+    {actions && actions.length > 0 && (
+        <div class="flex flex-wrap gap-4">
+            {actions.map((action) => (
+                <a
+                    href={action.href}
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-hover transition-colors"
+                >
+                    {action.text}
+                    <ArrowRight class="w-4 h-4" />
+                </a>
+            ))}
+        </div>
+    )}
+</div>
+
+<style>
+    .hero :global(a) {
+        color: var(--text-main);
+        text-decoration: underline;
+        text-decoration-style: dashed;
+    }
+    .hero :global(a:hover) {
+        text-decoration-style: solid;
+    }
+</style>

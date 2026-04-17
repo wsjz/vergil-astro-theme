@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AlbumCard from '../../components/content/AlbumCard.astro';
+import siteConfig from '../../data/site-config';
+
+const albums = await getCollection('albums');
+const sortedAlbums = albums.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+const title = `Albums - ${siteConfig.title}`;
+const description = 'Photo albums and galleries';
+---
+
+<BaseLayout title={title} description={description} showHeader={false}>
+    <div class="mb-12">
+        <h1 class="font-display text-2xl font-medium">Albums</h1>
+        <p class="mt-2 text-secondary">Photo collections and visual stories</p>
+    </div>
+    
+    {sortedAlbums.length > 0 ? (
+        <div class="grid gap-6 sm:grid-cols-2">
+            {sortedAlbums.map(album => (
+                <AlbumCard album={album} />
+            ))}
+        </div>
+    ) : (
+        <p class="text-center text-secondary">No albums yet</p>
+    )}
+</BaseLayout>

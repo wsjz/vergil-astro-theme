@@ -1,0 +1,61 @@
+---
+import { FileText, FolderOpen, Folder } from '@lucide/astro';
+import type { DocTreeNode } from '../../utils/docs-utils';
+
+interface Props {
+    nodes: DocTreeNode[];
+    currentSlug: string;
+    docId: string;
+    level?: number;
+}
+
+const { nodes, currentSlug, docId, level = 0 } = Astro.props;
+
+function isActive(slug: string, current: string): boolean {
+    return slug === current;
+}
+
+function isParentActive(dirPath: string, current: string): boolean {
+    return current.startsWith(dirPath + '/');
+}
+
+const indentClass = level === 0 ? '' : level === 1 ? 'pl-3' : 'pl-6';
+---
+
+<ul class={`space-y-0.5 ${level > 0 ? 'mt-0.5' : ''}`}>
+    {nodes.map((node) => {
+        if (node.type === 'article') {
+            const active = isActive(node.slug, currentSlug);
+            return (
+                <li>
+                    <a
+                        href={`/docs/${docId}/${node.slug}`}
+                        class={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm transition-colors ${indentClass} ${
+                            active
+                                ? 'bg-accent/10 text-accent font-medium'
+                                : 'text-secondary hover:text-accent hover:bg-hover'
+                        }`}
+                    >
+                        <FileText class="w-3.5 h-3.5 shrink-0 opacity-70" />
+                        <span class="truncate">{node.title}</span>
+                    </a>
+                </li>
+            );
+        }
+        const expanded = isParentActive(node.dirPath, currentSlug);
+        return (
+            <li>
+                <details open={expanded} class="group">
+                    <summary
+                        class={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm cursor-pointer select-none transition-colors ${indentClass} text-secondary hover:text-accent hover:bg-hover`}
+                    >
+                        <FolderOpen class="w-3.5 h-3.5 shrink-0 opacity-70 group-open:block hidden" />
+                        <Folder class="w-3.5 h-3.5 shrink-0 opacity-70 group-open:hidden block" />
+                        <span class="truncate font-medium">{node.title}</span>
+                    </summary>
+                    <Astro.self nodes={node.children} currentSlug={currentSlug} docId={docId} level={level + 1} />
+                </details>
+            </li>
+        );
+    })}
+</ul>

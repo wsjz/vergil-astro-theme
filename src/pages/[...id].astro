@@ -1,0 +1,36 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Comments from '../components/widgets/Comments.astro';
+import Subscribe from '../components/widgets/Subscribe.astro';
+import siteConfig from '../data/site-config';
+
+export async function getStaticPaths() {
+    const pages = await getCollection('pages');
+    return pages.map((page) => {
+        return {
+            params: { id: page.id },
+            props: { page }
+        };
+    });
+}
+
+type Props = { page: CollectionEntry<'pages'> };
+
+const { page } = Astro.props;
+const { title, seo, fonts } = page.data;
+const { Content } = await render(page);
+---
+
+<BaseLayout title={seo?.title ?? title} description={seo?.description} image={seo?.image} showHeader={false} articleTitle={title} commentsEnabled={siteConfig.comments?.enabled} fonts={fonts}>
+    <article class="mb-16 sm:mb-24">
+        <header class="mb-8">
+            <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{title}</h1>
+        </header>
+        <div class="prose sm:prose-lg max-w-none">
+            <Content />
+        </div>
+    </article>
+    <Subscribe class="my-16 sm:my-24" />
+    {siteConfig.comments?.enabled && <Comments pageId={`/${page.id}/`} pageTitle={title} />}
+</BaseLayout>

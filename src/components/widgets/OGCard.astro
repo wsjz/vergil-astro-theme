@@ -1,0 +1,97 @@
+---
+// OGCard
+
+import { parse } from 'node-html-parser';
+
+export interface Props {
+    url: string;
+}
+
+const { url } = Astro.props;
+
+if (!url) return null;
+
+let ogData = {
+    title: '',
+    description: '',
+    image: '',
+    site: ''
+};
+
+try {
+    const response = await fetch(url, {
+        headers: { 'User-Agent': 'Astro-OGCard/1.0' },
+        signal: AbortSignal.timeout(5000)
+    });
+    
+    if (response.ok) {
+        const html = await response.text();
+        const root = parse(html);
+        
+        const getMeta = (prop: string) => {
+            const el = root.querySelector(`meta[property="${prop}"], meta[name="${prop}"]`);
+            return el?.getAttribute('content') || '';
+        };
+        
+        ogData = {
+            title: getMeta('og:title') || getMeta('twitter:title') || root.querySelector('title')?.text || new URL(url).hostname,
+            description: getMeta('og:description') || getMeta('twitter:description') || getMeta('description') || '',
+            image: getMeta('og:image') || getMeta('twitter:image') || '',
+            site: getMeta('og:site_name') || new URL(url).hostname
+        };
+    }
+} catch (error) {
+    console.error(`Failed to fetch OG data for ${url}:`, error);
+    ogData.title = new URL(url).hostname;
+}
+
+if (!ogData.image) {
+    const urlObj = new URL(url);
+    ogData.image = `${urlObj.protocol}//${urlObj.hostname}/favicon.ico`;
+}
+
+const truncate = (str: string, len: number) => {
+    if (!str) return '';
+    return str.length > len ? str.slice(0, len) + '...' : str;
+};
+---
+
+<a 
+    href={url} 
+    target="_blank" 
+    rel="noopener noreferrer"
+    class="og-card group block my-6 no-underline"
+>
+    <div class="flex items-stretch border border-dashed border-main rounded overflow-hidden hover:bg-muted/30 transition-colors">
+        {ogData.image && (
+            <div class="w-24 h-24 sm:w-32 sm:h-32 shrink-0 bg-muted overflow-hidden">
+                <img 
+                    src={ogData.image} 
+                    alt="" 
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    onerror="this.style.display='none'"
+                />
+            </div>
+        )}
+        <div class="flex-1 p-3 sm:p-4 min-w-0 flex flex-col justify-center">
+            <p class="text-xs text-secondary mb-1 uppercase tracking-wider truncate">
+                {ogData.site}
+            </p>
+            <h3 class="font-display text-base sm:text-lg font-medium leading-snug line-clamp-2 mb-1 group-hover:underline group-hover:decoration-dashed">
+                {ogData.title}
+            </h3>
+            {ogData.description && (
+                <p class="text-sm text-secondary line-clamp-2 hidden sm:block">
+                    {truncate(ogData.description, 120)}
+                </p>
+            )}
+        </div>
+    </div>
+</a>
+
+<style>
+    .og-card {
+        text-decoration: none !important;
+    }
+</style>

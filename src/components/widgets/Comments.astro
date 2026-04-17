@@ -1,0 +1,104 @@
+---
+import siteConfig from '../../data/site-config';
+
+interface Props {
+    pageId?: string;
+    pageTitle?: string;
+}
+
+const { pageId = Astro.url.pathname, pageTitle = '' } = Astro.props;
+const provider = siteConfig.comments?.provider;
+const giscusConfig = siteConfig.comments?.giscus;
+const artalkConfig = siteConfig.comments?.artalk;
+---
+
+<div id="comments" class="mt-12 border-t border-dashed border-main pt-8">
+    {provider === 'giscus' && giscusConfig && (
+        <div class="giscus"></div>
+    )}
+    {provider === 'artalk' && artalkConfig && (
+        <div id="artalk-comments"></div>
+    )}
+</div>
+
+{provider === 'giscus' && giscusConfig && (
+    <div
+        id="giscus-config"
+        data-repo={giscusConfig.repo}
+        data-repo-id={giscusConfig.repoId}
+        data-category={giscusConfig.category}
+        data-category-id={giscusConfig.categoryId}
+        data-mapping={giscusConfig.mapping ?? 'pathname'}
+        data-strict={giscusConfig.strict ? '1' : '0'}
+        data-reactions-enabled={giscusConfig.reactionsEnabled !== false ? '1' : '0'}
+        data-emit-metadata={giscusConfig.emitMetadata ? '1' : '0'}
+        data-input-position={giscusConfig.inputPosition ?? 'top'}
+        data-theme={giscusConfig.theme ?? 'preferred_color_scheme'}
+        data-lang={giscusConfig.lang ?? 'zh-CN'}
+        data-loading={giscusConfig.loading ?? 'lazy'}
+        style="display:none"
+    ></div>
+    <script is:inline>
+        (function() {
+            var config = document.getElementById('giscus-config');
+            if (!config) return;
+            var script = document.createElement('script');
+            script.src = 'https://giscus.app/client.js';
+            script.setAttribute('data-repo', config.dataset.repo);
+            script.setAttribute('data-repo-id', config.dataset.repoId);
+            script.setAttribute('data-category', config.dataset.category);
+            script.setAttribute('data-category-id', config.dataset.categoryId);
+            script.setAttribute('data-mapping', config.dataset.mapping);
+            script.setAttribute('data-strict', config.dataset.strict);
+            script.setAttribute('data-reactions-enabled', config.dataset.reactionsEnabled);
+            script.setAttribute('data-emit-metadata', config.dataset.emitMetadata);
+            script.setAttribute('data-input-position', config.dataset.inputPosition);
+            script.setAttribute('data-theme', config.dataset.theme);
+            script.setAttribute('data-lang', config.dataset.lang);
+            script.setAttribute('data-loading', config.dataset.loading);
+            script.setAttribute('crossorigin', 'anonymous');
+            script.async = true;
+            var container = document.querySelector('.giscus');
+            if (container) {
+                container.appendChild(script);
+            }
+        })();
+    </script>
+)}
+
+{provider === 'artalk' && artalkConfig && (
+    <script is:inline data-page-id={pageId} data-page-title={pageTitle} data-server={artalkConfig.server} data-site={artalkConfig.site ?? 'Vergil Blog'}>
+        const script = document.currentScript;
+        const pageId = script.dataset.pageId;
+        const pageTitle = script.dataset.pageTitle;
+        const server = script.dataset.server;
+        const site = script.dataset.site;
+
+        function initArtalk() {
+            if (typeof Artalk === 'undefined') {
+                console.warn('Artalk not loaded');
+                return;
+            }
+
+            Artalk.init({
+                el: '#artalk-comments',
+                pageKey: pageId,
+                pageTitle: pageTitle,
+                server: server,
+                site: site,
+                darkMode: document.documentElement.classList.contains('dark')
+            });
+        }
+
+        const artalkScript = document.createElement('script');
+        artalkScript.src = 'https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/Artalk.js';
+        artalkScript.async = true;
+        artalkScript.onload = initArtalk;
+        document.head.appendChild(artalkScript);
+
+        const artalkCss = document.createElement('link');
+        artalkCss.rel = 'stylesheet';
+        artalkCss.href = 'https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/Artalk.css';
+        document.head.appendChild(artalkCss);
+    </script>
+)}

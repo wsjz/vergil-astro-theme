@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllSeries, getPostsBySeries, sortItemsByDateDesc } from '../../utils/data-utils';
+
+const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const allSeries = getAllSeries(posts);
+---
+
+<BaseLayout title="专栏" description="专栏文章合集" showHeader={false}>
+    <h1 class="mb-12 font-display text-xl sm:mb-16 sm:text-2xl">专栏</h1>
+    {allSeries.length === 0 ? (
+        <p class="text-secondary">暂无专栏，在文章 frontmatter 中添加 <code>series: 专栏名称</code> 即可创建。</p>
+    ) : (
+        <div class="space-y-4">
+            {allSeries.map((s) => {
+                const seriesPosts = getPostsBySeries(posts, s.id);
+                return (
+                    <a
+                        href={`/series/${s.id}`}
+                        class="group flex items-center justify-between py-4 border-b border-light hover:border-accent/40 transition-colors"
+                    >
+                        <div>
+                            <h2 class="font-display text-xl font-medium group-hover:text-accent transition-colors">{s.name}</h2>
+                            <p class="text-sm text-secondary mt-0.5">{seriesPosts.length} 篇文章</p>
+                        </div>
+                        <span class="text-secondary group-hover:text-accent transition-colors text-sm">→</span>
+                    </a>
+                );
+            })}
+        </div>
+    )}
+</BaseLayout>

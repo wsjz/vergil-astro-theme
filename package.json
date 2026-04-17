@@ -1,0 +1,41 @@
+{
+    "name": "vergil-astro-theme",
+    "type": "module",
+    "version": "1.0.0",
+    "scripts": {
+        "dev": "astro dev",
+        "start": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro"
+    },
+    "dependencies": {
+        "@astrojs/rss": "^4.0.13",
+        "@astrojs/sitemap": "^3.6.0",
+        "@fontsource-variable/inter": "^5.2.8",
+        "@fontsource-variable/newsreader": "^5.2.10",
+        "@iconify-json/bx": "^1.2.3",
+        "@iconify-json/lucide": "^1.2.102",
+        "@iconify-json/solar": "^1.2.5",
+        "@lucide/astro": "^0.562.0",
+        "@shikijs/transformers": "^1.17.0",
+        "@tailwindcss/vite": "^4.1.17",
+        "artalk": "^2.9.1",
+        "astro": "^5.15.9",
+        "fuse.js": "^7.3.0",
+        "hastscript": "^9.0.1",
+        "marked": "^17.0.0",
+        "medium-zoom": "^1.1.0",
+        "node-html-parser": "^7.0.1",
+        "open-props": "^1.7.23",
+        "remark-directive": "^4.0.0",
+        "tailwindcss": "^4.1.17",
+        "unist-util-visit": "^5.1.0"
+    },
+    "devDependencies": {
+        "@tailwindcss/typography": "^0.5.19",
+        "prettier": "^3.6.2",
+        "prettier-plugin-astro": "^0.14.1",
+        "prettier-plugin-tailwindcss": "^0.7.1"
+    }
+}

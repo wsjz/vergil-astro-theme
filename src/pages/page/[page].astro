@@ -1,0 +1,25 @@
+---
+import type { GetStaticPathsOptions, Page } from 'astro';
+import { type CollectionEntry, getCollection } from 'astro:content';
+import Pagination from '../../components/widgets/Pagination.astro';
+import PostPreview from '../../components/content/PostPreview.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { sortItemsByDateDesc } from '../../utils/data-utils';
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+    const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+    return paginate(posts, { pageSize: 7 });
+}
+
+type Props = { page: Page<CollectionEntry<'blog'>> };
+
+const { page } = Astro.props;
+const blog = page.data;
+const currentPage = page.currentPage;
+---
+
+<BaseLayout title={currentPage > 1 ? `Page ${currentPage}` : undefined} showHeader={false}>
+    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">文章</h1>
+    {blog.map((post) => <PostPreview post={post} class="mb-4 sm:mb-4" />)}
+    <Pagination page={page} class="my-16 sm:my-24" />
+</BaseLayout>

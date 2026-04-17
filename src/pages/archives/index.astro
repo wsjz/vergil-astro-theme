@@ -1,0 +1,68 @@
+---
+import { getCollection } from 'astro:content';
+import ArrowRight from '../../assets/icons/arrow-right.svg';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+import { sortItemsByDateDesc } from '../../utils/data-utils';
+
+const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+
+// Group posts by year
+const postsByYear = posts.reduce((acc, post) => {
+    const year = new Date(post.data.publishDate).getFullYear();
+    if (!acc[year]) {
+        acc[year] = [];
+    }
+    acc[year].push(post);
+    return acc;
+}, {} as Record<number, typeof posts>);
+
+// Sort years in descending order
+const sortedYears = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
+
+// Format month and day
+function formatDate(date: Date): string {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[date.getMonth()]} ${date.getDate()}`;
+}
+---
+
+<BaseLayout
+    title="Archives"
+    description="Browse all blog posts organized by year. Explore the complete archive of articles and insights."
+    showHeader={false}
+>
+    <h1 class="mb-12 font-display text-xl sm:mb-16 sm:text-2xl">Archives</h1>
+    
+    <div class="space-y-16 sm:space-y-20">
+        {sortedYears.map((year) => (
+            <section>
+                <h2 class="mb-8 flex items-baseline gap-4 font-display text-lg font-medium sm:text-xl">
+                    <span>{year}</span>
+                    <span class="text-sm font-normal text-secondary">
+                        {postsByYear[year].length} {postsByYear[year].length === 1 ? 'post' : 'posts'}
+                    </span>
+                </h2>
+                <div class="space-y-1">
+                    {postsByYear[year].map((post) => {
+                        const postDate = new Date(post.data.publishDate);
+                        return (
+                            <a 
+                                href={`/blog/${post.id}/`}
+                                class="group flex items-baseline gap-4 py-2 hover:bg-muted/50 -mx-2 px-2 rounded transition-colors"
+                            >
+                                <time class="shrink-0 text-sm text-secondary tabular-nums w-16">
+                                    {formatDate(postDate)}
+                                </time>
+                                <span class="font-display text-lg leading-tight group-hover:underline group-hover:decoration-dashed group-hover:decoration-1 group-hover:underline-offset-4">
+                                    {post.data.title}
+                                </span>
+                            </a>
+                        );
+                    })}
+                </div>
+            </section>
+        ))}
+    </div>
+
+</BaseLayout>

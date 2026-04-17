@@ -1,0 +1,145 @@
+---
+const searchDataUrl = '/search-data.json';
+---
+
+<div class="search-container relative">
+    <button
+        id="search-trigger"
+        class="hidden"
+        aria-label="Open search"
+    >
+        <span>Search</span>
+    </button>
+
+    <dialog
+        id="search-dialog"
+        class="m-auto max-h-[80vh] w-[90vw] max-w-2xl rounded-lg bg-main p-0 shadow-2xl backdrop:bg-black/50"
+    >
+        <div class="flex flex-col">
+            <div class="border-b border-dashed border-main p-4">
+                <div class="relative">
+                    <svg
+                        class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-secondary"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Type to search..."
+                        class="w-full rounded-md bg-secondary py-3 pl-10 pr-4 text-main outline-none placeholder:text-secondary"
+                        autocomplete="off"
+                    />
+                </div>
+            </div>
+
+            <div id="search-results" class="max-h-[60vh] overflow-y-auto p-4">
+                <p class="text-center text-secondary text-sm">Start typing to search</p>
+            </div>
+
+            <div class="border-t border-dashed border-main p-3 text-center text-xs text-secondary">
+                Press <kbd class="rounded bg-secondary px-1.5 py-0.5">ESC</kbd> to close
+            </div>
+        </div>
+    </dialog>
+</div>
+
+<script is:inline data-search-url={searchDataUrl}>
+(function() {
+    const script = document.currentScript;
+    const searchUrl = script.dataset.searchUrl;
+
+    const searchTrigger = document.getElementById('search-trigger');
+    const searchDialog = document.getElementById('search-dialog');
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+
+    let fuse = null;
+    let searchData = [];
+
+    document.addEventListener('open-search', async () => {
+        if (!fuse) await initSearch();
+        searchDialog?.showModal();
+        searchInput?.focus();
+    });
+
+    async function initSearch() {
+        try {
+            const response = await fetch(searchUrl);
+            searchData = await response.json();
+            const Fuse = (await import('https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.mjs')).default;
+            fuse = new Fuse(searchData, {
+                keys: ['title', 'description', 'content', 'tags'],
+                threshold: 0.3,
+                includeScore: true
+            });
+        } catch (error) {
+            console.error('Failed to initialize search:', error);
+        }
+    }
+
+    function renderResults(results) {
+        if (!results.length) {
+            searchResults.innerHTML = '<p class="text-center text-secondary text-sm">No results found</p>';
+            return;
+        }
+        const html = results.map(result => {
+            const item = result.item;
+            const url = item.type === 'post' ? `/blog/${item.id}/` : `/projects/${item.id}/`;
+            const typeLabel = item.type === 'post' ? 'Post' : 'Project';
+            return `
+                <a href="${url}" class="block border-b border-dashed border-secondary py-4 last:border-0 hover:bg-secondary/30 transition-colors">
+                    <div class="flex items-center gap-2 text-xs text-secondary mb-1">
+                        <span class="rounded bg-secondary px-2 py-0.5">${typeLabel}</span>
+                        <time>${new Date(item.date).toLocaleDateString()}</time>
+                    </div>
+                    <h3 class="font-display text-lg text-main mb-1">${item.title}</h3>
+                    <p class="text-sm text-secondary line-clamp-2">${item.description || item.content.slice(0, 150)}...</p>
+                </a>
+            `;
+        }).join('');
+        searchResults.innerHTML = html;
+    }
+
+    searchTrigger?.addEventListener('click', async () => {
+        if (!fuse) await initSearch();
+        searchDialog?.showModal();
+        searchInput?.focus();
+    });
+
+    searchDialog?.addEventListener('click', (e) => {
+        if (e.target === searchDialog) {
+            searchDialog.close();
+        }
+    });
+
+    searchInput?.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        if (!query) {
+            searchResults.innerHTML = '<p class="text-center text-secondary text-sm">Start typing to search</p>';
+            return;
+        }
+        if (!fuse) return;
+        const results = fuse.search(query).slice(0, 10);
+        renderResults(results);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            searchTrigger?.click();
+        }
+        if (e.key === 'Escape' && searchDialog?.open) {
+            searchDialog.close();
+        }
+    });
+})();
+</script>

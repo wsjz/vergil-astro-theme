@@ -1,0 +1,64 @@
+---
+import { getCollection } from 'astro:content';
+import Hero from '../components/content/Hero.astro';
+import HeroSplash from '../components/content/HeroSplash.astro';
+import Now from '../components/content/Now.astro';
+import PostPreview from '../components/content/PostPreview.astro';
+import siteConfig from '../data/site-config';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { sortItemsByDateDesc } from '../utils/data-utils';
+
+const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const pageSize = 7;
+const currentPage = 1;
+const totalPosts = posts.length;
+const totalPages = Math.ceil(totalPosts / pageSize);
+const pagePosts = posts.slice(0, pageSize);
+---
+
+<BaseLayout description={siteConfig.description} splashMode={true}>
+    <HeroSplash slot="splash" />
+    <Hero {...siteConfig.hero} />
+    
+    <!-- Now Section -->
+    <div class="mb-8 sm:mb-12">
+        <a href="/now" class="inline-block">
+            <h2 class="font-sans text-xl font-medium mb-6 sm:text-2xl text-accent hover:opacity-80 transition-opacity">动态</h2>
+        </a>
+        <Now
+            items={[
+                "正在学习和探索 **Astro** 和 **Tailwind CSS** 的现代网站构建方式",
+                "享受阅读和写作的时光，整理技术笔记",
+                "保持运动，保持健康的生活方式"
+            ]}
+            date="2025年4月"
+        />
+    </div>
+    
+    {
+        pagePosts?.length > 0 && (
+            <div class="mb-4 sm:mb-12">
+                <a href="/blog" class="inline-block">
+                    <h2 class="font-sans text-xl font-medium mb-4 sm:text-2xl text-accent hover:opacity-80 transition-opacity">文章</h2>
+                </a>
+                {pagePosts.map((post) => (
+                    <PostPreview post={post} headingLevel="h3" />
+                ))}
+                
+                <!-- Pagination -->
+                <nav aria-label="Pagination" class="relative px-12 py-2 text-center my-8">
+                    <span class="text-sm">Page {currentPage} of {totalPages}</span>
+                    {totalPages > 1 && (
+                        <a 
+                            href="/page/2" 
+                            class="absolute top-1/2 right-0 -translate-y-1/2 inline-flex items-center justify-center w-9 h-9 rounded-full border border-light hover:border-accent/40 hover:bg-accent/5 transition-all" 
+                            aria-label="Go to page 2"
+                        >
+                            <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                        </a>
+                    )}
+                </nav>
+            </div>
+        )
+    }
+</BaseLayout>
