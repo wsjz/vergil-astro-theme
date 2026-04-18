@@ -176,5 +176,21 @@ const isArticle = head.pageType === 'article';
         </script>
 
         <SiteAgent />
+
+        <script>
+            import mediumZoom from 'medium-zoom';
+
+            function initZoom() {
+                mediumZoom('img[data-zoomable="1"]', {
+                    background: 'rgba(0, 0, 0, 0.85)',
+                    margin: 24,
+                });
+            }
+
+            document.addEventListener('astro:page-load', initZoom);
+            if (document.readyState !== 'loading') {
+                initZoom();
+            }
+        </script>
     </body>
 </html>

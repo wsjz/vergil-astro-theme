@@ -6,6 +6,7 @@ import remarkDirective from 'remark-directive';
 import siteConfig from './src/data/site-config';
 import { rehypeTitleHeadings } from './src/plugins/rehype-title-headings.mjs';
 import { remarkContentDirectives } from './src/plugins/remark-content-directives.mjs';
+import { remarkImageDirectives } from './src/plugins/remark-image-directives.mjs';
 import { remarkTerminal, transformerTerminal } from './src/plugins/shiki-terminal.mjs';
 
 export default defineConfig({
@@ -20,7 +21,7 @@ export default defineConfig({
     },
     integrations: [sitemap()],
     markdown: {
-        remarkPlugins: [remarkDirective, remarkContentDirectives, remarkTerminal],
+        remarkPlugins: [remarkDirective, remarkImageDirectives, remarkContentDirectives, remarkTerminal],
         rehypePlugins: [rehypeTitleHeadings],
         shikiConfig: {
             themes: {

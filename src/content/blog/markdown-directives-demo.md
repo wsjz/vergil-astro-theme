@@ -523,6 +523,96 @@ tab: 示例代码
 
 ---
 
+### Image 图片
+
+::::tabs
+tab: 演示效果
+
+::image{src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80" alt="风景照片"}
+
+::image{src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80" alt="带下载按钮" download="true"}
+
+::image{src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80" alt="正方形裁剪" ratio="1/1" width="300px"}
+
+tab: 示例代码
+
+````
+::image{src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80" alt="风景照片"}
+
+::image{src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80" alt="带下载按钮" download="true"}
+
+::image{src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80" alt="正方形裁剪" ratio="1/1" width="300px"}
+````
+
+- `src`（**必填**）：图片地址
+- `alt`：图片描述，会显示在图片下方作为 caption
+- `width` / `height`：设置图片尺寸
+- `bg`：背景颜色
+- `padding`：内边距
+- `ratio`：固定宽高比
+- `download`：`true` 或自定义下载链接
+- `fancybox`：`false` 可禁用点击放大
+
+::::
+
+---
+
+### Gallery 图片画廊
+
+::::tabs
+tab: 演示效果
+
+:::gallery{layout="grid" size="m" ratio="square"}
+![山景1](https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=80)
+![山景2](https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80)
+![森林](https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=80)
+![湖泊](https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=400&q=80)
+:::
+
+tab: 示例代码
+
+````
+:::gallery{layout="grid" size="m" ratio="square"}
+![山景1](https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&q=80)
+![山景2](https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80)
+![森林](https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=80)
+![湖泊](https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=400&q=80)
+:::
+````
+
+- `layout`：`grid`（网格，默认）或 `flow`（瀑布流）
+- `size`：`xs` | `s` | `m` | `l` | `xl` | `mix`
+- `ratio`：`square` | `portrait`
+
+::::
+
+---
+
+### Banner 横幅
+
+::::tabs
+tab: 演示效果
+
+:::banner{title="Vergil 主题" subtitle="Astro 驱动的个人博客主题" bg="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80"}
+:::
+
+tab: 示例代码
+
+````
+:::banner{title="Vergil 主题" subtitle="Astro 驱动的个人博客主题" bg="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80"}
+:::
+````
+
+- `title`（**必填**）：主标题
+- `subtitle`：副标题
+- `bg`：背景图片地址
+- `avatar`：头像图片地址
+- `link`：点击跳转链接
+
+::::
+
+---
+
 ### Terminal 终端代码块
 
 ```bash terminal
