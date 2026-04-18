@@ -1,0 +1,110 @@
+---
+import { getAllCategories } from '../../../utils/data-utils';
+import { getCollection } from 'astro:content';
+import { getDocSets } from '../../../utils/docs-utils';
+
+interface Props {
+    activeType?: 'blog' | 'docs';
+    activeFilter?: string;
+}
+
+const { activeType = 'blog', activeFilter = 'all' } = Astro.props;
+
+const posts = await getCollection('blog');
+const categories = getAllCategories(posts);
+const docSets = await getDocSets();
+
+const typeUrl = (type: string) => {
+    const params = new URLSearchParams();
+    params.set('type', type);
+    return `/minimal/?${params.toString()}`;
+};
+
+const filterUrl = (type: string, filter: string) => {
+    const params = new URLSearchParams();
+    params.set('type', type);
+    if (filter !== 'all') params.set('cat', filter);
+    return `/minimal/?${params.toString()}`;
+};
+---
+
+<div class="mb-8">
+    <!-- 第一层 Tab：内容类型 -->
+    <div class="flex items-center gap-1 mb-4">
+        <a
+            href={typeUrl('blog')}
+            class={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                activeType === 'blog'
+                    ? 'bg-accent text-white'
+                    : 'text-secondary hover:bg-hover hover:text-accent'
+            }`}
+        >
+            博客
+        </a>
+        <a
+            href={typeUrl('docs')}
+            class={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                activeType === 'docs'
+                    ? 'bg-accent text-white'
+                    : 'text-secondary hover:bg-hover hover:text-accent'
+            }`}
+        >
+            文档
+        </a>
+    </div>
+
+    <!-- 第二层 Tab：分类/目录 -->
+    <div class="flex items-center gap-1 flex-wrap">
+        {activeType === 'blog' ? (
+            <>
+                <a
+                    href={filterUrl('blog', 'all')}
+                    class={`px-3 py-1 rounded-lg text-xs transition-all ${
+                        activeFilter === 'all'
+                            ? 'bg-accent/10 text-accent font-medium'
+                            : 'text-muted hover:text-accent hover:bg-hover'
+                    }`}
+                >
+                    全部
+                </a>
+                {categories.map((cat) => (
+                    <a
+                        href={filterUrl('blog', cat.id)}
+                        class={`px-3 py-1 rounded-lg text-xs transition-all ${
+                            activeFilter === cat.id
+                                ? 'bg-accent/10 text-accent font-medium'
+                                : 'text-muted hover:text-accent hover:bg-hover'
+                        }`}
+                    >
+                        {cat.name}
+                    </a>
+                ))}
+            </>
+        ) : (
+            <>
+                <a
+                    href={filterUrl('docs', 'all')}
+                    class={`px-3 py-1 rounded-lg text-xs transition-all ${
+                        activeFilter === 'all'
+                            ? 'bg-accent/10 text-accent font-medium'
+                            : 'text-muted hover:text-accent hover:bg-hover'
+                    }`}
+                >
+                    全部
+                </a>
+                {docSets.map((set) => (
+                    <a
+                        href={filterUrl('docs', set.id)}
+                        class={`px-3 py-1 rounded-lg text-xs transition-all ${
+                            activeFilter === set.id
+                                ? 'bg-accent/10 text-accent font-medium'
+                                : 'text-muted hover:text-accent hover:bg-hover'
+                        }`}
+                    >
+                        {set.meta.data.title}
+                    </a>
+                ))}
+            </>
+        )}
+    </div>
+</div>

@@ -1,0 +1,65 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import BaseHead, { type Props as HeadProps } from '../components/base/BaseHead.astro';
+import ResumeSidebar from '../components/views/resume/ResumeSidebar.astro';
+import ThemeToggle from '../components/ui/ThemeToggle.astro';
+
+export type Props = HeadProps & {
+    resume: import('astro:content').CollectionEntry<'resume'>;
+    headings: { depth: number; slug: string; text: string }[];
+};
+
+const { resume, headings, ...head } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN" class="wrap-break-words antialiased">
+    <head>
+        <BaseHead {...head} />
+        <script is:inline>
+            (function() {
+                try {
+                    var scheme = localStorage.getItem('colorScheme') || 'C';
+                    var isDark = localStorage.getItem('darkMode');
+                    document.documentElement.setAttribute('data-theme', scheme);
+                    if (isDark === 'true' || (isDark === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                        document.documentElement.classList.add('dark');
+                    }
+                } catch(e) {}
+            })();
+        </script>
+        <ViewTransitions />
+        <script is:inline src="/theme-toggle.js"></script>
+        <meta name="robots" content="noindex" />
+    </head>
+    <body class="bg-main text-main">
+        <ResumeSidebar resume={resume} headings={headings} />
+
+        <main class="ml-0 md:ml-72 min-h-screen">
+            <div class="max-w-3xl mx-auto px-8 py-12 print:px-0 print:py-0">
+                <!-- ThemeToggle 放在文章右上角 -->
+                <div class="flex justify-end mb-6 print:hidden">
+                    <ThemeToggle />
+                </div>
+                <article class="prose sm:prose-lg max-w-none print:prose-sm">
+                    <slot />
+                </article>
+            </div>
+        </main>
+
+        <style is:global>
+            @media print {
+                @page {
+                    margin: 2cm;
+                }
+                body {
+                    background: white !important;
+                    color: black !important;
+                }
+                main {
+                    margin-left: 0 !important;
+                }
+            }
+        </style>
+    </body>
+</html>

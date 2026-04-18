@@ -1,0 +1,31 @@
+---
+import { getCollection, render } from 'astro:content';
+import ResumeLayout from '../../layouts/ResumeLayout.astro';
+
+export async function getStaticPaths() {
+    const resumes = await getCollection('resume');
+    return resumes.map((resume) => ({
+        params: { id: resume.id },
+        props: { resume }
+    }));
+}
+
+const resumes = await getCollection('resume');
+const resume = resumes[0];
+
+if (!resume) {
+    return new Response('Resume not found', { status: 404 });
+}
+
+const { Content, headings } = await render(resume);
+---
+
+<ResumeLayout
+    title={resume.data.title}
+    description={`${resume.data.name} 的个人简历`}
+    pageType="website"
+    resume={resume}
+    headings={headings}
+>
+    <Content />
+</ResumeLayout>

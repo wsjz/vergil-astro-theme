@@ -1,0 +1,110 @@
+---
+import { ArrowLeft, Printer, Mail, Phone, MapPin, Globe } from '@lucide/astro';
+import siteConfig from '../../../data/site-config';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+    resume: CollectionEntry<'resume'>;
+    headings: { depth: number; slug: string; text: string }[];
+}
+
+const { resume, headings } = Astro.props;
+const { name, avatar, contact } = resume.data;
+
+const h2Headings = headings.filter((h) => h.depth === 2);
+---
+
+<aside class="fixed left-0 top-0 h-screen w-72 bg-card border-r border-light flex flex-col z-40 print:hidden">
+    <div class="flex-1 overflow-y-auto p-6">
+        <!-- 返回站点 -->
+        <a href="/" class="inline-flex items-center gap-1.5 text-xs text-muted hover:text-accent transition-colors mb-6">
+            <ArrowLeft class="w-3.5 h-3.5" />
+            <span>返回站点</span>
+        </a>
+
+        <!-- 基础信息卡片 -->
+        <div class="text-center mb-6">
+            <div class="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-accent/20 mb-4">
+                {avatar ? (
+                    <img src={avatar} alt={name} class="w-full h-full object-cover" />
+                ) : siteConfig.avatar ? (
+                    <img src={siteConfig.avatar.src} alt={name} class="w-full h-full object-cover" />
+                ) : (
+                    <div class="w-full h-full bg-accent/10 flex items-center justify-center">
+                        <span class="text-accent font-display text-2xl">{name.charAt(0)}</span>
+                    </div>
+                )}
+            </div>
+            <h1 class="font-display text-xl font-medium text-main">{name}</h1>
+            {siteConfig.subtitle && (
+                <p class="text-xs text-muted mt-1">{siteConfig.subtitle}</p>
+            )}
+        </div>
+
+        <!-- 联系方式 -->
+        {contact && (
+            <div class="space-y-2 mb-6">
+                {contact.email && (
+                    <a href={`mailto:${contact.email}`} class="flex items-center gap-2 text-xs text-secondary hover:text-accent transition-colors">
+                        <Mail class="w-3.5 h-3.5" />
+                        <span>{contact.email}</span>
+                    </a>
+                )}
+                {contact.phone && (
+                    <a href={`tel:${contact.phone}`} class="flex items-center gap-2 text-xs text-secondary hover:text-accent transition-colors">
+                        <Phone class="w-3.5 h-3.5" />
+                        <span>{contact.phone}</span>
+                    </a>
+                )}
+                {contact.location && (
+                    <div class="flex items-center gap-2 text-xs text-secondary">
+                        <MapPin class="w-3.5 h-3.5" />
+                        <span>{contact.location}</span>
+                    </div>
+                )}
+                {contact.website && (
+                    <a href={contact.website} target="_blank" rel="noopener" class="flex items-center gap-2 text-xs text-secondary hover:text-accent transition-colors">
+                        <Globe class="w-3.5 h-3.5" />
+                        <span>{contact.website}</span>
+                    </a>
+                )}
+            </div>
+        )}
+
+        <!-- 目录 -->
+        {h2Headings.length > 0 && (
+            <div class="mb-6">
+                <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">目录</h3>
+                <nav class="space-y-1">
+                    {h2Headings.map((h) => (
+                        <a
+                            href={`#${h.slug}`}
+                            class="block text-sm text-secondary hover:text-accent transition-colors py-1"
+                        >
+                            {h.text}
+                        </a>
+                    ))}
+                </nav>
+            </div>
+        )}
+    </div>
+
+    <!-- 底部按钮 -->
+    <div class="p-6 border-t border-light">
+        <button
+            onclick="window.print()"
+            class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity"
+        >
+            <Printer class="w-4 h-4" />
+            <span>打印简历</span>
+        </button>
+    </div>
+</aside>
+
+<style>
+    @media print {
+        aside {
+            display: none !important;
+        }
+    }
+</style>

@@ -1,0 +1,110 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import BaseHead, { type Props as HeadProps } from '../components/base/BaseHead.astro';
+import ThemeToggle from '../components/ui/ThemeToggle.astro';
+
+export type Props = HeadProps & {
+    showBackLink?: string;
+    backHref?: string;
+    showBreadcrumb?: boolean;
+};
+
+const { showBackLink, backHref, showBreadcrumb = false, ...head } = Astro.props;
+const isArticle = head.pageType === 'article';
+---
+
+<!doctype html>
+<html lang="zh-CN" class="wrap-break-words antialiased">
+    <head>
+        <BaseHead {...head} />
+        <script is:inline>
+            (function() {
+                try {
+                    var scheme = localStorage.getItem('colorScheme') || 'C';
+                    var isDark = localStorage.getItem('darkMode');
+                    document.documentElement.setAttribute('data-theme', scheme);
+                    if (isDark === 'true' || (isDark === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                        document.documentElement.classList.add('dark');
+                    }
+                } catch(e) {}
+            })();
+        </script>
+        <ViewTransitions />
+        <script is:inline src="/theme-toggle.js"></script>
+        <meta name="robots" content="noindex" />
+    </head>
+    <body class="bg-main text-main">
+        {isArticle && (
+            <div id="reading-progress" class="fixed top-0 left-0 h-[2px] bg-accent z-[9999] w-0 transition-none"></div>
+        )}
+
+        <main class="min-h-screen flex flex-col">
+            <div class="flex-1 w-full max-w-3xl mx-auto px-6 pt-12 pb-20">
+                <!-- 顶部栏：返回链接 + ThemeToggle -->
+                <div class="flex items-center justify-between mb-6">
+                    {showBackLink ? (
+                        <a href={backHref} class="text-sm text-secondary hover:text-accent transition-colors">
+                            ← {showBackLink}
+                        </a>
+                    ) : (
+                        <div />
+                    )}
+                    <ThemeToggle />
+                </div>
+
+                <!-- 面包屑插槽 -->
+                {showBreadcrumb && (
+                    <div id="minimal-breadcrumb" class="mb-6">
+                        <slot name="breadcrumb" />
+                    </div>
+                )}
+
+                <slot />
+            </div>
+        </main>
+
+        <div class="fixed bottom-6 left-0 right-0 flex justify-center z-50">
+            <button
+                id="minimal-back-btn"
+                class="px-4 py-2 rounded-full bg-card border border-light text-sm text-secondary hover:text-accent transition-colors shadow-sm cursor-pointer"
+            >
+                返回
+            </button>
+        </div>
+        <script is:inline>
+            (function(){
+                document.addEventListener('click', function(e){
+                    var btn = e.target.closest('#minimal-back-btn');
+                    if(!btn) return;
+                    if(history.length > 1){
+                        history.back();
+                    } else {
+                        location.href = '/';
+                    }
+                });
+            })();
+        </script>
+
+        {isArticle && (
+            <script is:inline>
+                (function () {
+                    function initProgress() {
+                        var bar = document.getElementById('reading-progress');
+                        if (!bar) return;
+                        function update() {
+                            var scrollTop = window.scrollY;
+                            var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                            var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+                            bar.style.width = pct + '%';
+                        }
+                        window.removeEventListener('scroll', update);
+                        window.addEventListener('scroll', update, { passive: true });
+                        update();
+                    }
+                    document.addEventListener('astro:page-load', initProgress);
+                    initProgress();
+                })();
+            </script>
+        )}
+    </body>
+</html>

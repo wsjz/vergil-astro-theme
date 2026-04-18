@@ -1,0 +1,230 @@
+---
+import { getCollection } from 'astro:content';
+import { getDocSets, type DocTreeNode } from '../../../utils/docs-utils';
+import { getAllCategories } from '../../../utils/data-utils';
+import { slugify } from '../../../utils/common-utils';
+
+const posts = await getCollection('blog');
+const categories = getAllCategories(posts);
+const sets = await getDocSets();
+
+// 序列化博客数据
+const blogItems = posts.map((p) => ({
+    id: p.id,
+    title: p.data.title,
+    date: p.data.publishDate.toISOString(),
+    href: `/minimal/blog/${p.id}/`,
+    categoryId: p.data.category ? slugify(p.data.category) : null
+}));
+
+// 序列化文档树数据（保留层级结构）
+function serializeTree(nodes: DocTreeNode[], setId: string): any[] {
+    return nodes.map((n) => {
+        if (n.type === 'article') {
+            return {
+                type: 'article',
+                title: n.title,
+                href: `/minimal/docs/${setId}/${n.slug}/`,
+                setId
+            };
+        }
+        return {
+            type: 'group',
+            title: n.title,
+            children: serializeTree(n.children, setId),
+            setId
+        };
+    });
+}
+
+const docTrees = sets.map((s) => ({
+    id: s.id,
+    title: s.meta.data.title,
+    tree: serializeTree(s.tree, s.id)
+}));
+
+const docSetsMeta = sets.map((s) => ({ id: s.id, title: s.meta.data.title }));
+---
+
+<minimal-client-view
+    data-blog={JSON.stringify(blogItems)}
+    data-doctrees={JSON.stringify(docTrees)}
+    data-categories={JSON.stringify(categories)}
+    data-docsets={JSON.stringify(docSetsMeta)}
+>
+    <div id="mc-tabs"></div>
+    <div id="mc-list" class="mt-4"></div>
+</minimal-client-view>
+
+<script is:inline>
+    (function() {
+        if (customElements.get('minimal-client-view')) return;
+
+        class MinimalClientView extends HTMLElement {
+            connectedCallback() {
+                this.blog = JSON.parse(this.dataset.blog || '[]');
+                this.doctrees = JSON.parse(this.dataset.doctrees || '[]');
+                this.categories = JSON.parse(this.dataset.categories || '[]');
+                this.docsets = JSON.parse(this.dataset.docsets || '[]');
+
+                this.tabsEl = this.querySelector('#mc-tabs');
+                this.listEl = this.querySelector('#mc-list');
+
+                // 事件委托
+                this._onClick = this._handleClick.bind(this);
+                this.tabsEl.addEventListener('click', this._onClick);
+
+                // 浏览器前进/后退
+                this._onPopState = this.render.bind(this);
+                window.addEventListener('popstate', this._onPopState);
+
+                // ViewTransitions 页面切换完成后重新渲染（URL 此时已更新）
+                this._onAfterSwap = this.render.bind(this);
+                document.addEventListener('astro:after-swap', this._onAfterSwap);
+
+                // 直接加载时立即渲染；ViewTransitions 导航时先预渲染，after-swap 后再校正
+                this.render();
+            }
+
+            disconnectedCallback() {
+                if (this.tabsEl) {
+                    this.tabsEl.removeEventListener('click', this._onClick);
+                }
+                window.removeEventListener('popstate', this._onPopState);
+                document.removeEventListener('astro:after-swap', this._onAfterSwap);
+            }
+
+            _handleClick(e) {
+                var typeBtn = e.target.closest('button[data-type]');
+                var catBtn = e.target.closest('button[data-cat]');
+                if (!typeBtn && !catBtn) return;
+
+                var currentType = this.getParams().type;
+
+                if (typeBtn) {
+                    this.setParams(typeBtn.getAttribute('data-type'), 'all');
+                } else if (catBtn) {
+                    this.setParams(currentType, catBtn.getAttribute('data-cat'));
+                }
+            }
+
+            getParams() {
+                var p = new URLSearchParams(location.search);
+                return {
+                    type: p.get('type') || 'blog',
+                    cat: p.get('cat') || 'all'
+                };
+            }
+
+            setParams(type, cat) {
+                var p = new URLSearchParams();
+                p.set('type', type);
+                if (cat !== 'all') p.set('cat', cat);
+                var url = '/minimal/?' + p.toString();
+                history.pushState(null, '', url);
+                this.render();
+            }
+
+            render() {
+                var params = this.getParams();
+                var type = params.type;
+                var cat = params.cat;
+
+                if (this.tabsEl) {
+                    this.tabsEl.innerHTML = this.renderTabs(type, cat);
+                }
+                if (this.listEl) {
+                    this.listEl.innerHTML = this.renderList(type, cat);
+                }
+            }
+
+            renderTabs(type, cat) {
+                var typeTabs = '<div class="flex items-center gap-1 mb-4">' +
+                    '<button data-type="blog" class="px-4 py-1.5 rounded-full text-sm font-medium transition-all ' + (type === 'blog' ? 'bg-accent text-white' : 'text-secondary hover:bg-hover hover:text-accent') + '">博客</button>' +
+                    '<button data-type="docs" class="px-4 py-1.5 rounded-full text-sm font-medium transition-all ' + (type === 'docs' ? 'bg-accent text-white' : 'text-secondary hover:bg-hover hover:text-accent') + '">文档</button>' +
+                    '</div>';
+
+                var filterTabs = '<div class="flex items-center gap-1 flex-wrap">';
+                if (type === 'blog') {
+                    filterTabs += '<button data-cat="all" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === 'all' ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">全部</button>';
+                    for (var i = 0; i < this.categories.length; i++) {
+                        var c = this.categories[i];
+                        filterTabs += '<button data-cat="' + c.id + '" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === c.id ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">' + c.name + '</button>';
+                    }
+                } else {
+                    filterTabs += '<button data-cat="all" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === 'all' ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">全部</button>';
+                    for (var j = 0; j < this.docsets.length; j++) {
+                        var s = this.docsets[j];
+                        filterTabs += '<button data-cat="' + s.id + '" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === s.id ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">' + s.title + '</button>';
+                    }
+                }
+                filterTabs += '</div>';
+
+                return typeTabs + filterTabs;
+            }
+
+            renderList(type, cat) {
+                if (type === 'blog') {
+                    var items = cat === 'all' ? this.blog : this.blog.filter(function(p) { return p.categoryId === cat; });
+                    if (items.length === 0) {
+                        return '<div class="text-center py-12 text-muted text-sm">暂无内容</div>';
+                    }
+                    var html = '<div class="space-y-1">';
+                    for (var i = 0; i < items.length; i++) {
+                        var item = items[i];
+                        var dateStr = item.date ? new Date(item.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+                        html += '<a href="' + item.href + '" class="group flex items-center justify-between py-3 px-4 rounded-lg transition-all hover:bg-hover">' +
+                            '<span class="text-sm text-main group-hover:text-accent transition-colors line-clamp-1">' + item.title + '</span>' +
+                            (dateStr ? '<span class="text-xs text-muted shrink-0 ml-4">' + dateStr + '</span>' : '') +
+                            '</a>';
+                    }
+                    html += '</div>';
+                    return html;
+                }
+
+                var trees = this.doctrees;
+                if (cat !== 'all') {
+                    trees = trees.filter(function(t) { return t.id === cat; });
+                }
+
+                if (trees.length === 0) {
+                    return '<div class="text-center py-12 text-muted text-sm">暂无内容</div>';
+                }
+
+                var html = '<div class="space-y-4">';
+                for (var t = 0; t < trees.length; t++) {
+                    var tree = trees[t];
+                    if (cat === 'all') {
+                        html += '<div class="text-sm font-medium text-main mb-2">' + tree.title + '</div>';
+                    }
+                    html += this.renderDocTree(tree.tree, 0);
+                    if (cat === 'all' && t < trees.length - 1) {
+                        html += '<div class="border-b border-light my-3"></div>';
+                    }
+                }
+                html += '</div>';
+                return html;
+            }
+
+            renderDocTree(nodes, depth) {
+                var html = '<div class="space-y-0.5">';
+                for (var i = 0; i < nodes.length; i++) {
+                    var node = nodes[i];
+                    var indent = depth * 16;
+                    if (node.type === 'group') {
+                        html += '<div class="text-xs font-medium text-muted uppercase tracking-wider mt-3 mb-1" style="padding-left: ' + indent + 'px">' + node.title + '</div>';
+                        html += this.renderDocTree(node.children, depth + 1);
+                    } else {
+                        html += '<a href="' + node.href + '" class="group flex items-center py-2 px-4 rounded-lg transition-all hover:bg-hover" style="padding-left: ' + (indent + 16) + 'px">' +
+                            '<span class="text-sm text-main group-hover:text-accent transition-colors line-clamp-1">' + node.title + '</span>' +
+                            '</a>';
+                    }
+                }
+                html += '</div>';
+                return html;
+            }
+        }
+
+        customElements.define('minimal-client-view', MinimalClientView);
+    })();
+</script>

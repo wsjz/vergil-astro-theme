@@ -1,0 +1,52 @@
+---
+import FormattedDate from '../../ui/FormattedDate.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface BlogItem {
+    type: 'blog';
+    id: string;
+    title: string;
+    date: Date;
+    href: string;
+}
+
+interface DocItem {
+    type: 'docs';
+    id: string;
+    title: string;
+    href: string;
+    docId: string;
+}
+
+type ListItem = BlogItem | DocItem;
+
+interface Props {
+    items: ListItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="space-y-1">
+    {items.map((item) => (
+        <a
+            href={item.href}
+            class="group flex items-center justify-between py-3 px-4 rounded-lg transition-all hover:bg-hover"
+        >
+            <span class="text-sm text-main group-hover:text-accent transition-colors line-clamp-1">
+                {item.title}
+            </span>
+            {item.type === 'blog' && (
+                <span class="text-xs text-muted shrink-0 ml-4">
+                    <FormattedDate date={item.date} />
+                </span>
+            )}
+        </a>
+    ))}
+</div>
+
+{items.length === 0 && (
+    <div class="text-center py-12 text-muted text-sm">
+        暂无内容
+    </div>
+)}

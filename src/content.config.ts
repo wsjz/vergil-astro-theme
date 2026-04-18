@@ -94,4 +94,20 @@ const docs = defineCollection({
         })
 });
 
-export const collections = { blog, pages, projects, albums, docs };
+const resume = defineCollection({
+    loader: glob({ pattern: '**/*.md', base: './src/content/resume' }),
+    schema: () =>
+        z.object({
+            title: z.string(),
+            name: z.string(),
+            avatar: z.string().optional(),
+            contact: z.object({
+                email: z.string().optional(),
+                phone: z.string().optional(),
+                location: z.string().optional(),
+                website: z.string().optional()
+            }).optional()
+        })
+});
+
+export const collections = { blog, pages, projects, albums, docs, resume };

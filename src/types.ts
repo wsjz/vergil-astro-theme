@@ -105,6 +105,11 @@ export type SiteConfig = {
     };
     splash?: SplashConfig;
     agent?: AgentConfig;
+    views?: {
+        default: { name: string; path: string };
+        resume: { name: string; path: string };
+        minimal: { name: string; path: string };
+    };
 };
 
 export type AgentProvider = 'rive' | 'live2d';
