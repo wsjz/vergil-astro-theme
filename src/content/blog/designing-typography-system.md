@@ -3,6 +3,7 @@ title: 重新设计博客的字体系统
 excerpt: 从混乱到克制——记录一次以「易读、护眼、有个性」为目标的字体系统重构，以及它如何与内容标签体系协同工作。
 publishDate: 'Apr 16 2026'
 isFeatured: true
+banner: https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1600&h=400&fit=crop&q=80
 tags:
   - 设计
   - 博客搭建

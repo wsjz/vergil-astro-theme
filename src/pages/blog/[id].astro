@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import Button from '../../components/ui/Button.astro';
 import FormattedDate from '../../components/ui/FormattedDate.astro';
 import ReadingTime from '../../components/ui/ReadingTime.astro';
@@ -31,7 +32,18 @@ type Props = { post: CollectionEntry<'blog'>; prevPost: CollectionEntry<'blog'>;
 
 const { href } = Astro.url;
 const { post, prevPost, nextPost } = Astro.props;
-const { title, publishDate, updatedDate, excerpt, tags = [], seo, series, category, fonts } = post.data;
+const { title, publishDate, updatedDate, excerpt, tags = [], seo, series, category, fonts, banner } = post.data;
+
+function resolveBannerUrl(banner: string | undefined): string | null {
+    if (!banner) return null;
+    if (banner.startsWith('http')) {
+        return banner;
+    }
+    // 关键词模式：使用固定 unsplash 随机图
+    return `https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1600&h=400&fit=crop&q=80`;
+}
+
+const bannerUrl = resolveBannerUrl(banner);
 const { Content, headings } = await render(post);
 ---
 
@@ -54,18 +66,54 @@ const { Content, headings } = await render(post);
 
     <FloatingToc headings={headings} />
 
+    {bannerUrl && (
+        <div class="article-banner relative -mx-4 sm:-mx-8 mb-8 overflow-hidden rounded-xl h-[180px] sm:h-[220px]">
+            <img
+                src={bannerUrl}
+                alt={title}
+                class="absolute inset-0 w-full h-full object-cover"
+                loading="eager"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 flex flex-col justify-between p-6 sm:p-8">
+                <div class="flex flex-wrap items-center gap-2 text-sm text-white/80 drop-shadow [&_a]:text-white/80 [&_a:hover]:text-white [&_span]:text-white/60">
+                    <Breadcrumb
+                        crumbs={[
+                            { text: 'Blog', href: '/blog/' },
+                            { text: title }
+                        ]}
+                    />
+                </div>
+                <div>
+                    <h1 class="font-display text-2xl leading-tight font-medium text-white sm:text-3xl sm:leading-tight drop-shadow-lg">{title}</h1>
+                    <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/70">
+                        <FormattedDate date={publishDate} />
+                        <ReadingTime content={post.body || ''} />
+                        {updatedDate && (
+                            <span>Updated on <FormattedDate date={updatedDate} /></span>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    )}
+
     <article class="mb-16 sm:mb-24">
         <header class="mb-8">
-            <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{title}</h1>
-            <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-secondary">
-                <FormattedDate date={publishDate} />
-                <ReadingTime content={post.body || ''} />
-                {updatedDate && (
-                    <span>
-                        Updated on <FormattedDate date={updatedDate} />
-                    </span>
-                )}
-            </div>
+            {bannerUrl ? null : (
+                <>
+                    <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{title}</h1>
+                    <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-secondary">
+                        <FormattedDate date={publishDate} />
+                        <ReadingTime content={post.body || ''} />
+                        {updatedDate && (
+                            <span>
+                                Updated on <FormattedDate date={updatedDate} />
+                            </span>
+                        )}
+                    </div>
+                </>
+            )}
         </header>
         {series && <SeriesNav currentPostId={post.id} series={series} />}
         <div class="prose sm:prose-lg max-w-none">

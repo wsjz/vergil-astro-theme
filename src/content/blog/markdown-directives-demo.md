@@ -2,6 +2,7 @@
 title: Markdown 内容指令示例
 excerpt: 展示在普通 `.md` 文件中直接使用所有内容指令的效果。每个指令都用「演示效果」和「示例代码」两个选项卡对照呈现，方便复制使用。
 publishDate: 'Apr 15 2026'
+banner: https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1600&h=400&fit=crop&q=80
 tags:
   - 使用指南
 category: 博客相关

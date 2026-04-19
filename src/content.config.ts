@@ -33,6 +33,7 @@ const blog = defineCollection({
             category: z.string().optional(),
             series: z.string().optional(),
             draft: z.boolean().default(false),
+            banner: z.string().optional(),
             seo: seoSchema(image).optional(),
             fonts: fontsSchema
         })
@@ -82,7 +83,7 @@ const albums = defineCollection({
 
 const docs = defineCollection({
     loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/docs' }),
-    schema: () =>
+    schema: ({ image }) =>
         z.object({
             title: z.string(),
             description: z.string().optional(),
@@ -90,7 +91,9 @@ const docs = defineCollection({
             order: z.number().default(99),
             dirs: z.record(z.string(), z.string()).optional(),
             excerpt: z.string().optional(),
-            draft: z.boolean().default(false)
+            draft: z.boolean().default(false),
+            tags: z.array(z.string()).default([]),
+            cover: image().optional()
         })
 });
 
