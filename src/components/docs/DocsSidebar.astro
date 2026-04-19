@@ -73,21 +73,6 @@ const metaEntry = tree.length > 0 ? undefined : undefined;
             };
         }
 
-        function updateMainMargin(collapsed) {
-            const main = document.querySelector('#main-stage > div.flex > div.flex-1');
-            if (!main) return;
-            if (collapsed) {
-                main.classList.remove('lg:ml-[calc(14rem+2%+12px)]', 'xl:ml-[calc(15rem+2%+16px)]');
-            } else {
-                if (!main.classList.contains('lg:ml-[calc(14rem+2%+12px)]')) {
-                    main.classList.add('lg:ml-[calc(14rem+2%+12px)]');
-                }
-                if (!main.classList.contains('xl:ml-[calc(15rem+2%+16px)]')) {
-                    main.classList.add('xl:ml-[calc(15rem+2%+16px)]');
-                }
-            }
-        }
-
         function setCollapsed(collapsed) {
             isCollapsed = collapsed;
             const { sidebar, overlay, desktopToggle } = getElements();
@@ -105,7 +90,7 @@ const metaEntry = tree.length > 0 ? undefined : undefined;
                 if (isMobile) {
                     overlay?.classList.add('hidden', 'opacity-0');
                 }
-                updateMainMargin(true);
+                if (desktopToggle) desktopToggle.style.left = '1rem';
             } else {
                 sidebar.classList.remove('-translate-x-full');
                 sidebar.classList.add('translate-x-0');
@@ -116,7 +101,7 @@ const metaEntry = tree.length > 0 ? undefined : undefined;
                     overlay?.classList.remove('hidden');
                     setTimeout(() => overlay?.classList.remove('opacity-0'), 10);
                 }
-                updateMainMargin(false);
+                if (desktopToggle) desktopToggle.style.left = '';
             }
         }
 

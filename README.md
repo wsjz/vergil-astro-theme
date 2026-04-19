@@ -20,6 +20,16 @@ Vergil 基于 [Dante](https://github.com/JustGoodUI/dante-astro-theme) 极简主
 
 ---
 
+## 效果展示
+
+<div align="center">
+
+![首页](/public/readme/3.jpg)
+![文章页 Banner](/public/readme/1.jpg)
+![文档目录](/public/readme/2.jpg)
+
+</div>
+
 ## 核心系统
 
 ### 视图系统

@@ -134,6 +134,36 @@ const isArticle = head.pageType === 'article';
             })();
         </script>
 
+        <script>
+            import mediumZoom from 'medium-zoom';
+
+            function initZoom() {
+                mediumZoom('img[data-zoomable="1"]', {
+                    background: 'rgba(0, 0, 0, 0.85)',
+                    margin: 24,
+                    onOpen: (target) => {
+                        const wrap = target.closest('.md-photo-img-wrap');
+                        if (wrap) {
+                            wrap.dataset.prevOverflow = wrap.style.overflow;
+                            wrap.style.overflow = 'visible';
+                        }
+                    },
+                    onClose: (target) => {
+                        const wrap = target.closest('.md-photo-img-wrap');
+                        if (wrap && wrap.dataset.prevOverflow !== undefined) {
+                            wrap.style.overflow = wrap.dataset.prevOverflow;
+                            delete wrap.dataset.prevOverflow;
+                        }
+                    },
+                });
+            }
+
+            document.addEventListener('astro:page-load', initZoom);
+            if (document.readyState !== 'loading') {
+                initZoom();
+            }
+        </script>
+
         <script is:inline>
             (function() {
                 function initTabs() {

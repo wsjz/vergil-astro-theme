@@ -1,7 +1,12 @@
 /* ── Image directive ── */
+img {
+    margin: 0;
+}
+
 .md-directive-image {
-    margin: 1rem 0;
+    margin: 1rem 0rem;
     box-sizing: border-box;
+    width: min(75%, 600px);
 }
 
 .md-directive-image .md-image-bg {
