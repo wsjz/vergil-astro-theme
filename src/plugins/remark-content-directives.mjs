@@ -268,11 +268,12 @@ export function remarkContentDirectives() {
                 const title = attrs.title || '';
                 const author = attrs.author || '';
                 const date = attrs.date || '';
+                const footer = attrs.footer || '';
                 node.data = { hName: 'div', hProperties: {} };
                 node.children = [
-                    { type: 'html', value: `<div class="md-directive md-directive-poetry"><div class="md-poetry-header">${title ? `<h3 class="md-poetry-title">${title}</h3>` : ''}${(author || date) ? `<p class="md-poetry-meta">${[author, date].filter(Boolean).join(' · ')}</p>` : ''}</div><div class="md-poetry-body">` },
+                    { type: 'html', value: `<div class="md-directive md-directive-poetry"><div class="md-poetry-content">${title ? `<div class="md-poetry-title">${title}</div>` : ''}${(author || date) ? `<div class="md-poetry-meta">${[author, date].filter(Boolean).join(' · ')}</div>` : ''}<div class="md-poetry-body">` },
                     ...node.children,
-                    { type: 'html', value: '</div></div>' }
+                    { type: 'html', value: `</div>${footer ? `<div class="md-poetry-footer">${footer}</div>` : ''}</div></div>` }
                 ];
             } else if (name === 'copy') {
                 const label = attrs.label || '';
@@ -402,6 +403,99 @@ export function remarkContentDirectives() {
 
                 node.data = { hName: tag, hProperties: hProps };
                 node.children = children;
+            } else if (name === 'reel') {
+                const title = attrs.title || '';
+                const author = attrs.author || '';
+                const date = attrs.date || '';
+                const footer = attrs.footer || '';
+                const reelChildren = node.children;
+                node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-reel' } };
+                node.children = [
+                    { type: 'html', value: '<div class="md-reel-content"><div class="md-reel-title">' + title + '</div>' },
+                    ...(author ? [{ type: 'html', value: '<div class="md-reel-meta"><span>' + author + '</span></div>' }] : []),
+                    { type: 'html', value: '<div class="md-reel-body"><div class="md-reel-main">' },
+                    ...reelChildren,
+                    { type: 'html', value: '</div></div>' },
+                    ...(date ? [{ type: 'html', value: '<div class="md-reel-date">' + date + '</div>' }] : []),
+                    { type: 'html', value: '<div class="md-reel-footer">' + footer + '</div></div>' }
+                ];
+            } else if (name === 'paper') {
+                const style = attrs.style || '';
+                const title = attrs.title || '';
+                const author = attrs.author || '';
+                const date = attrs.date || '';
+                const footer = attrs.footer || '';
+                const contentClasses = ['md-paper-content'];
+                if (style) contentClasses.push(style);
+
+                const originalChildren = node.children;
+                const sectionNodes = [];
+                let currentType = 'paragraph';
+                let currentTitle = '';
+                let currentContent = [];
+
+                function flushSection() {
+                    if (currentContent.length === 0) return;
+                    if (currentType === 'paragraph') {
+                        sectionNodes.push(h('div', { class: 'md-paper-paragraph' }, currentContent));
+                    } else if (currentType === 'section') {
+                        sectionNodes.push(
+                            h('div', { class: 'md-paper-section' }, [
+                                { type: 'html', value: '<div class="md-paper-section-title">' + currentTitle + '</div>' },
+                                h('div', { class: 'md-paper-section-content' }, currentContent)
+                            ])
+                        );
+                    } else if (currentType === 'line') {
+                        const alignClass = currentTitle === 'right' ? ' md-paper-line-right' : '';
+                        sectionNodes.push(h('div', { class: 'md-paper-line' + alignClass }, currentContent));
+                    }
+                    currentContent = [];
+                }
+
+                for (const child of originalChildren) {
+                    let match = null;
+
+                    // Case 1: standalone HTML block comment
+                    if (child.type === 'html' && child.value) {
+                        match = child.value.match(/<!--\s*(paragraph|section|line)(?:\s+(.*?))?\s*-->/);
+                    }
+
+                    // Case 2: HTML comment inside a paragraph node
+                    if (!match && child.type === 'paragraph' && child.children && child.children.length > 0) {
+                        const firstChild = child.children[0];
+                        if (firstChild.type === 'html' && firstChild.value) {
+                            match = firstChild.value.match(/<!--\s*(paragraph|section|line)(?:\s+(.*?))?\s*-->/);
+                            if (match && child.children.length === 1) {
+                                // This paragraph is only a comment marker, skip it entirely
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (match) {
+                        flushSection();
+                        currentType = match[1];
+                        currentTitle = (match[2] || '').trim();
+                        continue;
+                    }
+
+                    currentContent.push(child);
+                }
+                flushSection();
+
+                node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-paper' } };
+                node.children = [
+                    { type: 'html', value: '<div class="' + contentClasses.join(' ') + '"><div class="md-paper-title">' + title + '</div>' },
+                    h('div', { class: 'md-paper-body' }, sectionNodes),
+                    {
+                        type: 'html', value: '<div class="md-paper-footer">' +
+                            ((author || date) ? '<div class="md-paper-author-date">' +
+                                (author ? '<span class="md-paper-author">' + author + '</span>' : '') +
+                                (date ? '<span class="md-paper-date">' + date + '</span>' : '') +
+                                '</div>' : '') +
+                            footer + '</div></div>'
+                    }
+                ];
             }
         });
     };
