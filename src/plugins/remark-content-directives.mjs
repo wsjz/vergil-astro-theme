@@ -86,6 +86,44 @@ export function remarkContentDirectives() {
                     { type: 'html', value: `<span class="md-step-badge">${num}</span>` },
                     ...(title ? [{ type: 'html', value: `<span class="md-step-title">${title}</span>` }] : [])
                 ];
+            } else if (name === 'checkbox') {
+                const color = resolveColor(attrs.color || 'blue');
+                const symbol = attrs.symbol || '';
+                const checked = attrs.checked === 'true' || attrs.checked === '';
+                const inline = attrs.inline === 'true' || attrs.inline === '';
+                const classes = ['md-tag-checkbox'];
+                if (symbol) classes.push(`md-checkbox-symbol-${symbol}`);
+                if (inline) classes.push('md-checkbox-inline');
+                node.data = {
+                    hName: inline ? 'span' : 'div',
+                    hProperties: {
+                        class: classes.join(' '),
+                        'data-checked': checked ? 'true' : 'false',
+                        style: `--checkbox-color:${color}`
+                    }
+                };
+                node.children = [
+                    { type: 'html', value: '<span class="md-checkbox-box"></span>' },
+                    { type: 'text', value: text }
+                ];
+            } else if (name === 'radio') {
+                const color = resolveColor(attrs.color || 'blue');
+                const checked = attrs.checked === 'true' || attrs.checked === '';
+                const inline = attrs.inline === 'true' || attrs.inline === '';
+                const classes = ['md-tag-checkbox', 'md-tag-radio'];
+                if (inline) classes.push('md-checkbox-inline');
+                node.data = {
+                    hName: inline ? 'span' : 'div',
+                    hProperties: {
+                        class: classes.join(' '),
+                        'data-checked': checked ? 'true' : 'false',
+                        style: `--checkbox-color:${color}`
+                    }
+                };
+                node.children = [
+                    { type: 'html', value: '<span class="md-checkbox-box"></span>' },
+                    { type: 'text', value: text }
+                ];
             }
         });
 
@@ -193,7 +231,7 @@ export function remarkContentDirectives() {
                             const raw = text.slice(4).trim();
                             const m = raw.match(/^(.+?)\{(color=[^}]+)\}$/);
                             currentTab = m ? m[1].trim() : raw;
-                            currentTabColor = m ? resolveColor(m[2].slice(6).trim().replace(/^['""""]+|['""""]+$/g, '')) : '';
+                            currentTabColor = m ? resolveColor(m[2].slice(6).trim().replace(/^['"""]+|['"""]+$/g, '')) : '';
                             currentContent = [];
                             continue;
                         }

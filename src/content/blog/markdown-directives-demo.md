@@ -676,6 +676,71 @@ export default defineConfig({
 ```
 :::
 
+---
+
+### Checkbox 复选框
+
+::::tabs
+ tab: 演示效果
+
+:checkbox[默认未选中]
+:checkbox[已选中]{checked="true"}
+:checkbox[绿色已选中]{checked="true" color="green"}
+:checkbox[紫色加号]{checked="true" color="purple" symbol="plus"}
+:checkbox[红色减号]{checked="true" color="red" symbol="minus"}
+:checkbox[青色叉号]{checked="true" color="cyan" symbol="times"}
+
+行内用法：:checkbox[行内复选框]{inline="true" checked="true"}
+
+ tab: 示例代码
+
+`````markdown
+:checkbox[默认未选中]
+:checkbox[已选中]{checked="true"}
+:checkbox[绿色已选中]{checked="true" color="green"}
+:checkbox[紫色加号]{checked="true" color="purple" symbol="plus"}
+:checkbox[红色减号]{checked="true" color="red" symbol="minus"}
+:checkbox[青色叉号]{checked="true" color="cyan" symbol="times"}
+
+行内用法：:checkbox[行内复选框]{inline="true" checked="true"}
+`````
+
+- 默认独占一行（块级），添加 `inline="true"` 可在段落中内联使用
+- `:checkbox` 的 `checked` 为 `true` 时显示选中态
+- `:checkbox` 的 `symbol` 可选值：`plus`、`minus`、`times`
+- `color` 支持 `blue`、`green`、`red`、`cyan`、`purple`、`orange` 等或任意色值
+
+::::
+
+---
+
+### Radio 单选按钮
+
+::::tabs
+ tab: 演示效果
+
+:radio[单选未选中]
+:radio[单选已选中]{checked="true"}
+:radio[单选橙色]{checked="true" color="orange"}
+
+行内用法：:radio[行内单选]{inline="true" checked="true"}
+
+ tab: 示例代码
+
+`````markdown
+:radio[单选未选中]
+:radio[单选已选中]{checked="true"}
+:radio[单选橙色]{checked="true" color="orange"}
+
+行内用法：:radio[行内单选]{inline="true" checked="true"}
+`````
+
+- 默认独占一行（块级），添加 `inline="true"` 可在段落中内联使用
+- `:radio` 的 `checked` 为 `true` 时显示选中态
+- `color` 支持 `blue`、`green`、`red`、`cyan`、`purple`、`orange` 等或任意色值
+
+::::
+
 :::grid{cols="2" bg="none" gap="16"}
 :step-brackets[04]{title="显示行号的 Terminal"}
 
