@@ -496,6 +496,77 @@ export function remarkContentDirectives() {
                             footer + '</div></div>'
                     }
                 ];
+            } else if (name === 'ghcard') {
+                const type = attrs.type || 'repo';
+                const repo = attrs.repo || '';
+                const user = attrs.user || '';
+
+                if (type === 'repo' && repo) {
+                    const [owner, repoName] = repo.split('/');
+                    const apiUrl = `https://api.github.com/repos/${repo}`;
+                    const tagsApi = `https://api.github.com/repos/${repo}/tags`;
+                    const html = `<div class="md-directive md-directive-ghcard md-ghcard-repo" data-api="${apiUrl}" data-tags-api="${tagsApi}">
+  <a class="md-ghcard-link" href="https://github.com/${repo}" target="_blank" rel="external nofollow noopener noreferrer">
+    <div class="md-ghcard-header">
+      <span class="md-ghcard-icon">${getIconSvg('lucide:git-fork', 16)}</span>
+      <span class="md-ghcard-name">${repo}</span>
+    </div>
+    <div class="md-ghcard-desc"><span class="md-ghcard-text" data-key="description">&nbsp;</span></div>
+    <div class="md-ghcard-stats">
+      <div class="md-ghcard-stat">
+        <span class="md-ghcard-stat-icon">${getIconSvg('lucide:star', 14)}</span>
+        <span class="md-ghcard-text" data-key="stargazers_count">0</span>
+      </div>
+      <div class="md-ghcard-stat">
+        <span class="md-ghcard-stat-icon">${getIconSvg('lucide:git-fork', 14)}</span>
+        <span class="md-ghcard-text" data-key="forks_count">0</span>
+      </div>
+      <div class="md-ghcard-stat">
+        <span class="md-ghcard-stat-icon">${getIconSvg('lucide:tag', 14)}</span>
+        <span class="md-ghcard-text" data-key="latest-tag-name">-</span>
+      </div>
+    </div>
+  </a>
+</div>`;
+                    node.data = { hName: 'div', hProperties: {} };
+                    node.children = [{ type: 'html', value: html }];
+                } else if (type === 'user' && user) {
+                    const apiUrl = `https://api.github.com/users/${user}`;
+                    const bio = attrs.bio || '';
+                    const showAvatar = attrs.avatar !== 'false';
+                    const bioHtml = bio ? `<p class="md-ghcard-bio" data-key="bio">${bio}</p>` : '';
+                    const avatarHtml = showAvatar ? `<div class="md-ghcard-avatar"><img data-key="avatar_url" src="https://github.com/identicons/${user}.png" alt="${user}" loading="lazy" /></div>` : '';
+                    const html = `<div class="md-directive md-directive-ghcard md-ghcard-user" data-api="${apiUrl}">
+  <div class="md-ghcard-user-body">
+    ${avatarHtml}
+    <p class="md-ghcard-username" data-key="name">${user}</p>
+    ${bioHtml}
+    <div class="md-ghcard-user-stats">
+      <a class="md-ghcard-user-stat" href="https://github.com/${user}?tab=followers" target="_blank" rel="external nofollow noopener noreferrer">
+        <span class="md-ghcard-text" data-key="followers">0</span>
+        <span class="md-ghcard-stat-label">followers</span>
+      </a>
+      <a class="md-ghcard-user-stat" href="https://github.com/${user}?tab=following" target="_blank" rel="external nofollow noopener noreferrer">
+        <span class="md-ghcard-text" data-key="following">0</span>
+        <span class="md-ghcard-stat-label">following</span>
+      </a>
+      <a class="md-ghcard-user-stat" href="https://github.com/${user}?tab=repositories" target="_blank" rel="external nofollow noopener noreferrer">
+        <span class="md-ghcard-text" data-key="public_repos">0</span>
+        <span class="md-ghcard-stat-label">repos</span>
+      </a>
+    </div>
+    <a class="md-ghcard-follow" href="https://github.com/${user}" target="_blank" rel="external nofollow noopener noreferrer">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .999c-6.074 0-11 5.05-11 11.278c0 4.983 3.152 9.21 7.523 10.702c.55.104.727-.246.727-.543v-2.1c-3.06.683-3.697-1.33-3.697-1.33c-.5-1.304-1.222-1.65-1.222-1.65c-.998-.7.076-.686.076-.686c1.105.08 1.686 1.163 1.686 1.163c.98 1.724 2.573 1.226 3.201.937c.098-.728.383-1.226.698-1.508c-2.442-.286-5.01-1.253-5.01-5.574c0-1.232.429-2.237 1.132-3.027c-.114-.285-.49-1.432.107-2.985c0 0 .924-.303 3.026 1.156c.877-.25 1.818-.375 2.753-.38c.935.005 1.876.13 2.755.38c2.1-1.459 3.023-1.156 3.023-1.156c.598 1.554.222 2.701.108 2.985c.706.79 1.132 1.796 1.132 3.027c0 4.332-2.573 5.286-5.022 5.565c.394.35.754 1.036.754 2.088v3.095c0 .3.176.652.734.542C19.852 21.484 23 17.258 23 12.277C23 6.048 18.075.999 12 .999"/></svg>
+      Follow
+    </a>
+  </div>
+</div>`;
+                    node.data = { hName: 'div', hProperties: {} };
+                    node.children = [{ type: 'html', value: html }];
+                } else {
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-ghcard' } };
+                    node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">请提供有效的 repo（如 owner/repo）或 user 属性</p>' }];
+                }
             }
         });
     };

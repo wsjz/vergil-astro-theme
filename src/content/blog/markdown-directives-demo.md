@@ -751,6 +751,20 @@ export default defineConfig({
 ```
 :::
 
+:::grid{cols="2" bg="none" gap="16"}
+:step-brackets[04]{title="显示行号的 Terminal"}
+
+通过 `linenos` 属性让 terminal 显示行号。
+
+---
+
+```bash terminal title="安装依赖" linenos highlight="2"
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init
+```
+:::
+
+
 ---
 
 ### Checkbox 复选框
@@ -802,32 +816,90 @@ export default defineConfig({
 
  tab: 示例代码
 
-`````markdown
-:radio[单选未选中]
-:radio[单选已选中]{checked="true"}
-:radio[单选橙色]{checked="true" color="orange"}
+ `````markdown
+ :radio[单选未选中]
+ :radio[单选已选中]{checked="true"}
+ :radio[单选橙色]{checked="true" color="orange"}
 
-行内用法：:radio[行内单选]{inline="true" checked="true"}
-`````
+ 行内用法：:radio[行内单选]{inline="true" checked="true"}
+ `````
 
-- 默认独占一行（块级），添加 `inline="true"` 可在段落中内联使用
-- `:radio` 的 `checked` 为 `true` 时显示选中态
-- `color` 支持 `blue`、`green`、`red`、`cyan`、`purple`、`orange` 等或任意色值
+ - 默认独占一行（块级），添加 `inline="true"` 可在段落中内联使用
+ - `:radio` 的 `checked` 为 `true` 时显示选中态
+ - `color` 支持 `blue`、`green`、`red`、`cyan`、`purple`、`orange` 等或任意色值
+
+ ::::
+
+ ---
+
+ ### GHCard GitHub 卡片
+
+ ::::tabs
+ tab: 演示效果
+
+ :::ghcard{type="repo" repo="withastro/astro"}
+ :::
+
+ :::ghcard{type="user" user="octocat" bio="For all time, always."}
+ :::
+ 
+ :::ghcard{type="user" user="octocat" avatar="false"}
+ :::
+ 
+ tab: 示例代码
+ 
+ `````markdown
+ :::ghcard{type="repo" repo="withastro/astro"}
+ :::
+ 
+ :::ghcard{type="user" user="octocat" bio="For all time, always."}
+ :::
+ 
+ :::ghcard{type="user" user="octocat" avatar="false"}
+ :::
+ `````
+ 
+  - `type`：`repo`（仓库卡片）或 `user`（用户卡片）
+  - `repo`：仓库全名，格式为 `owner/repo`（`type="repo"` 时必填）
+  - `user`：GitHub 用户名（`type="user"` 时必填）
+  - `bio`：自定义用户简介（可选，仅 `user` 类型有效）
+  - `avatar`：`false` 可隐藏用户头像（可选，仅 `user` 类型有效）
+  - 数据通过 GitHub API 动态获取，自定义 `bio` 会在加载前作为占位展示
 
 ::::
 
-:::grid{cols="2" bg="none" gap="16"}
-:step-brackets[04]{title="显示行号的 Terminal"}
-
-通过 `linenos` 属性让 terminal 显示行号。
-
 ---
 
-```bash terminal title="安装依赖" linenos highlight="2"
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init
-```
-:::
+#### 在右侧边栏中使用 GHCard
+
+除了正文，你也可以通过 `GhCard` 组件把卡片放到页面右侧边栏。在 Astro 页面（如 `src/pages/blog/[id].astro`）中，向 `BaseLayout` 的 `right-sidebar` slot 传入组件即可：
+
+`````astro
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GhCard from '../../components/widgets/GhCard.astro';
+---
+
+<BaseLayout ...>
+  <div slot="right-sidebar" class="p-4 pt-6">
+    <GhCard mode="repo" repo="withastro/astro" />
+    <GhCard mode="user" user="octocat" bio="For all time, always." avatar={false} />
+  </div>
+  <!-- 文章正文 -->
+</BaseLayout>
+`````
+
+`GhCard` 组件属性：
+
+| 属性 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `mode` | `'repo' \| 'user'` | 是 | 卡片类型 |
+| `repo` | `string` | mode=repo | 仓库全名 `owner/repo` |
+| `user` | `string` | mode=user | GitHub 用户名 |
+| `bio` | `string` | 否 | 用户简介（仅 user） |
+| `avatar` | `boolean` | 否 | 是否显示头像，默认 `true`（仅 user） |
+
+> 由于数据通过客户端 JS 获取，放在边栏也会自动填充 GitHub API 数据。
 
 ---
 

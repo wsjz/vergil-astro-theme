@@ -206,5 +206,79 @@ const isArticle = head.pageType === 'article';
                 initZoom();
             }
         </script>
+
+        <script is:inline>
+            (function () {
+                function initGhCards() {
+                    document.querySelectorAll('.md-directive-ghcard').forEach(function (card) {
+                        if (card.dataset.ghcardInitialized) return;
+                        card.dataset.ghcardInitialized = 'true';
+
+                        var api = card.dataset.api;
+                        if (!api) return;
+
+                        var fill = function (data) {
+                            card.querySelectorAll('[data-key]').forEach(function (el) {
+                                var key = el.dataset.key;
+                                if (data[key] !== undefined && data[key] !== null) {
+                                    if (el.tagName === 'IMG') {
+                                        el.src = data[key];
+                                    } else {
+                                        el.textContent = data[key];
+                                    }
+                                }
+                            });
+                            // if bio element doesn't exist but API returns bio, create it
+                            var bioEl = card.querySelector('[data-key="bio"]');
+                            if (!bioEl && data.bio) {
+                                var usernameEl = card.querySelector('.md-ghcard-username');
+                                if (usernameEl) {
+                                    bioEl = document.createElement('p');
+                                    bioEl.className = 'md-ghcard-bio';
+                                    bioEl.dataset.key = 'bio';
+                                    bioEl.textContent = data.bio;
+                                    usernameEl.parentNode.insertBefore(bioEl, usernameEl.nextSibling);
+                                }
+                            }
+                        };
+
+                        fetch(api)
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                fill(data);
+                                // fetch latest tag for repo cards
+                                var tagsApi = card.dataset.tagsApi;
+                                if (tagsApi && Array.isArray(data)) {
+                                    return fetch(tagsApi)
+                                        .then(function (res) { return res.json(); })
+                                        .then(function (tags) {
+                                            if (Array.isArray(tags) && tags.length > 0) {
+                                                var tagEl = card.querySelector('[data-key="latest-tag-name"]');
+                                                if (tagEl) tagEl.textContent = tags[0].name;
+                                            }
+                                        });
+                                } else if (tagsApi) {
+                                    return fetch(tagsApi)
+                                        .then(function (res) { return res.json(); })
+                                        .then(function (tags) {
+                                            if (Array.isArray(tags) && tags.length > 0) {
+                                                var tagEl = card.querySelector('[data-key="latest-tag-name"]');
+                                                if (tagEl) tagEl.textContent = tags[0].name;
+                                            }
+                                        });
+                                }
+                            })
+                            .catch(function () {});
+                    });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initGhCards);
+                } else {
+                    initGhCards();
+                }
+                document.addEventListener('astro:page-load', initGhCards);
+            })();
+        </script>
     </body>
 </html>

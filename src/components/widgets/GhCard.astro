@@ -1,0 +1,77 @@
+---
+interface Props {
+    mode: 'repo' | 'user';
+    repo?: string;
+    user?: string;
+    bio?: string;
+    avatar?: boolean;
+}
+
+const { mode, repo, user, bio, avatar = true } = Astro.props;
+---
+
+{mode === 'repo' && repo && (
+    <div class="md-directive md-directive-ghcard md-ghcard-repo mb-4" data-api={`https://api.github.com/repos/${repo}`} data-tags-api={`https://api.github.com/repos/${repo}/tags`}>
+        <a class="md-ghcard-link" href={`https://github.com/${repo}`} target="_blank" rel="external nofollow noopener noreferrer">
+            <div class="md-ghcard-header">
+                <span class="md-ghcard-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9m6 3v3"/></svg>
+                </span>
+                <span class="md-ghcard-name">{repo}</span>
+            </div>
+            <div class="md-ghcard-desc"><span class="md-ghcard-text" data-key="description">&nbsp;</span></div>
+            <div class="md-ghcard-stats">
+                <div class="md-ghcard-stat">
+                    <span class="md-ghcard-stat-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
+                    </span>
+                    <span class="md-ghcard-text" data-key="stargazers_count">0</span>
+                </div>
+                <div class="md-ghcard-stat">
+                    <span class="md-ghcard-stat-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9m6 3v3"/></svg>
+                    </span>
+                    <span class="md-ghcard-text" data-key="forks_count">0</span>
+                </div>
+                <div class="md-ghcard-stat">
+                    <span class="md-ghcard-stat-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+                    </span>
+                    <span class="md-ghcard-text" data-key="latest-tag-name">-</span>
+                </div>
+            </div>
+        </a>
+    </div>
+)}
+
+{mode === 'user' && user && (
+    <div class="md-directive md-directive-ghcard md-ghcard-user mb-4" data-api={`https://api.github.com/users/${user}`}>
+        <div class="md-ghcard-user-body">
+            {avatar !== false && (
+                <div class="md-ghcard-avatar">
+                    <img data-key="avatar_url" src={`https://github.com/identicons/${user}.png`} alt={user} loading="lazy" />
+                </div>
+            )}
+            <p class="md-ghcard-username" data-key="name">{user}</p>
+            {bio && <p class="md-ghcard-bio" data-key="bio">{bio}</p>}
+            <div class="md-ghcard-user-stats">
+                <a class="md-ghcard-user-stat" href={`https://github.com/${user}?tab=followers`} target="_blank" rel="external nofollow noopener noreferrer">
+                    <span class="md-ghcard-text" data-key="followers">0</span>
+                    <span class="md-ghcard-stat-label">followers</span>
+                </a>
+                <a class="md-ghcard-user-stat" href={`https://github.com/${user}?tab=following`} target="_blank" rel="external nofollow noopener noreferrer">
+                    <span class="md-ghcard-text" data-key="following">0</span>
+                    <span class="md-ghcard-stat-label">following</span>
+                </a>
+                <a class="md-ghcard-user-stat" href={`https://github.com/${user}?tab=repositories`} target="_blank" rel="external nofollow noopener noreferrer">
+                    <span class="md-ghcard-text" data-key="public_repos">0</span>
+                    <span class="md-ghcard-stat-label">repos</span>
+                </a>
+            </div>
+            <a class="md-ghcard-follow" href={`https://github.com/${user}`} target="_blank" rel="external nofollow noopener noreferrer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .999c-6.074 0-11 5.05-11 11.278c0 4.983 3.152 9.21 7.523 10.702c.55.104.727-.246.727-.543v-2.1c-3.06.683-3.697-1.33-3.697-1.33c-.5-1.304-1.222-1.65-1.222-1.65c-.998-.7.076-.686.076-.686c1.105.08 1.686 1.163 1.686 1.163c.98 1.724 2.573 1.226 3.201.937c.098-.728.383-1.226.698-1.508c-2.442-.286-5.01-1.253-5.01-5.574c0-1.232.429-2.237 1.132-3.027c-.114-.285-.49-1.432.107-2.985c0 0 .924-.303 3.026 1.156c.877-.25 1.818-.375 2.753-.38c.935.005 1.876.13 2.755.38c2.1-1.459 3.023-1.156 3.023-1.156c.598 1.554.222 2.701.108 2.985c.706.79 1.132 1.796 1.132 3.027c0 4.332-2.573 5.286-5.022 5.565c.394.35.754 1.036.754 2.088v3.095c0 .3.176.652.734.542C19.852 21.484 23 17.258 23 12.277C23 6.048 18.075.999 12 .999"/></svg>
+                Follow
+            </a>
+        </div>
+    </div>
+)}
