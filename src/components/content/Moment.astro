@@ -1,0 +1,328 @@
+---
+import { marked } from 'marked';
+
+interface LinkCard {
+    title: string;
+    description: string;
+    url?: string;
+    image?: string;
+    rating?: string;
+    category?: string;
+}
+
+interface ForwardedPost {
+    author: string;
+    authorHandle?: string;
+    content: string;
+    images?: string[];
+    linkCard?: LinkCard;
+    tags?: string[];
+}
+
+export interface Props {
+    name?: string;
+    avatar?: string;
+    date?: string;
+    content?: string;
+    images?: string[];
+    forward?: ForwardedPost;
+    linkCard?: LinkCard;
+    tags?: string[];
+    href?: string;
+}
+
+const {
+    name = '',
+    avatar = '',
+    date = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }),
+    content = '',
+    images = [],
+    forward,
+    linkCard,
+    tags = [],
+    href,
+} = Astro.props;
+
+const renderMarkdown = async (text: string) => {
+    return marked.parse(text, { async: false }) as string;
+};
+
+const processedContent = content ? await renderMarkdown(content) : '';
+const processedForwardContent = forward?.content ? await renderMarkdown(forward.content) : '';
+
+const imageCount = images.length;
+
+// 微信朋友圈风格九宫格：
+// 1张→单列大图；2,4张→2列；3,5-9张→3列
+let imageGridCols = '';
+let imageGridMaxW = '';
+if (imageCount === 1) {
+    imageGridCols = 'grid-cols-1';
+    imageGridMaxW = 'max-w-[260px]';
+} else if (imageCount === 2 || imageCount === 4) {
+    imageGridCols = 'grid-cols-2';
+    imageGridMaxW = 'max-w-[280px]';
+} else {
+    imageGridCols = 'grid-cols-3';
+    imageGridMaxW = 'max-w-[300px]';
+}
+
+const hasForwardLinkCard = forward?.linkCard && Object.keys(forward.linkCard).length > 0;
+const hasBubbleContent = content.length > 0;
+
+const plainTextLength = content
+    .replace(/!?\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[#*`~\[\]()\-\_\!]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .length;
+const isLongContent = plainTextLength > 300;
+---
+
+<article class="moment-post" data-href={href || undefined}>
+    <div class="flex gap-3">
+        <!-- 左侧头像 -->
+        {avatar && (
+            <div class="flex-shrink-0">
+                <img
+                    src={avatar}
+                    alt={name}
+                    class="w-10 h-10 rounded-md object-cover"
+                    loading="lazy"
+                />
+            </div>
+        )}
+
+        <!-- 右侧内容区 -->
+        <div class="flex-1 min-w-0">
+            <!-- 用户名 -->
+            {name && (
+                <div class="font-semibold text-[13px] text-[var(--text-main)] mb-1.5">{name}</div>
+            )}
+
+            <!-- 文本气泡 -->
+            {hasBubbleContent && (
+                <div class="moment-bubble relative inline-block max-w-full">
+                    <div class="moment-bubble-inner rounded-2xl rounded-tl-sm bg-[var(--bg-card)] border border-[var(--border-light)] px-4 py-3">
+                        <div 
+                            class={`moment-text moment-text-content text-[var(--text-main)] text-[15px] leading-relaxed ${isLongContent ? 'moment-text-clamped' : ''}`} 
+                            set:html={processedContent} 
+                        />
+                        {isLongContent && (
+                            <button type="button" class="moment-expand-btn text-[var(--accent-color)] text-[13px] mt-1.5 hover:underline cursor-pointer bg-transparent border-0 p-0">
+                                展开
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            <!-- 图片网格（文字下方，微信朋友圈九宫格） -->
+            {images.length > 0 && (
+                <div class={`mt-2 ${imageGridMaxW}`}>
+                    <div class={`grid gap-1 ${imageGridCols}`}>
+                        {images.map((img) => (
+                            <div
+                                class={`relative overflow-hidden rounded-lg bg-[var(--bg-muted)] ${
+                                    imageCount === 1 ? 'aspect-[4/3]' : 'aspect-square'
+                                }`}
+                            >
+                                <img
+                                    src={img}
+                                    alt=""
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    data-zoomable="1"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            <!-- 转发内容 -->
+            {forward && (
+                <div class="rounded-xl border border-[var(--border-light)] bg-[var(--bg-muted)]/40 p-3 mt-2">
+                    <div class="flex items-center gap-1.5 mb-1.5 text-[14px]">
+                        <span class="font-semibold text-[var(--text-main)]">{forward.author}</span>
+                        {forward.authorHandle && (
+                            <span class="text-[var(--text-accent)]">@{forward.authorHandle}:</span>
+                        )}
+                    </div>
+                    <div class="now-text text-[var(--text-main)] text-[14px] leading-relaxed mb-2" set:html={processedForwardContent} />
+                    {forward.tags && forward.tags.length > 0 && (
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            {forward.tags.map((tag) => (
+                                <a href={`/tags/${tag}/`} class="text-[var(--text-accent)] text-[14px] hover:underline">
+                                    #{tag}
+                                </a>
+                            ))}
+                        </div>
+                    )}
+                    {forward.images && forward.images.length > 0 && (
+                        <div class={`mt-2 ${
+                            forward.images.length === 1 ? 'max-w-[200px]' :
+                            forward.images.length === 2 || forward.images.length === 4 ? 'max-w-[260px]' :
+                            'max-w-[300px]'
+                        }`}>
+                            <div class={`grid gap-1 ${
+                                forward.images.length === 1 ? 'grid-cols-1' :
+                                forward.images.length === 2 || forward.images.length === 4 ? 'grid-cols-2' :
+                                'grid-cols-3'
+                            }`}>
+                                {forward.images.map((img) => (
+                                    <div class="relative overflow-hidden rounded-lg bg-[var(--bg-muted)] aspect-square">
+                                        <img src={img} alt="" class="w-full h-full object-cover" loading="lazy" data-zoomable="1" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {hasForwardLinkCard && (
+                        <a
+                            href={forward.linkCard!.url || '#'}
+                            target={forward.linkCard!.url ? '_blank' : undefined}
+                            rel={forward.linkCard!.url ? 'noopener noreferrer' : undefined}
+                            class="flex gap-3 rounded-lg border border-[var(--border-light)] bg-[var(--bg-card)] p-2.5 mt-2 hover:shadow-sm transition-shadow"
+                        >
+                            {forward.linkCard!.image && (
+                                <div class="flex-shrink-0 w-14 h-14 rounded-md overflow-hidden bg-[var(--bg-muted)]">
+                                    <img src={forward.linkCard!.image} alt="" class="w-full h-full object-cover" loading="lazy" />
+                                </div>
+                            )}
+                            <div class="flex-1 min-w-0">
+                                <div class="font-semibold text-[14px] text-[var(--accent-color)] truncate">{forward.linkCard!.title}</div>
+                                <div class="text-[12px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">{forward.linkCard!.description}</div>
+                                <div class="text-[11px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
+                                    {forward.linkCard!.rating && <span>★ {forward.linkCard!.rating}</span>}
+                                    {forward.linkCard!.category && <span>{forward.linkCard!.category}</span>}
+                                </div>
+                            </div>
+                        </a>
+                    )}
+                </div>
+            )}
+
+            <!-- 链接卡片 -->
+            {linkCard && (
+                <a
+                    href={linkCard.url || '#'}
+                    target={linkCard.url ? '_blank' : undefined}
+                    rel={linkCard.url ? 'noopener noreferrer' : undefined}
+                    class="flex gap-3 rounded-lg border border-[var(--border-light)] bg-[var(--bg-card)] p-2.5 mt-2 hover:shadow-sm transition-shadow"
+                >
+                    {linkCard.image && (
+                        <div class="flex-shrink-0 w-14 h-14 rounded-md overflow-hidden bg-[var(--bg-muted)]">
+                            <img src={linkCard.image} alt="" class="w-full h-full object-cover" loading="lazy" />
+                        </div>
+                    )}
+                    <div class="flex-1 min-w-0">
+                        <div class="font-semibold text-[14px] text-[var(--accent-color)] truncate">{linkCard.title}</div>
+                        <div class="text-[12px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">{linkCard.description}</div>
+                        <div class="text-[11px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">
+                            {linkCard.rating && <span>★ {linkCard.rating}</span>}
+                            {linkCard.category && <span>{linkCard.category}</span>}
+                        </div>
+                    </div>
+                </a>
+            )}
+
+            <!-- 标签 -->
+            {tags.length > 0 && (
+                <div class="flex flex-wrap gap-2 mt-2">
+                    {tags.map((tag) => (
+                        <a href={`/tags/${tag}/`} class="text-[var(--text-accent)] text-[14px] hover:underline">
+                            #{tag}
+                        </a>
+                    ))}
+                </div>
+            )}
+
+            <!-- 时间 -->
+            <div class="text-[12px] text-[var(--text-muted)] mt-2">{date}</div>
+        </div>
+    </div>
+</article>
+
+<style>
+    .moment-post {
+        padding: 1rem 0.75rem;
+        margin: 0 -0.75rem;
+        border-bottom: 1px solid var(--border-light);
+        border-radius: 1rem;
+        transition: box-shadow 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+    }
+    .moment-post:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+        background-color: var(--bg-card);
+    }
+    .moment-post:last-child {
+        border-bottom: none;
+    }
+    .moment-post[data-href] {
+        cursor: pointer;
+    }
+    .moment-bubble-inner {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        transition: box-shadow 0.3s ease;
+    }
+    .moment-post:hover .moment-bubble-inner {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+    :global(.moment-text-clamped) {
+        display: -webkit-box;
+        -webkit-line-clamp: 6;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .moment-text :global(a) {
+        color: var(--accent-color);
+        text-decoration: none;
+    }
+    .moment-text :global(a:hover) {
+        text-decoration: underline;
+    }
+    .moment-text :global(strong) {
+        color: var(--text-main);
+        font-weight: 600;
+    }
+    .moment-text :global(p) {
+        margin: 0;
+    }
+    .moment-text :global(p + p) {
+        margin-top: 0.5rem;
+    }
+</style>
+
+<script is:inline>
+(function() {
+    if (window.__momentScriptLoaded) return;
+    window.__momentScriptLoaded = true;
+
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.moment-expand-btn');
+        if (!btn) return;
+        e.stopPropagation();
+        var content = btn.previousElementSibling;
+        if (!content) return;
+        if (content.classList.contains('moment-expanded')) {
+            content.classList.remove('moment-expanded');
+            content.classList.add('moment-text-clamped');
+            btn.textContent = '展开';
+        } else {
+            content.classList.remove('moment-text-clamped');
+            content.classList.add('moment-expanded');
+            btn.textContent = '收起';
+        }
+    });
+
+    // 点击整个 Moment 跳转（如果不是点击内部链接或按钮）
+    document.addEventListener('click', function(e) {
+        var post = e.target.closest('.moment-post[data-href]');
+        if (!post) return;
+        if (e.target.closest('a, button, [data-zoomable]')) return;
+        window.location.href = post.dataset.href;
+    });
+})();
+</script>

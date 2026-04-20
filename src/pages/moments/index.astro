@@ -1,0 +1,331 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Moment from '../../components/content/Moment.astro';
+import siteConfig from '../../data/site-config';
+import avatar from '../../assets/images/avatar.jpg';
+
+const avatarSrc = typeof avatar === 'string' ? avatar : avatar.src;
+const signature = '纵使生活有千般不如意，也不要自暴自弃！';
+const bannerUrl = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&h=400&fit=crop&q=80';
+
+// 自动读取 src/content/moments/ 下所有 JSON 文件
+const momentsDir = path.join(process.cwd(), 'src', 'content', 'moments');
+let allPosts: any[] = [];
+
+if (fs.existsSync(momentsDir)) {
+    const files = fs.readdirSync(momentsDir)
+        .filter(f => f.endsWith('.json'))
+        .sort((a, b) => b.localeCompare(a)); // 文件名倒序，确保时间倒序
+
+    for (const file of files) {
+        const filePath = path.join(momentsDir, file);
+        const raw = fs.readFileSync(filePath, 'utf-8');
+        try {
+            const data = JSON.parse(raw);
+            allPosts.push(data);
+        } catch (e) {
+            console.warn(`Failed to parse ${file}:`, e);
+        }
+    }
+}
+
+allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+const PAGE_SIZE = 5;
+const currentYear = new Date().getFullYear();
+const initialPosts = allPosts.slice(0, PAGE_SIZE);
+
+function getPostYear(post: typeof allPosts[0]) {
+    return parseInt((post.date || '').slice(0, 4), 10);
+}
+
+function formatRelativeTime(dateStr: string) {
+    const now = new Date();
+    const date = new Date(dateStr + 'T00:00:00');
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 0) return '今天';
+    if (diffDays === 1) return '昨天';
+    if (diffDays === 2) return '前天';
+    if (diffDays < 7) return diffDays + '天前';
+    if (diffDays < 14) return '1周前';
+    if (diffDays < 21) return '2周前';
+    if (diffDays < 30) return '3周前';
+    if (diffDays < 60) return '1个月前';
+    if (diffDays < 365) return Math.floor(diffDays / 30) + '个月前';
+    return date.getFullYear() + '年' + (date.getMonth() + 1) + '月';
+}
+---
+
+<BaseLayout
+    title="Moments"
+    description="What I'm doing now - my current focus, projects, and activities."
+    showHeader={false}
+    showRightSidebar={false}
+>
+    <!-- 朋友圈封面与个人信息 -->
+    <div class="relative mb-20">
+        <div class="w-full h-48 sm:h-56 md:h-64 rounded-lg overflow-hidden">
+            <img
+                src={bannerUrl}
+                alt="Cover"
+                class="w-full h-full object-cover"
+                loading="eager"
+            />
+        </div>
+        <div class="absolute bottom-0 right-4 sm:right-6 translate-y-1/2">
+            <div class="flex items-end gap-2">
+                <div class="text-right mb-4">
+                    <div class="text-white text-lg sm:text-xl font-semibold drop-shadow-md">
+                        {siteConfig.title || 'Vergil'}
+                    </div>
+                    <div class="text-[var(--text-secondary)] text-[13px] mt-0.5 whitespace-nowrap">
+                        {signature}
+                    </div>
+                </div>
+                <img
+                    src={avatarSrc}
+                    alt="avatar"
+                    class="w-16 h-16 sm:w-20 sm:h-20 rounded-md border-4 border-[var(--bg-main)] object-cover shadow-lg"
+                    loading="eager"
+                />
+            </div>
+        </div>
+    </div>
+
+    <!-- 动态列表 -->
+    <div id="moments-feed" class="mt-12 space-y-0" data-all-posts={JSON.stringify(allPosts)} data-page-size={PAGE_SIZE} data-current-year={currentYear}>
+        {allPosts.length === 0 && (
+            <div class="text-center py-12 text-[var(--text-muted)]">
+                <p>还没有发布任何动态</p>
+            </div>
+        )}
+        {initialPosts.map((post, index) => {
+            const postYear = getPostYear(post);
+            const prevYear = index > 0 ? getPostYear(allPosts[index - 1]) : null;
+            const showYearDivider = postYear < currentYear && postYear !== prevYear;
+            return (
+                <>
+                    {showYearDivider && (
+                        <div class="moment-year-divider flex items-center gap-3 my-6">
+                            <span class="text-2xl font-bold text-[var(--text-main)]">{postYear}</span>
+                            <span class="flex-1 h-px bg-[var(--border-light)]" />
+                        </div>
+                    )}
+                    <Moment
+                        name={siteConfig.title || 'Vergil'}
+                        avatar={avatarSrc}
+                        date={formatRelativeTime(post.date)}
+                        content={post.content}
+                        images={post.images}
+                        forward={post.forward}
+                        linkCard={post.linkCard}
+                        tags={post.tags}
+                    />
+                </>
+            );
+        })}
+    </div>
+
+    <!-- 加载更多 -->
+    <div id="moments-load-more" class="py-6 text-center">
+        <button
+            id="moments-load-btn"
+            class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-colors flex items-center gap-1.5 mx-auto"
+        >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            <span>加载更多</span>
+        </button>
+        <div id="moments-loading" class="hidden text-sm text-[var(--text-muted)] flex items-center justify-center gap-2">
+            <svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <span>加载中...</span>
+        </div>
+        <div id="moments-no-more" class="hidden text-sm text-[var(--text-muted)]">没有更多动态了</div>
+    </div>
+
+    <!-- 关于 Moments -->
+    <div class="mt-12 prose max-w-none">
+        <h2 class="font-display text-xl mb-4">关于 Moments</h2>
+        <p>
+            这里记录着我正在做的事情、感兴趣的话题，以及生活中的各种碎片。
+        </p>
+        <p>
+            如果你也有自己的网站，建议你也添加一个 /moments 页面！
+        </p>
+    </div>
+
+    <script is:inline>
+        (function() {
+            var feed = document.getElementById('moments-feed');
+            var loadBtn = document.getElementById('moments-load-btn');
+            var loading = document.getElementById('moments-loading');
+            var noMore = document.getElementById('moments-no-more');
+            if (!feed || !loadBtn) return;
+
+            var allPosts = JSON.parse(feed.dataset.allPosts || '[]');
+            var pageSize = parseInt(feed.dataset.pageSize || '5', 10);
+            var currentYear = parseInt(feed.dataset.currentYear || '2026', 10);
+            var loadedCount = feed.querySelectorAll('.moment-post').length;
+            var loadingLock = false;
+
+            function getPostYear(post) {
+                return parseInt((post.date || '').slice(0, 4), 10) || 0;
+            }
+
+            function formatRelativeTime(dateStr) {
+                var now = new Date();
+                var date = new Date(dateStr + 'T00:00:00');
+                var diffMs = now.getTime() - date.getTime();
+                var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                if (diffDays <= 0) return '今天';
+                if (diffDays === 1) return '昨天';
+                if (diffDays === 2) return '前天';
+                if (diffDays < 7) return diffDays + '天前';
+                if (diffDays < 14) return '1周前';
+                if (diffDays < 21) return '2周前';
+                if (diffDays < 30) return '3周前';
+                if (diffDays < 60) return '1个月前';
+                if (diffDays < 365) return Math.floor(diffDays / 30) + '个月前';
+                return date.getFullYear() + '年' + (date.getMonth() + 1) + '月';
+            }
+
+            function createPostHTML(post, prevYear) {
+                var year = getPostYear(post);
+                var yearHtml = '';
+                if (year && year < currentYear && year !== prevYear) {
+                    yearHtml = '<div class="moment-year-divider flex items-center gap-3 my-6">' +
+                        '<span class="text-2xl font-bold text-[var(--text-main)]">' + year + '</span>' +
+                        '<span class="flex-1 h-px bg-[var(--border-light)]"></span>' +
+                    '</div>';
+                }
+
+                var bubbleHtml = '';
+                if (post.content) {
+                    var contentHtml = '<div class="moment-text text-[var(--text-main)] text-[15px] leading-relaxed">' + escapeHtml(post.content) + '</div>';
+                    bubbleHtml = '<div class="moment-bubble relative inline-block max-w-full"><div class="moment-bubble-inner rounded-2xl rounded-tl-sm bg-[var(--bg-card)] border border-[var(--border-light)] px-4 py-3">' + contentHtml + '</div></div>';
+                }
+
+                var imagesHtml = '';
+                if (post.images && post.images.length) {
+                    var count = post.images.length;
+                    var cols = count === 1 ? 'grid-cols-1' : (count === 2 || count === 4) ? 'grid-cols-2' : 'grid-cols-3';
+                    var maxW = count === 1 ? 'max-w-[260px]' : (count === 2 || count === 4) ? 'max-w-[280px]' : 'max-w-[300px]';
+                    var aspect = count === 1 ? 'aspect-[4/3]' : 'aspect-square';
+                    imagesHtml = '<div class="mt-2 ' + maxW + '"><div class="grid gap-1 ' + cols + '">' + post.images.map(function(img) {
+                        return '<div class="relative overflow-hidden rounded-lg bg-[var(--bg-muted)] ' + aspect + '"><img src="' + escapeHtml(img) + '" alt="" class="w-full h-full object-cover" loading="lazy" data-zoomable="1"/></div>';
+                    }).join('') + '</div></div>';
+                }
+
+                var linkCardHtml = '';
+                if (post.linkCard) {
+                    var lc = post.linkCard;
+                    linkCardHtml = '<a href="' + escapeHtml(lc.url || '#') + '"' + (lc.url ? ' target="_blank" rel="noopener noreferrer"' : '') + ' class="flex gap-3 rounded-lg border border-[var(--border-light)] bg-[var(--bg-card)] p-2.5 mt-2 hover:shadow-sm transition-shadow">' +
+                        (lc.image ? '<div class="flex-shrink-0 w-14 h-14 rounded-md overflow-hidden bg-[var(--bg-muted)]"><img src="' + escapeHtml(lc.image) + '" alt="" class="w-full h-full object-cover" loading="lazy"/></div>' : '') +
+                        '<div class="flex-1 min-w-0"><div class="font-semibold text-[14px] text-[var(--accent-color)] truncate">' + escapeHtml(lc.title) + '</div><div class="text-[12px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">' + escapeHtml(lc.description) + '</div>' +
+                        (lc.rating || lc.category ? '<div class="text-[11px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">' + (lc.rating ? '<span>★ ' + escapeHtml(lc.rating) + '</span>' : '') + (lc.category ? '<span>' + escapeHtml(lc.category) + '</span>' : '') + '</div>' : '') +
+                        '</div></a>';
+                }
+
+                var forwardHtml = '';
+                if (post.forward) {
+                    var fw = post.forward;
+                    var fwLinkHtml = '';
+                    if (fw.linkCard) {
+                        var flc = fw.linkCard;
+                        fwLinkHtml = '<a href="' + escapeHtml(flc.url || '#') + '"' + (flc.url ? ' target="_blank" rel="noopener noreferrer"' : '') + ' class="flex gap-3 rounded-lg border border-[var(--border-light)] bg-[var(--bg-card)] p-2.5 mt-2 hover:shadow-sm transition-shadow">' +
+                            (flc.image ? '<div class="flex-shrink-0 w-14 h-14 rounded-md overflow-hidden bg-[var(--bg-muted)]"><img src="' + escapeHtml(flc.image) + '" alt="" class="w-full h-full object-cover" loading="lazy"/></div>' : '') +
+                            '<div class="flex-1 min-w-0"><div class="font-semibold text-[14px] text-[var(--accent-color)] truncate">' + escapeHtml(flc.title) + '</div><div class="text-[12px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">' + escapeHtml(flc.description) + '</div></div></a>';
+                    }
+                    forwardHtml = '<div class="rounded-xl border border-[var(--border-light)] bg-[var(--bg-muted)]/40 p-3 mt-2">' +
+                        '<div class="flex items-center gap-1.5 mb-1.5 text-[14px]"><span class="font-semibold text-[var(--text-main)]">' + escapeHtml(fw.author) + '</span>' + (fw.authorHandle ? '<span class="text-[var(--text-accent)]">@' + escapeHtml(fw.authorHandle) + ':</span>' : '') + '</div>' +
+                        '<div class="moment-text text-[var(--text-main)] text-[14px] leading-relaxed mb-2">' + escapeHtml(fw.content) + '</div>' +
+                        fwLinkHtml + '</div>';
+                }
+
+                var tagsHtml = '';
+                if (post.tags && post.tags.length) {
+                    tagsHtml = '<div class="flex flex-wrap gap-2 mt-2">' + post.tags.map(function(tag) {
+                        return '<a href="/tags/' + escapeHtml(tag) + '/" class="text-[var(--text-accent)] text-[14px] hover:underline">#' + escapeHtml(tag) + '</a>';
+                    }).join('') + '</div>';
+                }
+
+                var name = document.querySelector('[data-site-title]') ? document.querySelector('[data-site-title]').dataset.siteTitle : 'Vergil';
+                var avatarSrc = document.querySelector('[data-avatar-src]') ? document.querySelector('[data-avatar-src]').dataset.avatarSrc : '';
+
+                var postHtml = '<article class="moment-post"><div class="flex gap-3">' +
+                    (avatarSrc ? '<div class="flex-shrink-0"><img src="' + escapeHtml(avatarSrc) + '" alt="" class="w-10 h-10 rounded-md object-cover" loading="lazy"/></div>' : '') +
+                    '<div class="flex-1 min-w-0">' +
+                    '<div class="font-semibold text-[13px] text-[var(--text-main)] mb-1.5">' + escapeHtml(name) + '</div>' +
+                    bubbleHtml + imagesHtml + forwardHtml + linkCardHtml + tagsHtml +
+                    '<div class="text-[12px] text-[var(--text-muted)] mt-2">' + escapeHtml(formatRelativeTime(post.date)) + '</div>' +
+                    '</div></div></article>';
+
+                return yearHtml + postHtml;
+            }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
+            }
+
+            function loadMore() {
+                if (loadingLock) return;
+                loadingLock = true;
+                loadBtn.classList.add('hidden');
+                loading.classList.remove('hidden');
+
+                setTimeout(function() {
+                    var nextPosts = allPosts.slice(loadedCount, loadedCount + pageSize);
+                    if (nextPosts.length === 0) {
+                        loading.classList.add('hidden');
+                        noMore.classList.remove('hidden');
+                        loadingLock = false;
+                        return;
+                    }
+
+                    var lastPost = allPosts[loadedCount - 1];
+                    var prevYear = lastPost ? getPostYear(lastPost) : 0;
+                    var html = '';
+                    nextPosts.forEach(function(post) {
+                        html += createPostHTML(post, prevYear);
+                        prevYear = getPostYear(post);
+                    });
+
+                    var temp = document.createElement('div');
+                    temp.innerHTML = html;
+                    while (temp.firstChild) {
+                        feed.appendChild(temp.firstChild);
+                    }
+
+                    loadedCount += nextPosts.length;
+                    loading.classList.add('hidden');
+                    if (loadedCount >= allPosts.length) {
+                        noMore.classList.remove('hidden');
+                    } else {
+                        loadBtn.classList.remove('hidden');
+                    }
+                    loadingLock = false;
+                }, 400);
+            }
+
+            loadBtn.addEventListener('click', loadMore);
+
+            var scrollHandler = function() {
+                if (loadedCount >= allPosts.length) return;
+                var scrollTop = window.scrollY || document.documentElement.scrollTop;
+                var docHeight = document.documentElement.scrollHeight;
+                var winHeight = window.innerHeight;
+                if (scrollTop + winHeight >= docHeight - 200) {
+                    loadMore();
+                }
+            };
+            window.addEventListener('scroll', scrollHandler, { passive: true });
+        })();
+    </script>
+
+    <!-- 透传站点数据给 JS -->
+    <div data-site-title={siteConfig.title || 'Vergil'} data-avatar-src={avatarSrc} class="hidden" />
+</BaseLayout>

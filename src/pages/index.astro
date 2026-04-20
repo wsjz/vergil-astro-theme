@@ -1,8 +1,10 @@
 ---
+import fs from 'node:fs';
+import path from 'node:path';
 import { getCollection } from 'astro:content';
 import Hero from '../components/content/Hero.astro';
 import HeroSplash from '../components/content/HeroSplash.astro';
-import Now from '../components/content/Now.astro';
+import Moment from '../components/content/Moment.astro';
 import PostPreview from '../components/content/PostPreview.astro';
 import siteConfig from '../data/site-config';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -14,6 +16,20 @@ const currentPage = 1;
 const totalPosts = posts.length;
 const totalPages = Math.ceil(totalPosts / pageSize);
 const pagePosts = posts.slice(0, pageSize);
+
+// 读取最新动态
+const momentsDir = path.join(process.cwd(), 'src', 'content', 'moments');
+let latestMoment: any = null;
+if (fs.existsSync(momentsDir)) {
+    const files = fs.readdirSync(momentsDir).filter(f => f.endsWith('.json'));
+    const moments = [];
+    for (const file of files) {
+        const raw = fs.readFileSync(path.join(momentsDir, file), 'utf-8');
+        try { moments.push(JSON.parse(raw)); } catch { /* ignore */ }
+    }
+    moments.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    latestMoment = moments[0] || null;
+}
 ---
 
 <BaseLayout description={siteConfig.description} splashMode={true}>
@@ -22,17 +38,33 @@ const pagePosts = posts.slice(0, pageSize);
     
     <!-- Now Section -->
     <div class="mb-8 sm:mb-12">
-        <a href="/now" class="inline-block">
+        <a href="/moments" class="inline-block">
             <h2 class="font-sans text-xl font-medium mb-6 sm:text-2xl text-accent hover:opacity-80 transition-opacity">动态</h2>
         </a>
-        <Now
-            items={[
-                "正在学习和探索 **Astro** 和 **Tailwind CSS** 的现代网站构建方式",
-                "享受阅读和写作的时光，整理技术笔记",
-                "保持运动，保持健康的生活方式"
-            ]}
-            date="2025年4月"
-        />
+        {latestMoment ? (
+            <Moment
+                href="/moments"
+                content={latestMoment.content}
+                date={(() => {
+                    const now = new Date();
+                    const date = new Date(latestMoment.date);
+                    const diffMs = now.getTime() - date.getTime();
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    if (diffDays <= 0) return '今天';
+                    if (diffDays === 1) return '昨天';
+                    if (diffDays === 2) return '前天';
+                    if (diffDays < 7) return diffDays + '天前';
+                    if (diffDays < 30) return '1周前';
+                    if (diffDays < 60) return '1个月前';
+                    if (diffDays < 365) return Math.floor(diffDays / 30) + '个月前';
+                    return date.getFullYear() + '年' + (date.getMonth() + 1) + '月';
+                })()}
+            />
+        ) : (
+            <div class="text-sm text-[var(--text-muted)]">
+                暂无动态，在 <code class="bg-[var(--bg-muted)] px-1.5 py-0.5 rounded text-[var(--text-secondary)]">src/content/moments/</code> 目录下新建 .json 文件即可添加
+            </div>
+        )}
     </div>
     
     {

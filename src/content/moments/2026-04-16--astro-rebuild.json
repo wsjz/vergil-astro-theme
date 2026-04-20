@@ -1,0 +1,10 @@
+{
+    "date": "2026-04-16",
+    "content": "在用 Astro 重构整个博客主题，体验比想象中好太多。Islands 架构是真的香。",
+    "linkCard": {
+        "title": "Astro - Build faster websites",
+        "description": "Astro is the web framework for building content-driven websites.",
+        "url": "https://astro.build",
+        "image": "https://astro.build/og/astro.jpg"
+    }
+}
