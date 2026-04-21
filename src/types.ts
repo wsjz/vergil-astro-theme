@@ -108,7 +108,7 @@ export type SiteConfig = {
     views?: {
         default: { name: string; path: string };
         resume: { name: string; path: string };
-        minimal: { name: string; path: string };
+        minimal: { name: string; path: string; enabled?: boolean };
     };
 };
 

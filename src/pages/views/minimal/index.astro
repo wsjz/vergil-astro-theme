@@ -1,6 +1,12 @@
 ---
 import MinimalLayout from '../../../views/minimal/layouts/MinimalLayout.astro';
 import MinimalClientView from '../../../views/minimal/components/MinimalClientView.astro';
+import siteConfig from '../../../data/site-config';
+
+export async function getStaticPaths() {
+    if (siteConfig.views?.minimal?.enabled !== true) return [];
+    return [{}];
+}
 ---
 
 <MinimalLayout title="沉浸阅读" description="极简沉浸式阅读体验" pageType="website">

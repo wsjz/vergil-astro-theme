@@ -84,7 +84,7 @@ const siteConfig: SiteConfig = {
     views: {
         default: { name: '主页', path: '/' },
         resume: { name: '简历', path: '/views/resume/' },
-        minimal: { name: '沉浸阅读', path: '/views/minimal/' }
+        minimal: { name: '沉浸阅读', path: '/views/minimal/', enabled: false }
     },
     footerNavLinks: [
         {
@@ -177,7 +177,7 @@ const siteConfig: SiteConfig = {
         ]
     },
     agent: {
-        enabled: false,
+        enabled: true,
         provider: 'rive',
         // rive: { src: '/model.riv' },
         // live2d: { modelPath: '/model.json' },

@@ -3,8 +3,10 @@ import { getCollection, render } from 'astro:content';
 import MinimalLayout from '../../../../../views/minimal/layouts/MinimalLayout.astro';
 import Breadcrumb from '../../../../../components/ui/Breadcrumb.astro';
 import { getDocSets, getDocEntry, getDocTree } from '../../../../../utils/docs-utils';
+import siteConfig from '../../../../../data/site-config';
 
 export async function getStaticPaths() {
+    if (siteConfig.views?.minimal?.enabled !== true) return [];
     const entries = await getCollection('docs');
     const nonMeta = entries.filter((e) => !(e.id.endsWith('/_meta') || e.id === '_meta'));
     return nonMeta.map((entry) => {

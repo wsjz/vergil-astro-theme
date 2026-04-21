@@ -16,13 +16,17 @@ const iconMap: Record<string, any> = {
     FileText, Image, Lightbulb, MessageSquare, Clock
 };
 
+const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
+
 const navItems = (siteConfig.headerNavLinks ?? []).map((item) => ({
     ...item,
     icon: iconMap[item.icon] ?? Home,
-    children: item.children?.map((child) => ({
-        ...child,
-        icon: iconMap[child.icon ?? ''] ?? FileText
-    }))
+    children: item.children
+        ?.filter((child) => minimalEnabled || !child.href.includes('/views/minimal/'))
+        ?.map((child) => ({
+            ...child,
+            icon: iconMap[child.icon ?? ''] ?? FileText
+        }))
 }));
 
 const currentPath = Astro.url.pathname;

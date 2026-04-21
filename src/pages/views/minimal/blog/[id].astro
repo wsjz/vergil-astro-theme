@@ -4,8 +4,10 @@ import MinimalLayout from '../../../../views/minimal/layouts/MinimalLayout.astro
 import Breadcrumb from '../../../../components/ui/Breadcrumb.astro';
 import { sortItemsByDateDesc } from '../../../../utils/data-utils';
 import { slugify } from '../../../../utils/common-utils';
+import siteConfig from '../../../../data/site-config';
 
 export async function getStaticPaths() {
+    if (siteConfig.views?.minimal?.enabled !== true) return [];
     const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
     return posts.map((post) => ({
         params: { id: post.id },
