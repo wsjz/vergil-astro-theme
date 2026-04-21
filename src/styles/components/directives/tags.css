@@ -67,39 +67,3 @@
     font-family: var(--font-mono);
     font-weight: 600;
 }
-
-.md-tag-hashtag {
-    display: inline-flex;
-    align-items: center;
-    padding: 1px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    font-weight: 500;
-    background: color-mix(in srgb, var(--tag-hash-color) 12%, transparent);
-    color: var(--tag-hash-color);
-    text-decoration: none;
-    border: 1px solid color-mix(in srgb, var(--tag-hash-color) 25%, transparent);
-    transition: all 0.2s ease;
-}
-
-.md-tag-hashtag:hover {
-    background: color-mix(in srgb, var(--tag-hash-color) 22%, transparent);
-}
-
-.md-tag-button {
-    display: inline-flex;
-    align-items: center;
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: var(--md-text-sm);
-    font-weight: 500;
-    background: var(--tag-btn-bg);
-    color: #fff;
-    text-decoration: none;
-    transition: opacity 0.2s ease, transform 0.15s ease;
-}
-
-.md-tag-button:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}

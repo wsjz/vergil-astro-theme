@@ -577,23 +577,51 @@ tab: 示例代码
 
 ---
 
-### 标签与按钮
+### Hashtag 标签
 
 ::::tabs
 tab: 演示效果
 
-- 标签：:hashtag[Astro]{href="/tags/astro" color="blue"} :hashtag[博客]{href="/tags/blog" color="green"} :hashtag[教程]{href="/tags/tutorial" color="purple"}
-- 按钮：:button[查看文档]{href="/" color="accent"} :button[GitHub]{href="/" color="blue"}
+- 自动轮询颜色：:hashtag[Astro]{href="/tags/astro"} :hashtag[博客]{href="/tags/blog"} :hashtag[教程]{href="/tags/tutorial"} :hashtag[前端]{href="/tags/frontend"} :hashtag[CSS]{href="/tags/css"}
+- 自定义颜色：:hashtag[指定蓝色]{href="/tags/blue" color="blue"} :hashtag[指定红色]{href="/tags/red" color="red"}
 
-tab: 示例代码
+ tab: 示例代码
 
-````
-- 标签：:hashtag[Astro]{href="/tags/astro" color="blue"} :hashtag[博客]{href="/tags/blog" color="green"} :hashtag[教程]{href="/tags/tutorial" color="purple"}
-- 按钮：:button[查看文档]{href="/" color="accent"} :button[GitHub]{href="/" color="blue"}
-````
+ ````
+ - 自动轮询颜色：:hashtag[Astro]{href="/tags/astro"} :hashtag[博客]{href="/tags/blog"} :hashtag[教程]{href="/tags/tutorial"} :hashtag[前端]{href="/tags/frontend"} :hashtag[CSS]{href="/tags/css"}
+ - 自定义颜色：:hashtag[指定蓝色]{href="/tags/blue" color="blue"} :hashtag[指定红色]{href="/tags/red" color="red"}
+ ````
 
-- `:hashtag` 的 `href` 为跳转链接，`color` 可自定义颜色
-- `:button` 的 `href` 为跳转链接，`color` 可自定义颜色
+ - `:hashtag` 默认自动轮询 7 种颜色（红、橙、黄、绿、青、蓝、紫），无需指定 `color`
+ - `:hashtag` 的 `href` 为跳转链接，`color` 可手动自定义颜色
+ - `:hashtag` 左侧会自动显示 `#` 图标
+
+::::
+
+---
+
+### Button 按钮
+
+::::tabs
+tab: 演示效果
+
+- 普通按钮：:button[查看文档]{href="/" color="accent"} :button[GitHub]{href="/" color="blue"}
+- 带图标的按钮：:button[搜索]{href="/search" color="green" icon="lucide:search"}
+- 小尺寸按钮：:button[标签]{href="/tags" color="purple" size="xs"}
+- 图标按钮组：:button[文档]{href="/docs" color="cyan" icon="lucide:book-open"} :button[源码]{href="/github" color="cyan" icon="lucide:code"} :button[示例]{href="/demo" color="cyan" icon="lucide:trophy"}
+
+ tab: 示例代码
+
+ ````
+ - 普通按钮：:button[查看文档]{href="/" color="accent"} :button[GitHub]{href="/" color="blue"}
+ - 带图标的按钮：:button[搜索]{href="/search" color="green" icon="lucide:search"}
+ - 小尺寸按钮：:button[标签]{href="/tags" color="purple" size="xs"}
+ - 图标按钮组：:button[文档]{href="/docs" color="cyan" icon="lucide:book-open"} :button[源码]{href="/github" color="cyan" icon="lucide:code-2"} :button[示例]{href="/demo" color="cyan" icon="lucide:trophy"}
+ ````
+
+ - `:button` 的 `href` 为跳转链接，`color` 可自定义颜色
+ - `:button` 支持 `icon` 属性，可传入 Iconify 图标名（如 `lucide:search`）或图片 URL
+ - `:button` 支持 `size="xs"` 小尺寸模式
 
 ::::
 

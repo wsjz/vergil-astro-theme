@@ -12,6 +12,8 @@
 @import './directives/grid.css';
 @import './directives/quot.css';
 @import './directives/tags.css';
+@import './directives/hashtag.css';
+@import './directives/button.css';
 @import './directives/terminal.css';
 @import './directives/step.css';
 @import './directives/title.css';

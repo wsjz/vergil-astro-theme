@@ -16,6 +16,9 @@ const EMOJI_SOURCES = {
     twemoji: 'https://gcore.jsdelivr.net/gh/twitter/twemoji/assets/svg/{name}.svg',
 };
 
+const HASHTAG_COLORS = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'];
+let hashtagIndex = 0;
+
 function getIconSvg(name, size = '1em') {
     const [rawSet, iconName] = name.split(':');
     const set = SET_ALIASES[rawSet] || rawSet;
@@ -80,13 +83,42 @@ export function remarkContentDirectives() {
             } else if (name === 'sub') {
                 node.data = { hName: 'sub', hProperties: { class: 'md-tag-sub', style: `--tag-sub-color:${resolveColor(attrs.color || 'accent')}` } };
             } else if (name === 'hashtag') {
-                const color = resolveColor(attrs.color || 'accent');
+                let color = attrs.color ? resolveColor(attrs.color) : '';
+                if (!color) {
+                    color = resolveColor(HASHTAG_COLORS[hashtagIndex]);
+                    hashtagIndex += 1;
+                    if (hashtagIndex >= HASHTAG_COLORS.length) hashtagIndex = 0;
+                }
                 const href = attrs.href || '#';
+                const hashIcon = '<svg class="md-hash-svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M426.6 64.8c34.8 5.8 58.4 38.8 52.6 73.6l-19.6 117.6h190.2l23-138.6c5.8-34.8 38.8-58.4 73.6-52.6s58.4 38.8 52.6 73.6l-19.4 117.6H896c35.4 0 64 28.6 64 64s-28.6 64-64 64h-137.8l-42.6 256H832c35.4 0 64 28.6 64 64s-28.6 64-64 64h-137.8l-23 138.6c-5.8 34.8-38.8 58.4-73.6 52.6s-58.4-38.8-52.6-73.6l19.6-117.4h-190.4l-23 138.6c-5.8 34.8-38.8 58.4-73.6 52.6s-58.4-38.8-52.6-73.6l19.4-117.8H128c-35.4 0-64-28.6-64-64s28.6-64 64-64h137.8l42.6-256H192c-35.4 0-64-28.6-64-64s28.6-64 64-64h137.8l23-138.6c5.8-34.8 38.8-58.4 73.6-52.6z m11.6 319.2l-42.6 256h190.2l42.6-256h-190.2z"/></svg>';
                 node.data = { hName: 'a', hProperties: { href, class: 'md-tag-hashtag', style: `--tag-hash-color:${color}` } };
+                node.children = [
+                    { type: 'html', value: `<span class="md-hash-icon">${hashIcon}</span>` },
+                    { type: 'text', value: text }
+                ];
             } else if (name === 'button') {
                 const color = resolveColor(attrs.color || 'accent');
                 const href = attrs.href || '#';
-                node.data = { hName: 'a', hProperties: { href, class: 'md-tag-button', style: `--tag-btn-bg:${color}` } };
+                const icon = attrs.icon || '';
+                const size = attrs.size || '';
+                const classes = ['md-tag-button'];
+                if (size === 'xs') classes.push('md-btn-xs');
+                node.data = { hName: 'a', hProperties: { href, class: classes.join(' '), style: `--tag-btn-bg:${color}` } };
+                const children = [];
+                if (icon) {
+                    if (/^https?:\/\//i.test(icon)) {
+                        children.push({ type: 'html', value: `<img class="md-btn-icon" src="${icon}" alt="" />` });
+                    } else {
+                        const iconifyMatch = icon.match(/^([a-z0-9-]+):([a-z0-9-]+)$/i);
+                        if (iconifyMatch) {
+                            children.push({ type: 'html', value: `<span class="md-btn-icon">${getIconSvg(icon, '1.2em')}</span>` });
+                        } else {
+                            children.push({ type: 'text', value: icon });
+                        }
+                    }
+                }
+                children.push({ type: 'text', value: text });
+                node.children = children;
             } else if (name === 'step-brackets') {
                 const num = node.children?.map(c => c.value || '').join('') || '';
                 const title = attrs.title || '';
