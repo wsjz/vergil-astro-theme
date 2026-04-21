@@ -7,6 +7,15 @@ const ICON_SETS = { lucide, bx, solar };
 const SET_ALIASES = { bxs: 'bx', bxl: 'bx' };
 const SET_PREFIXES = { bxs: 'bxs-', bxl: 'bxl-' };
 
+const EMOJI_SOURCES = {
+    default: 'https://gcore.jsdelivr.net/gh/cdn-x/emoticons@3.1/qq/{name}.gif',
+    qq: 'https://gcore.jsdelivr.net/gh/cdn-x/emoticons@3.1/qq/{name}.gif',
+    aru: 'https://gcore.jsdelivr.net/gh/cdn-x/emoticons@3.1/aru/{name}.gif',
+    tieba: 'https://gcore.jsdelivr.net/gh/cdn-x/emoticons@3.1/tieba/{name}.png',
+    blobcat: 'https://gcore.jsdelivr.net/gh/cdn-x/emoticons@3.1/blobcat/{name}.gif',
+    twemoji: 'https://gcore.jsdelivr.net/gh/twitter/twemoji/assets/svg/{name}.svg',
+};
+
 function getIconSvg(name, size = '1em') {
     const [rawSet, iconName] = name.split(':');
     const set = SET_ALIASES[rawSet] || rawSet;
@@ -124,6 +133,39 @@ export function remarkContentDirectives() {
                     { type: 'html', value: '<span class="md-checkbox-box"></span>' },
                     { type: 'text', value: text }
                 ];
+            } else if (name === 'emoji') {
+                const height = attrs.height || '1.75em';
+                let source = attrs.source;
+                let emojiName = attrs.name;
+
+                // 如果省略了 source，使用第一个可用的 source
+                if (source === undefined) {
+                    const firstSource = Object.keys(EMOJI_SOURCES)[0];
+                    if (firstSource) {
+                        emojiName = node.children?.map(c => c.value || '').join('') || '';
+                        source = firstSource;
+                    }
+                }
+
+                // 如果 name 未指定，使用文本内容作为 name
+                if (!emojiName) {
+                    emojiName = node.children?.map(c => c.value || '').join('') || '';
+                }
+
+                if (source && emojiName) {
+                    const template = EMOJI_SOURCES[source] || source;
+                    const url = template.replace('{name}', emojiName);
+                    node.data = {
+                        hName: 'span',
+                        hProperties: {
+                            class: 'md-tag-emoji',
+                            style: `--emoji-height:${height}`
+                        }
+                    };
+                    node.children = [
+                        { type: 'html', value: `<img src="${url}" alt="${emojiName}" loading="lazy" style="height:${height}" />` }
+                    ];
+                }
             }
         });
 

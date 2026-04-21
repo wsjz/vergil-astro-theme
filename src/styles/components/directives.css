@@ -17,6 +17,7 @@
 @import './directives/title.css';
 @import './directives/image.css';
 @import './directives/photo.css';
+@import './directives/emoji.css';
 @import './directives/reel.css';
 @import './directives/paper.css';
 @import './directives/checkbox.css';

@@ -903,3 +903,52 @@ import GhCard from '../../components/widgets/GhCard.astro';
 
 ---
 
+### Emoji 表情包
+
+::::tabs
+ tab: 演示效果
+
+今天是开心的一天 :emoji[aini]{source="qq"}，代码终于跑通了！:emoji[OK]{source="qq"}
+
+Twemoji 风格的表情 :emoji[1f600]{source="twemoji"} :emoji[1f389]{source="twemoji"}
+
+贴吧表情 :emoji[huaji]{source="tieba"} :emoji[bishi]{source="tieba"}
+
+Blobcat 表情 :emoji[0_0]{source="blobcat"}
+
+也可以直接使用默认源（省略 source）：:emoji[aini]
+
+自定义高度：:emoji[party]{source="blobcat" height="3em"}
+
+ tab: 示例代码
+
+ `````markdown
+今天是开心的一天 :emoji[aini]{source="qq"}，代码终于跑通了！:emoji[OK]{source="qq"}
+
+Twemoji 风格的表情 :emoji[1f600]{source="twemoji"} :emoji[1f389]{source="twemoji"}
+
+贴吧表情 :emoji[huaji]{source="tieba"} :emoji[bishi]{source="tieba"}
+
+Blobcat 表情 :emoji[0_0]{source="blobcat"}
+
+也可以直接使用默认源（省略 source）：:emoji[aini]
+
+自定义高度：:emoji[party]{source="blobcat" height="3em"}
+ `````
+
+ - `:emoji` 为行内指令，可在段落中直接使用
+ - `source` 表情源，可选值：
+   - `qq` — QQ 表情（GIF 格式）
+   - `twemoji` — Twitter Emoji（SVG 格式）
+   - `aru` — Aru 表情（GIF 格式）
+   - `tieba` — 贴吧表情（PNG 格式）
+   - `blobcat` — Blobcat 表情（GIF 格式）
+   - `default` — 默认表情源（与 qq 相同）
+   - 省略 `source` 时自动使用 `default` 源
+ - `height` 自定义表情高度，默认 `1.75em`
+ - 方括号内的内容为表情名称，会替换到 URL 中的 `{name}` 占位符
+
+::::
+
+---
+
