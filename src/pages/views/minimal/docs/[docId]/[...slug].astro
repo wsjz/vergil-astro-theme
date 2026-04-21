@@ -1,8 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
-import MinimalLayout from '../../../../layouts/MinimalLayout.astro';
-import Breadcrumb from '../../../../components/ui/Breadcrumb.astro';
-import { getDocSets, getDocEntry, getDocTree } from '../../../../utils/docs-utils';
+import MinimalLayout from '../../../../../views/minimal/layouts/MinimalLayout.astro';
+import Breadcrumb from '../../../../../components/ui/Breadcrumb.astro';
+import { getDocSets, getDocEntry, getDocTree } from '../../../../../utils/docs-utils';
 
 export async function getStaticPaths() {
     const entries = await getCollection('docs');
@@ -31,8 +31,8 @@ const slugParts = slug.split('/');
 const tree = await getDocTree(docId);
 
 const crumbs: { text: string; href?: string }[] = [
-    { text: '文档', href: '/minimal/?type=docs' },
-    { text: metaTitle, href: `/minimal/?type=docs&cat=${docId}` }
+    { text: '文档', href: '/views/minimal/?type=docs' },
+    { text: metaTitle, href: `/views/minimal/?type=docs&cat=${docId}` }
 ];
 
 // 根据 slug 路径查找每一层的 group 名称
@@ -42,7 +42,7 @@ for (let i = 0; i < slugParts.length - 1; i++) {
     const group = currentNodes.find((n: any) => n.type === 'group' && n.dirPath === dirPath);
     if (group) {
         // 中间层级都跳回该文档集的列表页
-        crumbs.push({ text: group.title, href: `/minimal/?type=docs&cat=${docId}` });
+        crumbs.push({ text: group.title, href: `/views/minimal/?type=docs&cat=${docId}` });
         currentNodes = group.children;
     }
 }
@@ -55,7 +55,7 @@ crumbs.push({ text: entry.data.title as string });
     description={(entry.data.excerpt as string) ?? ''}
     pageType="article"
     showBackLink={metaTitle}
-    backHref={`/minimal/?type=docs&cat=${docId}`}
+    backHref={`/views/minimal/?type=docs&cat=${docId}`}
     showBreadcrumb={true}
 >
     <Breadcrumb crumbs={crumbs} slot="breadcrumb" />

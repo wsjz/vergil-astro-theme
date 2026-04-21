@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
-import ResumeLayout from '../../layouts/ResumeLayout.astro';
+import ResumeLayout from '../../../views/resume/layouts/ResumeLayout.astro';
 
 export async function getStaticPaths() {
     const resumes = await getCollection('resume');

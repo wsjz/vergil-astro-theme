@@ -17,14 +17,14 @@ const docSets = await getDocSets();
 const typeUrl = (type: string) => {
     const params = new URLSearchParams();
     params.set('type', type);
-    return `/minimal/?${params.toString()}`;
+    return `/views/minimal/?${params.toString()}`;
 };
 
 const filterUrl = (type: string, filter: string) => {
     const params = new URLSearchParams();
     params.set('type', type);
     if (filter !== 'all') params.set('cat', filter);
-    return `/minimal/?${params.toString()}`;
+    return `/views/minimal/?${params.toString()}`;
 };
 ---
 

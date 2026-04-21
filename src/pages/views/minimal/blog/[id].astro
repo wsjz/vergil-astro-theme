@@ -1,9 +1,9 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content';
-import MinimalLayout from '../../../layouts/MinimalLayout.astro';
-import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
-import { sortItemsByDateDesc } from '../../../utils/data-utils';
-import { slugify } from '../../../utils/common-utils';
+import MinimalLayout from '../../../../views/minimal/layouts/MinimalLayout.astro';
+import Breadcrumb from '../../../../components/ui/Breadcrumb.astro';
+import { sortItemsByDateDesc } from '../../../../utils/data-utils';
+import { slugify } from '../../../../utils/common-utils';
 
 export async function getStaticPaths() {
     const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
@@ -22,8 +22,8 @@ const { Content } = await render(post);
 const categorySlug = category ? slugify(category) : null;
 
 const crumbs = [
-    { text: '博客', href: '/minimal/?type=blog' },
-    ...(categorySlug ? [{ text: category!, href: `/minimal/?type=blog&cat=${categorySlug}` }] : []),
+    { text: '博客', href: '/views/minimal/?type=blog' },
+    ...(categorySlug ? [{ text: category!, href: `/views/minimal/?type=blog&cat=${categorySlug}` }] : []),
     { text: title }
 ];
 ---
@@ -33,7 +33,7 @@ const crumbs = [
     description={seo?.description ?? excerpt}
     pageType="article"
     showBackLink="返回列表"
-    backHref="/minimal/"
+    backHref="/views/minimal/"
     showBreadcrumb={true}
 >
     <Breadcrumb crumbs={crumbs} slot="breadcrumb" />

@@ -13,7 +13,7 @@ const blogItems = posts.map((p) => ({
     id: p.id,
     title: p.data.title,
     date: p.data.publishDate.toISOString(),
-    href: `/minimal/blog/${p.id}/`,
+    href: `/views/minimal/blog/${p.id}/`,
     categoryId: p.data.category ? slugify(p.data.category) : null
 }));
 
@@ -24,7 +24,7 @@ function serializeTree(nodes: DocTreeNode[], setId: string): any[] {
             return {
                 type: 'article',
                 title: n.title,
-                href: `/minimal/docs/${setId}/${n.slug}/`,
+                href: `/views/minimal/docs/${setId}/${n.slug}/`,
                 setId
             };
         }
@@ -120,7 +120,7 @@ const docSetsMeta = sets.map((s) => ({ id: s.id, title: s.meta.data.title }));
                 var p = new URLSearchParams();
                 p.set('type', type);
                 if (cat !== 'all') p.set('cat', cat);
-                var url = '/minimal/?' + p.toString();
+                var url = '/views/minimal/?' + p.toString();
                 history.pushState(null, '', url);
                 this.render();
             }

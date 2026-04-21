@@ -50,8 +50,8 @@ const siteConfig: SiteConfig = {
             icon: 'Home',
             children: [
                 { label: '主页', href: '/', icon: 'Home' },
-                { label: '简历', href: '/resume/', icon: 'FileText' },
-                { label: '沉浸阅读', href: '/minimal/', icon: 'BookOpen' }
+                { label: '简历', href: '/views/resume/', icon: 'FileText' },
+                { label: '沉浸阅读', href: '/views/minimal/', icon: 'BookOpen' }
             ]
         },
         {
@@ -83,8 +83,8 @@ const siteConfig: SiteConfig = {
     ],
     views: {
         default: { name: '主页', path: '/' },
-        resume: { name: '简历', path: '/resume/' },
-        minimal: { name: '沉浸阅读', path: '/minimal/' }
+        resume: { name: '简历', path: '/views/resume/' },
+        minimal: { name: '沉浸阅读', path: '/views/minimal/' }
     },
     footerNavLinks: [
         {
