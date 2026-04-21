@@ -84,7 +84,7 @@ const siteConfig: SiteConfig = {
     views: {
         default: { name: '主页', path: '/' },
         resume: { name: '简历', path: '/views/resume/' },
-        minimal: { name: '沉浸阅读', path: '/views/minimal/', enabled: false }
+        minimal: { name: '沉浸阅读', path: '/views/minimal/', enabled: true }
     },
     footerNavLinks: [
         {
@@ -166,7 +166,18 @@ const siteConfig: SiteConfig = {
     },
     splash: {
         enabled: true,
-        backgroundImage: '',
+        backgroundImage: [
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920&q=80',
+            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80',
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80'
+        ],
+        overlay: 'rgba(0,0,0,0.1)',
+        textShadow: true,
+        fallbackBg: 'bg-black',
+        gradientColor: '#2d2d2d',
+        gradientHeight: 'h-56',
+        backdropBlur: '12px',
+        slideDuration: 12,
         title: 'Vergil',
         subtitle: 'Minimal Astro.js theme',
         nav: [

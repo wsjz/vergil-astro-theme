@@ -47,7 +47,19 @@ export type Subscribe = {
 
 export type SplashConfig = {
     enabled?: boolean;
-    backgroundImage?: string;
+    backgroundImage?: string | string[];
+    overlay?: string;
+    textShadow?: boolean;
+    /** 无背景图时的 fallback 背景色，默认 bg-main */
+    fallbackBg?: string;
+    /** 底部渐变末尾颜色，默认跟随主题色 */
+    gradientColor?: string;
+    /** 底部渐变高度，默认 h-56 */
+    gradientHeight?: string;
+    /** 底部渐变毛玻璃模糊强度，默认 12px */
+    backdropBlur?: string;
+    /** 轮播图单张停留时长（秒），默认 18 */
+    slideDuration?: number;
     title?: string;
     subtitle?: string;
     nav?: { text: string; href: string; icon?: string }[];

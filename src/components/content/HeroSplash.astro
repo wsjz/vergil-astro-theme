@@ -1,39 +1,98 @@
 ---
 import siteConfig from '../../data/site-config';
+import '../../styles/components/splash.css';
 
 interface Props {
     title?: string;
     subtitle?: string;
-    backgroundImage?: string;
+    backgroundImage?: string | string[];
+    overlay?: string;
+    textShadow?: boolean;
+    fallbackBg?: string;
+    gradientColor?: string;
+    gradientHeight?: string;
+    backdropBlur?: string;
+    slideDuration?: number;
 }
 
 const {
     title = siteConfig.splash?.title || siteConfig.title,
     subtitle = siteConfig.splash?.subtitle || siteConfig.subtitle,
-    backgroundImage = siteConfig.splash?.backgroundImage
+    backgroundImage = siteConfig.splash?.backgroundImage,
+    overlay = siteConfig.splash?.overlay,
+    textShadow = siteConfig.splash?.textShadow ?? false,
+    fallbackBg = siteConfig.splash?.fallbackBg,
+    gradientColor = siteConfig.splash?.gradientColor,
+    gradientHeight = siteConfig.splash?.gradientHeight,
+    backdropBlur = siteConfig.splash?.backdropBlur,
+    slideDuration = siteConfig.splash?.slideDuration
 } = Astro.props;
 
-const containerClass = backgroundImage
-    ? 'bg-cover bg-center bg-no-repeat'
-    : 'bg-main';
+const images = backgroundImage
+    ? (Array.isArray(backgroundImage) ? backgroundImage : [backgroundImage])
+    : [];
+const hasBg = images.length > 0;
+const multi = images.length > 1;
+
+const textClass = hasBg ? 'text-white' : 'text-main';
+const subTextClass = hasBg ? 'text-white/80' : 'text-secondary';
+const shadowClass = textShadow && hasBg ? '[text-shadow:0_2px_8px_rgba(0,0,0,0.5)]' : '';
+const subShadowClass = textShadow && hasBg ? '[text-shadow:0_1px_4px_rgba(0,0,0,0.4)]' : '';
+
+// Resolve configurable values with defaults
+const resolvedFallbackBg = fallbackBg || (hasBg ? 'bg-black' : 'bg-main');
+const resolvedGradientColor = gradientColor || 'var(--bg-main, #f8fafc)';
+const resolvedGradientHeight = gradientHeight || 'h-56';
+const resolvedBackdropBlur = backdropBlur || '12px';
+const resolvedSlideDuration = slideDuration || 18;
+
+function bgStyle(url: string) {
+    return `background-image: url('${url}');`;
+}
+
+const cssVars = [
+    `--splash-gradient-color: ${resolvedGradientColor};`,
+    `--splash-backdrop-blur: ${resolvedBackdropBlur};`,
+    `--slide-duration: ${resolvedSlideDuration}s;`,
+    `--slide-count: ${images.length};`
+].join(' ');
 ---
 
 <!-- Splash Overlay -->
 <div
     id="hero-splash"
-    class={`fixed inset-0 z-[100] flex flex-col items-center justify-center ${containerClass}`}
-    style={backgroundImage ? `background-image: url('${backgroundImage}');` : ''}
+    class={`fixed inset-0 z-[100] flex flex-col items-center justify-center ${resolvedFallbackBg}`}
+    style={cssVars}
 >
-    <div class="text-center px-4">
-        <h1 class="text-4xl sm:text-5xl md:text-6xl font-sans font-bold text-main mb-4 tracking-tight">
+    {images.map((url, i) => (
+        <div
+            class={multi
+                ? `absolute inset-0 bg-cover bg-center bg-no-repeat splash-bg-${i}`
+                : 'absolute inset-0 bg-cover bg-center bg-no-repeat'}
+            style={bgStyle(url)}
+        />
+    ))}
+
+    {hasBg && overlay && (
+        <div
+            id="splash-overlay"
+            class="absolute inset-0"
+            style={`background: ${overlay};`}
+        />
+    )}
+    {hasBg && (
+        <div class={`splash-gradient ${resolvedGradientHeight}`} />
+    )}
+    <div class="relative z-10 text-center px-4">
+        <h1 class={`text-4xl sm:text-5xl md:text-6xl font-sans font-bold mb-4 tracking-tight ${textClass} ${shadowClass}`}>
             {title}
         </h1>
         {subtitle && (
-            <p class="text-lg sm:text-xl md:text-2xl text-secondary font-light mb-8">
+            <p class={`text-lg sm:text-xl md:text-2xl font-light mb-8 ${subTextClass} ${subShadowClass}`}>
                 {subtitle}
             </p>
         )}
-        
+
         <div class="inline-flex items-center gap-1 p-1.5 rounded-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg">
             {siteConfig.splash?.nav?.map((item) => (
                 <a
@@ -56,7 +115,7 @@ const containerClass = backgroundImage
 
     <button
         id="splash-arrow"
-        class="absolute bottom-12 left-1/2 -translate-x-1/2 p-2 text-secondary hover:text-accent transition-colors duration-300 cursor-pointer group"
+        class={`absolute bottom-12 left-1/2 -translate-x-1/2 p-2 transition-colors duration-300 cursor-pointer group z-10 ${hasBg ? 'text-white/70 hover:text-white' : 'text-secondary hover:text-accent'}`}
         aria-label="Scroll down"
     >
         <svg
@@ -76,16 +135,36 @@ const containerClass = backgroundImage
 
 <style>
     @keyframes bounce-arrow {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(8px);
-        }
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(8px); }
     }
 
     .animate-bounce-arrow {
         animation: bounce-arrow 1.5s ease-in-out infinite;
+    }
+
+    /* Multi-image crossfade */
+    .splash-bg-0,
+    .splash-bg-1,
+    .splash-bg-2,
+    .splash-bg-3,
+    .splash-bg-4 {
+        opacity: 0;
+        animation: crossfade var(--slide-duration, 18s) infinite;
+    }
+
+    .splash-bg-0 { animation-delay: 0s; }
+    .splash-bg-1 { animation-delay: calc(var(--slide-duration, 18s) / var(--slide-count, 3) * 1); }
+    .splash-bg-2 { animation-delay: calc(var(--slide-duration, 18s) / var(--slide-count, 3) * 2); }
+    .splash-bg-3 { animation-delay: calc(var(--slide-duration, 18s) / var(--slide-count, 3) * 3); }
+    .splash-bg-4 { animation-delay: calc(var(--slide-duration, 18s) / var(--slide-count, 3) * 4); }
+
+    @keyframes crossfade {
+        0%   { opacity: 0.01; transform: scale(1.05); }
+        8%   { opacity: 1; transform: scale(1); }
+        28%  { opacity: 1; transform: scale(1); }
+        36%  { opacity: 0.01; transform: scale(1.02); }
+        100% { opacity: 0.01; transform: scale(1.05); }
     }
 </style>
 
@@ -100,6 +179,7 @@ const containerClass = backgroundImage
         const splash = document.getElementById('hero-splash');
         const arrow = document.getElementById('splash-arrow');
         const topNav = document.getElementById('top-nav-header');
+        const overlay = document.getElementById('splash-overlay');
 
         if (!splash || !arrow) return;
 
@@ -112,6 +192,11 @@ const containerClass = backgroundImage
         function updateOnScroll() {
             const scrollY = window.scrollY;
             splash!.style.transform = `translateY(${-scrollY}px)`;
+
+            if (overlay) {
+                const opacity = Math.max(0, 1 - scrollY / (viewportHeight * 0.8));
+                overlay.style.opacity = String(opacity);
+            }
 
             if (topNav) {
                 const navOpacity = Math.min(1, Math.max(0, (scrollY - viewportHeight * 0.3) / (viewportHeight * 0.5)));
@@ -127,7 +212,6 @@ const containerClass = backgroundImage
                 }
             }
 
-            // Clamp: prevent inertia overshooting past viewportHeight
             if (scrollY > viewportHeight && scrollY < viewportHeight + 200 && isSnapping) {
                 window.scrollTo({ top: viewportHeight, behavior: 'instant' as ScrollBehavior });
             }
@@ -146,6 +230,7 @@ const containerClass = backgroundImage
 
         window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
         splash.style.transform = 'translateY(0)';
+        if (overlay) overlay.style.opacity = '1';
         if (topNav) topNav.style.opacity = '0';
         updateOnScroll();
 
@@ -161,14 +246,12 @@ const containerClass = backgroundImage
 
         arrow.addEventListener('click', scrollToContent, { signal });
 
-        // Click blank area to enter main content
         splash.addEventListener('click', (e) => {
             const target = e.target as HTMLElement;
             if (target.closest('a, button, input, textarea, select')) return;
             scrollToContent();
         }, { signal });
 
-        // Wheel: intercept and snap
         window.addEventListener('wheel', (e) => {
             if (window.scrollY < viewportHeight) {
                 e.preventDefault();
@@ -177,7 +260,6 @@ const containerClass = backgroundImage
             }
         }, { passive: false, signal });
 
-        // Touch: intercept and snap
         let touchStartY = 0;
         window.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
@@ -197,7 +279,6 @@ const containerClass = backgroundImage
             }
         }, { passive: true, signal });
 
-        // Snap correction: if scroll stops mid-way, snap to nearest anchor
         function handleScrollEnd() {
             const scrollY = window.scrollY;
             if (scrollY > 0 && scrollY < viewportHeight && !isSnapping) {

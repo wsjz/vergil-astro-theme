@@ -1,4 +1,19 @@
+/* Global scrollbar: hidden by default, show on hover */
+html {
+    scrollbar-width: none;
+}
+html:hover {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--border-light) 35%, transparent) transparent;
+}
+
 ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+html:hover ::-webkit-scrollbar,
+html:hover::-webkit-scrollbar {
     width: 6px;
     height: 6px;
 }
@@ -8,12 +23,17 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--border-light);
+    background: transparent;
     border-radius: 3px;
 }
 
+html:hover ::-webkit-scrollbar-thumb,
+html:hover::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--border-light) 35%, transparent);
+}
+
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
+    background: color-mix(in srgb, var(--text-muted) 60%, transparent);
 }
 
 /* Right sidebar container: hide scrollbar until hover */
@@ -22,7 +42,7 @@
 }
 .right-sidebar-container:hover {
     scrollbar-width: thin;
-    scrollbar-color: var(--border-light) transparent;
+    scrollbar-color: color-mix(in srgb, var(--border-light) 35%, transparent) transparent;
 }
 .right-sidebar-container::-webkit-scrollbar {
     width: 0;
@@ -34,7 +54,7 @@
     background: transparent;
 }
 .right-sidebar-container:hover::-webkit-scrollbar-thumb {
-    background: var(--border-light);
+    background: color-mix(in srgb, var(--border-light) 35%, transparent);
     border-radius: 3px;
 }
 

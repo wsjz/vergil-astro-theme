@@ -1,0 +1,38 @@
+/* ══════════════════════════════════════════
+   Hero Splash Component Styles
+   ══════════════════════════════════════════ */
+
+/* Reset border-radius on splash and its children */
+#hero-splash,
+#hero-splash > div {
+    border-radius: 0 !important;
+}
+
+/* Bottom gradient overlay with frosted glass effect */
+.splash-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(
+        to top,
+        color-mix(in srgb, var(--splash-gradient-color, var(--bg-main, #f8fafc)) 55%, transparent) 0%,
+        transparent 100%
+    );
+    -webkit-backdrop-filter: blur(var(--splash-backdrop-blur, 12px)) saturate(1.2);
+    backdrop-filter: blur(var(--splash-backdrop-blur, 12px)) saturate(1.2);
+    -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
+    mask-image: linear-gradient(to top, black 0%, transparent 100%);
+}
+
+/* Height variants */
+.splash-gradient.h-32  { height: 8rem; }
+.splash-gradient.h-40  { height: 10rem; }
+.splash-gradient.h-48  { height: 12rem; }
+.splash-gradient.h-56  { height: 14rem; }
+.splash-gradient.h-64  { height: 16rem; }
+.splash-gradient.h-72  { height: 18rem; }
+.splash-gradient.h-80  { height: 20rem; }
+.splash-gradient.h-96  { height: 24rem; }
