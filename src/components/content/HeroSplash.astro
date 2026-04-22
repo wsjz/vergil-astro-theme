@@ -254,20 +254,32 @@ const cssVars = [
 
         window.addEventListener('wheel', (e) => {
             if (window.scrollY < viewportHeight) {
-                e.preventDefault();
-                if (e.deltaY > 5) snapTo(viewportHeight);
-                else if (e.deltaY < -5) snapTo(0);
+                // Only intercept when explicitly snapping; allow free scrolling otherwise
+                if (e.deltaY > 5) {
+                    e.preventDefault();
+                    snapTo(viewportHeight);
+                } else if (e.deltaY < -5) {
+                    e.preventDefault();
+                    snapTo(0);
+                }
             }
         }, { passive: false, signal });
 
         let touchStartY = 0;
+        let touchMoved = false;
         window.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
+            touchMoved = false;
         }, { passive: true, signal });
 
         window.addEventListener('touchmove', (e) => {
             if (window.scrollY < viewportHeight && !isSnapping) {
-                e.preventDefault();
+                // Only prevent default during a clear vertical swipe intent
+                const deltaY = touchStartY - e.touches[0].clientY;
+                if (Math.abs(deltaY) > 10) {
+                    touchMoved = true;
+                    e.preventDefault();
+                }
             }
         }, { passive: false, signal });
 
@@ -276,6 +288,10 @@ const cssVars = [
                 const deltaY = touchStartY - e.changedTouches[0].clientY;
                 if (deltaY > 30) snapTo(viewportHeight);
                 else if (deltaY < -30) snapTo(0);
+                else if (!touchMoved) {
+                    // Tap (no swipe) → scroll to content
+                    scrollToContent();
+                }
             }
         }, { passive: true, signal });
 

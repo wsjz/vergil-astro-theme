@@ -1,0 +1,263 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import BaseHead, { type Props as HeadProps } from '../components/base/BaseHead.astro';
+import Footer from '../components/base/Footer.astro';
+import Sidebar from '../components/base/Sidebar.astro';
+import RightSidebar from '../components/base/RightSidebar.astro';
+import ThemeToggle from '../components/ui/ThemeToggle.astro';
+import TopNav from '../components/base/HeaderNav.astro';
+import Search from '../components/widgets/Search.astro';
+import SiteAgent from '../components/widgets/SiteAgent.astro';
+import siteConfig from '../data/site-config';
+
+export type Props = HeadProps & { showSidebar?: boolean; showRightSidebar?: boolean; showTopNav?: boolean; articleTitle?: string; commentsEnabled?: boolean; splashMode?: boolean };
+
+const { showSidebar = true, showRightSidebar = true, showTopNav = true, articleTitle = '', commentsEnabled = false, splashMode = false, ...head } = Astro.props;
+const isArticle = head.pageType === 'article';
+---
+
+<!doctype html>
+<html lang="en" class="wrap-break-words antialiased">
+    <head>
+        <BaseHead {...head} />
+        <script is:inline>
+            (function() {
+                if (location.pathname !== '/') return;
+                if ('scrollRestoration' in history) {
+                    history.scrollRestoration = 'manual';
+                }
+                window.scrollTo(0, 0);
+            })();
+        </script>
+        <script is:inline>
+            (function() {
+                try {
+                    var scheme = localStorage.getItem('colorScheme') || 'C';
+                    var isDark = localStorage.getItem('darkMode');
+                    document.documentElement.setAttribute('data-theme', scheme);
+                    if (isDark === 'true' || (isDark === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                        document.documentElement.classList.add('dark');
+                    }
+                } catch(e) {}
+            })();
+        </script>
+        <ViewTransitions />
+        <script is:inline src="/theme-toggle.js"></script>
+        <script is:inline>
+            (function () {
+                document.addEventListener('click', function (e) {
+                    var btn = e.target.closest('.md-copy-btn');
+                    if (!btn) return;
+                    var input = btn.parentElement.querySelector('.md-copy-input');
+                    if (!input && btn.dataset.copyTarget) {
+                        input = document.getElementById(btn.dataset.copyTarget);
+                    }
+                    if (!input) return;
+                    navigator.clipboard.writeText(input.value).then(function () {
+                        var original = btn.innerHTML;
+                        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>';
+                        btn.classList.add('md-copy-success');
+                        setTimeout(function () {
+                            btn.innerHTML = original;
+                            btn.classList.remove('md-copy-success');
+                        }, 1500);
+                    });
+                });
+            })();
+        </script>
+    </head>
+    <body class="bg-main text-main">
+        {isArticle && (
+            <div id="reading-progress" class="fixed top-0 left-0 h-[2px] bg-accent z-[9999] w-0 transition-none"></div>
+        )}
+        <slot name="splash" />
+
+        <div id="main-stage" class={splashMode ? 'relative mt-[100vh] translate-y-0' : ''}>
+            {showTopNav && <TopNav articleTitle={articleTitle} commentsEnabled={commentsEnabled} sticky={splashMode} />}
+            <Search />
+
+            <div class={`flex min-h-screen ${showTopNav ? 'pt-16' : ''}`}>
+                {showSidebar && <Sidebar />}
+                <div class="flex-1 lg:ml-[calc(14rem+5%+4px)] xl:ml-[calc(15rem+5%+4px)] xl:mr-[calc(12rem+5%+4px)] 2xl:mr-[calc(14rem+5%+4px)]">
+                    <div class="flex flex-col min-h-screen px-4 lg:px-6">
+                        <div class="flex items-center justify-end gap-3 py-4">
+                            <ThemeToggle />
+                        </div>
+                        <main class="mx-auto w-full max-w-3xl grow">
+                            <slot />
+                        </main>
+                        <Footer />
+                    </div>
+                </div>
+
+                {showRightSidebar && (
+                    <div class="right-sidebar-container hidden xl:block fixed right-[5%] top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-52 2xl:w-56 bg-main overflow-y-auto z-40">
+                        <slot name="right-sidebar">
+                            <RightSidebar />
+                        </slot>
+                    </div>
+                )}
+            </div>
+        </div>
+
+        <script is:inline>
+            (function () {
+                function initProgress() {
+                    var bar = document.getElementById('reading-progress');
+                    if (!bar) return;
+                    function update() {
+                        var scrollTop = window.scrollY;
+                        var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                        var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+                        bar.style.width = pct + '%';
+                    }
+                    window.removeEventListener('scroll', update);
+                    window.addEventListener('scroll', update, { passive: true });
+                    update();
+                }
+                document.addEventListener('astro:page-load', initProgress);
+                initProgress();
+            })();
+        </script>
+
+        <script is:inline>
+            (function() {
+                function initTabs() {
+                    document.querySelectorAll('.md-directive-tabs').forEach(function(container) {
+                        if (container.dataset.tabsInitialized) return;
+                        container.dataset.tabsInitialized = 'true';
+                        var nav = container.querySelector('.md-tabs-nav');
+                        var content = container.querySelector('.md-tabs-content');
+                        var buttons = nav ? Array.from(nav.querySelectorAll('.md-tab-btn')) : [];
+                        var panes = content ? Array.from(content.children).filter(function(el){ return el.classList.contains('md-tab-pane'); }) : [];
+                        buttons.forEach(function(btn, idx) {
+                            btn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                buttons.forEach(function(b) {
+                                    b.classList.remove('md-tab-active');
+                                    b.setAttribute('aria-selected', 'false');
+                                });
+                                btn.classList.add('md-tab-active');
+                                btn.setAttribute('aria-selected', 'true');
+                                panes.forEach(function(p) { p.classList.remove('md-tab-visible'); });
+                                if (panes[idx]) panes[idx].classList.add('md-tab-visible');
+                            });
+                        });
+                    });
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initTabs);
+                } else {
+                    initTabs();
+                }
+                document.addEventListener('astro:page-load', initTabs);
+            })();
+        </script>
+
+        <SiteAgent />
+
+        <script>
+            import mediumZoom from 'medium-zoom';
+
+            function initZoom() {
+                mediumZoom('img[data-zoomable="1"]', {
+                    background: 'rgba(0, 0, 0, 0.85)',
+                    margin: 24,
+                    onOpen: (target) => {
+                        const wrap = target.closest('.md-photo-img-wrap');
+                        if (wrap) {
+                            wrap.dataset.prevOverflow = wrap.style.overflow;
+                            wrap.style.overflow = 'visible';
+                        }
+                    },
+                    onClose: (target) => {
+                        const wrap = target.closest('.md-photo-img-wrap');
+                        if (wrap && wrap.dataset.prevOverflow !== undefined) {
+                            wrap.style.overflow = wrap.dataset.prevOverflow;
+                            delete wrap.dataset.prevOverflow;
+                        }
+                    },
+                });
+            }
+
+            document.addEventListener('astro:page-load', initZoom);
+            if (document.readyState !== 'loading') {
+                initZoom();
+            }
+        </script>
+
+        <script is:inline>
+            (function () {
+                function initGhCards() {
+                    document.querySelectorAll('.md-directive-ghcard').forEach(function (card) {
+                        if (card.dataset.ghcardInitialized) return;
+                        card.dataset.ghcardInitialized = 'true';
+
+                        var api = card.dataset.api;
+                        if (!api) return;
+
+                        var fill = function (data) {
+                            card.querySelectorAll('[data-key]').forEach(function (el) {
+                                var key = el.dataset.key;
+                                if (data[key] !== undefined && data[key] !== null) {
+                                    if (el.tagName === 'IMG') {
+                                        el.src = data[key];
+                                    } else {
+                                        el.textContent = data[key];
+                                    }
+                                }
+                            });
+                            // if bio element doesn't exist but API returns bio, create it
+                            var bioEl = card.querySelector('[data-key="bio"]');
+                            if (!bioEl && data.bio) {
+                                var usernameEl = card.querySelector('.md-ghcard-username');
+                                if (usernameEl) {
+                                    bioEl = document.createElement('p');
+                                    bioEl.className = 'md-ghcard-bio';
+                                    bioEl.dataset.key = 'bio';
+                                    bioEl.textContent = data.bio;
+                                    usernameEl.parentNode.insertBefore(bioEl, usernameEl.nextSibling);
+                                }
+                            }
+                        };
+
+                        fetch(api)
+                            .then(function (res) { return res.json(); })
+                            .then(function (data) {
+                                fill(data);
+                                // fetch latest tag for repo cards
+                                var tagsApi = card.dataset.tagsApi;
+                                if (tagsApi && Array.isArray(data)) {
+                                    return fetch(tagsApi)
+                                        .then(function (res) { return res.json(); })
+                                        .then(function (tags) {
+                                            if (Array.isArray(tags) && tags.length > 0) {
+                                                var tagEl = card.querySelector('[data-key="latest-tag-name"]');
+                                                if (tagEl) tagEl.textContent = tags[0].name;
+                                            }
+                                        });
+                                } else if (tagsApi) {
+                                    return fetch(tagsApi)
+                                        .then(function (res) { return res.json(); })
+                                        .then(function (tags) {
+                                            if (Array.isArray(tags) && tags.length > 0) {
+                                                var tagEl = card.querySelector('[data-key="latest-tag-name"]');
+                                                if (tagEl) tagEl.textContent = tags[0].name;
+                                            }
+                                        });
+                                }
+                            })
+                            .catch(function () {});
+                    });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initGhCards);
+                } else {
+                    initGhCards();
+                }
+                document.addEventListener('astro:page-load', initGhCards);
+            })();
+        </script>
+    </body>
+</html>

@@ -66,7 +66,10 @@ function formatCanonicalURL(url: string | URL) {
 ))}
 
 {fileFonts.map(f => (
-    <style set:html={`@font-face { font-family: "${f.cssName}"; src: url("${f.path}") format("${f.format ?? 'truetype'}"); font-display: swap; }`} />
+    <>
+        <link rel="preload" href={f.path} as="font" type={`font/${f.format === 'truetype' ? 'ttf' : f.format ?? 'ttf'}`} crossorigin />
+        <style set:html={`@font-face { font-family: "${f.cssName}"; src: url("${f.path}") format("${f.format ?? 'truetype'}"); font-display: swap; }`} />
+    </>
 ))}
 
 <style set:html={`

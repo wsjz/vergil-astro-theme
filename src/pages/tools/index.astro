@@ -1,0 +1,202 @@
+---
+import DefaultLayout from '../../layouts/DefaultLayout.astro';
+---
+
+<DefaultLayout title="图片转 WebP" description="在线图片格式转换工具，支持 PNG/JPG 转 WebP" showSidebar={false} showRightSidebar={false}>
+    <div class="max-w-3xl mx-auto py-12 px-4">
+        <h1 class="text-3xl font-bold text-main mb-2">图片转 WebP</h1>
+        <p class="text-secondary mb-10">纯前端转换，图片不会上传到服务器。支持批量处理。</p>
+
+        <!-- Upload Zone -->
+        <div
+            id="drop-zone"
+            class="border-2 border-dashed border-light rounded-xl p-10 text-center cursor-pointer transition-all hover:border-accent hover:bg-accent/5"
+        >
+            <svg class="w-12 h-12 mx-auto text-muted mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z"/>
+            </svg>
+            <p class="text-main font-medium mb-1">点击或拖拽图片到此处</p>
+            <p class="text-sm text-muted">支持 PNG、JPG、JPEG、WebP</p>
+            <input id="file-input" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" multiple class="hidden" />
+        </div>
+
+        <!-- Quality Control -->
+        <div class="mt-6 flex items-center gap-4">
+            <span class="text-sm text-secondary shrink-0">压缩质量</span>
+            <input
+                id="quality-slider"
+                type="range"
+                min="1"
+                max="100"
+                value="85"
+                class="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-accent"
+            />
+            <span id="quality-value" class="text-sm font-mono text-accent w-12 text-right">85%</span>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="mt-8 space-y-3 hidden">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-lg font-medium text-main">转换结果</h2>
+                <button
+                    id="download-all-btn"
+                    class="px-4 py-1.5 text-sm bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
+                >
+                    全部下载
+                </button>
+            </div>
+            <div id="results-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Font Converter Section -->
+        <div class="mt-16 pt-10 border-t border-light">
+            <h2 class="text-2xl font-bold text-main mb-2">字体转 WOFF2</h2>
+            <p class="text-secondary mb-6">WOFF2 比 TTF 体积小 30%~50%，是现代网页的首选字体格式。</p>
+
+            <div class="bg-muted/50 rounded-xl p-6">
+                <h3 class="font-medium text-main mb-3">推荐方案</h3>
+                <ol class="list-decimal list-inside space-y-2 text-sm text-secondary">
+                    <li>
+                        使用
+                        <a href="https://cloudconvert.com/ttf-to-woff2" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">CloudConvert</a>
+                        在线转换（无需安装，支持批量）
+                    </li>
+                    <li>
+                        或使用本地命令行（macOS）:
+                        <code class="block mt-1 px-3 py-2 bg-card rounded text-xs font-mono text-main">brew install woff2<br/>woff2_compress font.ttf</code>
+                    </li>
+                    <li>转换后把 .woff2 文件放到 <code class="px-1.5 py-0.5 bg-card rounded text-xs font-mono">public/fonts/</code></li>
+                    <li>修改 <code class="px-1.5 py-0.5 bg-card rounded text-xs font-mono">site-config.ts</code> 中的 path 为 .woff2 路径</li>
+                </ol>
+
+                <div class="mt-4 p-3 bg-accent/5 rounded-lg border border-accent/10">
+                    <p class="text-xs text-accent">
+                        💡 提示：中文字体文件很大（通常 10MB+），建议先用
+                        <a href="https://github.com/aui/font-spider" target="_blank" rel="noopener noreferrer" class="underline">字蛛</a>
+                        做子集化，只保留用到的字符，可压缩到几百 KB。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</DefaultLayout>
+
+<script>
+    const dropZone = document.getElementById('drop-zone')!;
+    const fileInput = document.getElementById('file-input')! as HTMLInputElement;
+    const qualitySlider = document.getElementById('quality-slider')! as HTMLInputElement;
+    const qualityValue = document.getElementById('quality-value')!;
+    const results = document.getElementById('results')!;
+    const resultsList = document.getElementById('results-list')!;
+    const downloadAllBtn = document.getElementById('download-all-btn')!;
+
+    let convertedFiles: { name: string; blob: Blob; url: string }[] = [];
+
+    qualitySlider.addEventListener('input', () => {
+        qualityValue.textContent = qualitySlider.value + '%';
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-accent', 'bg-accent/5');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-accent', 'bg-accent/5');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-accent', 'bg-accent/5');
+        if (e.dataTransfer?.files) {
+            handleFiles(e.dataTransfer.files);
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files) {
+            handleFiles(fileInput.files);
+        }
+    });
+
+    function handleFiles(files: FileList) {
+        const validFiles = Array.from(files).filter(f =>
+            f.type === 'image/png' || f.type === 'image/jpeg' || f.type === 'image/jpg' || f.type === 'image/webp'
+        );
+        if (validFiles.length === 0) return;
+
+        convertedFiles = [];
+        resultsList.innerHTML = '';
+        results.classList.remove('hidden');
+
+        validFiles.forEach(file => convertImage(file));
+    }
+
+    function convertImage(file: File) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d')!;
+                ctx.drawImage(img, 0, 0);
+
+                const quality = parseInt(qualitySlider.value) / 100;
+                canvas.toBlob((blob) => {
+                    if (!blob) return;
+                    const url = URL.createObjectURL(blob);
+                    const name = file.name.replace(/\.[^.]+$/, '') + '.webp';
+                    convertedFiles.push({ name, blob, url });
+                    addResultItem(file.name, file.size, blob.size, url, name);
+                }, 'image/webp', quality);
+            };
+            img.src = e.target?.result as string;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function formatSize(bytes: number): string {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function addResultItem(originalName: string, originalSize: number, newSize: number, url: string, downloadName: string) {
+        const saved = originalSize - newSize;
+        const savedPercent = ((saved / originalSize) * 100).toFixed(1);
+        const savedText = saved > 0 ? `节省 ${formatSize(saved)} (${savedPercent}%)` : `增加 ${formatSize(-saved)}`;
+
+        const item = document.createElement('div');
+        item.className = 'flex items-center gap-4 p-4 bg-card rounded-xl border border-light';
+        item.innerHTML = `
+            <div class="w-12 h-12 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="${url}" alt="preview" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm text-main truncate">${originalName}</p>
+                <p class="text-xs text-muted">${formatSize(originalSize)} → ${formatSize(newSize)} · ${savedText}</p>
+            </div>
+            <a
+                href="${url}"
+                download="${downloadName}"
+                class="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:opacity-90 transition-opacity shrink-0"
+            >
+                下载
+            </a>
+        `;
+        resultsList.appendChild(item);
+    }
+
+    downloadAllBtn.addEventListener('click', () => {
+        convertedFiles.forEach(({ url, name }) => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            a.click();
+        });
+    });
+</script>
