@@ -126,4 +126,13 @@ const resume = defineCollection({
         })
 });
 
-export const collections = { blog, pages, projects, albums, docs, resume };
+const thoughts = defineCollection({
+    loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/thoughts' }),
+    schema: () =>
+        z.object({
+            date: z.coerce.date(),
+            tags: z.array(z.string()).default([])
+        })
+});
+
+export const collections = { blog, pages, projects, albums, docs, resume, thoughts };

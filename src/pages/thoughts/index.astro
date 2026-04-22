@@ -1,0 +1,349 @@
+---
+import { getCollection } from 'astro:content';
+import DefaultLayout from '../../layouts/DefaultLayout.astro';
+import ThoughtCard from '../../components/content/ThoughtCard.astro';
+
+// 获取所有想法，按日期降序排列
+const allThoughts = await getCollection('thoughts');
+allThoughts.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+
+// 提取所有唯一标签，按使用频率排序
+const tagCounts = new Map<string, number>();
+allThoughts.forEach((thought) => {
+    thought.data.tags.forEach((tag) => {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+    });
+});
+const allTags = Array.from(tagCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([tag]) => tag);
+
+const PAGE_SIZE = 10;
+const initialThoughts = allThoughts.slice(0, PAGE_SIZE);
+
+// 标签展示：默认显示前8个，超出可展开
+const VISIBLE_TAG_COUNT = 8;
+const hasMoreTags = allTags.length > VISIBLE_TAG_COUNT;
+const visibleTags = hasMoreTags ? allTags.slice(0, VISIBLE_TAG_COUNT) : allTags;
+const hiddenTags = hasMoreTags ? allTags.slice(VISIBLE_TAG_COUNT) : [];
+---
+
+<DefaultLayout
+    title="想法"
+    description="记录碎片化的思考与灵感"
+    showRightSidebar={false}
+>
+    <!-- 标签筛选器 -->
+    {allTags.length > 0 && (
+        <div class="mb-6">
+            <div class="flex flex-wrap gap-2" id="thought-tags-filter">
+                <button
+                    type="button"
+                    class="thought-filter-btn text-sm px-3 py-1 rounded-full border border-[var(--border-light)] text-[var(--text-secondary)] hover:border-[var(--accent-color)] hover:text-[var(--accent-color)] transition-colors bg-transparent cursor-pointer active"
+                    data-tag=""
+                >
+                    全部
+                </button>
+                {visibleTags.map((tag) => (
+                    <button
+                        type="button"
+                        class="thought-filter-btn text-sm px-3 py-1 rounded-full border border-[var(--border-light)] text-[var(--text-secondary)] hover:border-[var(--accent-color)] hover:text-[var(--accent-color)] transition-colors bg-transparent cursor-pointer"
+                        data-tag={tag}
+                    >
+                        #{tag}
+                        <span class="text-[var(--text-muted)] ml-1">({tagCounts.get(tag)})</span>
+                    </button>
+                ))}
+                {hasMoreTags && (
+                    <button
+                        type="button"
+                        id="thought-tags-more-btn"
+                        class="text-sm px-3 py-1 rounded-full border border-[var(--border-light)] text-[var(--text-muted)] hover:border-[var(--accent-color)] hover:text-[var(--accent-color)] transition-colors bg-transparent cursor-pointer"
+                    >
+                        更多...
+                    </button>
+                )}
+            </div>
+            {hasMoreTags && (
+                <div id="thought-tags-hidden" class="flex flex-wrap gap-2 mt-2 hidden">
+                    {hiddenTags.map((tag) => (
+                        <button
+                            type="button"
+                            class="thought-filter-btn text-sm px-3 py-1 rounded-full border border-[var(--border-light)] text-[var(--text-secondary)] hover:border-[var(--accent-color)] hover:text-[var(--accent-color)] transition-colors bg-transparent cursor-pointer"
+                            data-tag={tag}
+                        >
+                            #{tag}
+                            <span class="text-[var(--text-muted)] ml-1">({tagCounts.get(tag)})</span>
+                        </button>
+                    ))}
+                    <button
+                        type="button"
+                        id="thought-tags-less-btn"
+                        class="text-sm px-3 py-1 rounded-full border border-[var(--border-light)] text-[var(--text-muted)] hover:border-[var(--accent-color)] hover:text-[var(--accent-color)] transition-colors bg-transparent cursor-pointer"
+                    >
+                        收起
+                    </button>
+                </div>
+            )}
+        </div>
+    )}
+
+    <!-- 想法卡片流 -->
+    <div id="thoughts-feed" class="space-y-4" data-all-thoughts={JSON.stringify(allThoughts.map(t => ({
+        id: t.id,
+        date: t.data.date,
+        tags: t.data.tags,
+        body: t.body
+    })))} data-page-size={PAGE_SIZE}>
+        {initialThoughts.map((thought) => (
+            <ThoughtCard thought={thought} />
+        ))}
+    </div>
+
+    <!-- 加载更多 -->
+    <div id="thoughts-load-more" class="py-6 text-center">
+        <button
+            id="thoughts-load-btn"
+            class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-colors flex items-center gap-1.5 mx-auto bg-transparent border-0 cursor-pointer"
+        >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            <span>加载更多</span>
+        </button>
+        <div id="thoughts-loading" class="hidden text-sm text-[var(--text-muted)] flex items-center justify-center gap-2">
+            <svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            <span>加载中...</span>
+        </div>
+        <div id="thoughts-no-more" class="hidden text-sm text-[var(--text-muted)]">没有更多想法了</div>
+    </div>
+
+    <!-- 空状态 -->
+    {allThoughts.length === 0 && (
+        <div class="text-center py-12 text-[var(--text-muted)]">
+            <p>还没有记录任何想法</p>
+        </div>
+    )}
+</DefaultLayout>
+
+<script is:inline>
+(function() {
+    if (window.__thoughtsPageScriptLoaded) return;
+    window.__thoughtsPageScriptLoaded = true;
+
+    var feed = document.getElementById('thoughts-feed');
+    var loadBtn = document.getElementById('thoughts-load-btn');
+    var loading = document.getElementById('thoughts-loading');
+    var noMore = document.getElementById('thoughts-no-more');
+    var tagFilterContainer = document.getElementById('thought-tags-filter');
+
+    if (!feed) return;
+
+    var allThoughts = JSON.parse(feed.dataset.allThoughts || '[]');
+    var pageSize = parseInt(feed.dataset.pageSize || '10', 10);
+    var loadedCount = feed.querySelectorAll('.thought-card').length;
+    var loadingLock = false;
+    var currentFilterTag = '';
+
+    // 获取当前过滤后的想法列表（标签筛选）
+    function getFilteredThoughts() {
+        if (!currentFilterTag) return allThoughts;
+        return allThoughts.filter(function(t) {
+            return t.tags && t.tags.indexOf(currentFilterTag) !== -1;
+        });
+    }
+
+    // 渲染单条想法为 HTML
+    function renderThoughtHTML(thought) {
+        var tagsHtml = '';
+        if (thought.tags && thought.tags.length > 0) {
+            tagsHtml = '<div class="flex flex-wrap gap-2 mb-3">' +
+                thought.tags.map(function(tag) {
+                    return '<button type="button" class="thought-tag text-sm text-[var(--accent-color)] hover:underline bg-transparent border-0 p-0 cursor-pointer" data-tag="' + escapeHtml(tag) + '">#' + escapeHtml(tag) + '</button>';
+                }).join('') +
+                '</div>';
+        }
+
+        var plainText = (thought.body || '')
+            .replace(/!?\[([^\]]+)\]\([^)]+\)/g, '$1')
+            .replace(/[#*`~\[\]()\-_\!]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        var isLong = plainText.length > 140;
+
+        var contentClass = 'thought-content text-[15px] leading-relaxed text-[var(--text-main)]';
+        if (isLong) contentClass += ' thought-content-clamped';
+
+        var expandBtn = '';
+        if (isLong) {
+            expandBtn = '<button type="button" class="thought-expand-btn text-[var(--accent-color)] text-sm mt-2 hover:underline bg-transparent border-0 p-0 cursor-pointer">展开</button>';
+        }
+
+        var dateStr = formatDate(thought.date);
+
+        return '<article class="thought-card" data-tags="' + escapeHtml(JSON.stringify(thought.tags || [])) + '">' +
+            '<div class="thought-card-inner rounded-xl bg-[var(--bg-card)] p-5">' +
+            '<div class="text-xs text-[var(--text-muted)] mb-2">' + escapeHtml(dateStr) + '</div>' +
+            tagsHtml +
+            '<div class="' + contentClass + '">' + escapeHtml(thought.body || '').replace(/\n/g, '<br>') + '</div>' +
+            expandBtn +
+            '</div></article>';
+    }
+
+    function formatDate(dateStr) {
+        var now = new Date();
+        var target = new Date(dateStr);
+        var diffMs = now.getTime() - target.getTime();
+        var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        var month = target.getMonth() + 1;
+        var day = target.getDate();
+        var hours = String(target.getHours()).padStart(2, '0');
+        var minutes = String(target.getMinutes()).padStart(2, '0');
+        var timeStr = hours + ':' + minutes;
+
+        if (diffDays <= 0) return '今天 ' + timeStr;
+        if (diffDays === 1) return '昨天 ' + timeStr;
+        if (diffDays === 2) return '前天 ' + timeStr;
+        if (diffDays < 7) return diffDays + '天前 ' + timeStr;
+        if (diffDays < 30) return Math.floor(diffDays / 7) + '周前 ' + timeStr;
+        if (target.getFullYear() === now.getFullYear()) {
+            return month + '月' + day + '日 ' + timeStr;
+        }
+        return target.getFullYear() + '年' + month + '月' + day + '日';
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // 加载更多
+    function loadMore() {
+        if (loadingLock) return;
+        loadingLock = true;
+        if (loadBtn) loadBtn.classList.add('hidden');
+        if (loading) loading.classList.remove('hidden');
+
+        setTimeout(function() {
+            var filtered = getFilteredThoughts();
+            var nextThoughts = filtered.slice(loadedCount, loadedCount + pageSize);
+
+            if (nextThoughts.length === 0) {
+                if (loading) loading.classList.add('hidden');
+                if (noMore) noMore.classList.remove('hidden');
+                loadingLock = false;
+                return;
+            }
+
+            var html = nextThoughts.map(renderThoughtHTML).join('');
+            var temp = document.createElement('div');
+            temp.innerHTML = html;
+            while (temp.firstChild) {
+                feed.appendChild(temp.firstChild);
+            }
+
+            loadedCount += nextThoughts.length;
+            if (loading) loading.classList.add('hidden');
+            if (loadedCount >= filtered.length) {
+                if (noMore) noMore.classList.remove('hidden');
+            } else {
+                if (loadBtn) loadBtn.classList.remove('hidden');
+            }
+            loadingLock = false;
+        }, 300);
+    }
+
+    if (loadBtn) {
+        loadBtn.addEventListener('click', loadMore);
+    }
+
+    // 无限滚动
+    var scrollHandler = function() {
+        var filtered = getFilteredThoughts();
+        if (loadedCount >= filtered.length) return;
+        var scrollTop = window.scrollY || document.documentElement.scrollTop;
+        var docHeight = document.documentElement.scrollHeight;
+        var winHeight = window.innerHeight;
+        if (scrollTop + winHeight >= docHeight - 200) {
+            loadMore();
+        }
+    };
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+
+    // 标签筛选
+    function setupTagFilter(container) {
+        if (!container) return;
+        container.addEventListener('click', function(e) {
+            var btn = e.target.closest('.thought-filter-btn');
+            if (!btn) return;
+
+            document.querySelectorAll('.thought-filter-btn').forEach(function(b) {
+                b.classList.remove('active');
+                b.style.borderColor = '';
+                b.style.color = '';
+            });
+            btn.classList.add('active');
+            btn.style.borderColor = 'var(--accent-color)';
+            btn.style.color = 'var(--accent-color)';
+
+            currentFilterTag = btn.dataset.tag || '';
+            applyFilter();
+        });
+    }
+
+    setupTagFilter(tagFilterContainer);
+
+    // 统一应用筛选并重新渲染
+    function applyFilter() {
+        var filtered = getFilteredThoughts();
+        feed.innerHTML = filtered.slice(0, pageSize).map(renderThoughtHTML).join('');
+        loadedCount = Math.min(pageSize, filtered.length);
+
+        if (noMore) noMore.classList.add('hidden');
+        if (loadBtn) loadBtn.classList.remove('hidden');
+        if (loadedCount >= filtered.length) {
+            if (loadBtn) loadBtn.classList.add('hidden');
+            if (noMore) noMore.classList.remove('hidden');
+        }
+    }
+
+    // 标签更多/收起
+    var tagsMoreBtn = document.getElementById('thought-tags-more-btn');
+    var tagsHidden = document.getElementById('thought-tags-hidden');
+    var tagsLessBtn = document.getElementById('thought-tags-less-btn');
+
+    if (tagsMoreBtn && tagsHidden) {
+        tagsMoreBtn.addEventListener('click', function() {
+            tagsHidden.classList.remove('hidden');
+            tagsMoreBtn.classList.add('hidden');
+        });
+    }
+    if (tagsLessBtn && tagsHidden && tagsMoreBtn) {
+        tagsLessBtn.addEventListener('click', function() {
+            tagsHidden.classList.add('hidden');
+            tagsMoreBtn.classList.remove('hidden');
+        });
+    }
+
+    // 监听卡片内标签点击事件
+    document.addEventListener('thought:filterByTag', function(e) {
+        var tag = e.detail && e.detail.tag;
+        if (!tag || !tagFilterContainer) return;
+
+        var btn = tagFilterContainer.querySelector('[data-tag="' + tag + '"]');
+        if (btn) {
+            btn.click();
+        }
+    });
+})();
+</script>
+
+<style is:global>
+    .thought-filter-btn.active {
+        border-color: var(--accent-color) !important;
+        color: var(--accent-color) !important;
+    }
+</style>

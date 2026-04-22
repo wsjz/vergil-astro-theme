@@ -1,0 +1,167 @@
+---
+import { type CollectionEntry } from 'astro:content';
+import { marked } from 'marked';
+
+interface Props {
+    thought: CollectionEntry<'thoughts'>;
+}
+
+const { thought } = Astro.props;
+const { date, tags } = thought.data;
+const content = thought.body || '';
+
+// 渲染 Markdown 正文
+const processedContent = await marked.parse(content, { async: false }) as string;
+
+// 计算纯文本长度（用于判断是否超长）
+const plainText = content
+    .replace(/!?\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[#*`~\[\]()\-_\!]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+const isLongContent = plainText.length > 140;
+
+// 格式化日期
+function formatDate(dateValue: Date): string {
+    const now = new Date();
+    const target = new Date(dateValue);
+    const diffMs = now.getTime() - target.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    const month = target.getMonth() + 1;
+    const day = target.getDate();
+    const hours = String(target.getHours()).padStart(2, '0');
+    const minutes = String(target.getMinutes()).padStart(2, '0');
+    const timeStr = `${hours}:${minutes}`;
+
+    if (diffDays <= 0) return `今天 ${timeStr}`;
+    if (diffDays === 1) return `昨天 ${timeStr}`;
+    if (diffDays < 7) return `${diffDays}天前 ${timeStr}`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前 ${timeStr}`;
+    if (target.getFullYear() === now.getFullYear()) {
+        return `${month}月${day}日 ${timeStr}`;
+    }
+    return `${target.getFullYear()}年${month}月${day}日`;
+}
+
+const formattedDate = formatDate(date);
+---
+
+<article class="thought-card" data-tags={JSON.stringify(tags)}>
+    <div class="thought-card-inner rounded-xl bg-[var(--bg-card)] p-5">
+        <!-- 日期 -->
+        <div class="text-xs text-[var(--text-muted)] mb-2">
+            {formattedDate}
+        </div>
+
+        <!-- 标签 -->
+        {tags.length > 0 && (
+            <div class="flex flex-wrap gap-2 mb-3">
+                {tags.map((tag) => (
+                    <button
+                        type="button"
+                        class="thought-tag text-sm text-[var(--accent-color)] hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                        data-tag={tag}
+                    >
+                        #{tag}
+                    </button>
+                ))}
+            </div>
+        )}
+
+        <!-- 正文 -->
+        <div
+            class={`thought-content text-[15px] leading-relaxed text-[var(--text-main)] ${isLongContent ? 'thought-content-clamped' : ''}`}
+            set:html={processedContent}
+        />
+
+        <!-- 展开/收起按钮 -->
+        {isLongContent && (
+            <button
+                type="button"
+                class="thought-expand-btn text-[var(--accent-color)] text-sm mt-2 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+            >
+                展开
+            </button>
+        )}
+    </div>
+</article>
+
+<style>
+    .thought-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .thought-card:hover {
+        transform: translateY(-1px);
+    }
+    .thought-card-inner {
+        transition: box-shadow 0.2s ease;
+    }
+    .thought-card:hover .thought-card-inner {
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+    .thought-content :global(a) {
+        color: var(--accent-color);
+        text-decoration: none;
+    }
+    .thought-content :global(a:hover) {
+        text-decoration: underline;
+    }
+    .thought-content :global(strong) {
+        color: var(--text-main);
+        font-weight: 600;
+    }
+    .thought-content :global(p) {
+        margin: 0;
+    }
+    .thought-content :global(p + p) {
+        margin-top: 0.5rem;
+    }
+    .thought-content-clamped {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+
+<script is:inline>
+(function() {
+    if (window.__thoughtCardScriptLoaded) return;
+    window.__thoughtCardScriptLoaded = true;
+
+    // 展开/收起
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.thought-expand-btn');
+        if (!btn) return;
+        e.stopPropagation();
+        var content = btn.previousElementSibling;
+        if (!content) return;
+        if (content.classList.contains('thought-expanded')) {
+            content.classList.remove('thought-expanded');
+            content.classList.add('thought-content-clamped');
+            btn.textContent = '展开';
+        } else {
+            content.classList.remove('thought-content-clamped');
+            content.classList.add('thought-expanded');
+            btn.textContent = '收起';
+        }
+    });
+
+    // 标签点击筛选（委托到 document）
+    document.addEventListener('click', function(e) {
+        var tagBtn = e.target.closest('.thought-tag');
+        if (!tagBtn) return;
+        e.stopPropagation();
+        var tag = tagBtn.dataset.tag;
+        if (!tag) return;
+
+        // 触发自定义事件，由页面监听处理
+        var event = new CustomEvent('thought:filterByTag', {
+            detail: { tag: tag },
+            bubbles: true
+        });
+        tagBtn.dispatchEvent(event);
+    });
+})();
+</script>
