@@ -387,6 +387,15 @@ export function remarkContentDirectives() {
                     node.data = { hName: 'div', hProperties: { class: `md-directive ${gridClasses.join(' ')}`, style: `${gridStyle};--grid-minw:${minw}` } };
                 }
                 node.children = cells.map(c => h('div', { class: 'md-grid-cell' }, c));
+            } else if (name === 'blockquote') {
+                const leftQuote = getIconSvg('bxs:quote-left', 28);
+                const rightQuote = getIconSvg('bxs:quote-right', 28);
+                node.data = { hName: 'blockquote', hProperties: { class: 'md-directive md-directive-blockquote' } };
+                node.children = [
+                    { type: 'html', value: `<span class="md-blockquote-icon md-blockquote-icon-left">${leftQuote}</span>` },
+                    ...node.children,
+                    { type: 'html', value: `<span class="md-blockquote-icon md-blockquote-icon-right">${rightQuote}</span>` }
+                ];
             } else if (name === 'quot') {
                 const icon = attrs.icon || '';
                 let text = '';
