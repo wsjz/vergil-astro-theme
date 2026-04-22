@@ -115,16 +115,18 @@ function formatRelativeTime(dateStr: string) {
                             <span class="flex-1 h-px bg-[var(--border-light)]" />
                         </div>
                     )}
-                    <Moment
-                        name={siteConfig.title || 'Vergil'}
-                        avatar={avatarSrc}
-                        date={formatRelativeTime(post.date)}
-                        content={post.content}
-                        images={post.images}
-                        forward={post.forward}
-                        linkCard={post.linkCard}
-                        tags={post.tags}
-                    />
+                    <div class="reveal">
+                        <Moment
+                            name={siteConfig.title || 'Vergil'}
+                            avatar={avatarSrc}
+                            date={formatRelativeTime(post.date)}
+                            content={post.content}
+                            images={post.images}
+                            forward={post.forward}
+                            linkCard={post.linkCard}
+                            tags={post.tags}
+                        />
+                    </div>
                 </>
             );
         })}
