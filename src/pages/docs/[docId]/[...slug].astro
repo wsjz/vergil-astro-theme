@@ -4,6 +4,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 import DocsNav from '../../../components/docs/DocsNav.astro';
 import TocSidebar from '../../../components/widgets/TocSidebar.astro';
 import FloatingToc from '../../../components/widgets/FloatingToc.astro';
+import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
 import { getDocSets, getDocEntry, getAdjacentDocs } from '../../../utils/docs-utils';
 
 export async function getStaticPaths() {
@@ -28,6 +29,17 @@ const { prev, next } = await getAdjacentDocs(docId, slug);
 const sets = await getDocSets();
 const currentSet = sets.find((s) => s.id === docId);
 const metaTitle = (currentSet?.meta.data.title as string) ?? docId;
+
+function resolveBannerUrl(banner: string | undefined): string | null {
+    if (!banner) return null;
+    if (banner.startsWith('http')) {
+        return banner;
+    }
+    // 关键词模式：使用固定 unsplash 随机图
+    return `https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1600&h=400&fit=crop&q=80`;
+}
+
+const bannerUrl = resolveBannerUrl(entry.data.banner as string | undefined);
 ---
 
 <DocsLayout
@@ -48,11 +60,41 @@ const metaTitle = (currentSet?.meta.data.title as string) ?? docId;
         <span class="font-display text-sm font-medium text-main">{metaTitle}</span>
     </div>
 
+    {bannerUrl && (
+        <div class="article-banner relative -mx-4 sm:-mx-8 mb-8 overflow-hidden rounded-xl h-[180px] sm:h-[220px]">
+            <img
+                src={bannerUrl}
+                alt={entry.data.title as string}
+                class="absolute inset-0 w-full h-full object-cover"
+                loading="eager"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 flex flex-col justify-between p-6 sm:p-8">
+                <div class="flex flex-wrap items-center gap-2 text-sm text-white/80 drop-shadow [&_a]:text-white/80 [&_a:hover]:text-white [&_span]:text-white/60">
+                    <Breadcrumb
+                        crumbs={[
+                            { text: 'Docs', href: '/docs/' },
+                            { text: metaTitle, href: `/docs/${docId}/` },
+                            { text: entry.data.title as string }
+                        ]}
+                    />
+                </div>
+                <div>
+                    <h1 class="font-display text-2xl leading-tight font-medium text-white sm:text-3xl sm:leading-tight drop-shadow-lg">{entry.data.title}</h1>
+                </div>
+            </div>
+        </div>
+    )}
+
     <article class="mb-16 sm:mb-24">
         <header class="mb-8">
-            <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{entry.data.title}</h1>
-            {entry.data.excerpt && (
-                <p class="mt-3 text-sm text-secondary">{entry.data.excerpt}</p>
+            {!bannerUrl && (
+                <>
+                    <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{entry.data.title}</h1>
+                    {entry.data.excerpt && (
+                        <p class="mt-3 text-sm text-secondary">{entry.data.excerpt}</p>
+                    )}
+                </>
             )}
         </header>
 

@@ -93,7 +93,19 @@ const docs = defineCollection({
             excerpt: z.string().optional(),
             draft: z.boolean().default(false),
             tags: z.array(z.string()).default([]),
-            cover: image().optional()
+            cover: image().optional(),
+            banner: z.string().optional(),
+            splash: z.object({
+                enabled: z.boolean().default(false),
+                backgroundImage: z.string().optional(),
+                overlay: z.string().optional(),
+                textShadow: z.boolean().default(true),
+                buttonText: z.string().default('开始阅读'),
+                fallbackBg: z.string().optional(),
+                gradientColor: z.string().optional(),
+                gradientHeight: z.string().default('h-56'),
+                backdropBlur: z.string().default('12px')
+            }).optional()
         })
 });
 
