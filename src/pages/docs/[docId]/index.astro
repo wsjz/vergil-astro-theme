@@ -1,6 +1,13 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import { getDocSets, getFirstDocSlug } from '../../../utils/docs-utils';
+import { getCollection, render } from 'astro:content';
+import { getDocSets, getFirstDocSlug, getAdjacentDocs } from '../../../utils/docs-utils';
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+import DocsNav from '../../../components/docs/DocsNav.astro';
+import TocSidebar from '../../../components/widgets/TocSidebar.astro';
+import FloatingToc from '../../../components/widgets/FloatingToc.astro';
+import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
+import DocSetSplash from '../../../components/docs/DocSetSplash.astro';
 
 export const getStaticPaths = (async () => {
     const sets = await getDocSets();
@@ -10,8 +17,95 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { docId } = Astro.params;
+const sets = await getDocSets();
+const currentSet = sets.find((s) => s.id === docId);
+const meta = currentSet?.meta;
+const splashConfig = meta?.data?.splash as Record<string, any> | undefined;
+const splashEnabled = splashConfig?.enabled === true;
+
+// 获取第一篇文档
 const firstSlug = await getFirstDocSlug(docId);
-const target = firstSlug ? `/docs/${docId}/${firstSlug}` : `/docs/${docId}`;
+let entry = null;
+let Content = null;
+let headings: any[] = [];
+
+if (firstSlug) {
+    const entries = await getCollection('docs');
+    const expectedId = `${docId}/${firstSlug}`;
+    entry = entries.find((e) => !(e.id.endsWith('/_meta') || e.id === '_meta') && e.id === expectedId);
+    if (entry) {
+        const rendered = await render(entry);
+        Content = rendered.Content;
+        headings = rendered.headings;
+    }
+}
+
+// 如果没有找到文章也没有开启 splash，跳转回文档列表
+if (!entry && !splashEnabled) {
+    return Astro.redirect('/docs/');
+}
+
+const { prev, next } = entry ? await getAdjacentDocs(docId, entry.id.split('/').slice(1).join('/')) : { prev: null, next: null };
+const metaTitle = (meta?.data?.title as string) ?? docId;
 ---
 
-<meta http-equiv="refresh" content={`0;url=${target}`} />
+<DocsLayout
+    title={(entry?.data?.title as string) || (meta?.data?.title as string) || docId}
+    description={(entry?.data?.excerpt as string) || (meta?.data?.description as string) || ''}
+    pageType="article"
+    docId={docId}
+    currentSlug={firstSlug || ''}
+    articleTitle={(entry?.data?.title as string) || ''}
+    splashMode={splashEnabled}
+>
+    <div slot="right-sidebar">
+        <TocSidebar headings={headings} />
+    </div>
+
+    {splashEnabled && (
+        <DocSetSplash
+            slot="splash"
+            title={(meta?.data?.title as string) || docId}
+            subtitle={(meta?.data?.subtitle as string) || 'Documentation'}
+            description={(meta?.data?.description as string) || ''}
+            backgroundImage={splashConfig?.backgroundImage}
+            overlay={splashConfig?.overlay}
+            textShadow={splashConfig?.textShadow !== false}
+            buttonText={splashConfig?.buttonText || '开始阅读'}
+            fallbackBg={splashConfig?.fallbackBg}
+            gradientColor={splashConfig?.gradientColor}
+            gradientHeight={splashConfig?.gradientHeight || 'h-56'}
+            backdropBlur={splashConfig?.backdropBlur || '12px'}
+        />
+    )}
+
+    <FloatingToc headings={headings} />
+
+    <div slot="title" class="flex items-center gap-2 mb-4 pb-3 border-b border-light">
+        <span class="font-display text-sm font-medium text-main">{metaTitle}</span>
+    </div>
+
+    {entry && (
+        <article class="mb-16 sm:mb-24">
+            <header class="mb-8">
+                <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{entry.data.title}</h1>
+                {entry.data.excerpt && (
+                    <p class="mt-3 text-sm text-secondary">{entry.data.excerpt}</p>
+                )}
+            </header>
+
+            <div class="prose sm:prose-lg max-w-none">
+                <Content />
+            </div>
+        </article>
+    )}
+
+    {!entry && (
+        <div class="flex flex-col items-center justify-center min-h-[40vh] text-secondary">
+            <p>该知识库暂无文章</p>
+            <a href="/docs/" class="mt-4 text-accent hover:underline">返回文档列表</a>
+        </div>
+    )}
+
+    <DocsNav docId={docId} prev={prev} next={next} />
+</DocsLayout>

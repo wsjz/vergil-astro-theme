@@ -86,6 +86,7 @@ const docs = defineCollection({
     schema: ({ image }) =>
         z.object({
             title: z.string(),
+            subtitle: z.string().optional(),
             description: z.string().optional(),
             icon: z.string().optional(),
             order: z.number().default(99),

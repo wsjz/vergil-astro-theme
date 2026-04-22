@@ -43,7 +43,7 @@ for (let i = 0; i < slugParts.length - 1; i++) {
     const dirPath = i === 0 ? slugParts[0] : slugParts.slice(0, i + 1).join('/');
     const group = currentNodes.find((n: any) => n.type === 'group' && n.dirPath === dirPath);
     if (group) {
-        // 中间层级都跳回该文档集的列表页
+        // 中间层级都跳回该知识库的列表页
         crumbs.push({ text: group.title, href: `/views/minimal/?type=docs&cat=${docId}` });
         currentNodes = group.children;
     }

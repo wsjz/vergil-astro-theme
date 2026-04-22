@@ -13,9 +13,10 @@ export type Props = HeadProps & {
     currentSlug?: string;
     articleTitle?: string;
     commentsEnabled?: boolean;
+    splashMode?: boolean;
 };
 
-const { docId, currentSlug = '', articleTitle = '', commentsEnabled = false, ...head } = Astro.props;
+const { docId, currentSlug = '', articleTitle = '', commentsEnabled = false, splashMode = false, ...head } = Astro.props;
 const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
 const isArticle = head.pageType === 'article';
 ---
@@ -67,9 +68,10 @@ const isArticle = head.pageType === 'article';
         {isArticle && (
             <div id="reading-progress" class="fixed top-0 left-0 h-[2px] bg-accent z-[9999] w-0 transition-none"></div>
         )}
+        <slot name="splash" />
 
-        <div id="main-stage">
-            <TopNav articleTitle={articleTitle} commentsEnabled={commentsEnabled} sticky={false} />
+        <div id="main-stage" class={splashMode ? 'relative mt-[100vh] translate-y-0' : ''}>
+            <TopNav articleTitle={articleTitle} commentsEnabled={commentsEnabled} sticky={splashMode} />
             <Search />
 
             <div class="flex min-h-screen pt-16">
