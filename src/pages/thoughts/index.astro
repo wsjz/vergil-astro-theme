@@ -96,7 +96,9 @@ const hiddenTags = hasMoreTags ? allTags.slice(VISIBLE_TAG_COUNT) : [];
         body: t.body
     })))} data-page-size={PAGE_SIZE}>
         {initialThoughts.map((thought) => (
-            <ThoughtCard thought={thought} />
+            <div class="reveal">
+                <ThoughtCard thought={thought} />
+            </div>
         ))}
     </div>
 
@@ -114,6 +116,20 @@ const hiddenTags = hasMoreTags ? allTags.slice(VISIBLE_TAG_COUNT) : [];
             <span>加载中...</span>
         </div>
         <div id="thoughts-no-more" class="hidden text-sm text-[var(--text-muted)]">没有更多想法了</div>
+
+        <!-- 骨架屏 -->
+        <div id="thoughts-skeleton" class="hidden space-y-4 mt-4">
+            <div class="rounded-xl bg-[var(--bg-card)] p-5">
+                <div class="skeleton h-3 w-20 rounded mb-3"></div>
+                <div class="skeleton h-3 w-full rounded mb-2"></div>
+                <div class="skeleton h-3 w-3/4 rounded"></div>
+            </div>
+            <div class="rounded-xl bg-[var(--bg-card)] p-5">
+                <div class="skeleton h-3 w-16 rounded mb-3"></div>
+                <div class="skeleton h-3 w-full rounded mb-2"></div>
+                <div class="skeleton h-3 w-1/2 rounded"></div>
+            </div>
+        </div>
     </div>
 
     <!-- 空状态 -->
@@ -133,6 +149,7 @@ const hiddenTags = hasMoreTags ? allTags.slice(VISIBLE_TAG_COUNT) : [];
     var loadBtn = document.getElementById('thoughts-load-btn');
     var loading = document.getElementById('thoughts-loading');
     var noMore = document.getElementById('thoughts-no-more');
+    var skeleton = document.getElementById('thoughts-skeleton');
     var tagFilterContainer = document.getElementById('thought-tags-filter');
 
     if (!feed) return;
@@ -179,7 +196,7 @@ const hiddenTags = hasMoreTags ? allTags.slice(VISIBLE_TAG_COUNT) : [];
 
         var dateStr = formatDate(thought.date);
 
-        return '<article class="thought-card" data-tags="' + escapeHtml(JSON.stringify(thought.tags || [])) + '">' +
+        return '<article class="thought-card reveal visible" data-tags="' + escapeHtml(JSON.stringify(thought.tags || [])) + '">' +
             '<div class="thought-card-inner rounded-xl bg-[var(--bg-card)] p-5">' +
             '<div class="text-xs text-[var(--text-muted)] mb-2">' + escapeHtml(dateStr) + '</div>' +
             tagsHtml +
@@ -226,6 +243,7 @@ const hiddenTags = hasMoreTags ? allTags.slice(VISIBLE_TAG_COUNT) : [];
         loadingLock = true;
         if (loadBtn) loadBtn.classList.add('hidden');
         if (loading) loading.classList.remove('hidden');
+        if (skeleton) skeleton.classList.remove('hidden');
 
         setTimeout(function() {
             var filtered = getFilteredThoughts();
@@ -233,6 +251,7 @@ const hiddenTags = hasMoreTags ? allTags.slice(VISIBLE_TAG_COUNT) : [];
 
             if (nextThoughts.length === 0) {
                 if (loading) loading.classList.add('hidden');
+                if (skeleton) skeleton.classList.add('hidden');
                 if (noMore) noMore.classList.remove('hidden');
                 loadingLock = false;
                 return;
@@ -247,6 +266,7 @@ const hiddenTags = hasMoreTags ? allTags.slice(VISIBLE_TAG_COUNT) : [];
 
             loadedCount += nextThoughts.length;
             if (loading) loading.classList.add('hidden');
+            if (skeleton) skeleton.classList.add('hidden');
             if (loadedCount >= filtered.length) {
                 if (noMore) noMore.classList.remove('hidden');
             } else {

@@ -81,3 +81,66 @@ dialog::backdrop {
         opacity: 1;
     }
 }
+
+/* ── 全局平滑滚动 ── */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ── 按钮/链接按压反馈 ── */
+button:active,
+a:active {
+    transform: scale(0.96);
+    transition: transform 0.1s ease;
+}
+
+/* ── 图片懒加载淡入 ── */
+img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+img[loading="lazy"].img-loaded {
+    opacity: 1;
+}
+
+/* ── 滚动显现（reveal）── */
+.reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.06s; }
+.reveal-delay-2 { transition-delay: 0.12s; }
+.reveal-delay-3 { transition-delay: 0.18s; }
+.reveal-delay-4 { transition-delay: 0.24s; }
+.reveal-delay-5 { transition-delay: 0.30s; }
+.reveal-delay-6 { transition-delay: 0.36s; }
+.reveal-delay-7 { transition-delay: 0.42s; }
+.reveal-delay-8 { transition-delay: 0.48s; }
+
+/* nth-child 自动 stagger */
+.reveal:nth-child(1) { transition-delay: 0.00s; }
+.reveal:nth-child(2) { transition-delay: 0.06s; }
+.reveal:nth-child(3) { transition-delay: 0.12s; }
+.reveal:nth-child(4) { transition-delay: 0.18s; }
+.reveal:nth-child(5) { transition-delay: 0.24s; }
+.reveal:nth-child(6) { transition-delay: 0.30s; }
+.reveal:nth-child(7) { transition-delay: 0.36s; }
+.reveal:nth-child(8) { transition-delay: 0.42s; }
+.reveal:nth-child(9) { transition-delay: 0.48s; }
+.reveal:nth-child(10) { transition-delay: 0.54s; }
+
+/* ── 骨架屏脉冲 ── */
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-muted) 50%, var(--bg-card) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+}
+@keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

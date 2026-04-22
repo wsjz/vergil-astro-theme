@@ -20,6 +20,10 @@ const portfolio = page.data;
 
 <BaseLayout title="Portfolio" description="Explore a diverse portfolio showcasing my passion and expertise" showHeader={false}>
     <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">Projects</h1>
-    {portfolio.map((project) => <ProjectPreview project={project} class="mb-10 sm:mb-12" />)}
+    {portfolio.map((project) => (
+        <div class="reveal rounded-xl bg-[var(--bg-card)] p-5 mb-6 sm:mb-8 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <ProjectPreview project={project} class="" />
+        </div>
+    ))}
     <Pagination page={page} class="my-16 sm:my-24" />
 </BaseLayout>

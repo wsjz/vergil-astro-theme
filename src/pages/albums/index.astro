@@ -20,7 +20,9 @@ const description = 'Photo albums and galleries';
     {sortedAlbums.length > 0 ? (
         <div class="grid gap-6 sm:grid-cols-2">
             {sortedAlbums.map(album => (
-                <AlbumCard album={album} />
+                <div class="reveal">
+                    <AlbumCard album={album} />
+                </div>
             ))}
         </div>
     ) : (

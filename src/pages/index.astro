@@ -74,7 +74,9 @@ if (fs.existsSync(momentsDir)) {
                     <h2 class="font-sans text-xl font-medium mb-4 sm:text-2xl text-accent hover:opacity-80 transition-opacity">文章</h2>
                 </a>
                 {pagePosts.map((post) => (
-                    <PostPreview post={post} headingLevel="h3" />
+                    <div class="reveal">
+                        <PostPreview post={post} headingLevel="h3" />
+                    </div>
                 ))}
                 
                 <!-- Pagination -->
