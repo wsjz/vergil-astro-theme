@@ -12,6 +12,11 @@ import { remarkTerminal, transformerTerminal } from './src/plugins/shiki-termina
 
 export default defineConfig({
     site: siteConfig.website,
+    trailingSlash: 'always',
+    prefetch: {
+        prefetchAll: true,
+        defaultStrategy: 'viewport',
+    },
     image: {
         service: {
             entrypoint: 'astro/assets/services/noop'

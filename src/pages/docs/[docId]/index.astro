@@ -32,7 +32,7 @@ let headings: any[] = [];
 if (firstSlug) {
     const entries = await getCollection('docs');
     const expectedId = `${docId}/${firstSlug}`;
-    entry = entries.find((e) => !(e.id.endsWith('/_meta') || e.id === '_meta') && e.id === expectedId);
+    entry = entries.find((e) => !(e.id.endsWith('/_meta') || e.id === '_meta') && (e.id === expectedId || e.id === `${expectedId}/index`));
     if (entry) {
         const rendered = await render(entry);
         Content = rendered.Content;
@@ -45,7 +45,8 @@ if (!entry && !splashEnabled) {
     return Astro.redirect('/docs/');
 }
 
-const { prev, next } = entry ? await getAdjacentDocs(docId, entry.id.split('/').slice(1).join('/')) : { prev: null, next: null };
+const articleSlug = entry ? entry.id.split('/').slice(1).join('/').replace(/\/index$/, '') : '';
+const { prev, next } = articleSlug ? await getAdjacentDocs(docId, articleSlug) : { prev: null, next: null };
 const metaTitle = (meta?.data?.title as string) ?? docId;
 ---
 

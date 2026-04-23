@@ -14,6 +14,7 @@ export type DocGroupNode = {
     dirPath: string;
     order: number;
     children: DocTreeNode[];
+    slug?: string; // index.md slug, if present
 };
 
 export type DocTreeNode = DocArticleNode | DocGroupNode;
@@ -23,6 +24,10 @@ export type DocSet = {
     meta: CollectionEntry<'docs'>;
     tree: DocTreeNode[];
 };
+
+function stripOrderPrefix(name: string): string {
+    return name.replace(/^\d+[-_]/, '');
+}
 
 function isMetaEntry(entry: CollectionEntry<'docs'>): boolean {
     return entry.id.endsWith('/_meta') || entry.id === '_meta';
@@ -63,7 +68,7 @@ export async function getDocTree(docId: string): Promise<DocTreeNode[]> {
 export async function getDocEntry(docId: string, slug: string): Promise<CollectionEntry<'docs'> | undefined> {
     const entries = await getCollection('docs');
     const expectedId = `${docId}/${slug}`;
-    return entries.find((e) => !isMetaEntry(e) && e.id === expectedId);
+    return entries.find((e) => !isMetaEntry(e) && (e.id === expectedId || e.id === `${expectedId}/index`));
 }
 
 export async function getFirstDocSlug(docId: string): Promise<string | undefined> {
@@ -122,6 +127,7 @@ function buildTree(
         const segments = relativeId.split('/');
         insertNode(root, segments, entry, '', dirOrderMap, dirs);
     }
+    dedupeIndexArticles(root);
     sortNodes(root, dirOrderMap);
     return root;
 }
@@ -138,7 +144,7 @@ function insertNode(
         nodes.push({
             type: 'article',
             title: entry.data.title as string,
-            slug: entry.id.split('/').slice(1).join('/'),
+            slug: entry.id.split('/').slice(1).join('/').replace(/\/index$/, ''),
             order: (entry.data.order as number) ?? 99,
             entry
         });
@@ -150,7 +156,7 @@ function insertNode(
     if (!group) {
         group = {
             type: 'group',
-            title: dirs?.[currentPath] ?? dirName,
+            title: dirs?.[currentPath] ?? stripOrderPrefix(dirName),
             dirPath: currentPath,
             order: dirOrderMap.get(currentPath) ?? 99,
             children: []
@@ -158,6 +164,37 @@ function insertNode(
         nodes.push(group);
     }
     insertNode(group.children, segments.slice(1), entry, currentPath, dirOrderMap, dirs);
+}
+
+function dedupeIndexArticles(nodes: DocTreeNode[]) {
+    const toRemove: number[] = [];
+
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+
+        if (node.type === 'group') {
+            dedupeIndexArticles(node.children);
+        }
+
+        if (node.type === 'article') {
+            // 查找同层级是否有 dirPath 等于 article.slug 的 group
+            const groupIdx = nodes.findIndex(
+                (n, idx) => idx !== i && n.type === 'group' && n.dirPath === node.slug
+            );
+            if (groupIdx !== -1) {
+                const group = nodes[groupIdx] as DocGroupNode;
+                group.slug = node.slug;
+                if (node.order < group.order) group.order = node.order;
+                toRemove.push(i);
+            }
+        }
+    }
+
+    // 从后往前删除，避免索引偏移
+    toRemove.sort((a, b) => b - a);
+    for (const idx of toRemove) {
+        nodes.splice(idx, 1);
+    }
 }
 
 function sortNodes(nodes: DocTreeNode[], dirOrderMap: Map<string, number>) {

@@ -25,6 +25,11 @@
     cursor: pointer;
 }
 
+.md-tag-blur:hover,
+.md-tag-blur.md-tag-blur--revealed {
+    filter: blur(0);
+}
+
 .md-tag-psw {
     background: var(--text-muted);
     color: transparent;
@@ -35,7 +40,8 @@
     user-select: none;
 }
 
-.md-tag-psw:hover {
+.md-tag-psw:hover,
+.md-tag-psw.md-tag-psw--revealed {
     color: var(--text-main);
     background: transparent;
 }

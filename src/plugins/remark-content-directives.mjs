@@ -67,9 +67,9 @@ export function remarkContentDirectives() {
             } else if (name === 'kbd') {
                 node.data = { hName: 'kbd', hProperties: { class: 'md-tag-kbd' } };
             } else if (name === 'blur') {
-                node.data = { hName: 'span', hProperties: { class: 'md-tag-blur', onclick: "this.classList.remove('md-tag-blur')" } };
+                node.data = { hName: 'span', hProperties: { class: 'md-tag-blur', onclick: "this.classList.toggle('md-tag-blur--revealed')" } };
             } else if (name === 'psw') {
-                node.data = { hName: 'span', hProperties: { class: 'md-tag-psw', onclick: "this.classList.remove('md-tag-psw')" } };
+                node.data = { hName: 'span', hProperties: { class: 'md-tag-psw', onclick: "this.classList.toggle('md-tag-psw--revealed')" } };
             } else if (name === 'u') {
                 node.data = { hName: 'u', hProperties: { class: 'md-tag-u', style: `--tag-u-color:${resolveColor(attrs.color || 'accent')}` } };
             } else if (name === 'emp') {

@@ -13,7 +13,7 @@ export async function getStaticPaths() {
     return nonMeta.map((entry) => {
         const parts = entry.id.split('/');
         const docId = parts[0];
-        const slug = parts.slice(1).join('/');
+        const slug = parts.slice(1).join('/').replace(/\/index$/, '');
         return { params: { docId, slug } };
     });
 }

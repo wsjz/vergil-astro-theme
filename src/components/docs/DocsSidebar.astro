@@ -41,18 +41,18 @@ const metaEntry = tree.length > 0 ? undefined : undefined;
     id="docs-sidebar"
     class="sidebar flex flex-col fixed left-0 lg:left-[2%] top-14 h-[calc(100vh-3.5rem)] w-64 lg:w-56 xl:w-60 2xl:w-64 bg-main overflow-y-auto z-40 transition-transform duration-300 translate-x-0"
 >
-    <div class="flex-1 p-4">
+    <div class="flex-1 py-4 px-3">
         <slot name="title">
-            <div class="flex items-center gap-2 mb-4 pb-3 border-b border-light">
-                <BookOpen class="w-5 h-5 text-accent" />
-                <span class="font-display text-sm font-medium text-main">文档</span>
+            <div class="flex items-center gap-2 mb-5 pb-3 px-1 border-b border-light">
+                <BookOpen class="w-[18px] h-[18px] text-accent" />
+                <span class="font-display text-[13px] font-semibold text-main tracking-wide">文档</span>
             </div>
         </slot>
 
         {tree.length > 0 ? (
             <DocsTreeNode nodes={tree} currentSlug={currentSlug} docId={docId} />
         ) : (
-            <p class="text-xs text-muted">暂无文档</p>
+            <p class="text-xs text-muted px-2">暂无文档</p>
         )}
     </div>
 </aside>

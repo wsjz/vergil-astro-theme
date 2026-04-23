@@ -68,6 +68,7 @@ const siteConfig: SiteConfig = {
             label: '生活',
             icon: 'Heart',
             children: [
+                { label: '动态', href: '/moments', icon: 'Zap' },
                 { label: '相册', href: '/albums', icon: 'Image' },
                 { label: '想法', href: '/thoughts', icon: 'Lightbulb' }
             ]

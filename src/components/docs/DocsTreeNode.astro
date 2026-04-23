@@ -1,5 +1,5 @@
 ---
-import { FileText, FolderOpen, Folder } from '@lucide/astro';
+import { ChevronRight, ChevronDown } from '@lucide/astro';
 import type { DocTreeNode } from '../../utils/docs-utils';
 
 interface Props {
@@ -15,47 +15,324 @@ function isActive(slug: string, current: string): boolean {
     return slug === current;
 }
 
-function isParentActive(dirPath: string, current: string): boolean {
-    return current.startsWith(dirPath + '/');
+function isInDir(dirPath: string, current: string): boolean {
+    return current === dirPath || current.startsWith(dirPath + '/');
 }
 
-const indentClass = level === 0 ? '' : level === 1 ? 'pl-3' : 'pl-6';
+function isAncestorActive(node: DocTreeNode, current: string): boolean {
+    if (node.type === 'article') return false;
+    if (isActive(node.slug || '', current)) return true;
+    if (isInDir(node.dirPath, current)) {
+        for (const child of node.children) {
+            if (isAncestorActive(child, current)) return true;
+        }
+    }
+    return false;
+}
+
+// 计算当前路径上所有被展开的目录
+function getExpandedDirs(nodes: DocTreeNode[], current: string, expanded: Set<string> = new Set()): Set<string> {
+    for (const node of nodes) {
+        if (node.type === 'group') {
+            if (isInDir(node.dirPath, current)) {
+                expanded.add(node.dirPath);
+                getExpandedDirs(node.children, current, expanded);
+            }
+        }
+    }
+    return expanded;
+}
+
+const expandedDirs = getExpandedDirs(nodes, currentSlug);
+
+// 层级样式配置
+const levelConfig = [
+    { textSize: 'text-[13px]', fontWeight: 'font-semibold', opacity: 'opacity-100' },
+    { textSize: 'text-[13px]', fontWeight: 'font-medium',   opacity: 'opacity-95'  },
+    { textSize: 'text-[12.5px]', fontWeight: 'font-medium', opacity: 'opacity-90'  },
+    { textSize: 'text-xs',      fontWeight: 'font-normal',  opacity: 'opacity-85'  },
+];
+
+function getLevelConfig(l: number) {
+    return levelConfig[Math.min(l, levelConfig.length - 1)];
+}
 ---
 
-<ul class={`space-y-0.5 ${level > 0 ? 'mt-0.5' : ''}`}>
+<ul class={`docs-tree-list ${level > 0 ? 'docs-tree-children' : ''}`} data-level={level}>
     {nodes.map((node) => {
         if (node.type === 'article') {
             const active = isActive(node.slug, currentSlug);
+            const cfg = getLevelConfig(level);
             return (
-                <li>
+                <li class="docs-tree-item">
                     <a
-                        href={`/docs/${docId}/${node.slug}`}
-                        class={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm transition-colors ${indentClass} ${
-                            active
-                                ? 'bg-accent/10 text-accent font-medium'
-                                : 'text-secondary hover:text-accent hover:bg-hover'
-                        }`}
+                        href={`/docs/${docId}/${node.slug}/`}
+                        class={`docs-tree-link ${cfg.textSize} ${active ? 'active' : ''}`}
+                        data-level={level}
                     >
-                        <FileText class="w-3.5 h-3.5 shrink-0 opacity-70" />
-                        <span class="truncate">{node.title}</span>
+                        <span class="active-indicator" aria-hidden="true" />
+                        <span class="indent-spacer" aria-hidden="true" data-level={level} />
+                        <span class="article-placeholder" aria-hidden="true" />
+                        <span class={`truncate ${cfg.fontWeight} ${cfg.opacity}`}>{node.title}</span>
                     </a>
                 </li>
             );
         }
-        const expanded = isParentActive(node.dirPath, currentSlug);
+
+        const expanded = expandedDirs.has(node.dirPath);
+        const hasIndex = !!node.slug;
+        const active = hasIndex && isActive(node.slug, currentSlug);
+        const ancestorActive = isAncestorActive(node, currentSlug);
+        const hasChildren = node.children.length > 0;
+        const cfg = getLevelConfig(level);
+
+        const navHref = hasIndex ? `/docs/${docId}/${node.slug}/` : null;
+
+        const headerContent = (
+            <>
+                <span class="active-indicator" aria-hidden="true" />
+                <span class="indent-spacer" aria-hidden="true" data-level={level} />
+
+                {/* 箭头 — 标识为目录，同时指示展开状态 */}
+                {hasChildren ? (
+                    <span class="chevron-indicator">
+                        {expanded ? (
+                            <ChevronDown class={`w-3.5 h-3.5 ${active || ancestorActive ? 'text-accent' : 'text-muted/50'}`} />
+                        ) : (
+                            <ChevronRight class={`w-3.5 h-3.5 ${active || ancestorActive ? 'text-accent' : 'text-muted/50'}`} />
+                        )}
+                    </span>
+                ) : (
+                    <span class="chevron-placeholder" />
+                )}
+
+                {/* 目录标题 */}
+                <span class={`docs-group-title ${cfg.textSize} ${cfg.fontWeight} ${active ? 'text-accent' : ''}`}>
+                    {node.title}
+                </span>
+            </>
+        );
+
         return (
-            <li>
-                <details open={expanded} class="group">
-                    <summary
-                        class={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm cursor-pointer select-none transition-colors ${indentClass} text-secondary hover:text-accent hover:bg-hover`}
+            <li class="docs-tree-item docs-tree-group-item" data-dir-path={node.dirPath}>
+                {navHref ? (
+                    <a
+                        href={navHref}
+                        class={`docs-tree-group-header ${active ? 'active' : ''}`}
+                        data-level={level}
+                        data-expandable={hasChildren ? 'true' : 'false'}
                     >
-                        <FolderOpen class="w-3.5 h-3.5 shrink-0 opacity-70 group-open:block hidden" />
-                        <Folder class="w-3.5 h-3.5 shrink-0 opacity-70 group-open:hidden block" />
-                        <span class="truncate font-medium">{node.title}</span>
-                    </summary>
-                    <Astro.self nodes={node.children} currentSlug={currentSlug} docId={docId} level={level + 1} />
-                </details>
+                        {headerContent}
+                    </a>
+                ) : (
+                    <div
+                        class={`docs-tree-group-header ${active ? 'active' : ''}`}
+                        data-level={level}
+                        data-expandable={hasChildren ? 'true' : 'false'}
+                        role="button"
+                        tabindex="0"
+                    >
+                        {headerContent}
+                    </div>
+                )}
+
+                {/* 子内容 */}
+                {hasChildren && (
+                    <div class={`doc-children-wrapper ${expanded ? '' : 'collapsed'}`}>
+                        <div class="doc-children-inner">
+                            <Astro.self nodes={node.children} currentSlug={currentSlug} docId={docId} level={level + 1} />
+                        </div>
+                    </div>
+                )}
             </li>
         );
     })}
 </ul>
+
+<style>
+    /* ── 列表容器 ── */
+    .docs-tree-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .docs-tree-children {
+        position: relative;
+    }
+
+    /* ── 列表项 ── */
+    .docs-tree-item {
+        position: relative;
+    }
+
+    /* 顶级组之间增加间距 */
+    .docs-tree-list[data-level="0"] > .docs-tree-group-item:not(:first-child) {
+        margin-top: 6px;
+    }
+
+    /* ── 缩进占位 ── */
+    .indent-spacer {
+        display: inline-block;
+        flex-shrink: 0;
+        width: 0;
+    }
+
+    .indent-spacer[data-level="1"] { width: 12px; }
+    .indent-spacer[data-level="2"] { width: 24px; }
+    .indent-spacer[data-level="3"] { width: 36px; }
+
+    /* ── 文章链接 ── */
+    .docs-tree-link {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 10px 6px 8px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+        position: relative;
+        min-height: 32px;
+    }
+
+    .docs-tree-link:hover {
+        color: var(--text-main);
+        background-color: var(--bg-hover);
+    }
+
+    .docs-tree-link.active {
+        color: var(--accent-color);
+        background-color: color-mix(in srgb, var(--accent-color) 8%, transparent);
+        font-weight: 500;
+    }
+
+    .docs-tree-link.active:hover {
+        background-color: color-mix(in srgb, var(--accent-color) 12%, transparent);
+    }
+
+    /* ── 目录标题行 ── */
+    .docs-tree-group-header {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 10px 6px 8px;
+        border-radius: 8px;
+        color: var(--text-main);
+        transition: background-color 0.2s ease;
+        position: relative;
+        min-height: 34px;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .docs-tree-group-header:hover {
+        background-color: var(--bg-hover);
+    }
+
+    .docs-tree-group-header.active {
+        background-color: color-mix(in srgb, var(--accent-color) 8%, transparent);
+    }
+
+    .docs-group-title {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: inherit;
+    }
+
+    /* ── 箭头指示 ── */
+    .chevron-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+
+    .chevron-placeholder,
+    .article-placeholder {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+
+    /* ── 激活指示条 ── */
+    .active-indicator {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 0;
+        background-color: var(--accent-color);
+        border-radius: 0 2px 2px 0;
+        transition: height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0;
+    }
+
+    .docs-tree-link.active .active-indicator,
+    .docs-tree-group-header.active .active-indicator {
+        height: 18px;
+        opacity: 1;
+    }
+
+    /* ── 子内容展开动画 ── */
+    .doc-children-wrapper {
+        display: grid;
+        grid-template-rows: 1fr;
+        transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-left: 11px;
+        padding-left: 6px;
+        border-left: 1px solid var(--border-light);
+        opacity: 1;
+    }
+
+    .doc-children-wrapper.collapsed {
+        grid-template-rows: 0fr;
+        opacity: 0;
+    }
+
+    .doc-children-inner {
+        overflow: hidden;
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+
+    /* 深色模式边框淡化 */
+    :global(.dark) .doc-children-wrapper {
+        border-left-color: color-mix(in srgb, var(--border-light) 60%, transparent);
+    }
+</style>
+
+<script is:inline>
+(function() {
+    function init() {
+        // 为无 index 的目录行绑定点击展开/收起
+        document.querySelectorAll('.docs-tree-group-header[data-expandable="true"]').forEach(function(header) {
+            if (header.dataset.expandBound) return;
+            header.dataset.expandBound = 'true';
+
+            header.addEventListener('click', function(e) {
+                // 如果是有链接的目录（有 index），让默认导航行为发生
+                // 但如果只是想在当前页展开/收起（比如右键或中键），这里不拦截
+                // 无 index 的目录是 div，需要手动处理展开/收起
+                if (header.tagName === 'A') return; // 有 index，正常导航
+
+                // 无 index 的 div，处理展开/收起
+                var wrapper = header.closest('.docs-tree-group-item').querySelector('.doc-children-wrapper');
+                if (!wrapper) return;
+
+                wrapper.classList.toggle('collapsed');
+            });
+        });
+    }
+
+    init();
+    document.addEventListener('astro:page-load', init);
+})();
+</script>

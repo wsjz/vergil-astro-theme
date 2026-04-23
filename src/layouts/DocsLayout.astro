@@ -145,8 +145,14 @@ const isArticle = head.pageType === 'article';
         <script>
             import mediumZoom from 'medium-zoom';
 
+            let zoomInstance: ReturnType<typeof mediumZoom> | null = null;
+
             function initZoom() {
-                mediumZoom('img[data-zoomable="1"]', {
+                // 清理旧的实例，避免重复绑定
+                if (zoomInstance) {
+                    zoomInstance.detach();
+                }
+                zoomInstance = mediumZoom('img[data-zoomable="1"]', {
                     background: 'rgba(0, 0, 0, 0.85)',
                     margin: 24,
                     onOpen: (target) => {
@@ -166,9 +172,18 @@ const isArticle = head.pageType === 'article';
                 });
             }
 
-            document.addEventListener('astro:page-load', initZoom);
+            function scheduleInitZoom() {
+                // 延迟到浏览器空闲时初始化，避免阻塞页面切换
+                if ('requestIdleCallback' in window) {
+                    requestIdleCallback(initZoom, { timeout: 300 });
+                } else {
+                    setTimeout(initZoom, 50);
+                }
+            }
+
+            document.addEventListener('astro:page-load', scheduleInitZoom);
             if (document.readyState !== 'loading') {
-                initZoom();
+                scheduleInitZoom();
             }
         </script>
 
