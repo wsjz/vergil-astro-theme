@@ -88,12 +88,20 @@ const siteConfig: SiteConfig = {
     },
     footerNavLinks: [
         {
-            text: 'About',
+            text: '关于',
             href: '/about'
         },
         {
-            text: 'Contact',
+            text: '联系',
             href: '/contact'
+        },
+        {
+            text: '贡献',
+            href: 'https://github.com/justgoodui/vergil-astro-theme'
+        },
+        {
+            text: '赞助',
+            href: 'https://github.com/sponsors/justgoodui'
         },
     ],
     socialLinks: [
