@@ -44,7 +44,7 @@ function hasActiveChild(children?: { href: string }[]): boolean {
 }
 ---
 
-<header class={`${sticky ? 'sticky top-0' : 'fixed top-0 left-0 right-0'} z-50`} id="top-nav-header" data-is-article={isArticlePage ? 'true' : 'false'} data-article-title={articleTitle} data-comments-enabled={commentsEnabled ? 'true' : 'false'}>
+<header class={`${sticky ? 'sticky top-0' : 'fixed top-0 left-0 right-0'} z-50`} id="top-nav-header" data-is-article={isArticlePage ? 'true' : 'false'} data-article-title={articleTitle} data-comments-enabled={commentsEnabled ? 'true' : 'false'} data-splash-mode={sticky ? 'true' : 'false'}>
     <div class="h-14 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-white/20 dark:border-gray-700/30 relative">
         <nav class="nav-normal flex items-center justify-between h-full max-w-7xl mx-auto px-4 lg:px-6 absolute inset-0 transition-all duration-300 ease-out">
             <a href="/" class="flex items-center gap-2 text-main hover:text-accent transition-colors">
@@ -261,11 +261,13 @@ function hasActiveChild(children?: { href: string }[]): boolean {
                 return;
             }
 
-            var SCROLL_THRESHOLD = 200;
+            var isSplashMode = header.dataset.splashMode === 'true';
+            var SCROLL_THRESHOLD = isSplashMode ? window.innerHeight : 200;
             var isArticleMode = false;
 
             function updateNav() {
-                var shouldBe = window.scrollY > SCROLL_THRESHOLD;
+                var threshold = isSplashMode ? window.innerHeight : SCROLL_THRESHOLD;
+                var shouldBe = window.scrollY > threshold;
                 if (shouldBe === isArticleMode) return;
                 isArticleMode = shouldBe;
 
@@ -298,7 +300,10 @@ function hasActiveChild(children?: { href: string }[]): boolean {
             };
             window._navScrollHandler = scrollHandler;
             window.addEventListener('scroll', scrollHandler, { passive: true });
-            updateNav();
+            // 延迟判断：ViewTransitions 页面切换时 scroll position 可能还没 reset
+            requestAnimationFrame(function() {
+                requestAnimationFrame(updateNav);
+            });
         }
 
         if (document.readyState === 'loading') {

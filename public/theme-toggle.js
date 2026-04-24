@@ -65,29 +65,19 @@
         var trigger = document.getElementById('scheme-trigger');
         var picker = document.getElementById('theme-scheme-picker');
 
-        // 避免重复绑定事件（ViewTransitions 每次导航后都会触发 setup）
-        if (trigger && dropdown && !trigger.dataset.themeBound) {
-            trigger.dataset.themeBound = 'true';
+        if (trigger && dropdown) {
             trigger.addEventListener('click', function (e) {
                 e.stopPropagation();
                 dropdown.classList.toggle('hidden');
             });
-        }
-
-        // 全局 click 关闭下拉：只绑定一次
-        if (!window.__themeGlobalClickBound) {
-            window.__themeGlobalClickBound = true;
             document.addEventListener('click', function (e) {
-                var d = document.getElementById('scheme-dropdown');
-                var t = document.getElementById('scheme-trigger');
-                if (d && t && !d.contains(e.target) && e.target !== t) {
-                    d.classList.add('hidden');
+                if (!dropdown.contains(e.target) && e.target !== trigger) {
+                    dropdown.classList.add('hidden');
                 }
             });
         }
 
-        if (picker && !picker.dataset.themeBound) {
-            picker.dataset.themeBound = 'true';
+        if (picker) {
             picker.addEventListener('click', function (e) {
                 var sw = e.target.closest('[data-scheme]');
                 if (!sw) return;
@@ -96,16 +86,14 @@
                 storeScheme(clicked);
                 applyTheme(clicked, curDark);
                 updateSchemeDots(clicked);
-                var d = document.getElementById('scheme-dropdown');
-                if (d) d.classList.add('hidden');
+                if (dropdown) dropdown.classList.add('hidden');
             });
         }
     }
 
     function setupDarkModeToggle() {
         var btn = document.getElementById('dark-mode-toggle');
-        if (!btn || btn.dataset.themeBound) return;
-        btn.dataset.themeBound = 'true';
+        if (!btn) return;
         btn.addEventListener('click', function () {
             var curScheme = root.getAttribute('data-theme') || 'C';
             var curDark = root.classList.contains('dark');
