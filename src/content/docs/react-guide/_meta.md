@@ -7,5 +7,5 @@ tags:
   - 教程
 cover: ../../../assets/images/project-1.jpg
 dirs:
-  hooks: Hooks
+  - hooks
 ---

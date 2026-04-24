@@ -262,11 +262,10 @@ function hasActiveChild(children?: { href: string }[]): boolean {
             }
 
             var isSplashMode = header.dataset.splashMode === 'true';
-            var SCROLL_THRESHOLD = isSplashMode ? window.innerHeight + 300 : 200;
             var isArticleMode = false;
 
             function updateNav() {
-                var threshold = isSplashMode ? window.innerHeight + 300 : SCROLL_THRESHOLD;
+                var threshold = isSplashMode ? window.innerHeight + 200 : 200;
                 var shouldBe = window.scrollY > threshold;
                 if (shouldBe === isArticleMode) return;
                 isArticleMode = shouldBe;

@@ -7,8 +7,8 @@ tags:
   - 后端
 cover: ../../../assets/images/project-2.jpg
 dirs:
-  getting-started: 快速开始
-  env-setup: 环境准备
-  advanced: 进阶
-  advanced/performance: 性能调优
+  - getting-started
+  - env-setup
+  - advanced:
+      - performance
 ---

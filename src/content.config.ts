@@ -90,8 +90,19 @@ const docs = defineCollection({
             description: z.string().optional(),
             icon: z.string().optional(),
             order: z.number().default(99),
-            dirs: z.record(z.string(), z.string()).optional(),
+            dirs: z.lazy(() =>
+                z.array(
+                    z.union([
+                        z.string(),
+                        z.record(
+                            z.string(),
+                            z.union([z.array(z.string()), z.null(), z.undefined()]).optional()
+                        )
+                    ])
+                )
+            ).optional(),
             excerpt: z.string().optional(),
+            autoRender: z.boolean().default(true).optional(),
             draft: z.boolean().default(false),
             tags: z.array(z.string()).default([]),
             cover: image().optional(),

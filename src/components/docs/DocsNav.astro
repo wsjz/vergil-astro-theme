@@ -30,7 +30,7 @@ const { docId, prev, next } = Astro.props;
     )}
     {next ? (
         <a
-            href={`/docs/${docId}/${next.slug}`}
+            href={`/docs/${docId}/${next.slug}/`}
             class="group flex flex-col gap-1 rounded-xl border border-light p-5 hover:border-accent/40 hover:bg-accent/5 transition-all text-right sm:text-right"
         >
             <span class="text-xs text-secondary flex items-center justify-end gap-1">

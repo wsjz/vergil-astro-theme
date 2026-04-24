@@ -95,7 +95,7 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
                 )}
             </header>
 
-            <div class="prose sm:prose-lg max-w-none">
+            <div class="prose sm:prose-lg max-w-none" data-current-slug={firstSlug || ''}>
                 <Content />
             </div>
         </article>
@@ -109,4 +109,41 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
     )}
 
     <DocsNav docId={docId} prev={prev} next={next} />
+
+    <script is:inline>
+        (function() {
+            // 修复文档集首页上子文档内容中的相对链接
+            // 首页 URL 为 /docs/docId/，子文档中的相对链接基于子文档自身 URL 编写，
+            // 但在首页上浏览器会以首页 URL 为基准解析，导致路径错位。
+            // 用 firstSlug 构建基准 URL，通过 URL 构造函数正确解析任意层级相对路径。
+            var path = location.pathname;
+            var match = path.match(/^\/docs\/([^/]+)\/$/);
+            if (!match) return;
+            var docId = match[1];
+
+            var prose = document.querySelector('article .prose');
+            if (!prose) return;
+
+            var firstSlug = prose.dataset.currentSlug || '';
+            if (!firstSlug) return;
+
+            var baseUrl = location.origin + '/docs/' + docId + '/' + firstSlug + '/';
+
+            prose.querySelectorAll('a[href]').forEach(function(a) {
+                var href = a.getAttribute('href');
+                if (!href) return;
+                // 只处理相对链接（非协议链接、非绝对路径）
+                if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return;
+                if (href.startsWith('/')) return;
+                if (href.startsWith('#')) return;
+
+                try {
+                    var resolved = new URL(href, baseUrl).pathname;
+                    a.setAttribute('href', resolved);
+                } catch (e) {
+                    // 忽略无效 URL
+                }
+            });
+        })();
+    </script>
 </DocsLayout>

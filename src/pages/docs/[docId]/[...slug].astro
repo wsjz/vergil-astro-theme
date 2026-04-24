@@ -5,7 +5,7 @@ import DocsNav from '../../../components/docs/DocsNav.astro';
 import TocSidebar from '../../../components/widgets/TocSidebar.astro';
 import FloatingToc from '../../../components/widgets/FloatingToc.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
-import { getDocSets, getDocEntry, getAdjacentDocs } from '../../../utils/docs-utils';
+import { getDocSets, getDocEntry, getAdjacentDocs, getDocGroup, type DocTreeNode } from '../../../utils/docs-utils';
 
 export async function getStaticPaths() {
     const entries = await getCollection('docs');
@@ -40,15 +40,28 @@ function resolveBannerUrl(banner: string | undefined): string | null {
 }
 
 const bannerUrl = resolveBannerUrl(entry.data.banner as string | undefined);
+
+// 判断是否开启自动渲染子目录
+// Astro glob loader 中 index.md 的 entry.id 格式为 docId/slug（不带 /index 后缀）
+// 判断方法：slug 是否对应一个已注册的目录
+const group = await getDocGroup(docId, slug);
+const isIndexPage = !!group;
+const autoRender = entry.data.autoRender === true;
+let groupChildren: DocTreeNode[] = [];
+if (isIndexPage && autoRender && group) {
+    groupChildren = group.children;
+}
+// 开启了 autoRender 但无子目录时，回退到正常渲染用户内容
+const showAutoRender = autoRender && groupChildren.length > 0;
 ---
 
 <DocsLayout
-    title={entry.data.title as string}
-    description={(entry.data.excerpt as string) ?? ''}
+    title={String(entry.data.title)}
+    description={String(entry.data.excerpt ?? '')}
     pageType="article"
     docId={docId}
     currentSlug={slug}
-    articleTitle={entry.data.title as string}
+    articleTitle={String(entry.data.title)}
 >
     <div slot="right-sidebar">
         <TocSidebar headings={headings} />
@@ -64,7 +77,7 @@ const bannerUrl = resolveBannerUrl(entry.data.banner as string | undefined);
         <div class="article-banner relative -mx-4 sm:-mx-8 mb-8 overflow-hidden rounded-xl h-[180px] sm:h-[220px]">
             <img
                 src={bannerUrl}
-                alt={entry.data.title as string}
+                alt={String(entry.data.title)}
                 class="absolute inset-0 w-full h-full object-cover"
                 loading="eager"
             />
@@ -75,7 +88,7 @@ const bannerUrl = resolveBannerUrl(entry.data.banner as string | undefined);
                         crumbs={[
                             { text: 'Docs', href: '/docs/' },
                             { text: metaTitle, href: `/docs/${docId}/` },
-                            { text: entry.data.title as string }
+                            { text: String(entry.data.title) }
                         ]}
                     />
                 </div>
@@ -98,9 +111,41 @@ const bannerUrl = resolveBannerUrl(entry.data.banner as string | undefined);
             )}
         </header>
 
-        <div class="prose sm:prose-lg max-w-none">
-            <Content />
-        </div>
+        {showAutoRender ? (
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {groupChildren.map((child) => {
+                    const isGroup = child.type === 'group';
+                    const href = isGroup
+                        ? `/docs/${docId}/${child.dirPath}/`
+                        : `/docs/${docId}/${child.slug}/`;
+                    const childCount = isGroup ? child.children.length : 0;
+                    return (
+                        <a
+                            href={href}
+                            class="group flex items-center gap-3 p-4 rounded-xl border border-light hover:border-accent/40 hover:bg-accent/5 transition-all"
+                        >
+                            <span class="flex-1 min-w-0">
+                                <span class="block font-medium text-main group-hover:text-accent transition-colors line-clamp-1">
+                                    {child.title}
+                                </span>
+                                {isGroup && childCount > 0 && (
+                                    <span class="block text-xs text-muted mt-0.5">
+                                        {childCount} 个子项
+                                    </span>
+                                )}
+                            </span>
+                            <svg class="w-4 h-4 text-muted group-hover:text-accent transition-colors shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+                            </svg>
+                        </a>
+                    );
+                })}
+            </div>
+        ) : (
+            <div class="prose sm:prose-lg max-w-none">
+                <Content />
+            </div>
+        )}
     </article>
 
     <DocsNav docId={docId} prev={prev} next={next} />
