@@ -32,7 +32,7 @@ if (fs.existsSync(momentsDir)) {
 }
 ---
 
-<BaseLayout description={siteConfig.description} splashMode={true}>
+<BaseLayout description={siteConfig.description} splashMode={true} preloadImages={siteConfig.splash?.backgroundImage ? (Array.isArray(siteConfig.splash.backgroundImage) ? [siteConfig.splash.backgroundImage[0]] : [siteConfig.splash.backgroundImage]) : undefined}>
     <HeroSplash slot="splash" />
     <Hero {...siteConfig.hero} />
     

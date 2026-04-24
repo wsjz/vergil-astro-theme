@@ -18,9 +18,10 @@ export type Props = {
     image?: ImageInput | undefined;
     pageType?: 'website' | 'article';
     fonts?: Partial<Record<'display' | 'body', string>>;
+    preloadImages?: string[];
 };
 
-const { description = '', pageType = 'website' } = Astro.props;
+const { description = '', pageType = 'website', preloadImages = [] } = Astro.props;
 const title = [Astro.props.title, siteConfig.title].filter(Boolean).join(' | ');
 const image = Astro.props.image ?? siteConfig.image;
 let resolvedImage: { src: string; alt?: string } | undefined;
@@ -84,6 +85,10 @@ function formatCanonicalURL(url: string | URL) {
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS" />
+
+{preloadImages.map((url) => (
+    <link rel="preload" as="image" href={url} fetchpriority="high" />
+))}
 
 <link rel="canonical" href={formatCanonicalURL(canonicalURL)} />
 <meta name="description" content={description} />

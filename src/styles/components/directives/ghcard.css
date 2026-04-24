@@ -207,3 +207,44 @@
 .md-ghcard-follow svg {
     opacity: 0.95;
 }
+
+/* ========== Skeleton Loading ========== */
+.md-directive-ghcard[data-loading="true"] .md-ghcard-header .md-ghcard-name,
+.md-directive-ghcard[data-loading="true"] .md-ghcard-desc .md-ghcard-text,
+.md-directive-ghcard[data-loading="true"] .md-ghcard-stats .md-ghcard-text,
+.md-directive-ghcard[data-loading="true"] .md-ghcard-username,
+.md-directive-ghcard[data-loading="true"] .md-ghcard-bio,
+.md-directive-ghcard[data-loading="true"] .md-ghcard-user-stat .md-ghcard-text,
+.md-directive-ghcard[data-loading="true"] .md-ghcard-avatar img {
+    background: linear-gradient(90deg, var(--bg-muted, #f3f4f6) 25%, var(--bg-card, #e5e7eb) 50%, var(--bg-muted, #f3f4f6) 75%);
+    background-size: 200% 100%;
+    animation: ghcard-skeleton-shimmer 1.5s infinite;
+    color: transparent !important;
+    border-radius: 4px;
+    display: inline-block;
+    min-width: 3em;
+}
+
+.md-directive-ghcard[data-loading="true"] .md-ghcard-desc .md-ghcard-text {
+    min-width: 80%;
+    min-height: 1em;
+}
+
+.md-directive-ghcard[data-loading="true"] .md-ghcard-avatar img {
+    min-width: 100%;
+    min-height: 100%;
+    border-radius: 50%;
+}
+
+.md-directive-ghcard[data-loading="true"] .md-ghcard-stats .md-ghcard-text {
+    min-width: 1.5em;
+}
+
+.md-directive-ghcard[data-loading="true"] .md-ghcard-user-stat .md-ghcard-text {
+    min-width: 2em;
+}
+
+@keyframes ghcard-skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}

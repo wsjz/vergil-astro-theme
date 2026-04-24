@@ -144,10 +144,18 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                     showNextLine();
                 });
 
-                if (provider === 'rive' && riveSrc) {
-                    initRive();
-                } else if (provider === 'live2d' && live2dModelPath) {
-                    initLive2d();
+                // 延迟加载 rive/live2d，优先保证主内容渲染
+                const loadCharacter = () => {
+                    if (provider === 'rive' && riveSrc) {
+                        initRive();
+                    } else if (provider === 'live2d' && live2dModelPath) {
+                        initLive2d();
+                    }
+                };
+                if ('requestIdleCallback' in window) {
+                    window.requestIdleCallback(loadCharacter, { timeout: 3000 });
+                } else {
+                    setTimeout(loadCharacter, 2000);
                 }
 
                 const isFirstVisit = !localStorage.getItem(agentConfig.firstVisitKey);
@@ -156,7 +164,7 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                     setTimeout(() => {
                         expandAgent();
                         showDialogueForCurrentRoute();
-                    }, 2000);
+                    }, 2500);
                 } else if (!state.isCollapsed) {
                     expandAgent();
                     showDialogueForCurrentRoute();

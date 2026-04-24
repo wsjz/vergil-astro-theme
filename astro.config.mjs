@@ -13,9 +13,7 @@ import { remarkTerminal, transformerTerminal } from './src/plugins/shiki-termina
 export default defineConfig({
     site: siteConfig.website,
     image: {
-        service: {
-            entrypoint: 'astro/assets/services/noop'
-        }
+        domains: ['images.unsplash.com']
     },
     vite: {
         plugins: [tailwindcss()]

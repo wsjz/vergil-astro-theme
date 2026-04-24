@@ -13,6 +13,25 @@ const artalkConfig = siteConfig.comments?.artalk;
 ---
 
 <div id="comments" class="mt-12 border-t border-dashed border-main pt-8">
+    <!-- 评论加载占位 -->
+    <div id="comments-skeleton" class="comments-skeleton space-y-4">
+        <div class="flex items-start gap-3">
+            <div class="skeleton w-10 h-10 rounded-full shrink-0"></div>
+            <div class="flex-1 space-y-2">
+                <div class="skeleton h-4 w-24 rounded"></div>
+                <div class="skeleton h-3 w-full rounded"></div>
+                <div class="skeleton h-3 w-3/4 rounded"></div>
+            </div>
+        </div>
+        <div class="flex items-start gap-3">
+            <div class="skeleton w-10 h-10 rounded-full shrink-0"></div>
+            <div class="flex-1 space-y-2">
+                <div class="skeleton h-4 w-20 rounded"></div>
+                <div class="skeleton h-3 w-full rounded"></div>
+                <div class="skeleton h-3 w-2/3 rounded"></div>
+            </div>
+        </div>
+    </div>
     {provider === 'giscus' && giscusConfig && (
         <div class="giscus"></div>
     )}
@@ -40,27 +59,60 @@ const artalkConfig = siteConfig.comments?.artalk;
     ></div>
     <script is:inline>
         (function() {
-            var config = document.getElementById('giscus-config');
-            if (!config) return;
-            var script = document.createElement('script');
-            script.src = 'https://giscus.app/client.js';
-            script.setAttribute('data-repo', config.dataset.repo);
-            script.setAttribute('data-repo-id', config.dataset.repoId);
-            script.setAttribute('data-category', config.dataset.category);
-            script.setAttribute('data-category-id', config.dataset.categoryId);
-            script.setAttribute('data-mapping', config.dataset.mapping);
-            script.setAttribute('data-strict', config.dataset.strict);
-            script.setAttribute('data-reactions-enabled', config.dataset.reactionsEnabled);
-            script.setAttribute('data-emit-metadata', config.dataset.emitMetadata);
-            script.setAttribute('data-input-position', config.dataset.inputPosition);
-            script.setAttribute('data-theme', config.dataset.theme);
-            script.setAttribute('data-lang', config.dataset.lang);
-            script.setAttribute('data-loading', config.dataset.loading);
-            script.setAttribute('crossorigin', 'anonymous');
-            script.async = true;
-            var container = document.querySelector('.giscus');
-            if (container) {
-                container.appendChild(script);
+            function hideCommentsSkeleton() {
+                var sk = document.getElementById('comments-skeleton');
+                if (sk) sk.style.display = 'none';
+            }
+
+            function loadGiscus() {
+                var config = document.getElementById('giscus-config');
+                if (!config) { hideCommentsSkeleton(); return; }
+                if (window.__giscusLoaded) return;
+                window.__giscusLoaded = true;
+
+                var script = document.createElement('script');
+                script.src = 'https://giscus.app/client.js';
+                script.setAttribute('data-repo', config.dataset.repo);
+                script.setAttribute('data-repo-id', config.dataset.repoId);
+                script.setAttribute('data-category', config.dataset.category);
+                script.setAttribute('data-category-id', config.dataset.categoryId);
+                script.setAttribute('data-mapping', config.dataset.mapping);
+                script.setAttribute('data-strict', config.dataset.strict);
+                script.setAttribute('data-reactions-enabled', config.dataset.reactionsEnabled);
+                script.setAttribute('data-emit-metadata', config.dataset.emitMetadata);
+                script.setAttribute('data-input-position', config.dataset.inputPosition);
+                script.setAttribute('data-theme', config.dataset.theme);
+                script.setAttribute('data-lang', config.dataset.lang);
+                script.setAttribute('data-loading', config.dataset.loading);
+                script.setAttribute('crossorigin', 'anonymous');
+                script.async = true;
+
+                script.onload = function() {
+                    setTimeout(hideCommentsSkeleton, 800);
+                };
+                script.onerror = hideCommentsSkeleton;
+                setTimeout(hideCommentsSkeleton, 5000);
+
+                var container = document.querySelector('.giscus');
+                if (container) {
+                    container.appendChild(script);
+                }
+            }
+
+            // 使用 IntersectionObserver 懒加载：评论区域进入视口时才加载
+            var commentsEl = document.getElementById('comments');
+            if (commentsEl && 'IntersectionObserver' in window) {
+                var observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            loadGiscus();
+                            observer.disconnect();
+                        }
+                    });
+                }, { rootMargin: '200px' });
+                observer.observe(commentsEl);
+            } else {
+                loadGiscus();
             }
         })();
     </script>
@@ -68,37 +120,69 @@ const artalkConfig = siteConfig.comments?.artalk;
 
 {provider === 'artalk' && artalkConfig && (
     <script is:inline data-page-id={pageId} data-page-title={pageTitle} data-server={artalkConfig.server} data-site={artalkConfig.site ?? 'Vergil Blog'}>
-        const script = document.currentScript;
-        const pageId = script.dataset.pageId;
-        const pageTitle = script.dataset.pageTitle;
-        const server = script.dataset.server;
-        const site = script.dataset.site;
+        (function() {
+            const script = document.currentScript;
+            const pageId = script.dataset.pageId;
+            const pageTitle = script.dataset.pageTitle;
+            const server = script.dataset.server;
+            const site = script.dataset.site;
 
-        function initArtalk() {
-            if (typeof Artalk === 'undefined') {
-                console.warn('Artalk not loaded');
-                return;
+            function hideCommentsSkeleton() {
+                var sk = document.getElementById('comments-skeleton');
+                if (sk) sk.style.display = 'none';
             }
 
-            Artalk.init({
-                el: '#artalk-comments',
-                pageKey: pageId,
-                pageTitle: pageTitle,
-                server: server,
-                site: site,
-                darkMode: document.documentElement.classList.contains('dark')
-            });
-        }
+            function loadArtalk() {
+                if (window.__artalkLoaded) return;
+                window.__artalkLoaded = true;
 
-        const artalkScript = document.createElement('script');
-        artalkScript.src = 'https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/Artalk.js';
-        artalkScript.async = true;
-        artalkScript.onload = initArtalk;
-        document.head.appendChild(artalkScript);
+                function initArtalk() {
+                    if (typeof Artalk === 'undefined') {
+                        console.warn('Artalk not loaded');
+                        hideCommentsSkeleton();
+                        return;
+                    }
 
-        const artalkCss = document.createElement('link');
-        artalkCss.rel = 'stylesheet';
-        artalkCss.href = 'https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/Artalk.css';
-        document.head.appendChild(artalkCss);
+                    Artalk.init({
+                        el: '#artalk-comments',
+                        pageKey: pageId,
+                        pageTitle: pageTitle,
+                        server: server,
+                        site: site,
+                        darkMode: document.documentElement.classList.contains('dark')
+                    });
+                    hideCommentsSkeleton();
+                }
+
+                const artalkScript = document.createElement('script');
+                artalkScript.src = 'https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/Artalk.js';
+                artalkScript.async = true;
+                artalkScript.onload = initArtalk;
+                artalkScript.onerror = hideCommentsSkeleton;
+                setTimeout(hideCommentsSkeleton, 5000);
+                document.head.appendChild(artalkScript);
+
+                const artalkCss = document.createElement('link');
+                artalkCss.rel = 'stylesheet';
+                artalkCss.href = 'https://cdn.jsdelivr.net/npm/artalk@2.9.1/dist/Artalk.css';
+                document.head.appendChild(artalkCss);
+            }
+
+            // 使用 IntersectionObserver 懒加载
+            var commentsEl = document.getElementById('comments');
+            if (commentsEl && 'IntersectionObserver' in window) {
+                var observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            loadArtalk();
+                            observer.disconnect();
+                        }
+                    });
+                }, { rootMargin: '200px' });
+                observer.observe(commentsEl);
+            } else {
+                loadArtalk();
+            }
+        })();
     </script>
 )}

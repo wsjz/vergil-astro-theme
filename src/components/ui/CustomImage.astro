@@ -12,15 +12,33 @@ type Props = ImageInput & {
     loading?: 'lazy' | 'eager';
     fetchpriority?: 'high' | 'low' | 'auto';
     decoding?: 'async' | 'sync' | 'auto';
+    inferSize?: boolean;
 };
 
-const { src, alt = '', class: className, loading = 'lazy', fetchpriority, decoding = 'async', ...rest } = Astro.props as Props;
+const { src, alt = '', class: className, loading = 'lazy', fetchpriority, decoding = 'async', inferSize, ...rest } = Astro.props as Props;
+
+// 判断是否是远程图片（配置了 domains 的）
+const isRemote = typeof src === 'string' && /^https?:\/\//.test(src);
+// 判断是否是本地 public 路径
+const isLocalPath = typeof src === 'string' && src.startsWith('/') && !src.startsWith('//');
+// Astro Image 支持：本地导入的 ImageMetadata、已配置域名的远程图片
+const isImageMetadata = typeof src === 'object' && src !== null && 'src' in src && 'width' in src && 'height' in src;
+const canUseAstroImage = isImageMetadata || isRemote;
 ---
 
 {
-    typeof src === 'string' ? (
-        <img class={className} src={src} alt={alt} loading={loading} decoding={decoding} />
+    canUseAstroImage ? (
+        <Image
+            class={className}
+            src={src}
+            alt={alt}
+            loading={loading}
+            fetchpriority={fetchpriority}
+            decoding={decoding}
+            inferSize={isRemote ? (inferSize ?? true) : inferSize}
+            {...(rest as any)}
+        />
     ) : (
-        <Image class={className} src={src} alt={alt} loading={loading} fetchpriority={fetchpriority} decoding={decoding} {...(rest as any)} />
+        <img class={className} src={src} alt={alt} loading={loading} decoding={decoding} />
     )
 }

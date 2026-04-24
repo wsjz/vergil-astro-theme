@@ -183,14 +183,12 @@ const cssVars = [
 
         if (!splash || !arrow) return;
 
-        document.documentElement.style.overscrollBehavior = 'none';
-
         const viewportHeight = window.innerHeight;
         let ticking = false;
-        let isSnapping = false;
 
         function updateOnScroll() {
             const scrollY = window.scrollY;
+            // splash 1:1 跟随滚动，滚动一屏后完全离开视口
             splash!.style.transform = `translateY(${-scrollY}px)`;
 
             if (overlay) {
@@ -202,30 +200,10 @@ const cssVars = [
                 const navOpacity = Math.min(1, Math.max(0, (scrollY - viewportHeight * 0.3) / (viewportHeight * 0.5)));
                 topNav.style.opacity = String(navOpacity);
             }
-
-            const mainStage = document.getElementById('main-stage');
-            if (mainStage) {
-                if (scrollY >= viewportHeight) {
-                    mainStage.classList.remove('translate-y-0');
-                } else if (!mainStage.classList.contains('translate-y-0')) {
-                    mainStage.classList.add('translate-y-0');
-                }
-            }
-
-            if (scrollY > viewportHeight && scrollY < viewportHeight + 200 && isSnapping) {
-                window.scrollTo({ top: viewportHeight, behavior: 'instant' as ScrollBehavior });
-            }
-        }
-
-        function snapTo(target: number) {
-            if (isSnapping) return;
-            isSnapping = true;
-            window.scrollTo({ top: target, behavior: 'smooth' });
-            setTimeout(() => { isSnapping = false; }, 800);
         }
 
         function scrollToContent() {
-            snapTo(viewportHeight);
+            window.scrollTo({ top: viewportHeight, behavior: 'smooth' });
         }
 
         window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
@@ -252,66 +230,6 @@ const cssVars = [
             scrollToContent();
         }, { signal });
 
-        window.addEventListener('wheel', (e) => {
-            if (window.scrollY < viewportHeight) {
-                // Only intercept when explicitly snapping; allow free scrolling otherwise
-                if (e.deltaY > 5) {
-                    e.preventDefault();
-                    snapTo(viewportHeight);
-                } else if (e.deltaY < -5) {
-                    e.preventDefault();
-                    snapTo(0);
-                }
-            }
-        }, { passive: false, signal });
-
-        let touchStartY = 0;
-        let touchMoved = false;
-        window.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-            touchMoved = false;
-        }, { passive: true, signal });
-
-        window.addEventListener('touchmove', (e) => {
-            if (window.scrollY < viewportHeight && !isSnapping) {
-                // Only prevent default during a clear vertical swipe intent
-                const deltaY = touchStartY - e.touches[0].clientY;
-                if (Math.abs(deltaY) > 10) {
-                    touchMoved = true;
-                    e.preventDefault();
-                }
-            }
-        }, { passive: false, signal });
-
-        window.addEventListener('touchend', (e) => {
-            if (window.scrollY < viewportHeight) {
-                const deltaY = touchStartY - e.changedTouches[0].clientY;
-                if (deltaY > 30) snapTo(viewportHeight);
-                else if (deltaY < -30) snapTo(0);
-                else if (!touchMoved) {
-                    // Tap (no swipe) → scroll to content
-                    scrollToContent();
-                }
-            }
-        }, { passive: true, signal });
-
-        function handleScrollEnd() {
-            const scrollY = window.scrollY;
-            if (scrollY > 0 && scrollY < viewportHeight && !isSnapping) {
-                snapTo(scrollY >= viewportHeight / 2 ? viewportHeight : 0);
-            }
-        }
-
-        if ('onscrollend' in window) {
-            window.addEventListener('scrollend', handleScrollEnd, { signal });
-        } else {
-            let scrollTimer: ReturnType<typeof setTimeout>;
-            window.addEventListener('scroll', () => {
-                clearTimeout(scrollTimer);
-                scrollTimer = setTimeout(handleScrollEnd, 150);
-            }, { passive: true, signal });
-        }
-
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') scrollToContent();
         }, { signal });
@@ -323,7 +241,6 @@ const cssVars = [
         } else {
             _splashAC?.abort();
             _splashAC = null;
-            document.documentElement.style.overscrollBehavior = '';
         }
     });
 

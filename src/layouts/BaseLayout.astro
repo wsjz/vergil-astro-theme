@@ -21,6 +21,17 @@ const isArticle = head.pageType === 'article';
 <html lang="en" class="wrap-break-words antialiased">
     <head>
         <BaseHead {...head} />
+        {splashMode && (
+            <style is:inline>
+                /* 首页 Splash CSS scroll-snap：在 splash 和主内容交界处自然吸附 */
+                html {
+                    scroll-snap-type: y proximity;
+                }
+                #main-stage {
+                    scroll-snap-align: start;
+                }
+            </style>
+        )}
         <script is:inline>
             (function() {
                 if (location.pathname !== '/') return;
@@ -132,15 +143,38 @@ const isArticle = head.pageType === 'article';
                 function initProgress() {
                     var bar = document.getElementById('reading-progress');
                     if (!bar) return;
+
+                    var main = document.querySelector('main');
+                    var ticking = false;
+
                     function update() {
+                        if (!main) {
+                            bar.style.width = '0%';
+                            return;
+                        }
                         var scrollTop = window.scrollY;
-                        var docHeight = document.documentElement.scrollHeight - window.innerHeight;
-                        var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+                        // 以 <main> 内容高度为基准，更准确反映"文章阅读进度"
+                        var contentHeight = main.scrollHeight;
+                        var viewportH = window.innerHeight;
+                        var readableHeight = Math.max(0, contentHeight - viewportH);
+                        var pct = readableHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / readableHeight) * 100)) : 0;
                         bar.style.width = pct + '%';
                     }
-                    window.removeEventListener('scroll', update);
-                    window.addEventListener('scroll', update, { passive: true });
-                    update();
+
+                    function onScroll() {
+                        if (!ticking) {
+                            requestAnimationFrame(function() {
+                                update();
+                                ticking = false;
+                            });
+                            ticking = true;
+                        }
+                    }
+
+                    window.removeEventListener('scroll', onScroll);
+                    window.addEventListener('scroll', onScroll, { passive: true });
+                    // ViewTransitions 后延迟一帧，确保 DOM 已更新
+                    requestAnimationFrame(update);
                 }
                 document.addEventListener('astro:page-load', initProgress);
                 initProgress();
@@ -184,10 +218,15 @@ const isArticle = head.pageType === 'article';
         <SiteAgent />
 
         <script>
-            import mediumZoom from 'medium-zoom';
+            // medium-zoom 按需加载：只在页面有可缩放图片时才导入
+            let zoomInstance = null;
 
-            function initZoom() {
-                mediumZoom('img[data-zoomable="1"]', {
+            async function initZoom() {
+                const images = document.querySelectorAll('img[data-zoomable="1"]');
+                if (images.length === 0) return;
+
+                const { default: mediumZoom } = await import('medium-zoom');
+                zoomInstance = mediumZoom('img[data-zoomable="1"]', {
                     background: 'rgba(0, 0, 0, 0.85)',
                     margin: 24,
                     onOpen: (target) => {
@@ -207,7 +246,15 @@ const isArticle = head.pageType === 'article';
                 });
             }
 
+            function disposeZoom() {
+                if (zoomInstance) {
+                    zoomInstance.detach();
+                    zoomInstance = null;
+                }
+            }
+
             document.addEventListener('astro:page-load', initZoom);
+            document.addEventListener('astro:before-swap', disposeZoom);
             if (document.readyState !== 'loading') {
                 initZoom();
             }
@@ -222,6 +269,9 @@ const isArticle = head.pageType === 'article';
 
                         var api = card.dataset.api;
                         if (!api) return;
+
+                        // 显示骨架屏
+                        card.dataset.loading = 'true';
 
                         var fill = function (data) {
                             card.querySelectorAll('[data-key]').forEach(function (el) {
@@ -274,7 +324,14 @@ const isArticle = head.pageType === 'article';
                                         });
                                 }
                             })
-                            .catch(function () {});
+                            .then(function () {
+                                // 数据加载完成，移除骨架屏
+                                delete card.dataset.loading;
+                            })
+                            .catch(function () {
+                                // 请求失败也移除骨架屏，避免一直闪烁
+                                delete card.dataset.loading;
+                            });
                     });
                 }
 
