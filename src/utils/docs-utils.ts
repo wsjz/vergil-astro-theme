@@ -64,7 +64,12 @@ export async function getDocTree(docId: string): Promise<DocTreeNode[]> {
 export async function getDocEntry(docId: string, slug: string): Promise<CollectionEntry<'docs'> | undefined> {
     const entries = await getCollection('docs');
     const expectedId = `${docId}/${slug}`;
-    return entries.find((e) => !isMetaEntry(e) && (e.id === expectedId || e.id === `${expectedId}/index`));
+    const expectedIdWithIndex = `${expectedId}/index`;
+    return entries.find(
+        (e) =>
+            !isMetaEntry(e) &&
+            (e.id.toLowerCase() === expectedId.toLowerCase() || e.id.toLowerCase() === expectedIdWithIndex.toLowerCase())
+    );
 }
 
 export async function getFirstDocSlug(docId: string): Promise<string | undefined> {
@@ -96,7 +101,7 @@ export async function getAdjacentDocs(
     const tree = await getDocTree(docId);
     const flat: DocArticleNode[] = [];
     flattenTree(tree, flat);
-    const idx = flat.findIndex((n) => n.slug === slug);
+    const idx = flat.findIndex((n) => n.slug.toLowerCase() === slug.toLowerCase());
     if (idx === -1) return { prev: null, next: null };
     return {
         prev: idx > 0 ? flat[idx - 1] : null,

@@ -12,11 +12,13 @@ interface Props {
 const { nodes, currentSlug, docId, level = 0 } = Astro.props;
 
 function isActive(slug: string, current: string): boolean {
-    return slug === current;
+    return slug.toLowerCase() === current.toLowerCase();
 }
 
 function isInDir(dirPath: string, current: string): boolean {
-    return current === dirPath || current.startsWith(dirPath + '/');
+    const lowerDir = dirPath.toLowerCase();
+    const lowerCurrent = current.toLowerCase();
+    return lowerCurrent === lowerDir || lowerCurrent.startsWith(lowerDir + '/');
 }
 
 function isAncestorActive(node: DocTreeNode, current: string): boolean {

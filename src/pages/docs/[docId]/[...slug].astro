@@ -10,12 +10,14 @@ import { getDocSets, getDocEntry, getAdjacentDocs, getDocGroup, type DocTreeNode
 export async function getStaticPaths() {
     const entries = await getCollection('docs');
     const nonMeta = entries.filter((e) => !(e.id.endsWith('/_meta') || e.id === '_meta'));
-    return nonMeta.map((entry) => {
-        const parts = entry.id.split('/');
-        const docId = parts[0];
-        const slug = parts.slice(1).join('/').replace(/\/index$/, '');
-        return { params: { docId, slug } };
-    });
+    return nonMeta
+        .map((entry) => {
+            const parts = entry.id.split('/');
+            const docId = parts[0];
+            const slug = parts.slice(1).join('/').replace(/\/index$/, '');
+            return { params: { docId, slug } };
+        })
+        .filter((p) => p.params.slug !== '');
 }
 
 const { docId, slug } = Astro.params;
