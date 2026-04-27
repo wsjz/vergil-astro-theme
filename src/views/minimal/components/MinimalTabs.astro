@@ -10,7 +10,7 @@ interface Props {
 
 const { activeType = 'blog', activeFilter = 'all' } = Astro.props;
 
-const posts = await getCollection('blog');
+const posts = await getCollection('blog', ({ data }) => !data.draft);
 const categories = getAllCategories(posts);
 const docSets = await getDocSets();
 

@@ -11,7 +11,7 @@ interface Props {
 
 const { currentPostId, tags, limit = 3 } = Astro.props;
 
-const allPosts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
 
 const related = allPosts
     .filter((p) => p.id !== currentPostId && p.data.tags?.some((t) => tags.map(slugify).includes(slugify(t))))

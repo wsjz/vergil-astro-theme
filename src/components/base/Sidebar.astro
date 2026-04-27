@@ -6,7 +6,7 @@ import CustomImage from '../ui/CustomImage.astro';
 
 const currentPath = Astro.url.pathname;
 
-const posts = await getCollection('blog');
+const posts = await getCollection('blog', ({ data }) => !data.draft);
 const totalPosts = posts.length;
 const totalWords = posts.reduce((sum, post) => {
   const content = post.body || '';

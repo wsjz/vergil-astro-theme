@@ -5,7 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 import { sortItemsByDateDesc } from '../../utils/data-utils';
 
-const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
 
 // Group posts by year
 const postsByYear = posts.reduce((acc, post) => {

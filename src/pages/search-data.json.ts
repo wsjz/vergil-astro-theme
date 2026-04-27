@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 
 export const GET: APIRoute = async () => {
-    const posts = await getCollection('blog');
+    const posts = await getCollection('blog', ({ data }) => !data.draft);
     const projects = await getCollection('projects');
 
     const searchData = [

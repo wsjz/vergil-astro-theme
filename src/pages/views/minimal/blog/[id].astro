@@ -8,7 +8,7 @@ import siteConfig from '../../../../data/site-config';
 
 export async function getStaticPaths() {
     if (siteConfig.views?.minimal?.enabled !== true) return [];
-    const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+    const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
     return posts.map((post) => ({
         params: { id: post.id },
         props: { post }

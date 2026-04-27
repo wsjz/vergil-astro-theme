@@ -35,7 +35,7 @@ function getDocId(entryId: string): string {
 }
 
 export async function getDocSets(): Promise<DocSet[]> {
-    const entries = await getCollection('docs');
+    const entries = await getCollection('docs', ({ data }) => !data.draft);
     const grouped = new Map<string, CollectionEntry<'docs'>[]>();
     for (const entry of entries) {
         const docId = getDocId(entry.id);
@@ -54,7 +54,7 @@ export async function getDocSets(): Promise<DocSet[]> {
 }
 
 export async function getDocTree(docId: string): Promise<DocTreeNode[]> {
-    const entries = await getCollection('docs');
+    const entries = await getCollection('docs', ({ data }) => !data.draft);
     const groupEntries = entries.filter((e) => getDocId(e.id) === docId);
     const meta = groupEntries.find(isMetaEntry);
     if (!meta) return [];
@@ -62,7 +62,7 @@ export async function getDocTree(docId: string): Promise<DocTreeNode[]> {
 }
 
 export async function getDocEntry(docId: string, slug: string): Promise<CollectionEntry<'docs'> | undefined> {
-    const entries = await getCollection('docs');
+    const entries = await getCollection('docs', ({ data }) => !data.draft);
     const expectedId = `${docId}/${slug}`;
     const expectedIdWithIndex = `${expectedId}/index`;
     return entries.find(

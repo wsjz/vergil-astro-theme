@@ -5,7 +5,7 @@ import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
 
-const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
 const tags = getAllTags(posts).sort((tagA, tagB) => {
     const postCountTagA = getPostsByTag(posts, tagA.id).length;
     const postCountTagB = getPostsByTag(posts, tagB.id).length;

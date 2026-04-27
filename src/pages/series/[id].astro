@@ -7,7 +7,7 @@ import { getAllSeries, getPostsBySeries, sortItemsByDateDesc } from '../../utils
 import { slugify } from '../../utils/common-utils';
 
 export async function getStaticPaths() {
-    const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+    const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
     const allSeries = getAllSeries(posts);
     if (allSeries.length === 0) {
         return [{ params: { id: '_empty' }, props: { seriesName: '' } }];
@@ -22,7 +22,7 @@ interface Props { seriesName: string }
 const { seriesName } = Astro.props;
 const { id } = Astro.params;
 
-const allPosts = await getCollection('blog');
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 const seriesPosts = getPostsBySeries(allPosts, id);
 ---
 

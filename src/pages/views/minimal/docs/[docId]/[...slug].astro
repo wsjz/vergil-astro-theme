@@ -7,7 +7,7 @@ import siteConfig from '../../../../../data/site-config';
 
 export async function getStaticPaths() {
     if (siteConfig.views?.minimal?.enabled !== true) return [];
-    const entries = await getCollection('docs');
+    const entries = await getCollection('docs', ({ data }) => !data.draft);
     const nonMeta = entries.filter((e) => !(e.id.endsWith('/_meta') || e.id === '_meta'));
     return nonMeta
         .map((entry) => {

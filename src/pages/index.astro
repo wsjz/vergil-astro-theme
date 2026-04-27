@@ -10,7 +10,7 @@ import siteConfig from '../data/site-config';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { sortItemsByDateDesc } from '../utils/data-utils';
 
-const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
 const pageSize = 7;
 const currentPage = 1;
 const totalPosts = posts.length;

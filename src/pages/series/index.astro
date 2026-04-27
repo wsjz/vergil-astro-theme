@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getAllSeries, getPostsBySeries, sortItemsByDateDesc } from '../../utils/data-utils';
 
-const posts = (await getCollection('blog')).sort(sortItemsByDateDesc);
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
 const allSeries = getAllSeries(posts);
 ---
 

@@ -8,7 +8,7 @@ import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
 import { getDocSets, getDocEntry, getAdjacentDocs, getDocGroup, type DocTreeNode } from '../../../utils/docs-utils';
 
 export async function getStaticPaths() {
-    const entries = await getCollection('docs');
+    const entries = await getCollection('docs', ({ data }) => !data.draft);
     const nonMeta = entries.filter((e) => !(e.id.endsWith('/_meta') || e.id === '_meta'));
     return nonMeta
         .map((entry) => {

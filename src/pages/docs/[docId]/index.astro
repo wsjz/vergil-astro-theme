@@ -30,7 +30,7 @@ let Content = null;
 let headings: any[] = [];
 
 if (firstSlug) {
-    const entries = await getCollection('docs');
+    const entries = await getCollection('docs', ({ data }) => !data.draft);
     const expectedId = `${docId}/${firstSlug}`;
     entry = entries.find((e) => !(e.id.endsWith('/_meta') || e.id === '_meta') && (e.id === expectedId || e.id === `${expectedId}/index`));
     if (entry) {

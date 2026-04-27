@@ -4,7 +4,7 @@ import { getDocSets, type DocTreeNode } from '../../../utils/docs-utils';
 import { getAllCategories } from '../../../utils/data-utils';
 import { slugify } from '../../../utils/common-utils';
 
-const posts = await getCollection('blog');
+const posts = await getCollection('blog', ({ data }) => !data.draft);
 const categories = getAllCategories(posts);
 const sets = await getDocSets();
 
