@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import { sortItemsByDateDesc } from '../../utils/data-utils';
+import FormattedDate from '../ui/FormattedDate.astro';
+import siteConfig from '../../data/site-config';
+
+interface Props {
+    limit?: number;
+}
+
+const { limit = 5 } = Astro.props;
+const configLimit = siteConfig.sidebar?.components?.recentPosts?.limit;
+const effectiveLimit = configLimit ?? limit;
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+    .sort(sortItemsByDateDesc)
+    .slice(0, effectiveLimit);
+---
+
+{posts.length > 0 && (
+    <div class="px-4 py-4">
+        <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">最近更新</h3>
+        <ul class="space-y-2.5">
+            {posts.map((post) => (
+                <li>
+                    <a
+                        href={`/blog/${post.id}/`}
+                        class="group block"
+                    >
+                        <span class="text-[12px] text-secondary group-hover:text-accent transition-colors line-clamp-2 leading-snug block">
+                            {post.data.title}
+                        </span>
+                        <span class="text-[10px] text-muted mt-0.5 block">
+                            <FormattedDate date={post.data.publishDate} />
+                        </span>
+                    </a>
+                </li>
+            ))}
+        </ul>
+    </div>
+)}

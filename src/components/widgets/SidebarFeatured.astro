@@ -1,0 +1,34 @@
+---
+import { getCollection } from 'astro:content';
+import { sortItemsByDateDesc } from '../../utils/data-utils';
+import siteConfig from '../../data/site-config';
+
+interface Props {
+    limit?: number;
+}
+
+const { limit = 3 } = Astro.props;
+const configLimit = siteConfig.sidebar?.components?.featured?.limit;
+const effectiveLimit = configLimit ?? limit;
+
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
+const featured = allPosts.filter((p) => p.data.isFeatured).slice(0, effectiveLimit);
+---
+
+{featured.length > 0 && (
+    <div class="px-4 py-4">
+        <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">精选文章</h3>
+        <ul class="space-y-2">
+            {featured.map((post) => (
+                <li>
+                    <a
+                        href={`/blog/${post.id}/`}
+                        class="text-[12px] text-secondary hover:text-accent transition-colors line-clamp-2 leading-snug block"
+                    >
+                        {post.data.title}
+                    </a>
+                </li>
+            ))}
+        </ul>
+    </div>
+)}

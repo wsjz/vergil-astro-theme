@@ -10,9 +10,9 @@ import Search from '../components/widgets/Search.astro';
 import SiteAgent from '../components/widgets/SiteAgent.astro';
 import siteConfig from '../data/site-config';
 
-export type Props = HeadProps & { showSidebar?: boolean; showRightSidebar?: boolean; showTopNav?: boolean; articleTitle?: string; commentsEnabled?: boolean; splashMode?: boolean };
+export type Props = HeadProps & { showSidebar?: boolean; showRightSidebar?: boolean; showTopNav?: boolean; articleTitle?: string; commentsEnabled?: boolean; splashMode?: boolean; rightSidebarConfig?: string[] };
 
-const { showSidebar = true, showRightSidebar = true, showTopNav = true, articleTitle = '', commentsEnabled = false, splashMode = false, ...head } = Astro.props;
+const { showSidebar = true, showRightSidebar = true, showTopNav = true, articleTitle = '', commentsEnabled = false, splashMode = false, rightSidebarConfig, ...head } = Astro.props;
 const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
 const isArticle = head.pageType === 'article';
 ---
@@ -131,7 +131,7 @@ const isArticle = head.pageType === 'article';
                 {showRightSidebar && (
                     <div class="right-sidebar-container hidden xl:block fixed right-[5%] top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-52 2xl:w-56 bg-main overflow-y-auto z-40">
                         <slot name="right-sidebar">
-                            <RightSidebar />
+                            <RightSidebar config={rightSidebarConfig} />
                         </slot>
                     </div>
                 )}

@@ -4,7 +4,6 @@ import { getCollection, render } from 'astro:content';
 import { getDocSets, getFirstDocSlug, getAdjacentDocs } from '../../../utils/docs-utils';
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import DocsNav from '../../../components/docs/DocsNav.astro';
-import TocSidebar from '../../../components/widgets/TocSidebar.astro';
 import FloatingToc from '../../../components/widgets/FloatingToc.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
 import DocSetSplash from '../../../components/docs/DocSetSplash.astro';
@@ -59,10 +58,6 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
     articleTitle={(entry?.data?.title as string) || (meta?.data?.title as string) || ''}
     splashMode={splashEnabled}
 >
-    <div slot="right-sidebar">
-        <TocSidebar headings={headings} />
-    </div>
-
     {splashEnabled && (
         <DocSetSplash
             slot="splash"

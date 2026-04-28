@@ -200,7 +200,37 @@ const siteConfig: SiteConfig = {
         provider: 'rive',
         // rive: { src: '/model.riv' },
         // live2d: { modelPath: '/model.json' },
-    }
+    },
+    sidebar: {
+        // 可配置：recentPosts, siteInfo
+        left: ['recentPosts', 'siteInfo'],
+        // 右侧默认组件（列表页/首页/归档等）
+        // 可配置：welcome, heatmap, recentPosts, featured, tags, ghCard
+        right: ['welcome', 'heatmap', 'featured', 'tags'],
+        // 文章页右侧（目前由页面 slot 覆盖，此配置暂未生效）
+        // 可配置：toc, related, featured
+        postRight: ['toc', 'featured'],
+        // 文档页右侧（目前由页面 slot 覆盖，此配置暂未生效）
+        // 可配置：toc
+        docRight: ['toc'],
+        components: {
+            welcome: {
+                text: '记录技术、生活与思考',
+            },
+            recentPosts: {
+                limit: 5,
+            },
+            featured: {
+                limit: 3,
+            },
+            tags: {
+                limit: 6,
+            },
+            related: {
+                limit: 3,
+            },
+        },
+    },
 };
 
 export default siteConfig;

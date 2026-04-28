@@ -1,17 +1,4 @@
 ---
-import { ArrowRight } from '@lucide/astro';
-import { getCollection } from 'astro:content';
-import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
-
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
-const tags = getAllTags(posts).sort((tagA, tagB) => {
-    const postCountTagA = getPostsByTag(posts, tagA.id).length;
-    const postCountTagB = getPostsByTag(posts, tagB.id).length;
-    return postCountTagB - postCountTagA;
-}).slice(0, 6);
-
-const totalPosts = posts.length;
-
 interface Heading {
     depth: number;
     slug: string;
@@ -23,6 +10,9 @@ interface Props {
 }
 
 const { headings } = Astro.props;
+if (!headings || headings.length === 0) {
+    return;
+}
 const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
 ---
 
@@ -48,28 +38,6 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
             </div>
         )}
 
-        <div>
-            <a href="/tags" class="flex items-center gap-1 text-xs font-medium text-muted uppercase tracking-wider mb-3 hover:text-accent transition-colors group">
-                <span>标签</span>
-                <ArrowRight class="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
-            </a>
-            <div class="space-y-0">
-                {tags.map((tag) => {
-                    const postCount = getPostsByTag(posts, tag.id).length;
-                    return (
-                        <a
-                            href={`/tags/${tag.id}`}
-                            class="flex items-center justify-between py-0.5 group"
-                        >
-                            <span class="text-[11px] text-secondary group-hover:text-accent transition-colors">
-                                #{tag.name}
-                            </span>
-                            <span class="text-[10px] text-muted">{postCount}</span>
-                        </a>
-                    );
-                })}
-            </div>
-        </div>
     </div>
 </aside>
 

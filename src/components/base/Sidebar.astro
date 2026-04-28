@@ -3,6 +3,7 @@ import { Home, Folder, BookOpen, Tags, Image, Clock, Sparkles, MapPin, Archive, 
 import { getCollection } from 'astro:content';
 import siteConfig from '../../data/site-config';
 import CustomImage from '../ui/CustomImage.astro';
+import SidebarRecentPosts from '../widgets/SidebarRecentPosts.astro';
 
 const currentPath = Astro.url.pathname;
 
@@ -80,6 +81,14 @@ const navItems = [
   { key: 'contact', href: '/contact', icon: MessageCircle, name: '留言' },
   { key: 'rss', href: '/rss.xml', icon: Rss, name: '订阅' },
 ];
+
+const leftConfig = siteConfig.sidebar?.left ?? ['recentPosts', 'siteInfo'];
+
+// Component registry for left sidebar
+const leftComponents: Record<string, any> = {
+    recentPosts: SidebarRecentPosts,
+    siteInfo: null, // handled inline
+};
 
 function isActive(href: string): boolean {
   if (href === '/') {
@@ -162,6 +171,18 @@ function isActive(href: string): boolean {
       </nav>
     </div>
 
+    {leftConfig.map((componentId) => {
+        const Component = leftComponents[componentId];
+        if (componentId === 'siteInfo') return null;
+        if (!Component) return null;
+        return (
+            <div class="bg-card/80 backdrop-blur-md rounded-xl p-3 mt-3">
+                <Component />
+            </div>
+        );
+    })}
+
+    {leftConfig.includes('siteInfo') && (
     <div class="bg-card/80 backdrop-blur-md rounded-xl p-3 mt-3">
       <div class="flex items-center gap-1.5 mb-2.5">
         <Info class="w-3.5 h-3.5 text-accent" />
@@ -196,8 +217,8 @@ function isActive(href: string): boolean {
               </div>
           </div>
       </div>
-      </div>
     </div>
+    )}
 
 
 </aside>

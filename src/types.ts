@@ -122,6 +122,7 @@ export type SiteConfig = {
         resume: { name: string; path: string };
         minimal: { name: string; path: string; enabled?: boolean };
     };
+    sidebar?: SidebarConfig;
 };
 
 export type AgentProvider = 'rive' | 'live2d';
@@ -146,4 +147,26 @@ export type Album = {
     images: ImageInput[];
     date?: Date;
     tags?: string[];
+};
+
+export type SidebarComponentConfig = {
+    recentPosts?: { limit?: number };
+    featured?: { limit?: number };
+    tags?: { limit?: number };
+    related?: { limit?: number };
+    welcome?: { text?: string };
+    ghCard?: {
+        mode: 'repo' | 'user';
+        repo?: string;
+        user?: string;
+        bio?: string;
+    };
+};
+
+export type SidebarConfig = {
+    left?: string[];
+    right?: string[];
+    postRight?: string[];
+    docRight?: string[];
+    components?: SidebarComponentConfig;
 };

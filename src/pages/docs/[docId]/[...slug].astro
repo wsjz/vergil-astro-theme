@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import DocsNav from '../../../components/docs/DocsNav.astro';
-import TocSidebar from '../../../components/widgets/TocSidebar.astro';
+import SidebarToc from '../../../components/widgets/SidebarToc.astro';
 import FloatingToc from '../../../components/widgets/FloatingToc.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
 import { getDocSets, getDocEntry, getAdjacentDocs, getDocGroup, type DocTreeNode } from '../../../utils/docs-utils';
@@ -66,7 +66,7 @@ const showAutoRender = autoRender && groupChildren.length > 0;
     articleTitle={String(entry.data.title)}
 >
     <div slot="right-sidebar">
-        <TocSidebar headings={headings} />
+        <SidebarToc headings={headings} />
     </div>
 
     <FloatingToc headings={headings} />
