@@ -37,7 +37,7 @@
     }
 
     .prose a {
-        @apply underline font-normal decoration-1 underline-offset-2 decoration-dashed hover:decoration-solid transition-colors duration-150;
+        @apply text-accent no-underline font-normal hover:bg-accent/6 hover:rounded transition-colors duration-150;
     }
 
     .prose :where(h1, h2, h3, h4, h5, h6) {

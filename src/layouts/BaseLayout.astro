@@ -2,7 +2,7 @@
 import { ViewTransitions } from 'astro:transitions';
 import BaseHead, { type Props as HeadProps } from '../components/base/BaseHead.astro';
 import Footer from '../components/base/Footer.astro';
-import Sidebar from '../components/base/Sidebar.astro';
+import LeftSidebar from '../components/base/LeftSidebar.astro';
 import RightSidebar from '../components/base/RightSidebar.astro';
 import ThemeToggle from '../components/ui/ThemeToggle.astro';
 import TopNav from '../components/base/HeaderNav.astro';
@@ -89,7 +89,7 @@ const isArticle = head.pageType === 'article';
             <Search />
 
             <div class={`flex min-h-screen ${showTopNav ? 'pt-16' : ''}`}>
-                {showSidebar && <Sidebar />}
+                {showSidebar && <LeftSidebar />}
                 <div class="flex-1 lg:ml-[calc(14rem+5%+4px)] xl:ml-[calc(15rem+5%+4px)] xl:mr-[calc(12rem+5%+4px)] 2xl:mr-[calc(14rem+5%+4px)]">
                     <div class="flex flex-col min-h-screen px-4 lg:px-6">
                         <div class="flex items-center justify-end gap-3 py-4">
