@@ -1042,19 +1042,35 @@ tab: 示例代码
 ::::tabs
 tab: 演示效果
 
+**竖向比例（默认）**
+
 :::posters{group="movies"}
 :::
 
+**正方形比例**
+
+:::posters{group="albums" ratio="square"}
+:::
+
 tab: 示例代码
+
+**竖向比例**
 
 `````markdown
 :::posters{group="movies"}
 :::
 `````
 
+**正方形比例**
+
+`````markdown
+:::posters{group="albums" ratio="square"}
+:::
+`````
+
 - `group`（**必填**）：对应 `site-config.ts` 中 `links` 配置的分组名
+- `ratio`：比例，可选 `portrait`（竖向 2:3，默认）或 `square`（正方形 1:1）
 - 海报卡片使用 `cover` 或 `icon` 字段作为封面图
-- 竖向比例（2:3），适合展示电影海报、专辑封面等
 - 鼠标悬停时显示标题文字
 - 极小间隙的紧凑网格布局
 

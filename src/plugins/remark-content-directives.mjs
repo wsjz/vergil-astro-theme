@@ -742,6 +742,7 @@ export function remarkContentDirectives(options = {}) {
                 }
             } else if (name === 'posters') {
                 const group = attrs.group || '';
+                const ratio = attrs.ratio || 'portrait';
                 const items = (links && links[group]) || [];
 
                 if (!group) {
@@ -770,7 +771,7 @@ export function remarkContentDirectives(options = {}) {
                             `</div>`;
                     }).join('');
 
-                    const html = `<div class="md-directive md-directive-posters"><div class="md-posters-grid">${cells}</div></div>`;
+                    const html = `<div class="md-directive md-directive-posters" data-ratio="${ratio}"><div class="md-posters-grid">${cells}</div></div>`;
                     node.data = { hName: 'div', hProperties: {} };
                     node.children = [{ type: 'html', value: html }];
                 }

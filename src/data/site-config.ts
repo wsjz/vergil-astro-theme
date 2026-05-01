@@ -274,6 +274,38 @@ const siteConfig: SiteConfig = {
                 labels: [{ name: '部署', color: '#000000' }]
             }
         ],
+        albums: [
+            {
+                title: 'Random Access Memories',
+                url: 'https://music.douban.com/subject/25708776/',
+                cover: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=400&q=80'
+            },
+            {
+                title: 'Abbey Road',
+                url: 'https://music.douban.com/subject/1394562/',
+                cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=80'
+            },
+            {
+                title: '1989',
+                url: 'https://music.douban.com/subject/26322755/',
+                cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80'
+            },
+            {
+                title: 'Dark Side of the Moon',
+                url: 'https://music.douban.com/subject/1401327/',
+                cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&q=80'
+            },
+            {
+                title: 'Thriller',
+                url: 'https://music.douban.com/subject/1431658/',
+                cover: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&q=80'
+            },
+            {
+                title: 'Nevermind',
+                url: 'https://music.douban.com/subject/1394566/',
+                cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80'
+            }
+        ],
         movies: [
             {
                 title: '星际穿越',
