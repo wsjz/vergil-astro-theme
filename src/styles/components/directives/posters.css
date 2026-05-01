@@ -93,7 +93,32 @@
     display: none;
 }
 
-/* 响应式 */
+/* 固定列数（任何屏幕下保持不变） */
+.md-directive-posters[data-cols="2"] .md-posters-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.md-directive-posters[data-cols="3"] .md-posters-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.md-directive-posters[data-cols="4"] .md-posters-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.md-directive-posters[data-cols="5"] .md-posters-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.md-directive-posters[data-cols="6"] .md-posters-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.md-directive-posters[data-cols="8"] .md-posters-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+/* 响应式（无固定列数时） */
 @media (min-width: 640px) {
     .md-posters-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));

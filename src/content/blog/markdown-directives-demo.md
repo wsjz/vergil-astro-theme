@@ -1044,7 +1044,7 @@ tab: 演示效果
 
 **竖向比例（默认）**
 
-:::posters{group="movies"}
+:::posters{group="movies" cols="6"}
 :::
 
 **正方形比例**
@@ -1057,7 +1057,7 @@ tab: 示例代码
 **竖向比例**
 
 `````markdown
-:::posters{group="movies"}
+:::posters{group="movies" cols="6"}
 :::
 `````
 
@@ -1070,6 +1070,7 @@ tab: 示例代码
 
 - `group`（**必填**）：对应 `site-config.ts` 中 `links` 配置的分组名
 - `ratio`：比例，可选 `portrait`（竖向 2:3，默认）或 `square`（正方形 1:1）
+- `cols`：固定列数，可选 `2` / `3` / `4` / `5` / `6` / `8`，不传则自动填充
 - 海报卡片使用 `cover` 或 `icon` 字段作为封面图
 - 鼠标悬停时显示标题文字
 - 极小间隙的紧凑网格布局
