@@ -740,6 +740,40 @@ export function remarkContentDirectives(options = {}) {
                     node.data = { hName: 'div', hProperties: {} };
                     node.children = [{ type: 'html', value: html }];
                 }
+            } else if (name === 'posters') {
+                const group = attrs.group || '';
+                const items = (links && links[group]) || [];
+
+                if (!group) {
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-posters' } };
+                    node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">请提供 group 属性，如 :::posters{group="movies"}</p>' }];
+                } else if (items.length === 0) {
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-posters' } };
+                    node.children = [{ type: 'html', value: `<p style="color:var(--text-secondary);font-size:0.875rem;">分组 "${group}" 暂无海报数据</p>` }];
+                } else {
+                    const cells = items.map(item => {
+                        const cover = item.cover || item.icon || '';
+                        const title = item.title || '';
+                        return `<div class="md-posters-cell">` +
+                            (item.url
+                                ? `<a class="md-posters-link" href="${item.url}" target="_blank" rel="external nofollow noopener noreferrer">`
+                                : `<div class="md-posters-link">`) +
+                            `<div class="md-posters-cover">` +
+                            (cover
+                                ? `<img src="${cover}" alt="${title}" loading="lazy" onerror="this.style.display='none'" />`
+                                : '') +
+                            `</div>` +
+                            `<div class="md-posters-meta">` +
+                            (title ? `<span class="md-posters-caption">${title}</span>` : '') +
+                            `</div>` +
+                            (item.url ? `</a>` : `</div>`) +
+                            `</div>`;
+                    }).join('');
+
+                    const html = `<div class="md-directive md-directive-posters"><div class="md-posters-grid">${cells}</div></div>`;
+                    node.data = { hName: 'div', hProperties: {} };
+                    node.children = [{ type: 'html', value: html }];
+                }
             }
         });
     };

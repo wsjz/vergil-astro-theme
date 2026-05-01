@@ -1034,3 +1034,28 @@ tab: 示例代码
 - 封面图未指定时自动通过截图服务抓取（默认 `thumio`，可在 `site-config.ts` 中切换为 `mshots`）
 
 ::::
+
+---
+
+### Posters 海报
+
+::::tabs
+tab: 演示效果
+
+:::posters{group="movies"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::posters{group="movies"}
+:::
+`````
+
+- `group`（**必填**）：对应 `site-config.ts` 中 `links` 配置的分组名
+- 海报卡片使用 `cover` 或 `icon` 字段作为封面图
+- 竖向比例（2:3），适合展示电影海报、专辑封面等
+- 鼠标悬停时显示标题文字
+- 极小间隙的紧凑网格布局
+
+::::

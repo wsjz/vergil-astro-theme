@@ -273,6 +273,48 @@ const siteConfig: SiteConfig = {
                 icon: 'https://vercel.com/favicon.ico',
                 labels: [{ name: '部署', color: '#000000' }]
             }
+        ],
+        movies: [
+            {
+                title: '星际穿越',
+                url: 'https://movie.douban.com/subject/1889243/',
+                cover: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&q=80'
+            },
+            {
+                title: '千与千寻',
+                url: 'https://movie.douban.com/subject/1291561/',
+                cover: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&q=80'
+            },
+            {
+                title: '盗梦空间',
+                url: 'https://movie.douban.com/subject/3541415/',
+                cover: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&q=80'
+            },
+            {
+                title: '肖申克的救赎',
+                url: 'https://movie.douban.com/subject/1292052/',
+                cover: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&q=80'
+            },
+            {
+                title: '泰坦尼克号',
+                url: 'https://movie.douban.com/subject/1292722/',
+                cover: 'https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&q=80'
+            },
+            {
+                title: '黑客帝国',
+                url: 'https://movie.douban.com/subject/1291843/',
+                cover: 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=400&q=80'
+            },
+            {
+                title: '大话西游',
+                url: 'https://movie.douban.com/subject/1299398/',
+                cover: 'https://images.unsplash.com/photo-1517604931442-710535c64c1f?w=400&q=80'
+            },
+            {
+                title: '霸王别姬',
+                url: 'https://movie.douban.com/subject/1291546/',
+                cover: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80'
+            }
         ]
     },
     // 网站卡片封面截图服务: 'thumio' | 'mshots'
