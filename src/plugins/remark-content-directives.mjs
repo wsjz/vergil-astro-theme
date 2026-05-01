@@ -53,7 +53,53 @@ function h(tagName, properties, children) {
     };
 }
 
-export function remarkContentDirectives() {
+// ── helpers for sites directive ──
+function hexToHsl(hex) {
+    let r = 0, g = 0, b = 0;
+    if (hex.length === 4) {
+        r = parseInt('0x' + hex[1] + hex[1]);
+        g = parseInt('0x' + hex[2] + hex[2]);
+        b = parseInt('0x' + hex[3] + hex[3]);
+    } else if (hex.length === 7) {
+        r = parseInt('0x' + hex[1] + hex[2]);
+        g = parseInt('0x' + hex[3] + hex[4]);
+        b = parseInt('0x' + hex[5] + hex[6]);
+    }
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+            case g: h = ((b - r) / d + 2) / 6; break;
+            case b: h = ((r - g) / d + 4) / 6; break;
+        }
+    }
+    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
+function labelTextColor(hex) {
+    const { h, s, l } = hexToHsl(hex);
+    if (l > 75) {
+        return `hsla(${h}, ${s}%, 20%, 1)`;
+    } else if (s > 90 && l > 40) {
+        return `hsla(${h}, 50%, 20%, 1)`;
+    }
+    return 'white';
+}
+
+function getScreenshotUrl(url, service) {
+    if (service === 'mshots') {
+        return `https://s0.wp.com/mshots/v1/${encodeURIComponent(url)}?w=1280&h=720`;
+    }
+    // default: thumio
+    return `https://image.thum.io/get/width/1280/crop/720/${url}`;
+}
+
+export function remarkContentDirectives(options = {}) {
+    const { links, screenshotService } = options;
     return (tree) => {
         visit(tree, 'textDirective', (node) => {
             const name = node.name;
@@ -649,6 +695,50 @@ export function remarkContentDirectives() {
                 } else {
                     node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-ghcard' } };
                     node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">请提供有效的 repo（如 owner/repo）或 user 属性</p>' }];
+                }
+            } else if (name === 'sites') {
+                const group = attrs.group || '';
+                const items = (links && links[group]) || [];
+
+                if (!group) {
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-sites' } };
+                    node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">请提供 group 属性，如 :::sites{group="friends"}</p>' }];
+                } else if (items.length === 0) {
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-sites' } };
+                    node.children = [{ type: 'html', value: `<p style="color:var(--text-secondary);font-size:0.875rem;">分组 "${group}" 暂无站点数据</p>` }];
+                } else {
+                    const cells = items.map(item => {
+                        const cover = item.cover || getScreenshotUrl(item.url, screenshotService);
+                        const icon = item.icon || `${new URL(item.url).origin}/favicon.ico`;
+                        const desc = item.description || item.url;
+                        let labelsHtml = '';
+                        if (item.labels && item.labels.length > 0) {
+                            labelsHtml = '<div class="md-sites-labels">' +
+                                item.labels.map(l => {
+                                    const color = l.color || '#3b82f6';
+                                    const textColor = labelTextColor(color);
+                                    return `<span class="md-sites-label" style="background:${color};color:${textColor}">${l.name}</span>`;
+                                }).join('') +
+                                '</div>';
+                        }
+                        return `<div class="md-sites-cell">` +
+                            `<a class="md-sites-link" href="${item.url}" target="_blank" rel="external nofollow noopener noreferrer">` +
+                            `<div class="md-sites-cover">` +
+                            `<img src="${cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.add('md-sites-cover-fallback');" />` +
+                            `</div>` +
+                            `<div class="md-sites-info">` +
+                            `<img class="md-sites-icon" src="${icon}" alt="" loading="lazy" onerror="this.style.display='none'" />` +
+                            `<span class="md-sites-title">${item.title}</span>` +
+                            `<span class="md-sites-desc">${desc}</span>` +
+                            `</div>` +
+                            labelsHtml +
+                            `</a>` +
+                            `</div>`;
+                    }).join('');
+
+                    const html = `<div class="md-directive md-directive-sites"><div class="md-sites-grid">${cells}</div></div>`;
+                    node.data = { hName: 'div', hProperties: {} };
+                    node.children = [{ type: 'html', value: html }];
                 }
             }
         });

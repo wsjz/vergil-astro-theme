@@ -20,7 +20,7 @@ export default defineConfig({
     },
     integrations: [sitemap()],
     markdown: {
-        remarkPlugins: [remarkDirective, remarkImageDirectives, remarkPhotoDirectives, remarkContentDirectives, remarkTerminal],
+        remarkPlugins: [remarkDirective, remarkImageDirectives, remarkPhotoDirectives, [remarkContentDirectives, { links: siteConfig.links, screenshotService: siteConfig.screenshotService }], remarkTerminal],
         rehypePlugins: [rehypeTitleHeadings],
         shikiConfig: {
             themes: {

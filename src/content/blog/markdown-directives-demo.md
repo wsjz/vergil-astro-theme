@@ -1008,3 +1008,29 @@ Blobcat 表情 :emoji[0_0]{source="blobcat"}
 
 ---
 
+
+---
+
+## 网站卡片
+
+### Sites 网站卡片
+
+::::tabs
+tab: 演示效果
+
+:::sites{group="design"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::sites{group="design"}
+:::
+`````
+
+- `group`（**必填**）：对应 `site-config.ts` 中 `links` 配置的分组名
+- 数据在 `site-config.ts` 的 `links` 字段中配置
+- 支持封面图、图标、标题、描述和彩色标签
+- 封面图未指定时自动通过截图服务抓取（默认 `thumio`，可在 `site-config.ts` 中切换为 `mshots`）
+
+::::

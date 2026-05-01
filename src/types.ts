@@ -22,6 +22,22 @@ export type Link = {
     href: string;
 };
 
+export type SiteLabel = {
+    name: string;
+    color: string;
+};
+
+export type SiteItem = {
+    title: string;
+    url: string;
+    description?: string;
+    icon?: string;
+    cover?: string;
+    labels?: SiteLabel[];
+};
+
+export type SiteConfigLinks = Record<string, SiteItem[]>;
+
 export type Hero = {
     title?: string;
     text?: string;
@@ -122,6 +138,9 @@ export type SiteConfig = {
         resume: { name: string; path: string };
         minimal: { name: string; path: string; enabled?: boolean };
     };
+    links?: SiteConfigLinks;
+    /** 网站卡片封面截图服务，默认 thumio */
+    screenshotService?: 'thumio' | 'mshots';
     sidebar?: SidebarConfig;
 };
 

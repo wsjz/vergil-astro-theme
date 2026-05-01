@@ -201,6 +201,82 @@ const siteConfig: SiteConfig = {
         // rive: { src: '/model.riv' },
         // live2d: { modelPath: '/model.json' },
     },
+    links: {
+        design: [
+            {
+                title: 'Unsplash',
+                url: 'https://unsplash.com',
+                description: 'Photos for everyone.',
+                icon: 'https://unsplash.com/favicon.ico',
+                labels: [{ name: '图片', color: '#3b82f6' }]
+            },
+            {
+                title: 'Dribbble',
+                url: 'https://dribbble.com',
+                description: 'Discover the world\'s top designers.',
+                icon: 'https://dribbble.com/favicon.ico',
+                labels: [{ name: '设计', color: '#ec4899' }]
+            },
+            {
+                title: 'Heroicons',
+                url: 'https://heroicons.com',
+                description: 'Free Open Source SVG Icons.',
+                icon: 'https://heroicons.com/favicon.ico',
+                labels: [{ name: '图标', color: '#8b5cf6' }]
+            },
+            {
+                title: 'Astro',
+                url: 'https://astro.build',
+                description: 'The web framework for content-driven websites.',
+                icon: 'https://astro.build/favicon.svg',
+                labels: [{ name: '框架', color: '#FF5D01' }]
+            },
+            {
+                title: 'Tailwind CSS',
+                url: 'https://tailwindcss.com',
+                description: 'Rapidly build modern websites without ever leaving your HTML.',
+                icon: 'https://tailwindcss.com/favicon.ico',
+                labels: [{ name: 'CSS', color: '#06b6d4' }]
+            },
+            {
+                title: 'GitHub',
+                url: 'https://github.com',
+                description: 'Where the world builds software.',
+                icon: 'https://github.com/favicon.ico',
+                labels: [{ name: '工具', color: '#24292f' }]
+            }
+        ],
+        tools: [
+            {
+                title: 'Iconify',
+                url: 'https://iconify.design',
+                description: 'All popular icon sets, one framework.',
+                icon: 'https://iconify.design/favicon.ico'
+            },
+            {
+                title: 'Shiki',
+                url: 'https://shiki.style',
+                description: 'A beautiful syntax highlighter.',
+                icon: 'https://shiki.style/favicon.ico'
+            },
+            {
+                title: 'Figma',
+                url: 'https://figma.com',
+                description: 'The collaborative interface design tool.',
+                icon: 'https://figma.com/favicon.ico',
+                labels: [{ name: '设计', color: '#a259ff' }]
+            },
+            {
+                title: 'Vercel',
+                url: 'https://vercel.com',
+                description: 'Develop. Preview. Ship.',
+                icon: 'https://vercel.com/favicon.ico',
+                labels: [{ name: '部署', color: '#000000' }]
+            }
+        ]
+    },
+    // 网站卡片封面截图服务: 'thumio' | 'mshots'
+    screenshotService: 'thumio',
     sidebar: {
         // 可配置：recentPosts, siteInfo
         left: ['recentPosts', 'siteInfo'],
