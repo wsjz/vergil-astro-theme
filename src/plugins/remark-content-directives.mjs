@@ -776,6 +776,129 @@ export function remarkContentDirectives(options = {}) {
                     node.data = { hName: 'div', hProperties: {} };
                     node.children = [{ type: 'html', value: html }];
                 }
+            } else if (name === 'panel') {
+                const segments = [];
+                let currentLeft = '';
+                let currentRight = '';
+                let currentContent = [];
+
+                for (const child of node.children) {
+                    let match = null;
+
+                    // Case 1: standalone HTML block comment <!-- label: left | right -->
+                    if (child.type === 'html' && child.value) {
+                        match = child.value.match(/<!--\s*label:\s*(.*?)\s*-->/);
+                    }
+
+                    // Case 2: HTML comment inside a paragraph node
+                    if (!match && child.type === 'paragraph' && child.children && child.children.length > 0) {
+                        const firstChild = child.children[0];
+                        if (firstChild.type === 'html' && firstChild.value) {
+                            match = firstChild.value.match(/<!--\s*label:\s*(.*?)\s*-->/);
+                            if (match && child.children.length === 1) {
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (match) {
+                        if (currentContent.length > 0) {
+                            segments.push({ left: currentLeft, right: currentRight, children: currentContent });
+                        }
+                        const parts = match[1].split('|').map(s => s.trim());
+                        currentLeft = parts[0] || '';
+                        currentRight = parts[1] || '';
+                        currentContent = [];
+                        continue;
+                    }
+
+                    // Code block: auto-extract left from title, right from right= attr
+                    if (child.type === 'code') {
+                        const meta = child.meta || '';
+                        const titleMatch = meta.match(/title=["']([^"']+)["']/);
+                        const rightMatch = meta.match(/right=["']([^"']+)["']/);
+                        const left = titleMatch ? titleMatch[1] : (child.lang || '');
+                        const right = rightMatch ? rightMatch[1] : '';
+
+                        if (currentContent.length > 0) {
+                            segments.push({ left: currentLeft, right: currentRight, children: currentContent });
+                            currentContent = [];
+                            currentLeft = '';
+                            currentRight = '';
+                        }
+
+                        segments.push({ left, right, children: [child] });
+                        continue;
+                    }
+
+                    currentContent.push(child);
+                }
+
+                if (currentContent.length > 0) {
+                    segments.push({ left: currentLeft, right: currentRight, children: currentContent });
+                }
+
+                const uid = `panel-${Math.random().toString(36).slice(2, 7)}`;
+                const copyIcon = getIconSvg('lucide:copy', 14);
+                const children = [];
+
+                children.push({ type: 'html', value: '<div class="md-panel-body">' });
+
+                for (let i = 0; i < segments.length; i++) {
+                    const seg = segments[i];
+                    const segUid = `${uid}-seg-${i}`;
+                    const isCode = seg.children.some(c => c.type === 'code');
+
+                    // Collect copy text for this segment
+                    let segCopyText = '';
+                    for (const c of seg.children) {
+                        if (c.type === 'code') {
+                            segCopyText = c.value;
+                        }
+                    }
+                    const safeSegCopyText = segCopyText
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+
+                    // Build segment header: left label + right meta
+                    const leftLabel = seg.left
+                        ? `<span class="md-segment-label-left">${seg.left}</span>`
+                        : '';
+                    const rightHtml = seg.right
+                        ? `<span class="md-segment-right">${seg.right}</span>`
+                        : '';
+                    const copyHtml = segCopyText
+                        ? `<button class="md-copy-btn md-segment-copy" data-copy-target="${segUid}" aria-label="Copy">${copyIcon}</button>`
+                        : '';
+                    const metaHtml = (rightHtml || copyHtml)
+                        ? `<div class="md-segment-meta">${rightHtml}${copyHtml}</div>`
+                        : '';
+                    const headerHtml = (leftLabel || metaHtml)
+                        ? `<div class="md-segment-header">${leftLabel}${metaHtml}</div>`
+                        : '';
+
+                    children.push({ type: 'html', value: `<div class="md-panel-segment">${headerHtml}` });
+                    children.push(...seg.children);
+                    children.push({ type: 'html', value: '</div>' });
+
+                    // Hidden textarea for this segment's copy
+                    if (segCopyText) {
+                        children.push({
+                            type: 'html',
+                            value: `<textarea id="${segUid}" class="md-copy-source" readonly style="position:absolute;left:-9999px;opacity:0;pointer-events:none;">${safeSegCopyText}</textarea>`
+                        });
+                    }
+
+                    if (i < segments.length - 1) {
+                        children.push({ type: 'html', value: '<div class="md-panel-divider"></div>' });
+                    }
+                }
+
+                children.push({ type: 'html', value: '</div>' });
+
+                node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-panel' } };
+                node.children = children;
             }
         });
     };

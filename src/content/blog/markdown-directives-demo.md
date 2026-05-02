@@ -745,22 +745,332 @@ tab: 示例代码
 
 ---
 
-### Terminal 终端代码块
+### Panel 代码面板
 
-```bash terminal
-npm install tailwindcss @tailwindcss/postcss postcss
+将多个相关代码块或文字段落放入同一个面板中并列展示。每段有独立的左侧标签和右侧说明，支持每段单独复制。
+
+#### 场景 1：多语言代码对比
+
+::::tabs
+tab: 演示效果
+
+:::panel
+```js title="JavaScript" right="ES2024"
+const user = await fetch('/api/user').then(r => r.json())
+console.log(user.name)
 ```
 
-```bash terminal title="配置文件"
-export default {
-  plugins: {
-    "@tailwindcss/postcss": {},
-  }
-}
+```ts title="TypeScript" right="v5.7"
+interface User { name: string }
+const user = await fetch<User>('/api/user').then(r => r.json())
+console.log(user.name)
 ```
+
+```py title="Python" right="3.13"
+import requests
+user = requests.get('/api/user').json()
+print(user['name'])
+```
+:::
+
+tab: 示例代码
+
+`````markdown
+:::panel
+```js title="JavaScript" right="ES2024"
+const user = await fetch('/api/user').then(r => r.json())
+```
+
+```ts title="TypeScript" right="v5.7"
+const user = await fetch<User>('/api/user').then(r => r.json())
+```
+:::
+`````
+
+- `title` -> 左侧标签（场景/功能描述）
+- `right` -> 右侧说明（语言、版本、文件名等任意文本）
+
+::::
 
 ---
 
+#### 场景 2：前后端配对
+
+::::tabs
+tab: 演示效果
+
+:::panel
+```js title="前端调用" right="React"
+api.getUser(id).then(user => {
+  setUser(user)
+})
+```
+
+```go title="后端实现" right="Go 1.23"
+func GetUser(w http.ResponseWriter, r *http.Request) {
+  id := r.URL.Query().Get("id")
+  user := db.FindUser(id)
+  json.NewEncoder(w).Encode(user)
+}
+```
+:::
+
+tab: 示例代码
+
+`````markdown
+:::panel
+```js title="前端调用" right="React"
+fetch('/api/user').then(r => r.json())
+```
+
+```go title="后端实现" right="Go 1.23"
+func GetUser(w http.ResponseWriter, r *http.Request) { ... }
+```
+:::
+`````
+
+::::
+
+---
+
+#### 场景 3：请求与响应
+
+::::tabs
+tab: 演示效果
+
+:::panel
+```http title="请求" right="HTTP/1.1"
+GET /api/posts?page=1&limit=10
+Authorization: Bearer eyJhbG...
+```
+
+```json title="响应" right="JSON"
+{
+  "data": [...],
+  "total": 42,
+  "page": 1,
+  "limit": 10
+}
+```
+:::
+
+tab: 示例代码
+
+`````markdown
+:::panel
+```http title="请求" right="HTTP/1.1"
+GET /api/posts?page=1&limit=10
+```
+
+```json title="响应" right="JSON"
+{ "data": [...], "total": 42 }
+```
+:::
+`````
+
+::::
+
+---
+
+#### 场景 4：配置文件多环境对比
+
+::::tabs
+tab: 演示效果
+
+:::panel
+```yaml title="开发环境" right="dev.yaml"
+database: localhost:5432
+debug: true
+log_level: debug
+```
+
+```yaml title="生产环境" right="prod.yaml"
+database: prod.db.internal:5432
+debug: false
+log_level: warn
+```
+:::
+
+tab: 示例代码
+
+`````markdown
+:::panel
+```yaml title="开发环境" right="dev.yaml"
+database: localhost:5432
+```
+
+```yaml title="生产环境" right="prod.yaml"
+database: prod.db.internal:5432
+```
+:::
+`````
+
+::::
+
+---
+
+#### 场景 5：普通文字内容分段
+
+::::tabs
+tab: 演示效果
+
+:::panel
+
+<!-- label: 快速上手 | 1 分钟 -->
+创建项目只需一行命令：
+
+```bash
+npx create-my-app
+```
+
+<!-- label: 详细步骤 | 5 分钟 -->
+1. 确保 Node.js >= 18
+2. 运行 `npx create-my-app`
+3. 按提示选择模板
+4. 进入目录运行 `npm run dev`
+
+<!-- label: 进阶配置 | 可选 -->
+如需自定义配置，可在项目根目录创建 `my-app.config.js`：
+
+```js
+export default {
+  theme: 'default',
+  plugins: ['@my-app/i18n']
+}
+```
+
+:::
+
+tab: 示例代码
+
+`````markdown
+:::panel
+
+<!-- label: 快速上手 | 1 分钟 -->
+创建项目只需一行命令：
+
+```bash
+npx create-my-app
+```
+
+<!-- label: 详细步骤 | 5 分钟 -->
+1. 确保 Node.js >= 18
+2. 运行 `npx create-my-app`
+
+:::
+`````
+
+- `<!-- label: 左边 | 右边 -->` 用 `|` 分隔左右标签
+- 若不需要右边标签，可省略 `|` 及之后内容
+
+::::
+
+---
+
+#### 场景 6：多视角叙事
+
+::::tabs
+tab: 演示效果
+
+:::panel
+
+<!-- label: 用户视角 | 痛点 -->
+界面突然卡住，刷新后数据全没了，心情很崩溃。
+
+<!-- label: 开发者视角 | 根因 -->
+前端在 `onMount` 时未做 Loading 态处理，接口 5s 超时导致用户以为页面死了，重复刷新引发竞态条件。
+
+<!-- label: 产品经理视角 | 方案 -->
+需要加 Loading 骨架屏 + 请求防抖 + 断网重试机制。
+
+:::
+
+tab: 示例代码
+
+`````markdown
+:::panel
+
+<!-- label: 用户视角 | 痛点 -->
+界面突然卡住，刷新后数据全没了。
+
+<!-- label: 开发者视角 | 根因 -->
+前端在 `onMount` 时未做 Loading 态处理。
+
+:::
+`````
+
+::::
+
+---
+
+#### 场景 7：正反观点对比
+
+::::tabs
+tab: 演示效果
+
+:::panel
+
+<!-- label: 支持 TypeScript | 优势 -->
+TypeScript 的严格类型让大型项目维护成本大幅降低，重构时信心十足，IDE 提示也能减少低级错误。
+
+<!-- label: 反对 TypeScript | 劣势 -->
+小项目引入 TS 的 overhead 过高，类型体操反而增加了心智负担，配置复杂，不如直接用 JSDoc + 类型检查。
+
+:::
+
+tab: 示例代码
+
+`````markdown
+:::panel
+
+<!-- label: 支持 TypeScript | 优势 -->
+TypeScript 的严格类型让大型项目维护成本大幅降低。
+
+<!-- label: 反对 TypeScript | 劣势 -->
+小项目引入 TS 的 overhead 过高。
+
+:::
+`````
+
+::::
+
+---
+
+#### 场景 8：时间线对比
+
+::::tabs
+tab: 演示效果
+
+:::panel
+
+<!-- label: 2023 | Webpack 时代 -->
+当时使用 Webpack 5，构建一次要 30 秒，热更新也经常失败，开发体验很差。
+
+<!-- label: 2025 | Vite 时代 -->
+迁移到 Vite 后，冷启动 < 1 秒，HMR 几乎无感知，开发效率提升了数倍。
+
+<!-- label: 展望 | Rspack 未来 -->
+明年计划尝试 Rspack，在保持 Webpack 兼容的同时进一步提升构建性能。
+
+:::
+
+tab: 示例代码
+
+`````markdown
+:::panel
+
+<!-- label: 2023 | Webpack 时代 -->
+当时使用 Webpack 5，构建一次要 30 秒。
+
+<!-- label: 2025 | Vite 时代 -->
+迁移到 Vite 后，冷启动 < 1 秒。
+
+:::
+`````
+
+::::
+
+---
 ### Grid 多列步骤示例
 
 :::grid{cols="2" bg="none" gap="16"}
