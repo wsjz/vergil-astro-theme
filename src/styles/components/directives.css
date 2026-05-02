@@ -27,4 +27,5 @@
 @import './directives/sites.css';
 @import './directives/posters.css';
 @import './directives/panel.css';
+@import './directives/private.css';
 @import './directives/blockquote.css';

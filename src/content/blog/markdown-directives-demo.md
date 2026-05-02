@@ -1071,6 +1071,73 @@ tab: 示例代码
 ::::
 
 ---
+
+### Private 私密内容
+
+将敏感内容放入加密容器，读者需要输入正确密码才能查看。支持密码提示，支持重新锁定。
+
+#### 场景 1：加密文本内容
+
+::::tabs
+tab: 演示效果
+
+:::private{password="hello2024" hint="打招呼 + 年份"}
+这是加密的内容，只有知道密码的人才能看到。
+
+- 敏感信息 1
+- 敏感信息 2
+
+**注意：** 请勿泄露密码！
+:::
+
+tab: 示例代码
+
+`````markdown
+:::private{password="hello2024" hint="打招呼 + 年份"}
+这是加密的内容，只有知道密码的人才能看到。
+
+- 敏感信息 1
+- 敏感信息 2
+:::
+`````
+
+- `password`（**必填**）：解密密码
+- `hint`（可选）：密码提示，帮助读者回忆
+- 支持段落、列表、代码块等任意 Markdown 内容
+- 解密后显示 **重新锁定** 按钮，可再次隐藏
+
+::::
+
+---
+
+#### 场景 2：加密代码片段
+
+::::tabs
+tab: 演示效果
+
+:::private{password="123456"}
+```env
+DATABASE_URL=postgresql://user:secret@localhost:5432/db
+API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+JWT_SECRET=my-super-secret-key
+```
+:::
+
+tab: 示例代码
+
+`````markdown
+:::private{password="123456"}
+```env
+DATABASE_URL=postgresql://user:secret@localhost:5432/db
+API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+```
+:::
+`````
+
+::::
+
+---
+
 ### Grid 多列步骤示例
 
 :::grid{cols="2" bg="none" gap="16"}

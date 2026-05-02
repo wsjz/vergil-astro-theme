@@ -1,6 +1,7 @@
 import bx from '@iconify-json/bx/icons.json' with { type: 'json' };
 import lucide from '@iconify-json/lucide/icons.json' with { type: 'json' };
 import solar from '@iconify-json/solar/icons.json' with { type: 'json' };
+import crypto from 'node:crypto';
 import { visit } from 'unist-util-visit';
 
 const ICON_SETS = { lucide, bx, solar };
@@ -51,6 +52,56 @@ function h(tagName, properties, children) {
         data: { hName: tagName, hProperties: properties || {} },
         children: children || []
     };
+}
+
+// ── helpers for private directive ──
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function serializeToHtml(nodes) {
+    if (!Array.isArray(nodes)) nodes = [nodes];
+    return nodes.map(node => {
+        if (!node) return '';
+        switch (node.type) {
+            case 'text': return escapeHtml(node.value || '');
+            case 'inlineCode': return `<code>${escapeHtml(node.value || '')}</code>`;
+            case 'strong': return `<strong>${serializeToHtml(node.children)}</strong>`;
+            case 'emphasis': return `<em>${serializeToHtml(node.children)}</em>`;
+            case 'delete': return `<del>${serializeToHtml(node.children)}</del>`;
+            case 'link': return `<a href="${node.url || '#'}">${serializeToHtml(node.children)}</a>`;
+            case 'image': return `<img src="${node.url || ''}" alt="${node.alt || ''}" loading="lazy" />`;
+            case 'break': return '<br>';
+            case 'paragraph': return `<p>${serializeToHtml(node.children)}</p>`;
+            case 'heading': return `<h${node.depth || 2}>${serializeToHtml(node.children)}</h${node.depth || 2}>`;
+            case 'code': return `<pre><code class="language-${node.lang || ''}">${escapeHtml(node.value || '')}</code></pre>`;
+            case 'blockquote': return `<blockquote>${serializeToHtml(node.children)}</blockquote>`;
+            case 'list': {
+                const tag = node.ordered ? 'ol' : 'ul';
+                return `<${tag}>${node.children.map(item => `<li>${serializeToHtml(item.children)}</li>`).join('')}</${tag}>`;
+            }
+            case 'listItem': return serializeToHtml(node.children);
+            case 'thematicBreak': return '<hr>';
+            case 'html': return node.value || '';
+            case 'container': return serializeToHtml(node.children);
+            default: return '';
+        }
+    }).join('');
+}
+
+function encryptPrivateContent(text, password) {
+    const salt = crypto.randomBytes(16);
+    const iv = crypto.randomBytes(16);
+    const key = crypto.pbkdf2Sync(password, salt, 100000, 32, 'sha256');
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+    let encrypted = cipher.update(text, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+    const payload = Buffer.concat([salt, iv, Buffer.from(encrypted, 'base64')]);
+    return payload.toString('base64');
 }
 
 // ── helpers for sites directive ──
@@ -899,6 +950,53 @@ export function remarkContentDirectives(options = {}) {
 
                 node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-panel' } };
                 node.children = children;
+            } else if (name === 'private') {
+                const password = attrs.password || '';
+                const hint = attrs.hint || '';
+
+                if (!password) {
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-private' } };
+                    node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">请提供 password 属性，如 :::private{password="xxx"}</p>' }];
+                } else {
+                    const html = serializeToHtml(node.children);
+                    const encrypted = encryptPrivateContent(html, password);
+
+                    const lockIcon = getIconSvg('lucide:lock', 20);
+                    const unlockIcon = getIconSvg('lucide:lock-open', 20);
+                    const eyeOpenIcon = getIconSvg('lucide:eye', 16);
+                    const eyeCloseIcon = getIconSvg('lucide:eye-off', 16);
+
+                    const hintHtml = hint ? `<div class="md-private-hint">提示：${escapeHtml(hint)}</div>` : '';
+
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-private', 'data-payload': encrypted } };
+                    node.children = [{
+                        type: 'html',
+                        value: `<div class="md-private-locked">
+    <div class="md-private-icon">${lockIcon}</div>
+    <div class="md-private-title">私密内容</div>
+    <div class="md-private-desc">此内容已加密，请输入密码查看</div>
+    ${hintHtml}
+    <div class="md-private-form">
+        <div class="md-private-input-wrap">
+            <input type="password" class="md-private-input" placeholder="请输入密码" />
+            <button type="button" class="md-private-toggle" aria-label="显示密码">
+                <span class="md-private-eye-open">${eyeOpenIcon}</span>
+                <span class="md-private-eye-close">${eyeCloseIcon}</span>
+            </button>
+        </div>
+        <button type="button" class="md-private-btn">查看</button>
+    </div>
+    <div class="md-private-error">密码错误，请重试</div>
+</div>
+<div class="md-private-unlocked" style="display:none">
+    <div class="md-private-header">
+        <span class="md-private-status">${unlockIcon}<span>已解锁</span></span>
+        <button type="button" class="md-private-lock-btn">${lockIcon}<span>重新锁定</span></button>
+    </div>
+    <div class="md-private-content"></div>
+</div>`
+                    }];
+                }
             }
         });
     };
