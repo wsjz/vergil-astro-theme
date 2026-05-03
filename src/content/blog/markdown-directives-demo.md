@@ -1138,6 +1138,94 @@ API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
 
 ---
 
+### Audio 音频播放器
+
+在文章中插入音频，支持本地音频、网易云音乐和语音消息三种模式。
+
+#### 标准播放器（本地音频）
+
+::::tabs
+tab: 演示效果
+
+:::audio{src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" title="SoundHelix Song 1" artist="T. Schürger" width="500px" cover="https://images.unsplash.com/photo-1470225620780-dba8ba36b6a5?w=200&q=80"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::audio{src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" title="SoundHelix Song 1" artist="T. Schürger" width="500px" cover="https://images.unsplash.com/photo-1470225620780-dba8ba36b6a5?w=200&q=80"}
+:::
+`````
+
+- `src`（**必填**）：音频文件地址
+- `title`：歌曲标题
+- `artist`：艺术家
+- `cover`：封面图 URL（可选，不填则显示音乐图标）
+- `align`：对齐方式，可选 `left`（默认）、`center`、`right`
+- `width`：自定义宽度，如 `width="400px"`
+
+**居中对齐示例：**
+
+:::audio{src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" title="SoundHelix Song 1" artist="T. Schürger" align="center"}
+:::
+
+**自定义宽度示例：**
+
+:::audio{src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" title="SoundHelix Song 1" artist="T. Schürger" width="500px"}
+:::
+
+::::
+
+---
+
+#### 网易云音乐
+
+::::tabs
+tab: 演示效果
+
+:::audio{netease="25706282" title="晴天" artist="周杰伦" width="300px"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::audio{netease="25706282" title="晴天" artist="周杰伦" width="300px"}
+:::
+`````
+
+- `netease`（**必填**）：网易云音乐歌曲 ID
+- 从网易云音乐网页版分享链接中获取歌曲 ID
+- `align`：对齐方式，可选 `left`（默认）、`center`、`right`
+- `width`：自定义宽度，如 `width="400px"`
+
+::::
+
+---
+
+#### 语音消息
+
+::::tabs
+tab: 演示效果
+
+:::audio{voice="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" duration="15" width="200px"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::audio{voice="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" duration="15" width="200px"}
+:::
+`````
+
+- `voice`（**必填**）：语音文件地址
+- `duration`：语音时长（秒），用于显示波形长度
+- `align`：对齐方式，可选 `left`（默认）、`center`、`right`
+- `width`：自定义宽度，如 `width="400px"`
+
+::::
+
+---
+
 ### Grid 多列步骤示例
 
 :::grid{cols="2" bg="none" gap="16"}
