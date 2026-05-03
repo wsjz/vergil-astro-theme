@@ -997,6 +997,69 @@ export function remarkContentDirectives(options = {}) {
 </div>`
                     }];
                 }
+            } else if (name === 'audio') {
+                const src = attrs.src || '';
+                const netease = attrs.netease || '';
+                const voice = attrs.voice || '';
+                const title = attrs.title || '';
+                const artist = attrs.artist || '';
+                const cover = attrs.cover || '';
+                const duration = attrs.duration || '';
+                const align = attrs.align || '';
+                const width = attrs.width || '';
+                const uid = `audio-${Math.random().toString(36).slice(2, 7)}`;
+
+                let containerStyle = '';
+                if (align) containerStyle += `--audio-align:${align};`;
+                if (width) containerStyle += `--audio-width:${width};`;
+
+                if (netease) {
+                    // 网易云模式
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-audio md-audio-netease', ...(containerStyle ? { style: containerStyle } : {}) } };
+                    node.children = [{
+                        type: 'html',
+                        value: `<div class="md-audio-netease-wrap"><iframe src="//music.163.com/outchain/player?type=2&id=${netease}&auto=0&height=32" frameborder="no" border="0" marginwidth="0" marginheight="0" width="288" height="52" title="${escapeHtml(title || '网易云音乐')}"></iframe></div>`
+                    }];
+                } else if (voice) {
+                    // 语音模式
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-audio md-audio-voice', 'data-src': voice, 'data-duration': duration, ...(containerStyle ? { style: containerStyle } : {}) } };
+                    node.children = [{
+                        type: 'html',
+                        value: `<div class="md-audio-voice-player"><button type="button" class="md-voice-play" aria-label="播放"><span class="md-voice-icon-play">${getIconSvg('lucide:play', 14)}</span><span class="md-voice-icon-pause" style="display:none">${getIconSvg('lucide:pause', 14)}</span></button><canvas class="md-voice-wave" width="200" height="28"></canvas><span class="md-voice-duration">${duration ? duration + '"' : ''}</span></div>`
+                    }];
+                } else if (src) {
+                    // 标准播放器模式
+                    const playIcon = getIconSvg('lucide:play', 18);
+                    const pauseIcon = getIconSvg('lucide:pause', 18);
+                    const coverHtml = cover ? `<img src="${cover}" alt="${escapeHtml(title || '封面')}" loading="lazy" />` : `<div class="md-audio-cover-default">${getIconSvg('lucide:music', 18)}</div>`;
+
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-audio', 'data-src': src, ...(containerStyle ? { style: containerStyle } : {}) } };
+                    node.children = [{
+                        type: 'html',
+                        value: `<div class="md-audio-player" id="${uid}">
+    <div class="md-audio-cover">${coverHtml}</div>
+    <div class="md-audio-meta">
+        <div class="md-audio-title">${escapeHtml(title || '未知标题')}</div>
+        <div class="md-audio-artist">${escapeHtml(artist || '')}</div>
+    </div>
+    <button type="button" class="md-audio-btn" aria-label="播放">
+        <span class="md-audio-play">${playIcon}</span>
+        <span class="md-audio-pause" style="display:none">${pauseIcon}</span>
+    </button>
+    <div class="md-audio-progress-wrap">
+        <span class="md-audio-time-current">00:00</span>
+        <div class="md-audio-progress-bar">
+            <div class="md-audio-progress-fill"></div>
+        </div>
+        <span class="md-audio-time-total">00:00</span>
+    </div>
+    <audio preload="metadata" style="display:none"><source src="${src}" type="audio/mpeg"></audio>
+</div>`
+                    }];
+                } else {
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-audio', ...(containerStyle ? { style: containerStyle } : {}) } };
+                    node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">请提供 src、netease 或 voice 属性</p>' }];
+                }
             }
         });
     };
