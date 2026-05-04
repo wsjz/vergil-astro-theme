@@ -997,6 +997,70 @@ export function remarkContentDirectives(options = {}) {
 </div>`
                     }];
                 }
+            } else if (name === 'video') {
+                const src = attrs.src || '';
+                const bilibili = attrs.bilibili || '';
+                const youtube = attrs.youtube || '';
+                const poster = attrs.poster || '';
+                const ratio = attrs.ratio || '16/9';
+                const width = attrs.width || '';
+                const align = attrs.align || '';
+                const autoplay = attrs.autoplay === 'true' || attrs.autoplay === '';
+                const pip = attrs.pip || 'auto';
+
+                function ratioToPadding(r) {
+                    const parts = r.split('/').map(Number);
+                    if (parts.length === 2 && parts[0] > 0 && parts[1] > 0) {
+                        return (parts[1] / parts[0] * 100).toFixed(4) + '%';
+                    }
+                    return '56.25%';
+                }
+                const ratioPct = ratioToPadding(ratio);
+                let containerStyle = `--video-ratio-pct:${ratioPct};`;
+                if (width) containerStyle += `--video-width:${width};`;
+                if (align) containerStyle += `--video-align:${align};`;
+
+                const uid = `video-${Math.random().toString(36).slice(2, 7)}`;
+                const playIcon = getIconSvg('lucide:play', 36);
+
+                if (src) {
+                    let videoHtml;
+                    const pipBtnIcon = getIconSvg('lucide:picture-in-picture', 16);
+                    const pipBtnHtml = pip === 'manual'
+                        ? `<button type="button" class="md-video-pip-btn" data-video-pip="${uid}" aria-label="画中画">${pipBtnIcon}</button>`
+                        : '';
+                    if (poster) {
+                        videoHtml = `<img class="md-video-poster-img" src="${poster}" alt="" loading="lazy" /><video class="md-video-element" id="${uid}" src="${src}" preload="metadata" playsinline disablePictureInPicture ${autoplay ? 'autoplay muted ' : ''}data-pip-video="${uid}" data-pip-mode="${pip}"></video><div class="md-video-overlay" data-video-id="${uid}"><button type="button" class="md-video-play-btn" data-video-play="${uid}" aria-label="播放">${playIcon}</button></div>${pipBtnHtml}`;
+                        node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-video md-video-has-poster', style: containerStyle } };
+                    } else {
+                        videoHtml = `<video class="md-video-element" id="${uid}" src="${src}" controls preload="metadata" playsinline disablePictureInPicture ${autoplay ? 'autoplay muted ' : ''}data-pip-video="${uid}" data-pip-mode="${pip}"></video>${pipBtnHtml}`;
+                        node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-video', style: containerStyle } };
+                    }
+                    node.children = [{ type: 'html', value: `<div class="md-video-wrap">${videoHtml}</div>` }];
+                } else if (bilibili) {
+                    const bvid = bilibili.startsWith('BV') ? bilibili : 'BV' + bilibili;
+                    const iframeSrc = `//player.bilibili.com/player.html?bvid=${bvid}&autoplay=${autoplay ? 1 : 0}&page=1&high_quality=1&as_wide=1`;
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-video md-video-iframe', style: containerStyle } };
+                    node.children = [{
+                        type: 'html',
+                        value: `<div class="md-video-wrap">
+                            <iframe src="${iframeSrc}" frameborder="0" allowfullscreen scrolling="no" allow="fullscreen" title="${escapeHtml('Bilibili 视频')}"></iframe>
+                        </div>`
+                    }];
+                } else if (youtube) {
+                    let iframeSrc = `https://www.youtube.com/embed/${youtube}?rel=0`;
+                    if (autoplay) iframeSrc += '&autoplay=1&mute=1';
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-video md-video-iframe', style: containerStyle } };
+                    node.children = [{
+                        type: 'html',
+                        value: `<div class="md-video-wrap">
+                            <iframe src="${iframeSrc}" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" title="${escapeHtml('YouTube 视频')}"></iframe>
+                        </div>`
+                    }];
+                } else {
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-video', style: containerStyle } };
+                    node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">请提供 src、bilibili 或 youtube 属性</p>' }];
+                }
             } else if (name === 'audio') {
                 const src = attrs.src || '';
                 const netease = attrs.netease || '';
