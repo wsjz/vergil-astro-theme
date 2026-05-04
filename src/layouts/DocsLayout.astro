@@ -288,6 +288,248 @@ const isArticle = head.pageType === 'article';
                 });
             })();
         </script>
+        <script is:inline>
+        (function () {
+            function formatTime(s) {
+                if (!isFinite(s) || s < 0) return '00:00';
+                var m = Math.floor(s / 60);
+                var sec = Math.floor(s % 60);
+                return (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
+            }
+
+            var pipContainer = null;
+            var pipVideo = null;
+            var pipOriginal = null;
+            var pipObserver = null;
+            var pipDragState = null;
+
+            function createPip(originalVideo) {
+                if (pipContainer) return;
+                var src = originalVideo.currentSrc || originalVideo.src;
+                var currentTime = originalVideo.currentTime;
+                var wasPaused = originalVideo.paused;
+
+                pipOriginal = originalVideo;
+                originalVideo.pause();
+
+                var uid = 'md-pip-' + (originalVideo.id || 'video');
+                var playIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+                var pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                var backIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>';
+
+                pipContainer = document.createElement('div');
+                pipContainer.className = 'md-video-pip';
+                pipContainer.id = uid;
+                pipContainer.innerHTML = '<div class="md-pip-header" data-pip-drag="1">' +
+                    '<span class="md-pip-title">视频</span>' +
+                    '<button type="button" class="md-pip-back" title="回到原位" aria-label="回到原位">' + backIcon + '</button>' +
+                    '<button type="button" class="md-pip-close" title="关闭" aria-label="关闭">×</button>' +
+                    '</div>' +
+                    '<div class="md-pip-video-wrap">' +
+                    '<video class="md-pip-video" src="' + src + '" preload="auto" playsinline></video>' +
+                    '</div>' +
+                    '<div class="md-pip-controls">' +
+                    '<button type="button" class="md-pip-play-btn" aria-label="播放">' + (wasPaused ? playIcon : pauseIcon) + '</button>' +
+                    '<div class="md-pip-progress"><div class="md-pip-progress-fill"></div></div>' +
+                    '<span class="md-pip-time">00:00 / 00:00</span>' +
+                    '</div>';
+
+                document.body.appendChild(pipContainer);
+
+                pipVideo = pipContainer.querySelector('.md-pip-video');
+                pipVideo.currentTime = currentTime;
+                if (!wasPaused) pipVideo.play().catch(function () {});
+
+                pipVideo.addEventListener('timeupdate', function () {
+                    if (pipOriginal) pipOriginal.currentTime = pipVideo.currentTime;
+                    updatePipProgress();
+                });
+                pipVideo.addEventListener('play', updatePipPlayBtn);
+                pipVideo.addEventListener('pause', updatePipPlayBtn);
+                pipVideo.addEventListener('ended', function () {
+                    updatePipPlayBtn();
+                    if (pipOriginal) pipOriginal.currentTime = 0;
+                });
+
+                pipContainer.querySelector('.md-pip-play-btn').addEventListener('click', function () {
+                    if (pipVideo.paused) {
+                        pipVideo.play().catch(function () {});
+                    } else {
+                        pipVideo.pause();
+                    }
+                });
+
+                pipContainer.querySelector('.md-pip-progress').addEventListener('click', function (e) {
+                    if (!pipVideo || !pipVideo.duration) return;
+                    var rect = this.getBoundingClientRect();
+                    var pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    pipVideo.currentTime = pct * pipVideo.duration;
+                });
+
+                pipContainer.querySelector('.md-pip-back').addEventListener('click', function () {
+                    closePip(true);
+                });
+
+                pipContainer.querySelector('.md-pip-close').addEventListener('click', function () {
+                    closePip(false);
+                });
+
+                initPipDrag();
+                updatePipProgress();
+            }
+
+            function updatePipProgress() {
+                if (!pipContainer || !pipVideo) return;
+                var fill = pipContainer.querySelector('.md-pip-progress-fill');
+                var progressBar = pipContainer.querySelector('.md-pip-progress');
+                var timeEl = pipContainer.querySelector('.md-pip-time');
+                var duration = pipVideo.duration || 0;
+                var current = pipVideo.currentTime || 0;
+                if (duration) {
+                    var pct = current / duration * 100;
+                    fill.style.width = pct + '%';
+                    if (progressBar) progressBar.style.setProperty('--pip-progress-pct', pct + '%');
+                    timeEl.textContent = formatTime(current) + ' / ' + formatTime(duration);
+                }
+            }
+
+            function updatePipPlayBtn() {
+                if (!pipContainer || !pipVideo) return;
+                var btn = pipContainer.querySelector('.md-pip-play-btn');
+                var playIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+                var pauseIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                btn.innerHTML = pipVideo.paused ? playIcon : pauseIcon;
+            }
+
+            function closePip(scrollBack) {
+                if (!pipContainer || !pipOriginal || !pipVideo) return;
+
+                pipOriginal.currentTime = pipVideo.currentTime;
+                var wasPlaying = !pipVideo.paused && !pipVideo.ended;
+
+                pipContainer.remove();
+                pipContainer = null;
+                pipVideo = null;
+
+                var orig = pipOriginal;
+                pipOriginal = null;
+
+                if (scrollBack) {
+                    orig.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(function () {
+                        if (wasPlaying) orig.play().catch(function () {});
+                    }, 600);
+                } else {
+                    if (wasPlaying) orig.play().catch(function () {});
+                }
+            }
+
+            function initPipDrag() {
+                if (!pipContainer) return;
+                var header = pipContainer.querySelector('.md-pip-header');
+                if (!header) return;
+
+                header.addEventListener('mousedown', function (e) {
+                    if (e.button !== 0) return;
+                    var rect = pipContainer.getBoundingClientRect();
+                    pipDragState = {
+                        startX: e.clientX,
+                        startY: e.clientY,
+                        startLeft: rect.left,
+                        startTop: rect.top
+                    };
+                    pipContainer.style.transition = 'none';
+                    e.preventDefault();
+                });
+            }
+
+            document.addEventListener('mousemove', function (e) {
+                if (!pipDragState || !pipContainer) return;
+                var dx = e.clientX - pipDragState.startX;
+                var dy = e.clientY - pipDragState.startY;
+                var newLeft = pipDragState.startLeft + dx;
+                var newTop = pipDragState.startTop + dy;
+                var winW = window.innerWidth;
+                var winH = window.innerHeight;
+                var elW = pipContainer.offsetWidth;
+                var elH = pipContainer.offsetHeight;
+                newLeft = Math.max(0, Math.min(winW - elW, newLeft));
+                newTop = Math.max(0, Math.min(winH - elH, newTop));
+                pipContainer.style.left = newLeft + 'px';
+                pipContainer.style.top = newTop + 'px';
+                pipContainer.style.right = 'auto';
+                pipContainer.style.bottom = 'auto';
+            });
+
+            document.addEventListener('mouseup', function () {
+                if (pipDragState && pipContainer) {
+                    pipDragState = null;
+                    pipContainer.style.transition = '';
+                }
+            });
+
+            function initVideoPip() {
+                if (pipObserver) {
+                    pipObserver.disconnect();
+                }
+
+                pipObserver = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        var video = entry.target;
+                        var pipMode = video.dataset.pipMode || 'auto';
+                        if (pipMode === 'off') return;
+                        if (pipMode === 'manual') return;
+
+                        if (!entry.isIntersecting && !video.paused && !pipContainer) {
+                            createPip(video);
+                        } else if (entry.isIntersecting && pipContainer && pipOriginal === video) {
+                            closePip(false);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('video[data-pip-video]').forEach(function (video) {
+                    pipObserver.observe(video);
+                });
+            }
+
+            document.addEventListener('click', function (e) {
+                var playBtn = e.target.closest('[data-video-play]');
+                if (playBtn) {
+                    var container = playBtn.closest('.md-directive-video');
+                    if (!container) return;
+                    var overlay = container.querySelector('.md-video-overlay');
+                    var posterImg = container.querySelector('.md-video-poster-img');
+                    var video = container.querySelector('.md-video-element');
+                    if (overlay) overlay.classList.add('is-hidden');
+                    if (posterImg) posterImg.style.display = 'none';
+                    if (video) {
+                        video.classList.add('is-ready');
+                        video.setAttribute('controls', '');
+                        video.play().catch(function () {});
+                    }
+                    return;
+                }
+                var pipBtn = e.target.closest('[data-video-pip]');
+                if (pipBtn) {
+                    var container = pipBtn.closest('.md-directive-video');
+                    if (!container) return;
+                    var video = container.querySelector('.md-video-element');
+                    if (video && !pipContainer) {
+                        createPip(video);
+                    }
+                    return;
+                }
+            });
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initVideoPip);
+            } else {
+                initVideoPip();
+            }
+            document.addEventListener('astro:page-load', initVideoPip);
+        })();
+        </script>
     </head>
     <body class="bg-main text-main">
         {isArticle && (

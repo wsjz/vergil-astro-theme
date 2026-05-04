@@ -1476,6 +1476,180 @@ Blobcat 表情 :emoji[0_0]{source="blobcat"}
 
 ---
 
+### Video 视频播放器
+
+在文章中插入视频，支持本地视频、Bilibili 和 YouTube 三种模式。本地视频支持画中画（PiP）浮动播放器。
+
+#### 本地视频（带封面）
+
+::::tabs
+tab: 演示效果
+
+:::video{src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" poster="https://images.unsplash.com/photo-1490750967868-88aa4f44dbb3?w=800&q=80" ratio="16/9"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::video{src="https://example.com/video.mp4" poster="https://example.com/poster.jpg" ratio="16/9"}
+:::
+`````
+
+- `src`（**必填**）：视频文件地址
+- `poster`：封面图，显示自定义播放按钮覆盖层，点击后播放
+- `ratio`：宽高比，默认 `16/9`，可选 `4/3`、`1/1`
+- `width`：最大宽度，如 `width="600px"`
+- `align`：对齐方式，可选 `left`（默认）、`center`、`right`
+- `autoplay`：`true` 自动播放（静音）
+- `pip`：画中画模式，可选 `auto`（默认，滚动离开自动触发）、`manual`（手动触发）、`off`（关闭）
+
+::::
+
+---
+
+#### 本地视频（原生 controls）
+
+不指定 `poster` 时，直接使用原生 `<video controls>` 播放器。
+
+::::tabs
+tab: 演示效果
+
+:::video{src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" ratio="16/9"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::video{src="https://example.com/video.mp4" ratio="16/9"}
+:::
+`````
+
+- 不指定 `poster` 时，使用原生浏览器播放器控件
+- 其他参数与带封面模式相同
+
+::::
+
+---
+
+#### 本地视频（画中画 auto）
+
+视频播放中向下滚动离开视口时，自动弹出右下角浮动播放器。滚动回原位置时自动恢复。
+
+::::tabs
+tab: 演示效果
+
+:::video{src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" poster="https://images.unsplash.com/photo-1490750967868-88aa4f44dbb3?w=800&q=80" ratio="16/9" pip="auto"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::video{src="..." poster="..." ratio="16/9" pip="auto"}
+:::
+`````
+
+- `pip="auto"`（默认）：播放中离开视口自动进入画中画
+- 浮动播放器支持拖动、播放/暂停、进度跳转
+- 点击 ↩ 回到原位并恢复播放，点击 × 直接关闭
+
+::::
+
+---
+
+#### 本地视频（画中画 manual）
+
+不自动触发，鼠标悬停视频右上角显示画中画按钮，点击后手动进入浮动播放。
+
+::::tabs
+tab: 演示效果
+
+:::video{src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" poster="https://images.unsplash.com/photo-1490750967868-88aa4f44dbb3?w=800&q=80" ratio="16/9" pip="manual"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::video{src="..." poster="..." ratio="16/9" pip="manual"}
+:::
+`````
+
+- `pip="manual"`：鼠标悬停时右上角显示画中画按钮，点击手动触发
+- 适合不希望自动打扰读者的场景
+
+::::
+
+---
+
+#### 本地视频（居中对齐）
+
+::::tabs
+tab: 演示效果
+
+:::video{src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" poster="https://images.unsplash.com/photo-1490750967868-88aa4f44dbb3?w=800&q=80" align="center" width="500px" ratio="4/3"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::video{src="..." poster="..." align="center" width="500px" ratio="4/3"}
+:::
+`````
+
+- `align="center"`：视频容器居中对齐
+- `width="500px"`：限制最大宽度
+- `ratio="4/3"`：4:3 宽高比
+
+::::
+
+---
+
+#### Bilibili
+
+::::tabs
+tab: 演示效果
+
+:::video{bilibili="BV1GJ411x7h7"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::video{bilibili="BV1GJ411x7h7"}
+:::
+`````
+
+- `bilibili`（**必填**）：B 站 BV 号
+- `ratio`、`width`、`align` 与本地视频相同
+- 不支持画中画（iframe 内视频无法控制）
+
+::::
+
+---
+
+#### YouTube
+
+::::tabs
+tab: 演示效果
+
+:::video{youtube="jfKfPfyJRdk"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::video{youtube="jfKfPfyJRdk"}
+:::
+`````
+
+- `youtube`（**必填**）：YouTube 视频 ID
+- `autoplay`：`true` 自动播放（自动静音，符合 YouTube 策略）
+- `ratio`、`width`、`align` 与本地视频相同
+- 不支持画中画
+
+::::
+
+---
+
 ## 网站卡片
 
 ### Sites 网站卡片

@@ -29,4 +29,5 @@
 @import './directives/panel.css';
 @import './directives/private.css';
 @import './directives/audio.css';
+@import './directives/video.css';
 @import './directives/blockquote.css';
