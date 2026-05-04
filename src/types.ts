@@ -142,6 +142,9 @@ export type SiteConfig = {
     /** 网站卡片封面截图服务，默认 thumio */
     screenshotService?: 'thumio' | 'mshots';
     sidebar?: SidebarConfig;
+    floatingAudio?: {
+        enabled: boolean;
+    };
 };
 
 export type AgentProvider = 'rive' | 'live2d';

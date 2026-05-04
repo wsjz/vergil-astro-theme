@@ -60,25 +60,42 @@
         if (darkIcon) darkIcon.classList.toggle('hidden', !isDark);
     }
 
+    var _schemeTriggerHandler = null;
+    var _schemeDocHandler = null;
+    var _schemePickerHandler = null;
+    var _darkModeHandler = null;
+
     function setupSchemePicker() {
         var dropdown = document.getElementById('scheme-dropdown');
         var trigger = document.getElementById('scheme-trigger');
         var picker = document.getElementById('theme-scheme-picker');
 
         if (trigger && dropdown) {
-            trigger.addEventListener('click', function (e) {
+            if (_schemeTriggerHandler) {
+                trigger.removeEventListener('click', _schemeTriggerHandler);
+            }
+            _schemeTriggerHandler = function (e) {
                 e.stopPropagation();
                 dropdown.classList.toggle('hidden');
-            });
-            document.addEventListener('click', function (e) {
+            };
+            trigger.addEventListener('click', _schemeTriggerHandler);
+
+            if (_schemeDocHandler) {
+                document.removeEventListener('click', _schemeDocHandler);
+            }
+            _schemeDocHandler = function (e) {
                 if (!dropdown.contains(e.target) && e.target !== trigger) {
                     dropdown.classList.add('hidden');
                 }
-            });
+            };
+            document.addEventListener('click', _schemeDocHandler);
         }
 
         if (picker) {
-            picker.addEventListener('click', function (e) {
+            if (_schemePickerHandler) {
+                picker.removeEventListener('click', _schemePickerHandler);
+            }
+            _schemePickerHandler = function (e) {
                 var sw = e.target.closest('[data-scheme]');
                 if (!sw) return;
                 var clicked = sw.dataset.scheme;
@@ -87,21 +104,26 @@
                 applyTheme(clicked, curDark);
                 updateSchemeDots(clicked);
                 if (dropdown) dropdown.classList.add('hidden');
-            });
+            };
+            picker.addEventListener('click', _schemePickerHandler);
         }
     }
 
     function setupDarkModeToggle() {
         var btn = document.getElementById('dark-mode-toggle');
         if (!btn) return;
-        btn.addEventListener('click', function () {
+        if (_darkModeHandler) {
+            btn.removeEventListener('click', _darkModeHandler);
+        }
+        _darkModeHandler = function () {
             var curScheme = root.getAttribute('data-theme') || 'C';
             var curDark = root.classList.contains('dark');
             var newDark = !curDark;
             storeDark(newDark);
             applyTheme(curScheme, newDark);
             updateDarkModeIcon(newDark);
-        });
+        };
+        btn.addEventListener('click', _darkModeHandler);
     }
 
     function setup() {
@@ -116,8 +138,4 @@
 
     applyTheme(getStoredScheme(), getStoredDark());
     document.addEventListener('astro:page-load', setup);
-    document.addEventListener('astro:after-swap', function () {
-        applyTheme(getStoredScheme(), getStoredDark());
-        setup();
-    });
 })();

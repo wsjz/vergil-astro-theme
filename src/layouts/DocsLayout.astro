@@ -7,6 +7,7 @@ import ThemeToggle from '../components/ui/ThemeToggle.astro';
 import TopNav from '../components/base/HeaderNav.astro';
 import Search from '../components/widgets/Search.astro';
 import RightSidebar from '../components/base/RightSidebar.astro';
+import FloatingAudioPlayer from '../components/widgets/FloatingAudioPlayer.astro';
 import siteConfig from '../data/site-config';
 
 export type Props = HeadProps & {
@@ -674,5 +675,7 @@ const isArticle = head.pageType === 'article';
                 document.addEventListener('astro:page-load', initTabs);
             })();
         </script>
+
+        {siteConfig.floatingAudio?.enabled && <FloatingAudioPlayer />}
     </body>
 </html>

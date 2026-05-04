@@ -381,6 +381,9 @@ const siteConfig: SiteConfig = {
             },
         },
     },
+    floatingAudio: {
+        enabled: true,
+    },
 };
 
 export default siteConfig;

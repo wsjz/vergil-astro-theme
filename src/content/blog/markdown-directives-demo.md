@@ -1147,13 +1147,13 @@ API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
 ::::tabs
 tab: 演示效果
 
-:::audio{src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" title="SoundHelix Song 1" artist="T. Schürger" width="500px" cover="https://images.unsplash.com/photo-1470225620780-dba8ba36b6a5?w=200&q=80"}
+:::audio{src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" title="SoundHelix Song 1" artist="T. Schürger" width="500px"}
 :::
 
 tab: 示例代码
 
 `````markdown
-:::audio{src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" title="SoundHelix Song 1" artist="T. Schürger" width="500px" cover="https://images.unsplash.com/photo-1470225620780-dba8ba36b6a5?w=200&q=80"}
+:::audio{src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" title="SoundHelix Song 1" artist="T. Schürger" width="500px"}
 :::
 `````
 
@@ -1180,21 +1180,40 @@ tab: 示例代码
 
 #### 网易云音乐
 
+**迷你模式（默认）：**
+
 ::::tabs
 tab: 演示效果
 
-:::audio{netease="25706282" title="晴天" artist="周杰伦" width="300px"}
+:::audio{netease="1450008309" title="晴天" artist="周杰伦" width="300px"}
 :::
 
 tab: 示例代码
 
 `````markdown
-:::audio{netease="25706282" title="晴天" artist="周杰伦" width="300px"}
+:::audio{netease="1450008309" title="晴天" artist="周杰伦" width="300px"}
 :::
 `````
 
-- `netease`（**必填**）：网易云音乐歌曲 ID
-- 从网易云音乐网页版分享链接中获取歌曲 ID
+::::
+
+**卡片模式（带封面）：**
+
+::::tabs
+tab: 演示效果
+
+:::audio{netease="1450008309" title="晴天" artist="周杰伦" mode="card"}
+:::
+
+tab: 示例代码
+
+`````markdown
+:::audio{netease="1450008309" title="晴天" artist="周杰伦" mode="card"}
+:::
+`````
+
+- `netease`（**必填**）：网易云音乐歌曲 ID，从网易云音乐网页版分享链接中获取
+- `mode`：播放器样式，可选 `mini`（默认，窄条模式）或 `card`（带封面大卡片）
 - `align`：对齐方式，可选 `left`（默认）、`center`、`right`
 - `width`：自定义宽度，如 `width="400px"`
 
@@ -1608,13 +1627,13 @@ tab: 示例代码
 ::::tabs
 tab: 演示效果
 
-:::video{bilibili="BV1GJ411x7h7"}
+:::video{bilibili="BV17VmcBJEZz"}
 :::
 
 tab: 示例代码
 
 `````markdown
-:::video{bilibili="BV1GJ411x7h7"}
+:::video{bilibili="BV17VmcBJEZz"}
 :::
 `````
 

@@ -1,5 +1,6 @@
 ---
 import { Sun, Moon, Palette } from '@lucide/astro';
+import siteConfig from '../../data/site-config';
 
 const schemes = [
   { id: 'A', name: '暖羊皮纸', color: '#4a7c59' },
@@ -14,6 +15,8 @@ const schemes = [
   { id: 'J', name: '苔藓森林', color: '#507838' },
   { id: 'K', name: '沙岩暖棕', color: '#b86030' },
 ];
+
+const floatingAudioEnabled = siteConfig.floatingAudio?.enabled === true;
 ---
 
 <!--
@@ -76,4 +79,87 @@ const schemes = [
     <span id="dark-mode-icon-light"><Sun class="h-4 w-4" /></span>
     <span id="dark-mode-icon-dark" class="hidden"><Moon class="h-4 w-4" /></span>
   </button>
+
+  {floatingAudioEnabled && (
+    <>
+      <div class="w-px h-3.5 bg-border-light/30"></div>
+      <button
+        id="fa-toggle-btn"
+        class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-all duration-200 hover:bg-card hover:shadow-sm text-muted opacity-50"
+        aria-label="浮动播放器"
+        title="浮动播放器"
+      >
+        <span id="fa-toggle-icon-wrap" class="relative inline-flex h-4 w-4 items-center justify-center">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+          </svg>
+          <span id="fa-toggle-slash" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span class="block w-[110%] h-[1.5px] bg-current rounded-full transform rotate-[-45deg]"></span>
+          </span>
+        </span>
+      </button>
+    </>
+  )}
 </div>
+
+{floatingAudioEnabled && (
+  <script is:inline>
+    (function () {
+      function setupFloatingAudioToggle() {
+        var btn = document.getElementById('fa-toggle-btn');
+        var slash = document.getElementById('fa-toggle-slash');
+        if (!btn || !slash) return;
+
+        // 避免重复绑定点击事件
+        if (btn.dataset.faToggleBound) return;
+        btn.dataset.faToggleBound = '1';
+
+        btn.addEventListener('click', function () {
+          document.dispatchEvent(new CustomEvent('fa-toggle'));
+        });
+
+        // Sync initial state
+        var player = document.getElementById('mdFloatingAudio');
+        if (player && player.getAttribute('data-state') !== 'hidden') {
+          btn.classList.remove('text-muted', 'opacity-50');
+          btn.classList.add('text-accent');
+          slash.style.display = 'none';
+        } else {
+          btn.classList.remove('text-accent');
+          btn.classList.add('text-muted', 'opacity-50');
+          slash.style.display = 'flex';
+        }
+      }
+
+      // 全局事件监听：每次触发时动态查询当前 DOM 元素，兼容 ViewTransitions
+      if (!window._faToggleGlobalListeners) {
+        document.addEventListener('fa-expanded', function () {
+          var btn = document.getElementById('fa-toggle-btn');
+          var slash = document.getElementById('fa-toggle-slash');
+          if (btn) {
+            btn.classList.remove('text-muted', 'opacity-50');
+            btn.classList.add('text-accent');
+          }
+          if (slash) slash.style.display = 'none';
+        });
+        document.addEventListener('fa-collapsed', function () {
+          var btn = document.getElementById('fa-toggle-btn');
+          var slash = document.getElementById('fa-toggle-slash');
+          if (btn) {
+            btn.classList.remove('text-accent');
+            btn.classList.add('text-muted', 'opacity-50');
+          }
+          if (slash) slash.style.display = 'flex';
+        });
+        window._faToggleGlobalListeners = true;
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupFloatingAudioToggle);
+      } else {
+        setupFloatingAudioToggle();
+      }
+      document.addEventListener('astro:page-load', setupFloatingAudioToggle);
+    })();
+  </script>
+)}

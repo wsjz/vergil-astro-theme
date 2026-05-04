@@ -8,6 +8,7 @@ import ThemeToggle from '../components/ui/ThemeToggle.astro';
 import TopNav from '../components/base/HeaderNav.astro';
 import Search from '../components/widgets/Search.astro';
 import SiteAgent from '../components/widgets/SiteAgent.astro';
+import FloatingAudioPlayer from '../components/widgets/FloatingAudioPlayer.astro';
 import siteConfig from '../data/site-config';
 
 export type Props = HeadProps & { showSidebar?: boolean; showRightSidebar?: boolean; showTopNav?: boolean; articleTitle?: string; commentsEnabled?: boolean; splashMode?: boolean; rightSidebarConfig?: string[] };
@@ -682,6 +683,7 @@ const isArticle = head.pageType === 'article';
         </script>
 
         <SiteAgent />
+        {siteConfig.floatingAudio?.enabled && <FloatingAudioPlayer />}
 
         <script>
             // medium-zoom 按需加载：只在页面有可缩放图片时才导入

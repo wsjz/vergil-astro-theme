@@ -1079,10 +1079,17 @@ export function remarkContentDirectives(options = {}) {
 
                 if (netease) {
                     // 网易云模式
-                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-audio md-audio-netease', ...(containerStyle ? { style: containerStyle } : {}) } };
+                    const neteaseMode = attrs.mode || 'mini';
+                    const isCard = neteaseMode === 'card';
+                    const iframeHeight = isCard ? 86 : 52;
+                    const iframeWidth = isCard ? 330 : 298;
+                    const playerHeight = isCard ? 66 : 32;
+                    const neteaseClass = isCard ? 'md-audio-netease md-audio-netease-card' : 'md-audio-netease';
+
+                    node.data = { hName: 'div', hProperties: { class: `md-directive md-directive-audio ${neteaseClass}`, 'data-netease': netease, 'data-title': title || '网易云音乐', 'data-artist': artist || '', ...(containerStyle ? { style: containerStyle } : {}) } };
                     node.children = [{
                         type: 'html',
-                        value: `<div class="md-audio-netease-wrap"><iframe src="//music.163.com/outchain/player?type=2&id=${netease}&auto=0&height=32" frameborder="no" border="0" marginwidth="0" marginheight="0" width="288" height="52" title="${escapeHtml(title || '网易云音乐')}"></iframe></div>`
+                        value: `<div class="md-audio-netease-wrap${isCard ? ' md-audio-netease-wrap-card' : ''}"><iframe src="//music.163.com/outchain/player?type=2&id=${netease}&auto=0&height=${playerHeight}" frameborder="no" border="0" marginwidth="0" marginheight="0" width="${iframeWidth}" height="${iframeHeight}" title="${escapeHtml(title || '网易云音乐')}"></iframe></div>`
                     }];
                 } else if (voice) {
                     // 语音模式
