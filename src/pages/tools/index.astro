@@ -3,28 +3,29 @@ import DefaultLayout from '../../layouts/DefaultLayout.astro';
 ---
 
 <DefaultLayout title="在线工具箱" description="JSON 解析、文本 Diff、图片转 WebP 等实用工具" showSidebar={false} showRightSidebar={false}>
-    <div class="max-w-4xl mx-auto py-12 px-4">
-        <h1 class="text-3xl font-bold text-main mb-2">在线工具箱</h1>
-        <p class="text-secondary mb-10">纯前端运行，数据不会上传到服务器。</p>
+    <div class="max-w-3xl mx-auto py-8 px-4">
+        <h1 class="text-2xl font-bold text-main mb-1.5">在线工具箱</h1>
+        <p class="text-sm text-secondary mb-8">纯前端运行，数据不会上传到服务器。</p>
 
         <!-- Tabs -->
-        <div class="flex gap-2 mb-10 border-b border-light pb-4">
-            <button class="tab-btn active px-4 py-2 rounded-lg text-sm font-medium transition-all" data-tab="image">图片转 WebP</button>
-            <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-secondary hover:text-main hover:bg-hover" data-tab="json">JSON 解析</button>
-            <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-secondary hover:text-main hover:bg-hover" data-tab="diff">文本 Diff</button>
-            <button class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all text-secondary hover:text-main hover:bg-hover" data-tab="sql">SQL 美化</button>
+        <div class="flex gap-1.5 mb-8 border-b border-light pb-3">
+            <button class="tab-btn active px-3 py-1.5 rounded-md text-sm font-medium transition-all" data-tab="image">图片转 WebP</button>
+            <button class="tab-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all text-secondary hover:text-main hover:bg-hover" data-tab="json">JSON 解析</button>
+            <button class="tab-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all text-secondary hover:text-main hover:bg-hover" data-tab="diff">文本 Diff</button>
+            <button class="tab-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all text-secondary hover:text-main hover:bg-hover" data-tab="sql">SQL 美化</button>
+            <button class="tab-btn px-3 py-1.5 rounded-md text-sm font-medium transition-all text-secondary hover:text-main hover:bg-hover" data-tab="password">密码生成</button>
         </div>
 
         <!-- Image Tool -->
         <div id="tab-image" class="tab-content">
-            <h2 class="text-2xl font-bold text-main mb-2">图片转 WebP</h2>
-            <p class="text-secondary mb-6">支持批量处理，纯前端转换，图片不会上传到服务器。</p>
+            <h2 class="text-xl font-bold text-main mb-1.5">图片转 WebP</h2>
+            <p class="text-sm text-secondary mb-5">支持批量处理，纯前端转换，图片不会上传到服务器。</p>
 
             <div
                 id="drop-zone"
-                class="border-2 border-dashed border-light rounded-xl p-10 text-center cursor-pointer transition-all hover:border-accent hover:bg-accent/5"
+                class="border-2 border-dashed border-light rounded-xl p-8 text-center cursor-pointer transition-all hover:border-accent hover:bg-accent/5"
             >
-                <svg class="w-12 h-12 mx-auto text-muted mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <svg class="w-10 h-10 mx-auto text-muted mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l-3 3m3-3l3 3M6.75 19.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z"/>
                 </svg>
                 <p class="text-main font-medium mb-1">点击或拖拽图片到此处</p>
@@ -49,8 +50,8 @@ import DefaultLayout from '../../layouts/DefaultLayout.astro';
 
         <!-- JSON Tool -->
         <div id="tab-json" class="tab-content hidden">
-            <h2 class="text-2xl font-bold text-main mb-2">JSON 解析</h2>
-            <p class="text-secondary mb-6">格式化、压缩、实时解析 JSON 字符串。</p>
+            <h2 class="text-xl font-bold text-main mb-1.5">JSON 解析</h2>
+            <p class="text-sm text-secondary mb-5">格式化、压缩、实时解析 JSON 字符串。</p>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
@@ -61,50 +62,50 @@ import DefaultLayout from '../../layouts/DefaultLayout.astro';
                             <button id="json-minify" class="text-xs px-3 py-1.5 bg-muted text-main rounded-lg hover:bg-hover transition-colors">压缩</button>
                         </div>
                     </div>
-                    <textarea id="json-input" class="w-full h-[28rem] p-4 bg-card border border-light rounded-xl font-mono text-sm resize-y focus:outline-none focus:border-accent" placeholder='{"key": "value"}'></textarea>
+                    <textarea id="json-input" class="w-full h-80 p-3 bg-card border border-light rounded-xl font-mono text-sm resize-y focus:outline-none focus:border-accent" placeholder='{"key": "value"}'></textarea>
                 </div>
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm text-secondary">解析结果</span>
                         <span id="json-status" class="text-xs text-muted"></span>
                     </div>
-                    <pre id="json-output" class="w-full h-[28rem] p-4 bg-card border border-light rounded-xl font-mono text-sm overflow-auto whitespace-pre-wrap"></pre>
+                    <pre id="json-output" class="w-full h-80 p-3 bg-card border border-light rounded-xl font-mono text-sm overflow-auto whitespace-pre-wrap"></pre>
                 </div>
             </div>
         </div>
 
         <!-- Diff Tool -->
         <div id="tab-diff" class="tab-content hidden">
-            <h2 class="text-2xl font-bold text-main mb-2">文本 Diff</h2>
-            <p class="text-secondary mb-6">逐行对比两段文本的差异。</p>
+            <h2 class="text-xl font-bold text-main mb-1.5">文本 Diff</h2>
+            <p class="text-sm text-secondary mb-5">逐行对比两段文本的差异。</p>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                    <span class="text-sm text-secondary mb-2 block">原文本 A</span>
-                    <textarea id="diff-left" class="w-full h-64 p-4 bg-card border border-light rounded-xl font-mono text-sm resize-y focus:outline-none focus:border-accent" placeholder="输入原文本..."></textarea>
+                    <span class="text-sm text-secondary mb-1.5 block">原文本 A</span>
+                    <textarea id="diff-left" class="w-full h-52 p-3 bg-card border border-light rounded-xl font-mono text-sm resize-y focus:outline-none focus:border-accent" placeholder="输入原文本..."></textarea>
                 </div>
                 <div>
-                    <span class="text-sm text-secondary mb-2 block">对比文本 B</span>
-                    <textarea id="diff-right" class="w-full h-64 p-4 bg-card border border-light rounded-xl font-mono text-sm resize-y focus:outline-none focus:border-accent" placeholder="输入对比文本..."></textarea>
+                    <span class="text-sm text-secondary mb-1.5 block">对比文本 B</span>
+                    <textarea id="diff-right" class="w-full h-52 p-3 bg-card border border-light rounded-xl font-mono text-sm resize-y focus:outline-none focus:border-accent" placeholder="输入对比文本..."></textarea>
                 </div>
             </div>
 
-            <button id="diff-btn" class="mt-4 px-6 py-2 bg-accent text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium">开始对比</button>
+            <button id="diff-btn" class="mt-3 px-5 py-1.5 bg-accent text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium">开始对比</button>
 
-            <div id="diff-result" class="mt-6 hidden">
-                <div class="flex items-center gap-4 mb-3 text-xs">
-                    <span class="flex items-center gap-1 text-secondary"><span class="w-3 h-3 rounded bg-[#dcfce7] border border-[#bbf7d0]"></span> 新增</span>
-                    <span class="flex items-center gap-1 text-secondary"><span class="w-3 h-3 rounded bg-[#fee2e2] border border-[#fecaca]"></span> 删除</span>
-                    <span class="flex items-center gap-1 text-secondary"><span class="w-3 h-3 rounded bg-card border border-light"></span> 相同</span>
+            <div id="diff-result" class="mt-5 hidden">
+                <div class="flex items-center gap-3 mb-2 text-xs">
+                    <span class="flex items-center gap-1 text-secondary"><span class="w-2.5 h-2.5 rounded bg-[#dcfce7] border border-[#bbf7d0]"></span> 新增</span>
+                    <span class="flex items-center gap-1 text-secondary"><span class="w-2.5 h-2.5 rounded bg-[#fee2e2] border border-[#fecaca]"></span> 删除</span>
+                    <span class="flex items-center gap-1 text-secondary"><span class="w-2.5 h-2.5 rounded bg-card border border-light"></span> 相同</span>
                 </div>
-                <div id="diff-content" class="w-full p-4 bg-card border border-light rounded-xl font-mono text-sm overflow-auto max-h-[28rem]"></div>
+                <div id="diff-content" class="w-full p-3 bg-card border border-light rounded-xl font-mono text-sm overflow-auto max-h-80"></div>
             </div>
         </div>
 
         <!-- SQL Tool -->
         <div id="tab-sql" class="tab-content hidden">
-            <h2 class="text-2xl font-bold text-main mb-2">SQL 美化 / 压缩</h2>
-            <p class="text-secondary mb-6">格式化 SQL 语句（关键字大写、换行缩进）或压缩为一行。</p>
+            <h2 class="text-xl font-bold text-main mb-1.5">SQL 美化 / 压缩</h2>
+            <p class="text-sm text-secondary mb-5">格式化 SQL 语句（关键字大写、换行缩进）或压缩为一行。</p>
 
             <div class="mb-4 flex items-center justify-between">
                 <span class="text-sm text-secondary">输入 SQL</span>
@@ -113,14 +114,84 @@ import DefaultLayout from '../../layouts/DefaultLayout.astro';
                     <button id="sql-minify" class="text-xs px-3 py-1.5 bg-muted text-main rounded-lg hover:bg-hover transition-colors">压缩</button>
                 </div>
             </div>
-            <textarea id="sql-input" class="w-full h-80 p-4 bg-card border border-light rounded-xl font-mono text-sm resize-y focus:outline-none focus:border-accent" placeholder="SELECT * FROM users WHERE id = 1;"></textarea>
+            <textarea id="sql-input" class="w-full h-72 p-3 bg-card border border-light rounded-xl font-mono text-sm resize-y focus:outline-none focus:border-accent" placeholder="SELECT * FROM users WHERE id = 1;"></textarea>
 
-            <div id="sql-result-wrap" class="mt-6 hidden">
+            <div id="sql-result-wrap" class="mt-5 hidden">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-sm text-secondary">结果</span>
                     <span id="sql-status" class="text-xs text-muted"></span>
                 </div>
-                <pre id="sql-output" class="w-full h-80 p-4 bg-card border border-light rounded-xl font-mono text-sm overflow-auto whitespace-pre-wrap select-text"></pre>
+                <pre id="sql-output" class="w-full h-72 p-3 bg-card border border-light rounded-xl font-mono text-sm overflow-auto whitespace-pre-wrap select-text"></pre>
+            </div>
+        </div>
+
+        <!-- Password Tool -->
+        <div id="tab-password" class="tab-content hidden">
+            <h2 class="text-xl font-bold text-main mb-1.5">随机密码生成</h2>
+            <p class="text-sm text-secondary mb-5">纯本地生成，密码不会上传到服务器。</p>
+
+            <div class="bg-card border border-light rounded-xl p-4 mb-5">
+                <div class="flex items-center gap-2 mb-3">
+                    <input id="pwd-output" type="text" readonly class="flex-1 h-11 px-4 bg-muted border border-light rounded-lg font-mono text-base tracking-wider text-main focus:outline-none select-text" value="" />
+                    <button id="pwd-copy-btn" class="h-11 px-4 bg-accent text-white rounded-lg hover:opacity-90 transition-opacity font-medium flex items-center gap-1.5 shrink-0 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5"/>
+                        </svg>
+                        <span id="pwd-copy-text">复制</span>
+                    </button>
+                    <button id="pwd-refresh-btn" class="h-11 px-4 bg-muted text-main rounded-lg hover:bg-hover transition-colors font-medium flex items-center gap-1.5 shrink-0 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>
+                        </svg>
+                        <span>刷新</span>
+                    </button>
+                </div>
+
+                <!-- Strength bar -->
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-muted shrink-0">密码强度</span>
+                    <div class="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div id="pwd-strength-bar" class="h-full w-0 rounded-full transition-all duration-500"></div>
+                    </div>
+                    <span id="pwd-strength-text" class="text-xs font-medium shrink-0 w-10 text-right">-</span>
+                </div>
+            </div>
+
+            <!-- Options -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="bg-card border border-light rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-medium text-main">密码长度</span>
+                        <span id="pwd-length-value" class="text-sm font-mono font-bold text-accent">16</span>
+                    </div>
+                    <input id="pwd-length" type="range" min="4" max="64" value="16" class="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-accent" />
+                    <div class="flex justify-between mt-1.5 text-xs text-muted">
+                        <span>4</span>
+                        <span>64</span>
+                    </div>
+                </div>
+
+                <div class="bg-card border border-light rounded-xl p-4">
+                    <span class="text-sm font-medium text-main block mb-3">字符类型</span>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2.5 cursor-pointer group">
+                            <input type="checkbox" id="pwd-uppercase" checked class="w-3.5 h-3.5 rounded border-light text-accent focus:ring-accent" />
+                            <span class="text-sm text-main group-hover:text-accent transition-colors">大写字母 (A-Z)</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer group">
+                            <input type="checkbox" id="pwd-lowercase" checked class="w-3.5 h-3.5 rounded border-light text-accent focus:ring-accent" />
+                            <span class="text-sm text-main group-hover:text-accent transition-colors">小写字母 (a-z)</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer group">
+                            <input type="checkbox" id="pwd-numbers" checked class="w-3.5 h-3.5 rounded border-light text-accent focus:ring-accent" />
+                            <span class="text-sm text-main group-hover:text-accent transition-colors">数字 (0-9)</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer group">
+                            <input type="checkbox" id="pwd-symbols" checked class="w-3.5 h-3.5 rounded border-light text-accent focus:ring-accent" />
+                            <span class="text-sm text-main group-hover:text-accent transition-colors">特殊符号 (!@#$...)</span>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -444,6 +515,135 @@ import DefaultLayout from '../../layouts/DefaultLayout.astro';
             }
         });
     }
+    // ===== Password Tool =====
+    const pwdOutput = document.getElementById('pwd-output')! as HTMLInputElement;
+    const pwdCopyBtn = document.getElementById('pwd-copy-btn')!;
+    const pwdCopyText = document.getElementById('pwd-copy-text')!;
+    const pwdRefreshBtn = document.getElementById('pwd-refresh-btn')!;
+    const pwdLength = document.getElementById('pwd-length')! as HTMLInputElement;
+    const pwdLengthValue = document.getElementById('pwd-length-value')!;
+    const pwdUppercase = document.getElementById('pwd-uppercase')! as HTMLInputElement;
+    const pwdLowercase = document.getElementById('pwd-lowercase')! as HTMLInputElement;
+    const pwdNumbers = document.getElementById('pwd-numbers')! as HTMLInputElement;
+    const pwdSymbols = document.getElementById('pwd-symbols')! as HTMLInputElement;
+    const pwdStrengthBar = document.getElementById('pwd-strength-bar')!;
+    const pwdStrengthText = document.getElementById('pwd-strength-text')!;
+
+    const CHAR_SETS = {
+        uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        lowercase: 'abcdefghijklmnopqrstuvwxyz',
+        numbers: '0123456789',
+        symbols: '!@#$%^&*()_+-=[]{}|;:,.<>?',
+    };
+
+    function generatePassword(): string {
+        const length = parseInt(pwdLength.value);
+        let chars = '';
+        let required: string[] = [];
+
+        if (pwdUppercase.checked) {
+            chars += CHAR_SETS.uppercase;
+            required.push(CHAR_SETS.uppercase[Math.floor(Math.random() * CHAR_SETS.uppercase.length)]);
+        }
+        if (pwdLowercase.checked) {
+            chars += CHAR_SETS.lowercase;
+            required.push(CHAR_SETS.lowercase[Math.floor(Math.random() * CHAR_SETS.lowercase.length)]);
+        }
+        if (pwdNumbers.checked) {
+            chars += CHAR_SETS.numbers;
+            required.push(CHAR_SETS.numbers[Math.floor(Math.random() * CHAR_SETS.numbers.length)]);
+        }
+        if (pwdSymbols.checked) {
+            chars += CHAR_SETS.symbols;
+            required.push(CHAR_SETS.symbols[Math.floor(Math.random() * CHAR_SETS.symbols.length)]);
+        }
+
+        if (!chars) {
+            pwdLowercase.checked = true;
+            chars = CHAR_SETS.lowercase;
+            required.push(CHAR_SETS.lowercase[Math.floor(Math.random() * CHAR_SETS.lowercase.length)]);
+        }
+
+        // Fill remaining with random chars
+        let password = required.join('');
+        for (let i = password.length; i < length; i++) {
+            password += chars[Math.floor(Math.random() * chars.length)];
+        }
+
+        // Shuffle
+        password = password.split('').sort(() => Math.random() - 0.5).join('');
+
+        return password;
+    }
+
+    function calcStrength(password: string): { score: number; label: string; color: string } {
+        let score = 0;
+        const length = password.length;
+
+        if (length >= 8) score++;
+        if (length >= 12) score++;
+        if (length >= 16) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+
+        // Max score is 7, normalize to 0-4
+        const normalized = Math.min(4, Math.floor(score / 1.75));
+
+        const levels = [
+            { label: '极弱', color: '#ef4444' },
+            { label: '较弱', color: '#f97316' },
+            { label: '一般', color: '#eab308' },
+            { label: '较强', color: '#84cc16' },
+            { label: '极强', color: '#22c55e' },
+        ];
+
+        return { score: normalized, ...levels[normalized] };
+    }
+
+    function updatePassword() {
+        const password = generatePassword();
+        pwdOutput.value = password;
+        const strength = calcStrength(password);
+        pwdStrengthBar.style.width = ((strength.score + 1) / 5 * 100) + '%';
+        pwdStrengthBar.style.backgroundColor = strength.color;
+        pwdStrengthText.textContent = strength.label;
+        pwdStrengthText.style.color = strength.color;
+    }
+
+    pwdLength.addEventListener('input', () => {
+        pwdLengthValue.textContent = pwdLength.value;
+        updatePassword();
+    });
+
+    [pwdUppercase, pwdLowercase, pwdNumbers, pwdSymbols].forEach(el => {
+        el.addEventListener('change', updatePassword);
+    });
+
+    pwdRefreshBtn.addEventListener('click', updatePassword);
+
+    pwdCopyBtn.addEventListener('click', async () => {
+        if (!pwdOutput.value) return;
+        try {
+            await navigator.clipboard.writeText(pwdOutput.value);
+            pwdCopyText.textContent = '已复制';
+            setTimeout(() => {
+                pwdCopyText.textContent = '复制';
+            }, 1500);
+        } catch {
+            pwdOutput.select();
+            document.execCommand('copy');
+            pwdCopyText.textContent = '已复制';
+            setTimeout(() => {
+                pwdCopyText.textContent = '复制';
+            }, 1500);
+        }
+    });
+
+    // Init
+    updatePassword();
+
     setupSelectAll(jsonOutput);
     setupSelectAll(sqlOutput);
     setupSelectAll(diffContent);
