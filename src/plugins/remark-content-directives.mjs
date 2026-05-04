@@ -1030,7 +1030,7 @@ export function remarkContentDirectives(options = {}) {
                         ? `<button type="button" class="md-video-pip-btn" data-video-pip="${uid}" aria-label="画中画">${pipBtnIcon}</button>`
                         : '';
                     if (poster) {
-                        videoHtml = `<img class="md-video-poster-img" src="${poster}" alt="" loading="lazy" /><video class="md-video-element" id="${uid}" src="${src}" preload="metadata" playsinline disablePictureInPicture ${autoplay ? 'autoplay muted ' : ''}data-pip-video="${uid}" data-pip-mode="${pip}"></video><div class="md-video-overlay" data-video-id="${uid}"><button type="button" class="md-video-play-btn" data-video-play="${uid}" aria-label="播放">${playIcon}</button></div>${pipBtnHtml}`;
+                        videoHtml = `<img class="md-video-poster-img" src="${poster}" alt="" loading="lazy" onerror="this.style.display='none'" /><video class="md-video-element" id="${uid}" src="${src}" preload="metadata" playsinline disablePictureInPicture ${autoplay ? 'autoplay muted ' : ''}data-pip-video="${uid}" data-pip-mode="${pip}"></video><div class="md-video-overlay" data-video-id="${uid}"><button type="button" class="md-video-play-btn" data-video-play="${uid}" aria-label="播放">${playIcon}</button></div>${pipBtnHtml}`;
                         node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-video md-video-has-poster', style: containerStyle } };
                     } else {
                         videoHtml = `<video class="md-video-element" id="${uid}" src="${src}" controls preload="metadata" playsinline disablePictureInPicture ${autoplay ? 'autoplay muted ' : ''}data-pip-video="${uid}" data-pip-mode="${pip}"></video>${pipBtnHtml}`;
@@ -1103,11 +1103,12 @@ export function remarkContentDirectives(options = {}) {
                     const playIcon = getIconSvg('lucide:play', 18);
                     const pauseIcon = getIconSvg('lucide:pause', 18);
                     const coverHtml = cover ? `<img src="${cover}" alt="${escapeHtml(title || '封面')}" loading="lazy" />` : `<div class="md-audio-cover-default">${getIconSvg('lucide:music', 18)}</div>`;
+                    const autoplayAttr = attrs.autoplay === 'true' || attrs.autoplay === '' ? ' autoplay' : '';
 
                     node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-audio', 'data-src': src, ...(containerStyle ? { style: containerStyle } : {}) } };
                     node.children = [{
                         type: 'html',
-                        value: `<div class="md-audio-player" id="${uid}">
+                        value: `<div class="md-audio-player" id="${uid}"${autoplayAttr ? ' data-autoplay="1"' : ''}>
     <div class="md-audio-cover">${coverHtml}</div>
     <div class="md-audio-meta">
         <div class="md-audio-title">${escapeHtml(title || '未知标题')}</div>
@@ -1124,7 +1125,7 @@ export function remarkContentDirectives(options = {}) {
         </div>
         <span class="md-audio-time-total">00:00</span>
     </div>
-    <audio preload="metadata" style="display:none"><source src="${src}" type="audio/mpeg"></audio>
+    <audio preload="metadata" style="display:none"${autoplayAttr}><source src="${src}" type="audio/mpeg"></audio>
 </div>`
                     }];
                 } else {

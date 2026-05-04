@@ -383,6 +383,7 @@ const siteConfig: SiteConfig = {
     },
     floatingAudio: {
         enabled: true,
+        autoplay: false,
     },
 };
 

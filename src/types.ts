@@ -144,6 +144,7 @@ export type SiteConfig = {
     sidebar?: SidebarConfig;
     floatingAudio?: {
         enabled: boolean;
+        autoplay?: boolean;
     };
 };
 

@@ -287,6 +287,49 @@ const isArticle = head.pageType === 'article';
                         return;
                     }
                 });
+
+                // Autoplay support for inline audio players
+                function initInlineAudioAutoplay() {
+                    document.querySelectorAll('.md-audio-player[data-autoplay="1"]').forEach(function (player) {
+                        var container = player.closest('.md-directive-audio');
+                        if (!container) return;
+                        var audioEl = container.querySelector('audio');
+                        var playBtn = player.querySelector('.md-audio-play');
+                        var pauseBtn = player.querySelector('.md-audio-pause');
+                        var progressBar = player.querySelector('.md-audio-progress-bar');
+                        var progressFill = player.querySelector('.md-audio-progress-fill');
+                        var timeCurrent = player.querySelector('.md-audio-time-current');
+                        var timeTotal = player.querySelector('.md-audio-time-total');
+                        if (!audioEl || !playBtn || !pauseBtn) return;
+                        if (!audioEl._inited) {
+                            audioEl._inited = true;
+                            audioEl.addEventListener('loadedmetadata', function () {
+                                timeTotal.textContent = formatTime(audioEl.duration);
+                            });
+                            audioEl.addEventListener('timeupdate', function () {
+                                if (!audioEl.duration) return;
+                                var pct = audioEl.currentTime / audioEl.duration;
+                                progressFill.style.width = (pct * 100) + '%';
+                                timeCurrent.textContent = formatTime(audioEl.currentTime);
+                            });
+                            audioEl.addEventListener('ended', function () {
+                                playBtn.style.display = 'inline-flex';
+                                pauseBtn.style.display = 'none';
+                                progressFill.style.width = '0%';
+                                timeCurrent.textContent = '00:00';
+                                if (activeAudio === audioEl) activeAudio = null;
+                            });
+                        }
+                        audioEl.play().then(function () {
+                            playBtn.style.display = 'none';
+                            pauseBtn.style.display = 'inline-flex';
+                            if (activeAudio && activeAudio !== audioEl) activeAudio.pause();
+                            activeAudio = audioEl;
+                        }).catch(function () {});
+                    });
+                }
+                if (document.readyState !== 'loading') initInlineAudioAutoplay();
+                document.addEventListener('astro:page-load', initInlineAudioAutoplay);
             })();
         </script>
         <script is:inline>

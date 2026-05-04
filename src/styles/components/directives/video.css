@@ -15,7 +15,9 @@
     max-width: var(--video-width);
     border-radius: 8px;
     overflow: hidden;
-    background: #050505;
+    background:
+        radial-gradient(circle at center, color-mix(in srgb, var(--accent-color, #4a7c59) 12%, transparent) 0%, transparent 70%),
+        linear-gradient(135deg, #0c0c0c 0%, #141414 50%, #0c0c0c 100%);
     box-shadow:
         0 2px 8px rgba(0, 0, 0, 0.35),
         0 8px 24px rgba(0, 0, 0, 0.3),
@@ -116,6 +118,18 @@
     object-fit: cover;
     display: block;
     z-index: 1;
+}
+
+/* 默认占位背景：poster 加载中或加载失败时显示 */
+.md-video-has-poster .md-video-wrap {
+    background:
+        radial-gradient(circle at center, color-mix(in srgb, var(--accent-color, #4a7c59) 12%, transparent) 0%, transparent 70%),
+        linear-gradient(135deg, #0c0c0c 0%, #141414 50%, #0c0c0c 100%);
+}
+
+/* poster 加载失败隐藏后，overlay 按钮仍然可见 */
+.md-video-poster-img[src=""] {
+    display: none;
 }
 
 /* 有 poster 时 video 初始隐藏，点击后显示 */

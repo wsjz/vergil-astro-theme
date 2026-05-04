@@ -1,6 +1,8 @@
 ---
+import siteConfig from '../../data/site-config';
+const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false };
 ---
-<div class="md-floating-audio" id="mdFloatingAudio" data-state="hidden">
+<div class="md-floating-audio" id="mdFloatingAudio" data-state="hidden" data-autoplay={faConfig.autoplay ? '1' : '0'}>
     <div class="md-fa-collapsed" id="mdFaCollapsed">
         <div class="md-fa-cover-ring">
             <img class="md-fa-cover-img" id="mdFaCoverImg" src="" alt="" style="display:none" />
@@ -586,6 +588,14 @@
                 }
             }
             S._inited = true;
+
+            // Autoplay: if configured and playlist has items, auto-play first track
+            var shouldAutoplay = E.playerEl.dataset.autoplay === '1';
+            if (shouldAutoplay && S.playlist.length > 0 && S.playlist[0].type !== 'netease') {
+                loadTrack(0);
+                E.audioEl.play().catch(function () {});
+                showPlayer();
+            }
         } else {
             if (E.audioEl.src) {
                 var idx = S.playlist.findIndex(function (t) { return t.src === E.audioEl.src; });
