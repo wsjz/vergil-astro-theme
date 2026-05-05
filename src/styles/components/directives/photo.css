@@ -5,9 +5,9 @@
     box-sizing: border-box;
     overflow: hidden;
     border-radius: var(--md-radius-sm, 8px);
-    --photo-watermark-bg: #ffffff;
-    --photo-watermark-text: #1a1a1a;
-    --photo-watermark-muted: #999999;
+    --photo-watermark-bg: var(--bg-card, #ffffff);
+    --photo-watermark-text: var(--text-main, #1a1a1a);
+    --photo-watermark-muted: var(--text-muted, #999999);
     --photo-nikon-yellow: #ffcc00;
 }
 

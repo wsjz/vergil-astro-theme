@@ -714,13 +714,13 @@ tab: 示例代码
 
 - `layout`：`grid`（网格，默认）或 `flow`（瀑布流）
 - `size`：`xs` | `s` | `m` | `l` | `xl` | `mix`
-- `ratio`：`square` | `portrait`
+- `ratio`：`square` | `portrait` | `origin`（保持原始比例）
 
 ::::
 
 ---
 
-### Banner 横幅
+ ### Banner 横幅
 
 ::::tabs
 tab: 演示效果

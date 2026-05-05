@@ -1,31 +1,248 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import AlbumCard from '../../components/content/AlbumCard.astro';
 import siteConfig from '../../data/site-config';
 
 const albums = await getCollection('albums');
 const sortedAlbums = albums.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 
 const title = `Albums - ${siteConfig.title}`;
-const description = 'Photo albums and galleries';
+const description = 'Photo collections and visual stories';
 ---
 
 <BaseLayout title={title} description={description} showHeader={false}>
-    <div class="mb-12">
-        <h1 class="font-display text-2xl font-medium">Albums</h1>
-        <p class="mt-2 text-secondary">Photo collections and visual stories</p>
-    </div>
-    
-    {sortedAlbums.length > 0 ? (
-        <div class="grid gap-6 sm:grid-cols-2">
-            {sortedAlbums.map(album => (
-                <div class="reveal">
-                    <AlbumCard album={album} />
-                </div>
-            ))}
+    <div class="albums-page">
+        <header class="albums-header">
+            <h1 class="albums-title">Albums</h1>
+            <p class="albums-subtitle">{sortedAlbums.length} 个影集</p>
+        </header>
+
+        <div class="albums-grid">
+            {sortedAlbums.map((album, i) => {
+                const { title, description, date, cover, images, tags } = album.data;
+                const coverSrc = cover ? (typeof cover === 'string' ? cover : cover.src) : null;
+                const firstImg = images?.[0]?.src;
+                const displayCover = coverSrc || (typeof firstImg === 'string' ? firstImg : firstImg?.src);
+                const count = images?.length || 0;
+                return (
+                    <a href={`/albums/${album.id}/`} class="albums-card reveal" style={`--delay:${i * 0.08}s`}>
+                        <div class="albums-card-cover">
+                            {displayCover ? (
+                                <Image
+                                    src={cover ? (typeof cover === 'string' ? cover : cover) : images[0].src}
+                                    alt={title}
+                                    width={600}
+                                    height={400}
+                                    class="albums-card-img"
+                                    loading={i < 4 ? 'eager' : 'lazy'}
+                                />
+                            ) : (
+                                <div class="albums-card-placeholder">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <rect width="18" height="18" x="3" y="3" rx="2"/>
+                                        <circle cx="9" cy="9" r="2"/>
+                                        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                                    </svg>
+                                </div>
+                            )}
+                            <div class="albums-card-overlay">
+                                <span class="albums-card-count">{count} 张</span>
+                            </div>
+                        </div>
+                        <div class="albums-card-body">
+                            <h2 class="albums-card-title">{title}</h2>
+                            {description && <p class="albums-card-desc">{description}</p>}
+                            <div class="albums-card-meta">
+                                <time>{new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' })}</time>
+                                {tags && tags.length > 0 && (
+                                    <span class="albums-card-tag">{tags[0]}</span>
+                                )}
+                            </div>
+                        </div>
+                    </a>
+                );
+            })}
         </div>
-    ) : (
-        <p class="text-center text-secondary">No albums yet</p>
-    )}
+
+        {sortedAlbums.length === 0 && (
+            <div class="albums-empty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted">
+                    <rect width="18" height="18" x="3" y="3" rx="2"/>
+                    <circle cx="9" cy="9" r="2"/>
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                </svg>
+                <p>暂无影集</p>
+            </div>
+        )}
+    </div>
 </BaseLayout>
+
+<style>
+    .albums-page {
+        padding: 1rem 0 4rem;
+    }
+
+    .albums-header {
+        margin-bottom: 2.5rem;
+        text-align: center;
+    }
+
+    .albums-title {
+        font-family: var(--font-display, serif);
+        font-size: clamp(1.75rem, 4vw, 2.25rem);
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-main);
+    }
+
+    .albums-subtitle {
+        font-size: 0.9375rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+    }
+
+    .albums-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+        .albums-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .albums-grid {
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+    }
+
+    .albums-card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        transition: transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1),
+                    box-shadow 0.35s ease,
+                    border-color 0.35s ease;
+    }
+
+    .albums-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.18);
+        border-color: var(--border-main);
+    }
+
+    .albums-card-cover {
+        position: relative;
+        aspect-ratio: 3 / 2;
+        overflow: hidden;
+        background: var(--bg-muted);
+    }
+
+    .albums-card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    .albums-card:hover .albums-card-img {
+        transform: scale(1.06);
+    }
+
+    .albums-card-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+    }
+
+    .albums-card-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        padding: 0.75rem;
+        background: linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .albums-card:hover .albums-card-overlay {
+        opacity: 1;
+    }
+
+    .albums-card-count {
+        font-size: 0.6875rem;
+        color: white;
+        background: rgba(0,0,0,0.45);
+        backdrop-filter: blur(6px);
+        padding: 0.25rem 0.625rem;
+        border-radius: 9999px;
+        letter-spacing: 0.02em;
+    }
+
+    .albums-card-body {
+        padding: 1rem 1.125rem 1.125rem;
+    }
+
+    .albums-card-title {
+        font-family: var(--font-display, serif);
+        font-size: 1.0625rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-main);
+        line-height: 1.3;
+    }
+
+    .albums-card-desc {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        margin: 0.375rem 0 0;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .albums-card-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .albums-card-tag {
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        background: var(--bg-muted);
+        font-size: 0.6875rem;
+    }
+
+    .albums-empty {
+        text-align: center;
+        padding: 6rem 1rem;
+        color: var(--text-muted);
+    }
+
+    .albums-empty p {
+        margin-top: 1rem;
+        font-size: 0.9375rem;
+    }
+</style>

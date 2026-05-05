@@ -20,9 +20,52 @@ img {
     line-height: 0;
 }
 
-
 .md-directive-image .md-image-bg:hover .md-image-download {
-    opacity: 1 !important;
+    opacity: 1;
+}
+
+/* ── Image loading & error states ── */
+.md-image-img-wrap {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.md-image-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--bg-muted);
+    opacity: 1;
+    transition: opacity 0.4s ease;
+}
+
+.md-image-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        105deg,
+        transparent 40%,
+        rgba(128, 128, 128, 0.06) 45%,
+        rgba(128, 128, 128, 0.1) 50%,
+        rgba(128, 128, 128, 0.06) 55%,
+        transparent 60%
+    );
+    background-size: 200% 100%;
+    animation: md-image-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes md-image-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Hide loading when image is loaded */
+.md-image-img-wrap.is-loaded .md-image-loading {
+    opacity: 0;
+    animation: none;
 }
 
 .md-directive-image .md-image-bg img {
@@ -30,6 +73,23 @@ img {
     object-fit: cover;
     width: 100%;
     height: auto;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.md-directive-image .md-image-bg img.md-image-loaded {
+    opacity: 1;
+}
+
+/* Error state */
+.md-image-img-wrap.has-error .md-image-loading {
+    opacity: 0;
+    animation: none;
+}
+
+.md-directive-image .md-image-bg img.md-image-error {
+    opacity: 0.3;
+    filter: grayscale(1);
 }
 
 .md-directive-image .md-image-bg[style*="aspect-ratio"] img {
@@ -38,25 +98,30 @@ img {
 
 .md-directive-image .md-image-download {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
-    font-size: 1.125rem;
-    padding: 6px;
+    bottom: 10px;
+    right: 10px;
+    font-size: 1rem;
+    padding: 8px;
     line-height: 0;
-    border-radius: 40px;
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.35);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    border-radius: 50%;
+    color: white;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     opacity: 0;
-    transition: opacity 0.3s ease, background 0.3s ease, color 0.3s ease;
+    transition: opacity 0.25s ease, background 0.2s ease, transform 0.2s ease;
     text-decoration: none;
     z-index: 2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .md-directive-image .md-image-download:hover {
-    background: var(--bg-card) !important;
-    color: var(--accent-color);
+    background: rgba(0, 0, 0, 0.5);
+    transform: scale(1.1);
+}
+
+.md-directive-image .md-image-download:active {
+    transform: scale(0.95);
 }
 
 .md-directive-image .md-image-meta {
@@ -91,13 +156,53 @@ img {
     border-radius: var(--md-radius-sm, 8px);
 }
 
+/* ── Gallery loading placeholder ── */
+.md-directive-gallery .md-gallery-cell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+        105deg,
+        transparent 40%,
+        rgba(128, 128, 128, 0.06) 45%,
+        rgba(128, 128, 128, 0.1) 50%,
+        rgba(128, 128, 128, 0.06) 55%,
+        transparent 60%
+    );
+    background-size: 200% 100%;
+    pointer-events: none;
+    animation: md-gallery-shimmer 1.6s ease-in-out infinite;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+}
+
+@keyframes md-gallery-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Hide shimmer once image is loaded */
+.md-directive-gallery .md-gallery-cell:has(img.img-loaded)::before,
+.md-directive-gallery .md-gallery-cell:has(img:not([loading="lazy"]))::before {
+    opacity: 0;
+    animation: none;
+}
+
 .md-directive-gallery .md-gallery-cell img {
     object-fit: cover;
     max-height: 100%;
     display: block;
     width: 100%;
     height: 100%;
-    transition: transform 0.5s ease;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Fade in once loaded */
+.md-directive-gallery .md-gallery-cell img.img-loaded,
+.md-directive-gallery .md-gallery-cell img:not([loading="lazy"]) {
+    opacity: 1;
 }
 
 .md-directive-gallery .md-gallery-cell:hover img {
@@ -218,6 +323,15 @@ img {
 
 .md-directive-gallery.md-gallery-grid[data-gallery-ratio="portrait"] .md-gallery-cell {
     aspect-ratio: 2 / 3;
+}
+
+.md-directive-gallery.md-gallery-grid[data-gallery-ratio="origin"] .md-gallery-cell {
+    aspect-ratio: auto;
+}
+
+.md-directive-gallery.md-gallery-grid[data-gallery-ratio="origin"] .md-gallery-cell img {
+    height: auto;
+    object-fit: contain;
 }
 
 /* Flow (masonry) layout */

@@ -1,8 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import MasonryGallery from '../../components/widgets/MasonryGallery.astro';
 import FormattedDate from '../../components/ui/FormattedDate.astro';
 import Comments from '../../components/widgets/Comments.astro';
 
@@ -16,46 +16,428 @@ export const getStaticPaths = (async () => {
 
 const { album } = Astro.props;
 const { Content } = await render(album);
-const { title, description, date, images, tags, fonts } = album.data;
+const { title, description, date, cover, images, tags, fonts } = album.data;
+
+// All images flattened for lightbox
+const allImages = images.map((img, i) => ({
+    src: typeof img.src === 'string' ? img.src : img.src.src,
+    alt: img.alt || title,
+    index: i
+}));
+
+const coverSrc = cover ? (typeof cover === 'string' ? cover : cover.src) : null;
+const coverImg = coverSrc || allImages[0]?.src || '';
+const imageCount = images.length;
 ---
 
-<BaseLayout title={title} description={description} showHeader={false} articleTitle={title} commentsEnabled={true} fonts={fonts}>
-    <article>
-        <header class="mb-8">
-            <h1 class="font-display text-2xl font-medium">{title}</h1>
-            {description && <p class="mt-2 text-lg text-secondary">{description}</p>}
-            <div class="mt-4 flex flex-wrap items-center gap-4 text-sm text-secondary">
-                <FormattedDate date={date} />
-                {tags && tags.length > 0 && (
-                    <div class="flex gap-2">
-                        {tags.map(tag => (
-                            <span class="rounded-full bg-secondary px-3 py-1">{tag}</span>
-                        ))}
-                    </div>
-                )}
+<BaseLayout title={title} description={description} showHeader={false} showRightSidebar={false} fonts={fonts}>
+    <article class="album-detail">
+        {/* ── Header ── */}
+        <header class="album-detail-header">
+            <h1 class="album-detail-title">{title}</h1>
+            {description && <p class="album-detail-desc">{description}</p>}
+            <div class="album-detail-meta">
+                <span><FormattedDate date={date} /></span>
+                <span class="album-detail-dot" />
+                <span>{imageCount} 张照片</span>
+                {tags && tags.length > 0 && [
+                    <span class="album-detail-dot" />,
+                    <span class="album-detail-tags">{tags.join(' / ')}</span>
+                ]}
             </div>
         </header>
-        <div class="prose mb-8">
+
+        {/* ── Cover ── */}
+        {coverImg && (
+            <figure class="album-detail-cover" data-lightbox-index="0">
+                <Image
+                    src={coverSrc ? (typeof cover === 'string' ? cover : cover) : images[0].src}
+                    alt={title}
+                    width={900}
+                    class="album-detail-cover-img"
+                    loading="eager"
+                />
+            </figure>
+        )}
+
+        {/* ── Narrative ── */}
+        <div class="album-detail-body">
             <Content />
         </div>
-        {images && images.length > 0 && (
-            <MasonryGallery
-                images={images.map(img => ({
-                    src: typeof img.src === 'string' ? img.src : img.src.src,
-                    alt: img.alt || title,
-                    caption: img.caption
-                }))}
-                columns={3}
-            />
-        )}
+
+        {/* ── Gallery Grid ── */}
+        <div class="album-detail-gallery">
+            {images.map((img, i) => {
+                let layoutClass = 'album-g-half';
+                if (imageCount < 3) {
+                    layoutClass = 'album-g-full';
+                } else if (imageCount === 3) {
+                    layoutClass = i === 0 ? 'album-g-large' : 'album-g-half';
+                } else {
+                    layoutClass = i % 5 === 0 ? 'album-g-large' : 'album-g-half';
+                }
+                return (
+                    <figure class={`album-g-item ${layoutClass}`} data-lightbox-index={i}>
+                        <Image
+                            src={img.src}
+                            alt={img.alt || title}
+                            width={800}
+                            class="album-g-img"
+                            loading={i < 4 ? 'eager' : 'lazy'}
+                        />
+                        {img.alt ? <span class="album-g-caption">{img.alt}</span> : null}
+                    </figure>
+                );
+            })}
+        </div>
+
         <Comments pageId={`/albums/${album.id}/`} pageTitle={title} />
     </article>
+
+    {/* ── Lightbox ── */}
+    <div class="album-lightbox" id="album-lightbox" role="dialog" aria-modal="true" aria-label="图片浏览">
+        <div class="album-lightbox-backdrop" />
+        <button class="album-lightbox-close" aria-label="关闭">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        <button class="album-lightbox-prev" aria-label="上一张">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button class="album-lightbox-next" aria-label="下一张">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <div class="album-lightbox-stage">
+            <img class="album-lightbox-img" src="" alt="" />
+        </div>
+        <div class="album-lightbox-info">
+            <span class="album-lightbox-caption" />
+            <span class="album-lightbox-counter" />
+        </div>
+    </div>
 </BaseLayout>
 
-<script is:inline>
-    import mediumZoom from 'medium-zoom';
-    mediumZoom('.masonry-gallery img', {
-        background: 'var(--color-bg-main)',
-        margin: 24
-    });
+<script is:inline define:vars={{ imageData: allImages }}>
+    (function() {
+        const lightbox = document.getElementById('album-lightbox');
+        if (!lightbox) return;
+        const stageImg = lightbox.querySelector('.album-lightbox-img');
+        const captionEl = lightbox.querySelector('.album-lightbox-caption');
+        const counterEl = lightbox.querySelector('.album-lightbox-counter');
+        let currentIndex = 0;
+        let isOpen = false;
+        let touchStartX = 0;
+
+        function open(idx) {
+            if (idx < 0 || idx >= imageData.length) return;
+            currentIndex = idx;
+            stageImg.src = imageData[idx].src;
+            stageImg.alt = imageData[idx].alt || '';
+            captionEl.textContent = imageData[idx].alt || '';
+            counterEl.textContent = (idx + 1) + ' / ' + imageData.length;
+            lightbox.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+            isOpen = true;
+        }
+        function close() {
+            lightbox.classList.remove('is-open');
+            document.body.style.overflow = '';
+            isOpen = false;
+        }
+        function prev() { if (currentIndex > 0) open(currentIndex - 1); }
+        function next() { if (currentIndex < imageData.length - 1) open(currentIndex + 1); }
+
+        document.addEventListener('click', function(e) {
+            const item = e.target.closest('[data-lightbox-index]');
+            if (item) { e.preventDefault(); open(parseInt(item.dataset.lightboxIndex, 10)); }
+        });
+        lightbox.querySelector('.album-lightbox-close').addEventListener('click', close);
+        lightbox.querySelector('.album-lightbox-backdrop').addEventListener('click', close);
+        lightbox.querySelector('.album-lightbox-prev').addEventListener('click', prev);
+        lightbox.querySelector('.album-lightbox-next').addEventListener('click', next);
+        document.addEventListener('keydown', function(e) {
+            if (!isOpen) return;
+            if (e.key === 'Escape') close();
+            if (e.key === 'ArrowLeft') prev();
+            if (e.key === 'ArrowRight') next();
+        });
+        lightbox.addEventListener('touchstart', function(e) { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        lightbox.addEventListener('touchend', function(e) {
+            const diff = touchStartX - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 50) diff > 0 ? next() : prev();
+        }, { passive: true });
+    })();
 </script>
+
+<style>
+    /* ── Album Detail: Editorial Layout ── */
+    .album-detail {
+        padding: 3rem 0 5rem;
+    }
+
+    /* ── Header: Magazine-style ── */
+    .album-detail-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 0 1rem;
+    }
+
+    .album-detail-title {
+        font-family: var(--font-display, serif);
+        font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+        font-weight: 500;
+        line-height: 1.25;
+        margin: 0;
+        color: var(--text-main);
+        letter-spacing: -0.01em;
+    }
+
+    .album-detail-desc {
+        font-size: 0.9375rem;
+        color: var(--text-secondary);
+        margin-top: 1rem;
+        line-height: 1.7;
+        max-width: 520px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .album-detail-meta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.625rem;
+        margin-top: 1.25rem;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    .album-detail-dot {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.35;
+    }
+
+    /* ── Cover: Constrained, elegant ── */
+    .album-detail-cover {
+        margin: 0 auto 3rem;
+        border-radius: 6px;
+        overflow: hidden;
+        cursor: zoom-in;
+        background: var(--bg-muted);
+        max-height: 420px;
+    }
+
+    .album-detail-cover img {
+        display: block;
+        width: 100%;
+        height: 420px;
+        object-fit: cover;
+        margin: 0;
+        transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    .album-detail-cover:hover img {
+        transform: scale(1.02);
+    }
+
+    @media (max-width: 640px) {
+        .album-detail-cover img {
+            height: 280px;
+        }
+    }
+
+    /* ── Body ── */
+    .album-detail-body {
+        max-width: 600px;
+        margin: 0 auto 3.5rem;
+        font-size: 0.9375rem;
+        line-height: 1.85;
+        color: var(--text-secondary);
+    }
+
+    .album-detail-body :global(p) {
+        margin: 1.25rem 0;
+    }
+
+    .album-detail-body :global(p:first-child) {
+        margin-top: 0;
+    }
+
+    /* ── Gallery: Tight editorial grid ── */
+    .album-detail-gallery {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 4px;
+    }
+
+    .album-g-item {
+        margin: 0;
+        position: relative;
+        overflow: hidden;
+        cursor: zoom-in;
+        border-radius: 3px;
+        background: var(--bg-muted);
+    }
+
+    .album-g-item img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        margin: 0;
+        transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    .album-g-item:hover img {
+        transform: scale(1.04);
+    }
+
+    .album-g-large {
+        grid-column: span 2;
+        aspect-ratio: 2 / 1;
+        max-height: 360px;
+    }
+
+    .album-g-half {
+        aspect-ratio: 1;
+        max-height: 320px;
+    }
+
+    .album-g-full {
+        grid-column: span 2;
+        aspect-ratio: 16 / 9;
+        max-height: 340px;
+    }
+
+    .album-g-caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 2.5rem 1rem 0.625rem;
+        font-size: 0.6875rem;
+        font-weight: 400;
+        letter-spacing: 0.04em;
+        color: rgba(255,255,255,0.9);
+        background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .album-g-item:hover .album-g-caption {
+        opacity: 1;
+    }
+
+    @media (max-width: 640px) {
+        .album-detail-gallery {
+            grid-template-columns: 1fr;
+            gap: 3px;
+        }
+        .album-g-large,
+        .album-g-half,
+        .album-g-full {
+            grid-column: span 1;
+            aspect-ratio: 4 / 3;
+            max-height: 280px;
+        }
+    }
+
+    /* ── Lightbox ── */
+    .album-lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    .album-lightbox.is-open {
+        opacity: 1;
+        visibility: visible;
+    }
+    .album-lightbox-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.94);
+    }
+    .album-lightbox-close {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.25rem;
+        z-index: 2;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.7);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, color 0.2s;
+    }
+    .album-lightbox-close:hover { background: rgba(255,255,255,0.15); color: white; }
+    .album-lightbox-prev,
+    .album-lightbox-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255,255,255,0.06);
+        color: rgba(255,255,255,0.6);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, color 0.2s;
+    }
+    .album-lightbox-prev:hover,
+    .album-lightbox-next:hover { background: rgba(255,255,255,0.12); color: white; }
+    .album-lightbox-prev { left: 0.75rem; }
+    .album-lightbox-next { right: 0.75rem; }
+    .album-lightbox-stage {
+        position: relative;
+        z-index: 1;
+        max-width: 90vw;
+        max-height: 82vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .album-lightbox-img {
+        max-width: 100%;
+        max-height: 82vh;
+        object-fit: contain;
+        border-radius: 2px;
+    }
+    .album-lightbox-info {
+        position: absolute;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        display: flex;
+        gap: 0.75rem;
+        color: rgba(255,255,255,0.5);
+        font-size: 0.75rem;
+        letter-spacing: 0.03em;
+    }
+    .album-lightbox-counter {
+        font-variant-numeric: tabular-nums;
+    }
+</style>

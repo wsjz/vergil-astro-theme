@@ -53,11 +53,18 @@ function renderImageDirective(attrs) {
     const useZoom = fancybox !== 'false' && fancybox !== false;
     const zoomAttr = useZoom ? ' data-zoomable="1"' : '';
 
+    // Build image with loading placeholder wrapper
+    let imgWrap = '<div class="md-image-img-wrap">';
+    // Loading shimmer placeholder
+    imgWrap += '<div class="md-image-loading"></div>';
+    // Actual image with onerror fallback
     let imgHtml = `<img class="md-image-img" src="${escapeHtml(src)}" alt="${escapeHtml(alt)}"${zoomAttr}`;
     if (imgStyle && !ratio) imgHtml += ` style="${imgStyle}"`;
-    imgHtml += ' loading="lazy" decoding="async" />';
+    imgHtml += ' loading="lazy" decoding="async" onerror="this.classList.add(\'md-image-error\');this.closest(\'.md-image-img-wrap\').classList.add(\'has-error\');" onload="this.classList.add(\'md-image-loaded\');this.closest(\'.md-image-img-wrap\').classList.add(\'is-loaded\');" />';
+    imgWrap += imgHtml;
+    imgWrap += '</div>';
 
-    let inner = imgHtml;
+    let inner = imgWrap;
 
     if (download && download.length > 0) {
         const href = download === 'true' ? src : download;
