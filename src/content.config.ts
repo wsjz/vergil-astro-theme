@@ -62,6 +62,24 @@ const projects = defineCollection({
         })
 });
 
+const photoSchema = (image: ImageFunction) =>
+    z.object({
+        src: image(),
+        alt: z.string().optional(),
+        caption: z.string().optional(),
+        season: z.enum(['spring', 'summer', 'autumn', 'winter']).optional(),
+        featured: z.boolean().default(false),
+        exif: z.object({
+            camera: z.string().optional(),
+            lens: z.string().optional(),
+            focal: z.string().optional(),
+            aperture: z.string().optional(),
+            shutter: z.string().optional(),
+            iso: z.string().optional(),
+            datetime: z.string().optional()
+        }).optional()
+    });
+
 const albums = defineCollection({
     loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/albums' }),
     schema: ({ image }) =>
@@ -70,14 +88,16 @@ const albums = defineCollection({
             description: z.string().optional(),
             date: z.coerce.date(),
             cover: image().optional(),
-            images: z.array(
-                z.object({
-                    src: image(),
-                    alt: z.string().optional()
-                })
-            ).default([]),
+            images: z.array(photoSchema(image)).default([]),
             tags: z.array(z.string()).default([]),
-            fonts: fontsSchema
+            fonts: fontsSchema,
+            theme: z.enum(['golden', 'seasons']).default('golden').optional(),
+            layout: z.enum(['grid', 'masonry', 'timeline', 'carousel']).default('grid').optional(),
+            photoFit: z.enum(['cover', 'contain', 'auto']).default('cover').optional(),
+            background: z.string().optional(),
+            accent: z.string().optional(),
+            seasonFilter: z.boolean().default(false).optional(),
+            seasonDefault: z.enum(['spring', 'summer', 'autumn', 'winter']).optional()
         })
 });
 
