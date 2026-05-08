@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import ArrowRight from '../../assets/icons/arrow-right.svg';
+import { ChevronRight } from '@lucide/astro';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
@@ -34,7 +34,7 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
                         </div>
                     </div>
                     <div class="hidden font-display opacity-0 transition group-hover:opacity-100 sm:inline-flex sm:shrink-0 sm:items-center sm:gap-1">
-                        查看文章 <ArrowRight class="h-4 w-4 fill-current" />
+                        查看文章 <ChevronRight class="h-4 w-4" />
                     </div>
                 </a>
             );

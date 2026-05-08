@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { ChevronRight } from '@lucide/astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getAllSeries, getPostsBySeries, sortItemsByDateDesc } from '../../utils/data-utils';
 
@@ -24,7 +25,7 @@ const allSeries = getAllSeries(posts);
                             <h2 class="font-display text-xl font-medium group-hover:text-accent transition-colors">{s.name}</h2>
                             <p class="text-sm text-secondary mt-0.5">{seriesPosts.length} 篇文章</p>
                         </div>
-                        <span class="text-secondary group-hover:text-accent transition-colors text-sm">→</span>
+                        <ChevronRight class="w-4 h-4 text-secondary group-hover:text-accent transition-colors" />
                     </a>
                 );
             })}

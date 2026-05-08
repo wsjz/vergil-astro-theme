@@ -1,5 +1,5 @@
 ---
-import { ArrowLeft, Printer, Mail, Phone, MapPin, Globe } from '@lucide/astro';
+import { ChevronLeft, Printer, Mail, Phone, MapPin, Globe } from '@lucide/astro';
 import siteConfig from '../../../data/site-config';
 import type { CollectionEntry } from 'astro:content';
 
@@ -18,7 +18,7 @@ const h2Headings = headings.filter((h) => h.depth === 2);
     <div class="flex-1 overflow-y-auto p-6">
         <!-- 返回站点 -->
         <a href="/" class="inline-flex items-center gap-1.5 text-xs text-muted hover:text-accent transition-colors mb-6">
-            <ArrowLeft class="w-3.5 h-3.5" />
+            <ChevronLeft class="w-3.5 h-3.5" />
             <span>返回站点</span>
         </a>
 

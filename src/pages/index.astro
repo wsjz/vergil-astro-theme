@@ -7,6 +7,7 @@ import HeroSplash from '../components/content/HeroSplash.astro';
 import Moment from '../components/content/Moment.astro';
 import PostPreview from '../components/content/PostPreview.astro';
 import siteConfig from '../data/site-config';
+import { ChevronRight } from '@lucide/astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { sortItemsByDateDesc } from '../utils/data-utils';
 
@@ -88,7 +89,7 @@ if (fs.existsSync(momentsDir)) {
                             class="absolute top-1/2 right-0 -translate-y-1/2 inline-flex items-center justify-center w-9 h-9 rounded-full border border-light hover:border-accent/40 hover:bg-accent/5 transition-all" 
                             aria-label="Go to page 2"
                         >
-                            <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                            <ChevronRight class="h-5 w-5" />
                         </a>
                     )}
                 </nav>

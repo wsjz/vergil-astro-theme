@@ -1,4 +1,6 @@
 ---
+import { ChevronUp } from '@lucide/astro';
+
 interface Heading {
     depth: number;
     slug: string;
@@ -18,9 +20,7 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
     class="fixed right-4 xl:right-64 2xl:right-72 bottom-10 z-50 flex items-center justify-center w-10 h-10 bg-card border border-light rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/50 hover:shadow-xl transition-all duration-300 opacity-0 invisible translate-y-4"
     aria-label="Back to top"
 >
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-    </svg>
+    <ChevronUp class="w-4 h-4" />
 </button>
 
 {tocHeadings.length > 0 && (

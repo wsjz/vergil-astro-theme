@@ -196,7 +196,7 @@ export function remarkImageDirectives() {
                 html += '<div class="md-banner-content">';
                 html += '<div class="md-banner-top">';
                 if (!link) {
-                    html += `<button class="md-banner-back" onclick="window.history.back()"><svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M7.78 12.53a.75.75 0 01-1.06 0L2.47 8.28a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L4.81 7h7.44a.75.75 0 010 1.5H4.81l2.97 2.97a.75.75 0 010 1.06z"></path></svg></button>`;
+                    html += `<button class="md-banner-back" onclick="window.history.back()"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M10.354 12.354a.5.5 0 01-.708 0l-4-4a.5.5 0 010-.708l4-4a.5.5 0 11.708.708L6.707 8l3.647 3.646a.5.5 0 010 .708z"/></svg></button>`;
                 } else {
                     html += '<div></div>';
                 }

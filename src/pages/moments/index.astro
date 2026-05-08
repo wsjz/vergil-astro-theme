@@ -1,6 +1,7 @@
 ---
 import fs from 'node:fs';
 import path from 'node:path';
+import { ChevronDown } from '@lucide/astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Moment from '../../components/content/Moment.astro';
 import siteConfig from '../../data/site-config';
@@ -138,7 +139,7 @@ function formatRelativeTime(dateStr: string) {
             id="moments-load-btn"
             class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-colors flex items-center gap-1.5 mx-auto"
         >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            <ChevronDown class="w-4 h-4" />
             <span>加载更多</span>
         </button>
         <div id="moments-loading" class="hidden text-sm text-[var(--text-muted)] flex items-center justify-center gap-2">

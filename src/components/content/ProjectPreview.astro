@@ -1,6 +1,6 @@
 ---
 import { type CollectionEntry } from 'astro:content';
-import ArrowRight from '../../assets/icons/arrow-right.svg';
+import { ChevronRight } from '@lucide/astro';
 
 type Props = { project: CollectionEntry<'projects'>; class?: string; headingLevel?: 'h2' | 'h3' };
 
@@ -19,7 +19,7 @@ const TitleTag = headingLevel;
         </div>
         <div class="hidden sm:flex items-center gap-1 text-accent opacity-0 group-hover:opacity-100 transition-opacity">
             <span class="text-sm">View</span>
-            <ArrowRight class="w-4 h-4 fill-current" />
+            <ChevronRight class="w-4 h-4" />
         </div>
     </div>
 </a>

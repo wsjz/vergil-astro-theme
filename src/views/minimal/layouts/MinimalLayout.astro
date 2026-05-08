@@ -1,5 +1,6 @@
 ---
 import { ViewTransitions } from 'astro:transitions';
+import { ChevronLeft } from '@lucide/astro';
 import BaseHead, { type Props as HeadProps } from '../../../components/base/BaseHead.astro';
 import ThemeToggle from '../../../components/ui/ThemeToggle.astro';
 
@@ -43,8 +44,8 @@ const isArticle = head.pageType === 'article';
                 <!-- 顶部栏：返回链接 + ThemeToggle -->
                 <div class="flex items-center justify-between mb-6">
                     {showBackLink ? (
-                        <a href={backHref} class="text-sm text-secondary hover:text-accent transition-colors">
-                            ← {showBackLink}
+                        <a href={backHref} class="text-sm text-secondary hover:text-accent transition-colors inline-flex items-center gap-1">
+                            <ChevronLeft class="w-3.5 h-3.5" /> {showBackLink}
                         </a>
                     ) : (
                         <div />

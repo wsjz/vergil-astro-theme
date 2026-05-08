@@ -6,6 +6,7 @@ import SidebarToc from '../../../components/widgets/SidebarToc.astro';
 import FloatingToc from '../../../components/widgets/FloatingToc.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
 import { getDocSets, getDocEntry, getAdjacentDocs, getDocGroup, type DocTreeNode } from '../../../utils/docs-utils';
+import { ChevronRight } from '@lucide/astro';
 
 export async function getStaticPaths() {
     const entries = await getCollection('docs', ({ data }) => !data.draft);
@@ -136,9 +137,7 @@ const showAutoRender = autoRender && groupChildren.length > 0;
                                     </span>
                                 )}
                             </span>
-                            <svg class="w-4 h-4 text-muted group-hover:text-accent transition-colors shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-                            </svg>
+                            <ChevronRight class="w-4 h-4 text-muted group-hover:text-accent transition-colors shrink-0" />
                         </a>
                     );
                 })}

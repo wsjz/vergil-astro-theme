@@ -1,6 +1,5 @@
 ---
-import ArrowLeft from '../../assets/icons/arrow-left.svg';
-import ArrowRight from '../../assets/icons/arrow-right.svg';
+import { ChevronLeft, ChevronRight } from '@lucide/astro';
 import IconButton from '../ui/IconButton.astro';
 
 const { page, class: className } = Astro.props;
@@ -14,7 +13,7 @@ const { page, class: className } = Astro.props;
                 href={page.url.prev}
                 aria-label={`Go to page ${page.currentPage - 1} of ${page.lastPage}`}
             >
-                <ArrowLeft class="h-5 w-5 fill-current" />
+                <ChevronLeft class="h-5 w-5" />
             </IconButton>
         )
     }
@@ -26,7 +25,7 @@ const { page, class: className } = Astro.props;
                 href={page.url.next}
                 aria-label={`Go to page ${page.currentPage + 1} of ${page.lastPage}`}
             >
-                <ArrowRight class="h-5 w-5 fill-current" />
+                <ChevronRight class="h-5 w-5" />
             </IconButton>
         )
     }

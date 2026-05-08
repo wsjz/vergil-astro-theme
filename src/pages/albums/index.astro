@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { ChevronRight } from '@lucide/astro';
 import DefaultLayout from '../../layouts/DefaultLayout.astro';
 import CustomImage from '../../components/ui/CustomImage.astro';
 import siteConfig from '../../data/site-config';
@@ -65,12 +66,8 @@ const totalCount = sortedAlbums.length;
                             )}
                             <div class="albums-item-shade"></div>
                             <span class="albums-item-num">{num}</span>
-                            <span class="albums-item-arrow" aria-hidden="true">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M7 7h10v10"/>
-                                    <path d="M7 17 17 7"/>
-                                </svg>
-                            </span>
+                            <ChevronRight class="albums-item-arrow-icon" aria-hidden="true" />
+
                             <div class="albums-item-overlay">
                                 {albumDesc ? <p class="albums-item-overlay-desc">{albumDesc}</p> : null}
                             </div>

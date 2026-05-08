@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { ChevronDown } from '@lucide/astro';
 import DefaultLayout from '../../layouts/DefaultLayout.astro';
 import ThoughtCard from '../../components/content/ThoughtCard.astro';
 
@@ -108,7 +109,7 @@ const hiddenTags = hasMoreTags ? allTags.slice(VISIBLE_TAG_COUNT) : [];
             id="thoughts-load-btn"
             class="text-sm text-[var(--text-secondary)] hover:text-[var(--accent-color)] transition-colors flex items-center gap-1.5 mx-auto bg-transparent border-0 cursor-pointer"
         >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            <ChevronDown class="w-4 h-4" />
             <span>加载更多</span>
         </button>
         <div id="thoughts-loading" class="hidden text-sm text-[var(--text-muted)] flex items-center justify-center gap-2">

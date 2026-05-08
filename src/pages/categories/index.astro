@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { ChevronRight } from '@lucide/astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import { getAllCategories, getPostsByCategory, sortItemsByDateDesc } from '../../utils/data-utils';
@@ -30,7 +31,7 @@ const categories = getAllCategories(posts).sort((a, b) => {
                             </h2>
                             <p class="text-sm text-secondary mt-0.5">{count} 篇文章</p>
                         </div>
-                        <span class="text-secondary group-hover:text-accent transition-colors text-sm">→</span>
+                        <ChevronRight class="w-4 h-4 text-secondary group-hover:text-accent transition-colors" />
                     </a>
                 );
             })}
