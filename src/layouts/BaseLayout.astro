@@ -11,9 +11,9 @@ import SiteAgent from '../components/widgets/SiteAgent.astro';
 import FloatingAudioPlayer from '../components/widgets/FloatingAudioPlayer.astro';
 import siteConfig from '../data/site-config';
 
-export type Props = HeadProps & { showSidebar?: boolean; showRightSidebar?: boolean; showTopNav?: boolean; articleTitle?: string; commentsEnabled?: boolean; splashMode?: boolean; rightSidebarConfig?: string[] };
+export type Props = HeadProps & { showSidebar?: boolean; showRightSidebar?: boolean; showTopNav?: boolean; showThemeToggle?: boolean; articleTitle?: string; commentsEnabled?: boolean; splashMode?: boolean; rightSidebarConfig?: string[] };
 
-const { showSidebar = true, showRightSidebar = true, showTopNav = true, articleTitle = '', commentsEnabled = false, splashMode = false, rightSidebarConfig, ...head } = Astro.props;
+const { showSidebar = true, showRightSidebar = true, showTopNav = true, showThemeToggle = true, articleTitle = '', commentsEnabled = false, splashMode = false, rightSidebarConfig, ...head } = Astro.props;
 const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
 const isArticle = head.pageType === 'article';
 ---
@@ -600,7 +600,7 @@ const isArticle = head.pageType === 'article';
 
             <div class={`flex min-h-screen ${showTopNav ? 'pt-16' : ''}`}>
                 {showSidebar && <LeftSidebar />}
-                <div class="flex-1 lg:ml-[calc(14rem+5%+4px)] xl:ml-[calc(15rem+5%+4px)] xl:mr-[calc(12rem+5%+4px)] 2xl:mr-[calc(14rem+5%+4px)]">
+                <div class={`flex-1 ${showSidebar ? 'lg:ml-[calc(14rem+5%+4px)] xl:ml-[calc(15rem+5%+4px)]' : ''} ${showRightSidebar ? 'xl:mr-[calc(12rem+5%+4px)] 2xl:mr-[calc(14rem+5%+4px)]' : ''}`}>
                     <div class="flex flex-col min-h-screen px-4 lg:px-6">
                         <div class="flex items-center justify-end gap-3 py-4">
                             {minimalEnabled && (
@@ -614,7 +614,7 @@ const isArticle = head.pageType === 'article';
                                     <span>沉浸</span>
                                 </a>
                             )}
-                            <ThemeToggle />
+                            {showThemeToggle && <ThemeToggle />}
                         </div>
                         {minimalEnabled && (
                             <script is:inline>

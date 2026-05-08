@@ -2,9 +2,8 @@
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import { Image } from 'astro:assets';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import AlbumLayout from '../../layouts/AlbumLayout.astro';
 import FormattedDate from '../../components/ui/FormattedDate.astro';
-import Comments from '../../components/widgets/Comments.astro';
 
 export const getStaticPaths = (async () => {
     const albums = await getCollection('albums');
@@ -16,144 +15,508 @@ export const getStaticPaths = (async () => {
 
 const { album } = Astro.props;
 const { Content } = await render(album);
-const { title, description, date, cover, images, tags, fonts } = album.data;
+const { title, description, date, cover, images, tags, fonts, theme = 'golden', layout = 'grid', photoFit = 'cover', background, accent, seasonFilter = false, seasonDefault } = album.data;
 
-// All images flattened for lightbox
+const isGolden = theme === 'golden';
+const isSeasons = theme === 'seasons';
+
+// 获取当前月份用于四季自动切换
+const currentMonth = new Date().getMonth() + 1;
+const currentSeason = currentMonth >= 3 && currentMonth <= 5 ? 'spring' :
+                       currentMonth >= 6 && currentMonth <= 8 ? 'summer' :
+                       currentMonth >= 9 && currentMonth <= 11 ? 'autumn' : 'winter';
+const defaultSeason = seasonDefault || currentSeason;
+
+// 所有图片数据（用于灯箱）
 const allImages = images.map((img, i) => ({
     src: typeof img.src === 'string' ? img.src : img.src.src,
     alt: img.alt || title,
-    index: i
+    caption: img.caption || img.alt || '',
+    season: img.season || null,
+    index: i,
+    featured: img.featured || false
 }));
+
+// 四季分类
+const springImages = allImages.filter(img => img.season === 'spring');
+const summerImages = allImages.filter(img => img.season === 'summer');
+const autumnImages = allImages.filter(img => img.season === 'autumn');
+const winterImages = allImages.filter(img => img.season === 'winter');
+const hasSeasons = springImages.length > 0 || summerImages.length > 0 || autumnImages.length > 0 || winterImages.length > 0;
 
 const coverSrc = cover ? (typeof cover === 'string' ? cover : cover.src) : null;
 const coverImg = coverSrc || allImages[0]?.src || '';
 const imageCount = images.length;
+const yearMonth = new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
 ---
 
-<BaseLayout title={title} description={description} showHeader={false} showRightSidebar={false} fonts={fonts}>
-    <article class="album-detail">
-        {/* ── Header ── */}
-        <header class="album-detail-header">
-            <h1 class="album-detail-title">{title}</h1>
-            {description && <p class="album-detail-desc">{description}</p>}
-            <div class="album-detail-meta">
-                <span><FormattedDate date={date} /></span>
-                <span class="album-detail-dot" />
-                <span>{imageCount} 张照片</span>
-                {tags && tags.length > 0 && [
-                    <span class="album-detail-dot" />,
-                    <span class="album-detail-tags">{tags.join(' / ')}</span>
-                ]}
-            </div>
-        </header>
+<AlbumLayout title={title} description={description} theme={theme} fonts={fonts} pageType="detail" background={background} accent={accent}>
+    {/* ── Background Video: Seasons Theme ── */}
+    {isSeasons ? (
+        <div class="adetail-bg-video" id="adetail-bg-video">
+            <video
+                autoplay
+                muted
+                loop
+                playsinline
+                class="adetail-bg-video-el"
+                id="season-video"
+                poster={typeof cover === 'string' ? cover : coverSrc}
+            >
+                <source src="/videos/season-summer.mp4" type="video/mp4" />
+            </video>
+            <div class="adetail-bg-video-overlay"></div>
+            <div class="adetail-bg-video-vignette"></div>
+        </div>
+    ) : null}
 
-        {/* ── Cover ── */}
-        {coverImg && (
-            <figure class="album-detail-cover" data-lightbox-index="0">
-                <Image
-                    src={coverSrc ? (typeof cover === 'string' ? cover : cover) : images[0].src}
-                    alt={title}
-                    width={900}
-                    class="album-detail-cover-img"
-                    loading="eager"
-                />
-            </figure>
-        )}
+    <article class="adetail" data-album-theme={theme} data-photo-fit={photoFit} data-layout={layout}>
+        {/* ── HERO: Golden Full-Screen Video ── */}
+        {isGolden ? (
+            <section class="adetail-hero reveal">
+                <div class="adetail-hero-bg">
+                    {/* Exact from building Hero.tsx — full-screen looping video */}
+                    <video
+                        autoplay
+                        muted
+                        loop
+                        playsinline
+                        class="adetail-hero-video"
+                        poster={typeof cover === 'string' ? cover : coverSrc}
+                    >
+                        <source src="/videos/hero-golden.mp4" type="video/mp4" />
+                    </video>
+                    <div class="adetail-hero-overlay"></div>
+                    <div class="adetail-hero-vignette"></div>
+                </div>
+                <div class="adetail-hero-content">
+                    <span class="adetail-section-label reveal">Selected Work · 当期影集</span>
+                    <h1 class="adetail-title reveal" style="--delay: 0.1s">{title}</h1>
+                    {description ? <p class="adetail-desc reveal" style="--delay: 0.2s">{description}</p> : null}
+                    <div class="adetail-hero-scroll reveal" style="--delay: 0.5s">
+                        <span>Scroll</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14"/>
+                            <path d="m19 12-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+        ) : null}
 
-        {/* ── Narrative ── */}
-        <div class="album-detail-body">
+        {/* ── HEADER: Seasons Centered ── */}
+        {isSeasons ? (
+            <header class="adetail-header">
+                <div class="adetail-header-inner">
+                    <span class="adetail-section-label reveal">作品集 · Selected</span>
+                    <h1 class="adetail-title reveal" style="--delay: 0.1s">{title}</h1>
+                    {description ? <p class="adetail-desc reveal" style="--delay: 0.2s">{description}</p> : null}
+                    <div class="adetail-meta reveal" style="--delay: 0.3s">
+                        <span class="adetail-meta-item">
+                            <span class="adetail-meta-key">Date</span>
+                            <FormattedDate date={date} />
+                        </span>
+                        <span class="adetail-meta-divider"></span>
+                        <span class="adetail-meta-item">
+                            <span class="adetail-meta-key">Photos</span>
+                            <span class="adetail-meta-value">{String(imageCount).padStart(2, '0')}</span>
+                        </span>
+                        {tags && tags.length > 0 ? (
+                            <>
+                                <span class="adetail-meta-divider"></span>
+                                <span class="adetail-meta-item">
+                                    <span class="adetail-meta-key">Tags</span>
+                                    <span class="adetail-meta-value">{tags.join(' · ')}</span>
+                                </span>
+                            </>
+                        ) : null}
+                    </div>
+                </div>
+            </header>
+        ) : null}
+
+        {/* ── SEASONS POLAROID + TEXT ── */}
+        {isSeasons && coverImg ? (
+            <section class="season-about reveal">
+                <div class="season-about-inner">
+                    <div class="polaroid-card">
+                        <div class="polaroid-img-wrap">
+                            <img src={coverSrc} alt={title} loading="eager" />
+                        </div>
+                        <div class="polaroid-footer">
+                            <span class="polaroid-label">{title}</span>
+                            <span class="polaroid-date">{yearMonth}</span>
+                        </div>
+                    </div>
+                    <div class="season-about-text">
+                        <p class="season-about-desc">{description}</p>
+                        <div class="season-about-stats">
+                            <div class="s-stat">
+                                <span class="s-stat-num">{String(imageCount).padStart(2, '0')}</span>
+                                <span class="s-stat-label">Photos</span>
+                            </div>
+                            <div class="s-stat">
+                                <span class="s-stat-num">{tags?.length || 0}</span>
+                                <span class="s-stat-label">Tags</span>
+                            </div>
+                            <div class="s-stat">
+                                <span class="s-stat-num">4</span>
+                                <span class="s-stat-label">Seasons</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        ) : null}
+
+        {/* ── STATS BAR (golden) ── */}
+        {isGolden ? (
+            <section class="adetail-stats reveal">
+                <div class="adetail-stats-inner">
+                    <div class="adetail-stat">
+                        <span class="adetail-stat-num">{String(imageCount).padStart(2, '0')}</span>
+                        <span class="adetail-stat-label">Photos</span>
+                    </div>
+                    <div class="adetail-stat-divider"></div>
+                    <div class="adetail-stat">
+                        <span class="adetail-stat-num">{yearMonth}</span>
+                        <span class="adetail-stat-label">Date</span>
+                    </div>
+                    <div class="adetail-stat-divider"></div>
+                    <div class="adetail-stat">
+                        <span class="adetail-stat-num">{tags?.[0] || '—'}</span>
+                        <span class="adetail-stat-label">Category</span>
+                    </div>
+                </div>
+            </section>
+        ) : null}
+
+        {/* ── BODY (Markdown content with directives) ── */}
+        <div class="adetail-body reveal">
             <Content />
         </div>
 
-        {/* ── Gallery Grid ── */}
-        <div class="album-detail-gallery">
+        {/* ── SEASON POETRY (seasons theme) ── */}
+        {isSeasons ? (
+            <section class="season-poetry reveal" data-season={defaultSeason}>
+                <div class="season-poetry-card glass-panel">
+                    <div class="season-poetry-label">
+                        <div class="season-dot" id="poetry-dot"></div>
+                        <span class="season-name-jp" id="poetry-name-jp">春</span>
+                        <span class="season-name-en" id="poetry-name-en">Spring</span>
+                    </div>
+                    <div class="season-poetry-lines" id="poetry-lines">
+                        {/* Lines injected by JS */}
+                    </div>
+                    <div class="season-poetry-deco" id="poetry-deco">春</div>
+                </div>
+            </section>
+        ) : null}
+
+        {/* ── SEASON FILTER NAV (for seasons theme) ── */}
+        {isSeasons && hasSeasons && seasonFilter ? (
+            <div class="season-nav reveal" data-default-season={defaultSeason}>
+                <button class="season-btn" data-season="all" data-active="true">
+                    <span class="season-label">全部</span>
+                    <span class="season-count">{allImages.length}</span>
+                </button>
+                {springImages.length > 0 ? (
+                    <button class="season-btn" data-season="spring">
+                        <span class="season-label">春</span>
+                        <span class="season-count">{springImages.length}</span>
+                    </button>
+                ) : null}
+                {summerImages.length > 0 ? (
+                    <button class="season-btn" data-season="summer">
+                        <span class="season-label">夏</span>
+                        <span class="season-count">{summerImages.length}</span>
+                    </button>
+                ) : null}
+                {autumnImages.length > 0 ? (
+                    <button class="season-btn" data-season="autumn">
+                        <span class="season-label">秋</span>
+                        <span class="season-count">{autumnImages.length}</span>
+                    </button>
+                ) : null}
+                {winterImages.length > 0 ? (
+                    <button class="season-btn" data-season="winter">
+                        <span class="season-label">冬</span>
+                        <span class="season-count">{winterImages.length}</span>
+                    </button>
+                ) : null}
+            </div>
+        ) : null}
+
+        {/* ── GALLERY ── */}
+        <div class="adetail-gallery" data-layout={layout}>
             {images.map((img, i) => {
-                let layoutClass = 'album-g-half';
-                if (imageCount < 3) {
-                    layoutClass = 'album-g-full';
-                } else if (imageCount === 3) {
-                    layoutClass = i === 0 ? 'album-g-large' : 'album-g-half';
-                } else {
-                    layoutClass = i % 5 === 0 ? 'album-g-large' : 'album-g-half';
+                const num = String(i + 1).padStart(2, '0');
+                const itemClass = 'adetail-g-item reveal';
+                const showNumber = isGolden;
+                const imgSeason = img.season || '';
+                const seasonColor = imgSeason === 'spring' ? '#FFC1CC' : imgSeason === 'summer' ? '#FFD700' : imgSeason === 'autumn' ? '#FF7F50' : imgSeason === 'winter' ? '#F0F8FF' : '';
+
+                const shutter = (
+                    <div class="g-shutter-clip">
+                        <div class="g-strip-clip g-strip-1" style="--s-delay: 0s"></div>
+                        <div class="g-strip-clip g-strip-2" style="--s-delay: 0.08s"></div>
+                        <div class="g-strip-clip g-strip-3" style="--s-delay: 0.16s"></div>
+                    </div>
+                );
+
+                const exifBar = img.exif ? (
+                    <div class="g-exif-bar">
+                        <div class="g-exif-left">
+                            {img.exif.camera ? <span class="g-exif-brand">{img.exif.camera}</span> : null}
+                            {img.exif.model ? <span class="g-exif-model">{img.exif.model}</span> : null}
+                        </div>
+                        <div class="g-exif-right">
+                            {img.exif.focal ? <span>{img.exif.focal}</span> : null}
+                            {img.exif.aperture ? <span>{img.exif.aperture}</span> : null}
+                            {img.exif.shutter ? <span>{img.exif.shutter}</span> : null}
+                            {img.exif.iso ? <span>ISO {img.exif.iso}</span> : null}
+                        </div>
+                    </div>
+                ) : null;
+
+                const overlay = (
+                    <div class="g-overlay">
+                        <div class="g-overlay-inner">
+                            {isGolden ? null : (img.alt ? <p class="g-overlay-title">{img.alt}</p> : null)}
+                            {isGolden ? null : (img.caption ? <p class="g-overlay-caption">{img.caption}</p> : null)}
+                            {isGolden ? null : (img.exif ? (
+                                <div class="g-exif">
+                                    {img.exif.camera ? <span>{img.exif.camera}</span> : null}
+                                    {img.exif.focal ? <span>{img.exif.focal}</span> : null}
+                                    {img.exif.aperture ? <span>{img.exif.aperture}</span> : null}
+                                </div>
+                            ) : null)}
+                            <span class="g-arrow">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+                                </svg>
+                            </span>
+                            {isGolden && img.caption ? <p class="g-overlay-caption g-caption-golden">{img.caption}</p> : null}
+                            {isGolden ? exifBar : null}
+                        </div>
+                    </div>
+                );
+
+                if (isGolden) {
+                    return (
+                        <div class={itemClass} data-lightbox-index={i} data-index={i}>
+                            <figure class="g-inner">
+                                <div class="g-media">
+                                    <Image
+                                        src={img.src}
+                                        alt={img.alt || title}
+                                        width={1200}
+                                        class="g-img"
+                                        loading={i < 4 ? 'eager' : 'lazy'}
+                                    />
+                                    {shutter}
+                                    {overlay}
+                                </div>
+                                <span class="g-number">{num}</span>
+                            </figure>
+                            <div class="g-meta">
+                                <div class="g-meta-left">
+                                    <h3 class="g-meta-title">{img.alt || title}</h3>
+                                    {img.caption ? <p class="g-meta-caption">{img.caption}</p> : null}
+                                </div>
+                                <div class="g-meta-right">
+                                    <span class="g-meta-cat">{tags?.[0] || ''}</span>
+                                    <span class="g-meta-arrow">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    );
                 }
+
                 return (
-                    <figure class={`album-g-item ${layoutClass}`} data-lightbox-index={i}>
-                        <Image
-                            src={img.src}
-                            alt={img.alt || title}
-                            width={800}
-                            class="album-g-img"
-                            loading={i < 4 ? 'eager' : 'lazy'}
-                        />
-                        {img.alt ? <span class="album-g-caption">{img.alt}</span> : null}
+                    <figure class={itemClass} data-lightbox-index={i} data-season={imgSeason} data-index={i}>
+                        <div class="g-media">
+                            <Image
+                                src={img.src}
+                                alt={img.alt || title}
+                                width={1200}
+                                class="g-img"
+                                loading={i < 4 ? 'eager' : 'lazy'}
+                            />
+                            {shutter}
+                        </div>
+                        {isSeasons && imgSeason ? (
+                            <span class="g-season-badge" style={seasonColor ? `color:${seasonColor};border-color:${seasonColor}40` : ''}>
+                                {imgSeason === 'spring' ? '春' : imgSeason === 'summer' ? '夏' : imgSeason === 'autumn' ? '秋' : '冬'}
+                            </span>
+                        ) : null}
+                        {overlay}
                     </figure>
                 );
             })}
         </div>
-
-        <Comments pageId={`/albums/${album.id}/`} pageTitle={title} />
     </article>
 
-    {/* ── Lightbox ── */}
-    <div class="album-lightbox" id="album-lightbox" role="dialog" aria-modal="true" aria-label="图片浏览">
-        <div class="album-lightbox-backdrop" />
-        <button class="album-lightbox-close" aria-label="关闭">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
-        <button class="album-lightbox-prev" aria-label="上一张">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <button class="album-lightbox-next" aria-label="下一张">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
-        <div class="album-lightbox-stage">
-            <img class="album-lightbox-img" src="" alt="" />
+    {/* ── Seasonal Particles Canvas ── */}
+    {isSeasons ? (
+        <canvas class="season-particles" id="season-particles"></canvas>
+    ) : null}
+
+    {isSeasons ? (
+        <div class="time-console" id="time-console"
+            style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, transparent 100%)">
+            <div class="time-console-inner">
+                <div class="time-display">
+                    <span class="time-value" id="time-value">12:00</span>
+                    <span class="time-label" id="time-label">正午</span>
+                </div>
+                {/* Seasonal Poem — exact from app TimeConsole.tsx */}
+                <div class="time-poem" id="time-poem">
+                    <p class="time-poem-line" id="time-poem-ja">春の匂いが、風の中で踊る</p>
+                    <p class="time-poem-line" id="time-poem-zh">春天的气息，在风中起舞</p>
+                </div>
+                <div class="time-slider-wrap">
+                    <div class="time-track-labels">
+                        <span>04:00</span>
+                        <span>12:00</span>
+                        <span>24:00</span>
+                    </div>
+                    <div class="time-slider-bar">
+                        <div class="time-track-marks">
+                            <span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <input
+                            type="range"
+                            id="time-slider"
+                            class="time-slider"
+                            min="0"
+                            max="1200"
+                            value="720"
+                            data-default-real-time="true"
+                        />
+                        <div class="time-slider-fill" id="time-fill"></div>
+                        <div class="time-slider-thumb" id="time-thumb"></div>
+                    </div>
+                </div>
+                {/* Season Indicator Pill — exact from app TimeConsole.tsx */}
+                <div class="time-season-pill" id="time-season-pill">
+                    <span class="time-season-name" id="time-season-name">春 Spring</span>
+                </div>
+            </div>
+            <style>{`
+                .time-slider::-webkit-slider-thumb {
+                    -webkit-appearance: none; appearance: none;
+                    width: 16px; height: 16px; border-radius: 50%;
+                    background: transparent; cursor: pointer; border: none;
+                }
+                .time-slider::-moz-range-thumb {
+                    width: 16px; height: 16px; border-radius: 50%;
+                    background: transparent; cursor: pointer; border: none;
+                }
+            `}</style>
         </div>
-        <div class="album-lightbox-info">
-            <span class="album-lightbox-caption" />
-            <span class="album-lightbox-counter" />
+    ) : null}
+
+    {/* ── LIGHTBOX ── */}
+    <div class="alb-lightbox" id="alb-lightbox" role="dialog" aria-modal="true" aria-label="图片浏览">
+        <div class="alb-lightbox-backdrop"></div>
+        <button class="alb-lightbox-close" aria-label="关闭">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        <button class="alb-lightbox-prev" aria-label="上一张">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button class="alb-lightbox-next" aria-label="下一张">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <div class="alb-lightbox-stage">
+            <img class="alb-lightbox-img" src="" alt="" />
+        </div>
+        <div class="alb-lightbox-info">
+            <span class="alb-lightbox-caption"></span>
+            <span class="alb-lightbox-counter"></span>
         </div>
     </div>
-</BaseLayout>
+</AlbumLayout>
 
-<script is:inline define:vars={{ imageData: allImages }}>
+<script is:inline define:vars={{ imageData: allImages, isSeasonsTheme: isSeasons, defaultSeason: defaultSeason }}>
     (function() {
-        const lightbox = document.getElementById('album-lightbox');
+        const lightbox = document.getElementById('alb-lightbox');
         if (!lightbox) return;
-        const stageImg = lightbox.querySelector('.album-lightbox-img');
-        const captionEl = lightbox.querySelector('.album-lightbox-caption');
-        const counterEl = lightbox.querySelector('.album-lightbox-counter');
+        const stageImg = lightbox.querySelector('.alb-lightbox-img');
+        const captionEl = lightbox.querySelector('.alb-lightbox-caption');
+        const counterEl = lightbox.querySelector('.alb-lightbox-counter');
         let currentIndex = 0;
         let isOpen = false;
         let touchStartX = 0;
+        let isAnimating = false;
 
         function open(idx) {
-            if (idx < 0 || idx >= imageData.length) return;
+            if (idx < 0 || idx >= imageData.length || isAnimating) return;
+            isAnimating = true;
             currentIndex = idx;
             stageImg.src = imageData[idx].src;
             stageImg.alt = imageData[idx].alt || '';
-            captionEl.textContent = imageData[idx].alt || '';
-            counterEl.textContent = (idx + 1) + ' / ' + imageData.length;
+            captionEl.textContent = imageData[idx].caption || imageData[idx].alt || '';
+            counterEl.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(imageData.length).padStart(2, '0');
             lightbox.classList.add('is-open');
             document.body.style.overflow = 'hidden';
             isOpen = true;
+            setTimeout(function() { isAnimating = false; }, 400);
         }
         function close() {
+            if (!isOpen || isAnimating) return;
+            isAnimating = true;
             lightbox.classList.remove('is-open');
             document.body.style.overflow = '';
-            isOpen = false;
+            setTimeout(function() {
+                isOpen = false;
+                isAnimating = false;
+            }, 350);
         }
-        function prev() { if (currentIndex > 0) open(currentIndex - 1); }
-        function next() { if (currentIndex < imageData.length - 1) open(currentIndex + 1); }
+        function slideTo(idx, dir) {
+            if (isAnimating) return;
+            isAnimating = true;
+            stageImg.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease';
+            stageImg.style.transform = 'translateX(' + (dir > 0 ? -40 : 40) + 'px)';
+            stageImg.style.opacity = '0';
+            setTimeout(function() {
+                currentIndex = idx;
+                stageImg.src = imageData[idx].src;
+                stageImg.alt = imageData[idx].alt || '';
+                captionEl.textContent = imageData[idx].caption || imageData[idx].alt || '';
+                counterEl.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(imageData.length).padStart(2, '0');
+                requestAnimationFrame(function() {
+                    stageImg.style.transition = 'none';
+                    stageImg.style.transform = 'translateX(' + (dir > 0 ? 40 : -40) + 'px)';
+                    requestAnimationFrame(function() {
+                        stageImg.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease';
+                        stageImg.style.transform = 'translateX(0)';
+                        stageImg.style.opacity = '1';
+                        setTimeout(function() { isAnimating = false; }, 400);
+                    });
+                });
+            }, 280);
+        }
+        function prev() {
+            if (currentIndex > 0 && !isAnimating) slideTo(currentIndex - 1, -1);
+        }
+        function next() {
+            if (currentIndex < imageData.length - 1 && !isAnimating) slideTo(currentIndex + 1, 1);
+        }
 
         document.addEventListener('click', function(e) {
             const item = e.target.closest('[data-lightbox-index]');
             if (item) { e.preventDefault(); open(parseInt(item.dataset.lightboxIndex, 10)); }
         });
-        lightbox.querySelector('.album-lightbox-close').addEventListener('click', close);
-        lightbox.querySelector('.album-lightbox-backdrop').addEventListener('click', close);
-        lightbox.querySelector('.album-lightbox-prev').addEventListener('click', prev);
-        lightbox.querySelector('.album-lightbox-next').addEventListener('click', next);
+        lightbox.querySelector('.alb-lightbox-close').addEventListener('click', close);
+        lightbox.querySelector('.alb-lightbox-backdrop').addEventListener('click', close);
+        lightbox.querySelector('.alb-lightbox-prev').addEventListener('click', prev);
+        lightbox.querySelector('.alb-lightbox-next').addEventListener('click', next);
         document.addEventListener('keydown', function(e) {
             if (!isOpen) return;
             if (e.key === 'Escape') close();
@@ -165,191 +528,1601 @@ const imageCount = images.length;
             const diff = touchStartX - e.changedTouches[0].screenX;
             if (Math.abs(diff) > 50) diff > 0 ? next() : prev();
         }, { passive: true });
+
+        // ── Season Switcher: filter + poetry + colors ──
+        const seasonNav = document.querySelector('.season-nav');
+        const timeConsolePoems = {
+            spring: { ja: '春の匂いが、風の中で踊る', zh: '春天的气息，在风中起舞' },
+            summer: { ja: '雨上がり、庭の蝉時雨', zh: '雨后初晴，庭院蝉声如雨' },
+            autumn: { ja: '落葉が語る、季節の終焉', zh: '落叶诉说着季节的终结' },
+            winter: { ja: '雪景色に、心が静まる', zh: '雪景之中，心灵归于宁静' }
+        };
+        const seasonPoetryData = {
+            spring: [
+                { ja: '花びらが散るその瞬間', zh: '花瓣飘落的那个瞬间', en: 'The moment petals begin to fall' },
+                { ja: '春風が記憶を運んでくる', zh: '春风携来了记忆', en: 'Spring wind carries memories afar' },
+                { ja: '桜の下で、永遠を信じた', zh: '在樱花树下，我曾相信永恒', en: 'Beneath the sakura, I believed in forever' }
+            ],
+            summer: [
+                { ja: '雨上がり、庭の蝉時雨', zh: '雨后初晴，庭院蝉声如雨', en: 'After the rain, cicadas sing like falling rain' },
+                { ja: '積乱雲の向こうに何があるのだろう', zh: '积雨云的彼端会有什么', en: 'What lies beyond the towering thunderclouds' },
+                { ja: '夏の終わりは、いつも急すぎる', zh: '夏天的结束，总是太过仓促', en: 'The end of summer always comes too soon' }
+            ],
+            autumn: [
+                { ja: '落ち葉が空を舞う黄昏', zh: '落叶飞舞的黄昏', en: 'Twilight when fallen leaves dance in the sky' },
+                { ja: '夕焼けは一日の告别の言葉', zh: '晚霞是一整天的告别之辞', en: "The sunset is the day's farewell speech" },
+                { ja: '秋色に染まる街を歩く', zh: '漫步于染上秋色的街道', en: 'Walking through streets dyed in autumn colors' }
+            ],
+            winter: [
+                { ja: '雪が全ての音を吸い込む', zh: '雪吞噬了所有声音', en: 'Snow swallows every sound' },
+                { ja: '冬の空は、最も深い青を持つ', zh: '冬日的天空拥有最深沉的蓝', en: 'The winter sky holds the deepest blue' },
+                { ja: '星が降る夜、願いを一つだけ', zh: '繁星坠落的夜晚，只许一个愿望', en: 'On a star-falling night, one wish is all I need' }
+            ]
+        };
+        const seasonColorMap = {
+            spring: '#FFC1CC', summer: '#FFD700', autumn: '#FF7F50', winter: '#F0F8FF'
+        };
+        const seasonNameMap = {
+            spring: { jp: '春', en: 'Spring' },
+            summer: { jp: '夏', en: 'Summer' },
+            autumn: { jp: '秋', en: 'Autumn' },
+            winter: { jp: '冬', en: 'Winter' }
+        };
+        const seasonColors = {
+            spring: { main: '#FFC1CC', glow: 'rgba(255, 193, 204, 0.4)', glowSoft: 'rgba(255, 193, 204, 0.15)' },
+            summer: { main: '#FFD700', glow: 'rgba(255, 215, 0, 0.4)', glowSoft: 'rgba(255, 215, 0, 0.15)' },
+            autumn: { main: '#FF7F50', glow: 'rgba(255, 127, 80, 0.4)', glowSoft: 'rgba(255, 127, 80, 0.15)' },
+            winter: { main: '#F0F8FF', glow: 'rgba(240, 248, 255, 0.4)', glowSoft: 'rgba(240, 248, 255, 0.15)' }
+        };
+        const seasonNames = {
+            spring: '春 Spring', summer: '夏 Summer', autumn: '秋 Autumn', winter: '冬 Winter'
+        };
+
+        if (seasonNav) {
+            const ds = seasonNav.dataset.defaultSeason;
+            const gallery = document.querySelector('.adetail-gallery');
+            const items = gallery ? gallery.querySelectorAll('.adetail-g-item') : [];
+
+            function filterGallery(season) {
+                items.forEach(function(item) {
+                    if (season === 'all') {
+                        item.style.display = '';
+                        item.classList.add('reveal', 'visible');
+                    } else {
+                        const itemSeason = item.dataset.season;
+                        if (itemSeason === season) {
+                            item.style.display = '';
+                            item.classList.add('reveal', 'visible');
+                        } else {
+                            item.style.display = 'none';
+                            item.classList.remove('visible');
+                        }
+                    }
+                });
+            }
+
+            function updateSeasonUI(season) {
+                filterGallery(season);
+
+                var poetryCard = document.querySelector('.season-poetry');
+                if (poetryCard) {
+                    var pData = seasonPoetryData[season] || seasonPoetryData.spring;
+                    var pColor = seasonColorMap[season] || seasonColorMap.spring;
+                    var pName = seasonNameMap[season] || seasonNameMap.spring;
+
+                    var dot = poetryCard.querySelector('.season-dot');
+                    if (dot) dot.style.backgroundColor = pColor;
+
+                    var nameJp = poetryCard.querySelector('.season-name-jp');
+                    if (nameJp) { nameJp.textContent = pName.jp; nameJp.style.color = pColor + 'CC'; }
+
+                    var nameEn = poetryCard.querySelector('.season-name-en');
+                    if (nameEn) nameEn.textContent = pName.en;
+
+                    var deco = poetryCard.querySelector('.season-poetry-deco');
+                    if (deco) { deco.textContent = pName.jp; deco.style.color = pColor + '08'; }
+
+                    var linesEl = poetryCard.querySelector('.season-poetry-lines');
+                    if (linesEl) {
+                        linesEl.innerHTML = pData.map(function(line) {
+                            return '<div class="poetry-line">' +
+                                '<p class="poetry-ja">' + line.ja + '</p>' +
+                                '<p class="poetry-zh">' + line.zh + '</p>' +
+                                '<p class="poetry-en">' + line.en + '</p>' +
+                            '</div>';
+                        }).join('');
+                    }
+                }
+
+                var tcEl = document.getElementById('time-console');
+                if (tcEl) {
+                    var sc = seasonColors[season] || seasonColors.spring;
+                    tcEl.style.setProperty('--tc-track', sc.main);
+                    tcEl.style.setProperty('--tc-thumb', sc.main);
+                    tcEl.style.setProperty('--tc-glow', sc.glow);
+                    tcEl.style.setProperty('--tc-glow-soft', sc.glowSoft);
+
+                    var seasonName = document.getElementById('time-season-name');
+                    var seasonPill = document.getElementById('time-season-pill');
+                    var sn = seasonNames[season] || seasonNames.spring;
+                    if (seasonName) seasonName.textContent = sn;
+                    if (seasonPill && seasonPill.firstElementChild) {
+                        seasonPill.firstElementChild.style.borderColor = sc.main + '30';
+                        seasonPill.firstElementChild.style.color = sc.main + 'AA';
+                    }
+
+                    var tpJa = document.getElementById('time-poem-ja');
+                    var tpZh = document.getElementById('time-poem-zh');
+                    var tpoem = timeConsolePoems[season] || timeConsolePoems.spring;
+                    if (tpJa) tpJa.textContent = tpoem.ja;
+                    if (tpZh) tpZh.textContent = tpoem.zh;
+                }
+
+                // Background video crossfade
+                var bgVideo = document.getElementById('season-video');
+                if (bgVideo) {
+                    var videoMap = { spring: '/videos/season-summer.mp4', summer: '/videos/season-summer.mp4', autumn: '/videos/season-autumn.mp4', winter: '/videos/season-autumn.mp4' };
+                    var newSrc = videoMap[season];
+                    if (newSrc && bgVideo.querySelector('source').src !== newSrc) {
+                        bgVideo.style.transition = 'opacity 0.6s ease';
+                        bgVideo.style.opacity = '0.3';
+                        setTimeout(function() {
+                            bgVideo.querySelector('source').src = newSrc;
+                            bgVideo.load();
+                            bgVideo.play().catch(function(){});
+                            bgVideo.style.opacity = '1';
+                        }, 600);
+                    }
+                }
+
+                // Particles config update
+                var canvas = document.getElementById('season-particles');
+                if (canvas && window.__seasonParticles) {
+                    window.__seasonParticles.setSeason(season);
+                }
+            }
+
+            seasonNav.querySelectorAll('.season-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    seasonNav.querySelectorAll('.season-btn').forEach(function(b) { b.dataset.active = 'false'; });
+                    btn.dataset.active = 'true';
+                    updateSeasonUI(btn.dataset.season);
+                });
+            });
+
+            if (ds) {
+                var defaultBtn = seasonNav.querySelector('[data-season="' + ds + '"]');
+                if (defaultBtn) {
+                    defaultBtn.dataset.active = 'true';
+                    updateSeasonUI(ds);
+                }
+            }
+        }
+
+        // ── Fallback initial state (when no season nav) ──
+        if (!seasonNav && isSeasonsTheme) {
+            var tcEl0 = document.getElementById('time-console');
+            if (tcEl0) {
+                var sc0 = seasonColors[defaultSeason] || seasonColors.spring;
+                tcEl0.style.setProperty('--tc-track', sc0.main);
+                tcEl0.style.setProperty('--tc-thumb', sc0.main);
+                tcEl0.style.setProperty('--tc-glow', sc0.glow);
+                tcEl0.style.setProperty('--tc-glow-soft', sc0.glowSoft);
+                var sn0 = document.getElementById('time-season-name');
+                var sp0 = document.getElementById('time-season-pill');
+                if (sn0) sn0.textContent = seasonNames[defaultSeason] || seasonNames.spring;
+                if (sp0 && sp0.firstElementChild) {
+                    sp0.firstElementChild.style.borderColor = sc0.main + '30';
+                    sp0.firstElementChild.style.color = sc0.main + 'AA';
+                }
+                var tpJa0 = document.getElementById('time-poem-ja');
+                var tpZh0 = document.getElementById('time-poem-zh');
+                var tcp0 = timeConsolePoems[defaultSeason] || timeConsolePoems.spring;
+                if (tpJa0) tpJa0.textContent = tcp0.ja;
+                if (tpZh0) tpZh0.textContent = tcp0.zh;
+            }
+        }
+
+        // ── TimeConsole ──
+        const timeSlider = document.getElementById('time-slider');
+        const timeValue = document.getElementById('time-value');
+        const timeFill = document.getElementById('time-fill');
+        const timeThumb = document.getElementById('time-thumb');
+
+        if (timeSlider) {
+            var bgVideo = document.getElementById('season-video');
+
+            function formatTime(v) {
+                var totalMinutes = 240 + parseInt(v, 10);
+                var hours = Math.floor(totalMinutes / 60);
+                var mins = totalMinutes % 60;
+                return (hours < 10 ? '0' : '') + hours + ':' + (mins < 10 ? '0' : '') + mins;
+            }
+
+            function getTimeLabel(v) {
+                var totalMinutes = 240 + parseInt(v, 10);
+                var hours = Math.floor(totalMinutes / 60);
+                if (hours >= 4 && hours < 6) return '拂晓';
+                if (hours >= 6 && hours < 9) return '清晨';
+                if (hours >= 9 && hours < 12) return '上午';
+                if (hours >= 12 && hours < 14) return '正午';
+                if (hours >= 14 && hours < 17) return '午后';
+                if (hours >= 17 && hours < 19) return '黄昏';
+                if (hours >= 19 && hours < 21) return '傍晚';
+                return '深夜';
+            }
+
+            /* Exact from app App.tsx — CSS filter based on time */
+            function getTimeFilter(value) {
+                var t = value / 1200;
+                var brightness = 0.25 + 0.9 * Math.sin(t * Math.PI * 0.8);
+                var saturate = 0.4 + 1.2 * Math.sin(t * Math.PI * 0.7);
+                var hueRotate = 10 - 20 * t;
+                var contrast = 0.85 + 0.3 * Math.sin(t * Math.PI);
+                return 'brightness(' + brightness + ') saturate(' + saturate + ') hue-rotate(' + hueRotate + 'deg) contrast(' + contrast + ')';
+            }
+
+            function updateTime(value) {
+                var pct = value / 1200;
+                if (timeValue) timeValue.textContent = formatTime(value);
+                var timeLabel = document.getElementById('time-label');
+                if (timeLabel) timeLabel.textContent = getTimeLabel(value);
+                if (timeFill) timeFill.style.width = (pct * 100) + '%';
+                if (timeThumb) timeThumb.style.left = (pct * 100) + '%';
+                var filterStr = getTimeFilter(value);
+                /* Apply filter to background video — exact from app */
+                if (bgVideo) {
+                    bgVideo.style.filter = filterStr;
+                    bgVideo.style.willChange = 'filter';
+                }
+            }
+
+            /* Default to current real time */
+            var now = new Date();
+            var currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+            var defaultTimeValue = Math.max(0, Math.min(1200, currentTotalMinutes - 240));
+            timeSlider.value = defaultTimeValue;
+            updateTime(defaultTimeValue);
+
+            timeSlider.addEventListener('input', function(e) { updateTime(e.target.value); });
+        }
+
+        // ── Seasonal Particles ──
+        if (isSeasonsTheme) {
+            const canvas = document.getElementById('season-particles');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                let particles = [];
+                let animId = null;
+                let w = 0, h = 0;
+
+                const seasonConfig = {
+                    spring: { count: 50, color: '#FFC1CC', type: 'petal' },
+                    summer: { count: 30, color: '#FFD700', type: 'firefly' },
+                    autumn: { count: 45, color: '#FF7F50', type: 'leaf' },
+                    winter: { count: 70, color: '#F0F8FF', type: 'snow' }
+                };
+                const cfg = seasonConfig[defaultSeason] || seasonConfig.spring;
+
+                function resize() {
+                    w = canvas.width = window.innerWidth;
+                    h = canvas.height = window.innerHeight;
+                }
+
+                function createParticles() {
+                    particles = [];
+                    for (var i = 0; i < cfg.count; i++) {
+                        particles.push({
+                            x: Math.random() * w,
+                            y: Math.random() * h,
+                            size: cfg.type === 'firefly' ? 1.5 + Math.random() * 2 : 2 + Math.random() * 4,
+                            speedX: (Math.random() - 0.5) * (cfg.type === 'firefly' ? 1 : 0.5),
+                            speedY: cfg.type === 'firefly' ? -0.3 - Math.random() * 0.7 : 0.3 + Math.random() * 0.8,
+                            opacity: Math.random() * 0.6 + 0.2,
+                            rotation: Math.random() * Math.PI * 2,
+                            rotSpeed: (Math.random() - 0.5) * 0.02,
+                            swayPhase: Math.random() * Math.PI * 2,
+                            swayAmp: cfg.type === 'petal' ? 1.5 : cfg.type === 'leaf' ? 1 : 0.3
+                        });
+                    }
+                }
+
+                function drawParticle(p) {
+                    ctx.save();
+                    ctx.globalAlpha = p.opacity;
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation);
+
+                    if (cfg.type === 'petal') {
+                        ctx.fillStyle = cfg.color;
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, p.size, p.size * 0.6, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (cfg.type === 'firefly') {
+                        var g = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size * 3);
+                        g.addColorStop(0, cfg.color);
+                        g.addColorStop(0.4, cfg.color + '60');
+                        g.addColorStop(1, 'transparent');
+                        ctx.fillStyle = g;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, p.size * 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (cfg.type === 'leaf') {
+                        ctx.fillStyle = cfg.color;
+                        ctx.beginPath();
+                        ctx.moveTo(0, -p.size);
+                        ctx.quadraticCurveTo(p.size * 0.6, -p.size * 0.3, p.size * 0.4, p.size * 0.4);
+                        ctx.quadraticCurveTo(0, p.size, -p.size * 0.4, p.size * 0.4);
+                        ctx.quadraticCurveTo(-p.size * 0.6, -p.size * 0.3, 0, -p.size);
+                        ctx.fill();
+                    } else {
+                        ctx.fillStyle = cfg.color;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                }
+
+                function update() {
+                    ctx.clearRect(0, 0, w, h);
+                    particles.forEach(function(p) {
+                        p.swayPhase += 0.015;
+                        p.x += p.speedX + Math.sin(p.swayPhase) * p.swayAmp;
+                        p.y += p.speedY;
+                        p.rotation += p.rotSpeed;
+
+                        if (cfg.type === 'firefly') {
+                            p.opacity = 0.3 + Math.sin(p.swayPhase * 2) * 0.3;
+                        }
+
+                        if (p.y > h + 20) { p.y = -20; p.x = Math.random() * w; }
+                        if (p.y < -20 && cfg.type === 'firefly') { p.y = h + 20; p.x = Math.random() * w; }
+                        if (p.x > w + 20) p.x = -20;
+                        if (p.x < -20) p.x = w + 20;
+
+                        drawParticle(p);
+                    });
+                    animId = requestAnimationFrame(update);
+                }
+
+                resize();
+                createParticles();
+                update();
+
+                window.addEventListener('resize', function() { resize(); createParticles(); });
+            }
+        }
     })();
 </script>
 
 <style>
-    /* ── Album Detail: Editorial Layout ── */
-    .album-detail {
-        padding: 3rem 0 5rem;
+    /* ════════════════════════════════════════════════════════════
+       ALBUM DETAIL — v2
+       Golden: building project inspired — dark, gold, architectural
+       Seasons: app project inspired — atmospheric, particles, time-filter
+       ════════════════════════════════════════════════════════════ */
+
+    /* ─── SHARED ─── */
+    .adetail {
+        max-width: 90rem;
+        margin: 0 auto;
+        padding-bottom: 4rem;
     }
 
-    /* ── Header: Magazine-style ── */
-    .album-detail-header {
-        text-align: center;
-        margin-bottom: 3rem;
-        padding: 0 1rem;
+    /* ── Season Poetry ── */
+    .season-poetry {
+        max-width: 48rem;
+        margin: 0 auto 4rem;
+        padding: 0 2rem;
     }
 
-    .album-detail-title {
-        font-family: var(--font-display, serif);
-        font-size: clamp(1.5rem, 3.5vw, 2.25rem);
-        font-weight: 500;
-        line-height: 1.25;
+    .season-poetry-card {
+        position: relative;
+        padding: 2rem 2.5rem;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .season-poetry-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .season-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--album-accent);
+    }
+
+    .season-name-jp {
+        font-size: 1.25rem;
+        letter-spacing: 0.1em;
+    }
+
+    .season-name-en {
+        font-size: 0.875rem;
+        font-style: italic;
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .season-poetry-lines {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .poetry-line {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .poetry-ja {
         margin: 0;
-        color: var(--text-main);
-        letter-spacing: -0.01em;
-    }
-
-    .album-detail-desc {
-        font-size: 0.9375rem;
-        color: var(--text-secondary);
-        margin-top: 1rem;
+        font-size: 1.0625rem;
+        color: rgba(255, 255, 255, 0.8);
+        letter-spacing: 0.08em;
         line-height: 1.7;
-        max-width: 520px;
-        margin-left: auto;
-        margin-right: auto;
     }
 
-    .album-detail-meta {
+    .poetry-zh {
+        margin: 0;
+        font-size: 0.9375rem;
+        color: rgba(255, 255, 255, 0.5);
+        line-height: 1.5;
+    }
+
+    .poetry-en {
+        margin: 0;
+        font-size: 0.9375rem;
+        font-style: italic;
+        color: rgba(255, 255, 255, 0.3);
+        line-height: 1.5;
+    }
+
+    .season-poetry-deco {
+        position: absolute;
+        top: 0.75rem;
+        right: 1rem;
+        font-size: 5rem;
+        font-weight: 300;
+        pointer-events: none;
+        user-select: none;
+        line-height: 1;
+    }
+
+    /* ── Background Video: Seasons ── */
+    .adetail-bg-video {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .adetail-bg-video-el {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        margin: 0;
+        transition: filter 0.1s ease;
+    }
+
+    .adetail-bg-video-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.25) 70%, rgba(0,0,0,0.6) 100%);
+    }
+
+    .adetail-bg-video-vignette {
+        position: absolute;
+        inset: 0;
+        box-shadow: inset 0 0 150px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── Hero (golden full-screen) ── */
+    .adetail-hero {
+        position: relative;
+        min-height: 100vh;
+        min-height: 100dvh;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.625rem;
-        margin-top: 1.25rem;
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        letter-spacing: 0.03em;
-        text-transform: uppercase;
-    }
-
-    .album-detail-dot {
-        width: 3px;
-        height: 3px;
-        border-radius: 50%;
-        background: currentColor;
-        opacity: 0.35;
-    }
-
-    /* ── Cover: Constrained, elegant ── */
-    .album-detail-cover {
-        margin: 0 auto 3rem;
-        border-radius: 6px;
         overflow: hidden;
-        cursor: zoom-in;
-        background: var(--bg-muted);
-        max-height: 420px;
     }
 
-    .album-detail-cover img {
-        display: block;
+    .adetail-hero-bg {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+
+    .adetail-hero-video {
+        position: absolute;
+        inset: 0;
         width: 100%;
-        height: 420px;
+        height: 100%;
         object-fit: cover;
         margin: 0;
-        transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
     }
 
-    .album-detail-cover:hover img {
-        transform: scale(1.02);
+    /* Exact copy from building Hero.tsx */
+    .adetail-hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 50%, #0a0a0a 100%);
+        z-index: 1;
     }
 
-    @media (max-width: 640px) {
-        .album-detail-cover img {
-            height: 280px;
-        }
+    .adetail-hero-overlay::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.3);
     }
 
-    /* ── Body ── */
-    .album-detail-body {
-        max-width: 600px;
-        margin: 0 auto 3.5rem;
-        font-size: 0.9375rem;
-        line-height: 1.85;
-        color: var(--text-secondary);
+    .adetail-hero-vignette {
+        position: absolute;
+        inset: 0;
+        box-shadow: inset 0 0 150px 60px rgba(0,0,0,0.6);
+        z-index: 2;
+        pointer-events: none;
     }
 
-    .album-detail-body :global(p) {
-        margin: 1.25rem 0;
+    .adetail-hero-content {
+        position: relative;
+        z-index: 3;
+        text-align: center;
+        max-width: 56rem;
+        padding: 2rem 1.5rem;
     }
 
-    .album-detail-body :global(p:first-child) {
+    .adetail-hero .adetail-section-label {
+        display: inline-block;
+        padding: 0.5rem 1.25rem;
+        border: 1px solid rgba(200, 164, 100, 0.35);
+        font-size: 0.625rem;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: var(--album-accent);
+        font-weight: 500;
+        margin-bottom: 2rem;
+    }
+
+    .adetail-hero .adetail-title {
+        font-family: var(--font-display, serif);
+        font-size: clamp(3.5rem, 10vw, 8rem);
+        font-weight: 200;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+        margin: 0;
+        color: var(--album-text);
+        text-shadow: 0 4px 40px rgba(0,0,0,0.5);
+    }
+
+    .adetail-hero .adetail-desc {
+        margin: 1.75rem auto 0;
+        max-width: 34rem;
+        font-size: 1rem;
+        line-height: 1.8;
+        color: rgba(245, 240, 232, 0.55);
+        font-weight: 300;
+    }
+
+    .adetail-hero-scroll {
+        position: absolute;
+        bottom: 2.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.625rem;
+        font-size: 0.625rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(245, 240, 232, 0.3);
+        animation: albums-bounce 2.5s ease-in-out infinite;
+    }
+
+    .adetail-hero-scroll svg {
+        opacity: 0.4;
+    }
+
+    /* ── Stats Bar ── */
+    .adetail-stats {
+        padding: 3rem 1.5rem;
+        border-top: 1px solid var(--album-border);
+        border-bottom: 1px solid var(--album-border);
         margin-top: 0;
     }
 
-    /* ── Gallery: Tight editorial grid ── */
-    .album-detail-gallery {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 4px;
+    @media (min-width: 768px) {
+        .adetail-stats {
+            padding: 4rem 4rem;
+        }
     }
 
-    .album-g-item {
+    .adetail-stats-inner {
+        max-width: 60rem;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .adetail-stats-inner {
+            gap: 5rem;
+        }
+    }
+
+    .adetail-stat {
+        text-align: center;
+    }
+
+    .adetail-stat-num {
+        display: block;
+        font-family: var(--font-display, serif);
+        font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+        font-weight: 200;
+        color: var(--album-accent);
+        letter-spacing: 0.02em;
+        line-height: 1.2;
+    }
+
+    .adetail-stat-label {
+        display: block;
+        font-size: 0.625rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--album-text-muted);
+        margin-top: 0.625rem;
+    }
+
+    .adetail-stat-divider {
+        width: 1px;
+        height: 3rem;
+        background: linear-gradient(to bottom, transparent, var(--album-border), transparent);
+    }
+
+    /* ── Header ── */
+    .adetail-header {
+        padding: 5rem 1.5rem 3rem;
+    }
+
+    @media (min-width: 768px) {
+        .adetail-header {
+            padding: 7rem 4rem 4rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .adetail-header {
+            padding: 8rem 6rem 5rem;
+        }
+    }
+
+    .adetail-header-inner {
+        max-width: 60rem;
+        margin: 0 auto;
+    }
+
+    .adetail-section-label {
+        display: block;
+        font-size: 0.6875rem;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: var(--album-accent);
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    .adetail-title {
+        font-family: var(--font-display, serif);
+        font-size: clamp(2.5rem, 6vw, 5rem);
+        font-weight: 300;
+        line-height: 1.05;
+        letter-spacing: -0.025em;
+        margin: 0;
+        color: var(--album-text);
+    }
+
+    .adetail-desc {
+        font-size: 1rem;
+        line-height: 1.8;
+        color: var(--album-text-secondary);
+        margin: 1.5rem 0 0;
+        max-width: 36rem;
+        font-weight: 300;
+    }
+
+    .adetail-line {
+        width: 12rem;
+        height: 1px;
+        background: linear-gradient(to right, var(--album-accent) 0%, transparent 100%);
+        margin: 2rem 0 0;
+    }
+
+    .adetail-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        font-size: 0.6875rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--album-text-muted);
+    }
+
+    .adetail-meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .adetail-meta-key {
+        color: var(--album-text-muted);
+        opacity: 0.5;
+    }
+
+    .adetail-meta-value {
+        color: var(--album-text-secondary);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .adetail-meta-divider {
+        width: 2rem;
+        height: 1px;
+        background: var(--album-border);
+    }
+
+    /* ── Cover ── */
+    .adetail-cover {
+        position: relative;
+        margin: 0 1.5rem 4rem;
+        overflow: hidden;
+        cursor: zoom-in;
+        background: var(--album-bg-card);
+        border-radius: 2px;
+    }
+
+    @media (min-width: 768px) {
+        .adetail-cover {
+            margin: 0 4rem 5rem;
+        }
+    }
+
+    .adetail-cover-img,
+    .adetail-cover img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 75vh;
+        object-fit: cover;
+        margin: 0;
+        transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    .adetail-cover:hover img {
+        transform: scale(1.02);
+    }
+
+    .adetail-cover-vignette {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(to bottom, transparent 50%, var(--album-bg) 100%);
+    }
+
+    /* ── Body (Markdown with directives) ── */
+    .adetail-body {
+        max-width: 42rem;
+        margin: 0 auto 4rem;
+        padding: 0 1.5rem;
+        font-size: 0.9375rem;
+        line-height: 1.9;
+        color: #b8b8b8;
+    }
+
+    .adetail-body :global(p) {
+        margin: 1.5rem 0;
+    }
+
+    .adetail-body :global(p:first-child) {
+        margin-top: 0;
+    }
+
+    .adetail-body :global(h2) {
+        color: rgba(255, 255, 255, 0.92);
+        font-weight: 300;
+        letter-spacing: 0.05em;
+        font-size: 1.375rem;
+        margin: 2.5rem 0 1rem;
+        line-height: 1.4;
+    }
+
+    .adetail-body :global(h3) {
+        color: rgba(255, 255, 255, 0.85);
+        font-weight: 400;
+        font-size: 1.125rem;
+        margin: 2rem 0 0.875rem;
+        line-height: 1.4;
+    }
+
+    /* Glass Panel — exact from app index.css */
+    .glass-panel {
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    /* Seasons body */
+    [data-album-theme="seasons"] .adetail-body {
+        max-width: 48rem;
+        padding: 2.5rem 2rem;
+    }
+
+    /* Note: grid glass-panel override moved to global style below */
+
+    [data-album-theme="seasons"] .adetail-body :global(p) {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    /* ── Gallery ── */
+    .adetail-gallery {
+        padding: 0 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .adetail-gallery {
+            padding: 0 4rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .adetail-gallery {
+            padding: 0 6rem;
+        }
+    }
+
+    .adetail-g-item {
         margin: 0;
         position: relative;
         overflow: hidden;
         cursor: zoom-in;
-        border-radius: 3px;
-        background: var(--bg-muted);
+        background: var(--album-bg-card);
+        border-radius: 2px;
     }
 
-    .album-g-item img {
+    .g-media {
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .g-img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        transition: transform 1s cubic-bezier(0.25, 0.1, 0.25, 1), filter 0.5s ease;
+    }
+
+    /* Shutter Reveal — exact from app PortfolioGrid.tsx */
+    .g-shutter-clip {
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        pointer-events: none;
+    }
+
+    .g-strip-clip {
+        position: absolute;
+        inset: 0;
+        background: var(--album-bg);
+        transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) var(--s-delay, 0s);
+    }
+
+    .g-strip-1 {
+        clip-path: inset(0 0 66.6% 0);
+        transform: translateY(0);
+    }
+    .g-strip-2 {
+        clip-path: inset(33.3% 0 33.3% 0);
+        transform: translateY(0);
+    }
+    .g-strip-3 {
+        clip-path: inset(66.6% 0 0 0);
+        transform: translateY(0);
+    }
+
+    .adetail-g-item.visible .g-strip-1 {
+        transform: translateY(-101%);
+    }
+    .adetail-g-item.visible .g-strip-2 {
+        transform: translateY(101%);
+    }
+    .adetail-g-item.visible .g-strip-3 {
+        transform: translateY(-101%);
+    }
+
+    /* photo-fit modes */
+    [data-photo-fit="cover"] .g-img {
+        object-fit: cover;
+    }
+    [data-photo-fit="contain"] .g-img {
+        object-fit: contain;
+        background: var(--album-bg-card);
+        height: auto;
+        max-height: 85vh;
+    }
+    [data-photo-fit="contain"] .g-media {
+        height: auto;
+        min-height: 120px;
+    }
+    [data-photo-fit="contain"] .adetail-g-item {
+        aspect-ratio: auto;
+        height: auto;
+    }
+    [data-photo-fit="auto"] .g-img {
+        object-fit: none;
+        width: auto;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .adetail-g-item:hover .g-img {
+        transform: scale(1.05);
+    }
+
+    .g-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 40%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 1.5rem;
+    }
+
+    .adetail-g-item:hover .g-overlay {
+        opacity: 1;
+    }
+
+    .g-overlay-title {
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: rgba(255,255,255,0.9);
+        max-width: 36rem;
+        margin: 0 0 0.25rem;
+        font-weight: 500;
+    }
+
+    .g-overlay-caption {
+        font-size: 0.75rem;
+        line-height: 1.4;
+        color: rgba(255,255,255,0.55);
+        margin: 0;
+        font-style: italic;
+    }
+
+    .g-exif {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.6875rem;
+        letter-spacing: 0.05em;
+        color: rgba(255,255,255,0.45);
+    }
+
+    .g-exif span:not(:last-child)::after {
+        content: '\00b7';
+        margin-left: 0.5rem;
+        opacity: 0.5;
+    }
+
+    .g-arrow {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 50%;
+        color: rgba(255,255,255,0.4);
+        opacity: 0;
+        transform: translate(6px, -6px);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        background: rgba(0,0,0,0.25);
+        backdrop-filter: blur(4px);
+    }
+
+    .adetail-g-item:hover .g-arrow {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+
+    /* ─── GRID LAYOUT ─── */
+    .adetail-gallery[data-layout="grid"] {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+        .adetail-gallery[data-layout="grid"] {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .adetail-gallery[data-layout="grid"] {
+            gap: 1.5rem;
+        }
+    }
+
+    /* ─── GOLDEN THEME ─── */
+    /* ─── GOLDEN THEME ─── */
+    /* Hero breakout: full viewport width regardless of parent max-width */
+    [data-album-theme="golden"] .adetail-hero {
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+    }
+
+    /* Golden wrapper (grid item) */
+    [data-album-theme="golden"] .adetail-g-item {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+        cursor: pointer;
+    }
+
+    [data-album-theme="golden"] .adetail-g-item:nth-child(5n+1) {
+        grid-column: 1 / -1;
+    }
+
+    /* Golden inner figure */
+    [data-album-theme="golden"] .g-inner {
+        position: relative;
+        overflow: hidden;
+        margin: 0;
+        aspect-ratio: 16 / 10;
+    }
+
+    [data-album-theme="golden"] .adetail-g-item:nth-child(5n+1) .g-inner {
+        aspect-ratio: 21 / 9;
+    }
+
+    @media (max-width: 640px) {
+        [data-album-theme="golden"] .adetail-g-item:nth-child(5n+1) .g-inner {
+            aspect-ratio: 4 / 3;
+        }
+        [data-album-theme="golden"] .g-inner {
+            aspect-ratio: 4 / 3;
+        }
+    }
+
+    [data-album-theme="golden"] .g-media {
+        height: 100%;
+    }
+
+    [data-album-theme="golden"] .g-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+    }
+
+    [data-album-theme="golden"] .g-number {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        z-index: 3;
+        font-family: var(--font-mono, monospace);
+        font-size: 0.6875rem;
+        letter-spacing: 0.2em;
+        color: var(--album-accent);
+        font-weight: 500;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+    }
+
+    [data-album-theme="golden"] .adetail-g-item:hover .g-number {
+        opacity: 1;
+    }
+
+    /* Title below image — matches original building Projects.tsx */
+    [data-album-theme="golden"] .g-meta {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-top: 1rem;
+        padding: 0 0.125rem;
+    }
+
+    [data-album-theme="golden"] .g-meta-left {
+        min-width: 0;
+    }
+
+    [data-album-theme="golden"] .g-meta-title {
+        font-size: 1rem;
+        font-weight: 300;
+        color: var(--album-text);
+        margin: 0;
+        transition: color 0.3s ease;
+        line-height: 1.4;
+        letter-spacing: 0.01em;
+    }
+
+    [data-album-theme="golden"] .adetail-g-item:hover .g-meta-title {
+        color: var(--album-accent);
+    }
+
+    [data-album-theme="golden"] .g-meta-caption {
+        font-size: 0.75rem;
+        color: var(--album-text-muted);
+        margin: 0.25rem 0 0;
+        letter-spacing: 0.02em;
+    }
+
+    [data-album-theme="golden"] .g-meta-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--album-text-muted);
+        transition: color 0.3s ease;
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+    }
+
+    [data-album-theme="golden"] .adetail-g-item:hover .g-meta-right {
+        color: var(--album-accent);
+    }
+
+    [data-album-theme="golden"] .g-meta-cat {
+        font-size: 0.625rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        display: none;
+    }
+
+    @media (min-width: 768px) {
+        [data-album-theme="golden"] .g-meta-cat {
+            display: block;
+        }
+    }
+
+    [data-album-theme="golden"] .g-meta-arrow {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Golden hover caption inside overlay — matches original Projects.tsx */
+    [data-album-theme="golden"] .g-caption-golden {
+        margin: 0;
+        font-size: 0.9375rem;
+        line-height: 1.6;
+        color: rgba(255,255,255,0.85);
+        max-width: 42rem;
+        font-weight: 300;
+    }
+
+    [data-album-theme="golden"] .g-strip-clip {
+        background: #0a0a0a;
+    }
+
+    /* Golden EXIF bar in hover overlay — matches photo watermark style */
+    [data-album-theme="golden"] .g-exif-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.625rem 0 0;
+        margin-top: 0.75rem;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        pointer-events: none;
+    }
+
+    [data-album-theme="golden"] .g-exif-left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        min-width: 0;
+    }
+
+    [data-album-theme="golden"] .g-exif-brand {
+        font-size: 0.625rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.85);
+        text-transform: uppercase;
+    }
+
+    [data-album-theme="golden"] .g-exif-model {
+        font-size: 0.5rem;
+        color: rgba(255, 255, 255, 0.45);
+        letter-spacing: 0.03em;
+    }
+
+    [data-album-theme="golden"] .g-exif-right {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.625rem;
+        letter-spacing: 0.03em;
+        color: rgba(255, 255, 255, 0.7);
+        font-variant-numeric: tabular-nums;
+    }
+
+    [data-album-theme="golden"] .g-exif-right span:not(:last-child)::after {
+        content: '\00b7';
+        margin-left: 0.5rem;
+        opacity: 0.4;
+    }
+
+    /* ─── SEASONS THEME ─── */
+    [data-album-theme="seasons"] .adetail-header {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 1.5rem;
+    }
+
+    [data-album-theme="seasons"] .adetail-section-label {
+        color: rgba(255, 255, 255, 0.45);
+        text-align: center;
+        letter-spacing: 0.4em;
+    }
+
+    [data-album-theme="seasons"] .adetail-header-inner {
+        max-width: 100%;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    /* ── Seasons Polaroid + Text (matches original app PolaroidSection) ── */
+    .season-about {
+        min-height: 70vh;
+        padding: 5rem 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .season-about {
+            min-height: 80vh;
+            padding: 8rem 4rem;
+        }
+    }
+
+    .season-about-inner {
+        max-width: 72rem;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .season-about-inner {
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 4rem;
+        }
+    }
+
+    .polaroid-card {
+        position: relative;
+        flex-shrink: 0;
+        background: #f5f5f5;
+        padding: 0.75rem 0.75rem 2.5rem;
+        box-shadow: 0 20px 60px -10px rgba(0,0,0,0.4);
+        transform: rotate(-3deg);
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        width: 260px;
+    }
+
+    @media (min-width: 768px) {
+        .polaroid-card {
+            width: 300px;
+            padding: 1rem 1rem 3rem;
+            transform: rotate(-4deg);
+        }
+    }
+
+    .polaroid-card:hover {
+        transform: rotate(-1deg) scale(1.02);
+    }
+
+    .polaroid-img-wrap {
+        overflow: hidden;
+        background: #e0e0e0;
+        aspect-ratio: 4 / 3;
+    }
+
+    .polaroid-img-wrap img {
         display: block;
         width: 100%;
         height: 100%;
         object-fit: cover;
         margin: 0;
-        transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
     }
 
-    .album-g-item:hover img {
-        transform: scale(1.04);
-    }
-
-    .album-g-large {
-        grid-column: span 2;
-        aspect-ratio: 2 / 1;
-        max-height: 360px;
-    }
-
-    .album-g-half {
-        aspect-ratio: 1;
-        max-height: 320px;
-    }
-
-    .album-g-full {
-        grid-column: span 2;
-        aspect-ratio: 16 / 9;
-        max-height: 340px;
-    }
-
-    .album-g-caption {
+    .polaroid-footer {
         position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 2.5rem 1rem 0.625rem;
-        font-size: 0.6875rem;
-        font-weight: 400;
-        letter-spacing: 0.04em;
-        color: rgba(255,255,255,0.9);
-        background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        pointer-events: none;
-        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        bottom: 0.75rem;
+        left: 1rem;
+        right: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
-    .album-g-item:hover .album-g-caption {
+    @media (min-width: 768px) {
+        .polaroid-footer {
+            bottom: 1rem;
+            left: 1.25rem;
+            right: 1.25rem;
+        }
+    }
+
+    .polaroid-label {
+        font-size: 0.8125rem;
+        color: #333;
+        letter-spacing: 0.05em;
+        font-weight: 400;
+    }
+
+    .polaroid-date {
+        font-size: 0.6875rem;
+        color: #999;
+        font-family: var(--font-mono, monospace);
+    }
+
+    .season-about-text {
+        flex: 1;
+        max-width: 32rem;
+        text-align: center;
+    }
+
+    @media (min-width: 768px) {
+        .season-about-text {
+            text-align: left;
+            padding-top: 1rem;
+        }
+    }
+
+    .season-about-desc {
+        font-size: 0.9375rem;
+        line-height: 1.9;
+        color: rgba(255, 255, 255, 0.7);
+        margin: 0;
+        text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+    }
+
+    .season-about-stats {
+        display: flex;
+        gap: 2.5rem;
+        margin-top: 2rem;
+        justify-content: center;
+    }
+
+    @media (min-width: 768px) {
+        .season-about-stats {
+            justify-content: flex-start;
+        }
+    }
+
+    .s-stat {
+        text-align: center;
+    }
+
+    .s-stat-num {
+        display: block;
+        font-family: var(--font-display, serif);
+        font-size: 2rem;
+        font-weight: 200;
+        color: var(--album-accent);
+        line-height: 1;
+    }
+
+    .s-stat-label {
+        display: block;
+        font-size: 0.625rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--album-text-muted);
+        margin-top: 0.5rem;
+    }
+
+    [data-album-theme="seasons"] .adetail-title {
+        font-weight: 300;
+        font-size: clamp(2.5rem, 7vw, 5.5rem);
+        letter-spacing: 0.02em;
+        line-height: 1.1;
+        text-shadow: 0 2px 30px rgba(0,0,0,0.5), 0 1px 10px rgba(0,0,0,0.4);
+    }
+
+    [data-album-theme="seasons"] .adetail-desc {
+        margin: 1.5rem auto 0;
+        text-align: center;
+        font-weight: 300;
+        color: rgba(255, 255, 255, 0.75);
+        text-shadow: 0 1px 20px rgba(0,0,0,0.5);
+        max-width: 36rem;
+    }
+
+    [data-album-theme="seasons"] .adetail-meta {
+        justify-content: center;
+        margin-top: 2.5rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-shadow: 0 1px 10px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    [data-album-theme="seasons"] .adetail-meta-key {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    [data-album-theme="seasons"] .adetail-meta-value {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    [data-album-theme="seasons"] .adetail-meta-divider {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    [data-album-theme="seasons"] .adetail-gallery {
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        [data-album-theme="seasons"] .adetail-gallery {
+            padding: 0 2.5rem;
+            gap: 2rem;
+        }
+    }
+
+    /* Cover/auto: varied fixed heights — matches original PortfolioGrid */
+    [data-album-theme="seasons"]:not([data-photo-fit="contain"]) .adetail-gallery[data-layout="grid"] .adetail-g-item:nth-child(4n+1) { height: 340px; }
+    [data-album-theme="seasons"]:not([data-photo-fit="contain"]) .adetail-gallery[data-layout="grid"] .adetail-g-item:nth-child(4n+2) { height: 260px; }
+    [data-album-theme="seasons"]:not([data-photo-fit="contain"]) .adetail-gallery[data-layout="grid"] .adetail-g-item:nth-child(4n+3) { height: 400px; }
+    [data-album-theme="seasons"]:not([data-photo-fit="contain"]) .adetail-gallery[data-layout="grid"] .adetail-g-item:nth-child(4n+4) { height: 300px; }
+
+    @media (min-width: 768px) {
+        [data-album-theme="seasons"]:not([data-photo-fit="contain"]) .adetail-gallery[data-layout="grid"] .adetail-g-item:nth-child(4n+1) { height: 420px; }
+        [data-album-theme="seasons"]:not([data-photo-fit="contain"]) .adetail-gallery[data-layout="grid"] .adetail-g-item:nth-child(4n+2) { height: 320px; }
+        [data-album-theme="seasons"]:not([data-photo-fit="contain"]) .adetail-gallery[data-layout="grid"] .adetail-g-item:nth-child(4n+3) { height: 480px; }
+        [data-album-theme="seasons"]:not([data-photo-fit="contain"]) .adetail-gallery[data-layout="grid"] .adetail-g-item:nth-child(4n+4) { height: 360px; }
+    }
+
+    /* Contain: natural image heights, no forced aspect, top-aligned within grid rows */
+    [data-album-theme="seasons"][data-photo-fit="contain"] .adetail-gallery[data-layout="grid"] {
+        align-items: start;
+    }
+    [data-album-theme="seasons"][data-photo-fit="contain"] .adetail-g-item {
+        aspect-ratio: auto;
+        height: auto;
+    }
+
+    [data-album-theme="seasons"] .adetail-g-item:hover .g-img {
+        transform: scale(1.05);
+    }
+
+    [data-album-theme="seasons"] .g-shutter-strip {
+        background: #0d0d12;
+    }
+
+    /* Season badge on images */
+    .g-season-badge {
+        position: absolute;
+        top: 0.75rem;
+        left: 0.75rem;
+        z-index: 3;
+        font-size: 0.625rem;
+        letter-spacing: 0.15em;
+        padding: 0.25rem 0.625rem;
+        border-radius: 2px;
+        background: rgba(0,0,0,0.5);
+        font-weight: 500;
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
+    }
+
+    .adetail-g-item:hover .g-season-badge {
         opacity: 1;
     }
 
-    @media (max-width: 640px) {
-        .album-detail-gallery {
-            grid-template-columns: 1fr;
-            gap: 3px;
-        }
-        .album-g-large,
-        .album-g-half,
-        .album-g-full {
-            grid-column: span 1;
-            aspect-ratio: 4 / 3;
-            max-height: 280px;
+    /* ─── Season Particles Canvas ─── */
+    .season-particles {
+        position: fixed;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    /* ─── Season Nav ─── */
+    .season-nav {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin: 2rem 1.5rem 3rem;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 5;
+    }
+
+    @media (min-width: 768px) {
+        .season-nav {
+            gap: 1rem;
+            margin: 3rem 4rem 4rem;
         }
     }
 
-    /* ── Lightbox ── */
-    .album-lightbox {
+    .season-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(0,0,0,0.35);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        color: rgba(255,255,255,0.65);
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        cursor: pointer;
+        border-radius: 2px;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        font-family: inherit;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    }
+
+    .season-btn:hover {
+        border-color: rgba(255,255,255,0.3);
+        color: rgba(255,255,255,0.9);
+        background: rgba(0,0,0,0.5);
+    }
+
+    .season-btn[data-active="true"] {
+        border-color: var(--album-accent);
+        color: var(--album-accent);
+        background: rgba(200, 164, 100, 0.1);
+    }
+
+    .season-count {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.6875rem;
+        opacity: 0.5;
+    }
+
+    /* ─── LIGHTBOX ─── */
+    .alb-lightbox {
         position: fixed;
         inset: 0;
         z-index: 10000;
@@ -359,85 +2132,385 @@ const imageCount = images.length;
         justify-content: center;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.35s ease, visibility 0.35s ease;
+        transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .album-lightbox.is-open {
+
+    .alb-lightbox.is-open {
         opacity: 1;
         visibility: visible;
     }
-    .album-lightbox-backdrop {
+
+    .alb-lightbox-backdrop {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.94);
+        background: rgba(0, 0, 0, 0.97);
+        backdrop-filter: blur(12px);
     }
-    .album-lightbox-close {
+
+    .alb-lightbox-close,
+    .alb-lightbox-prev,
+    .alb-lightbox-next {
         position: absolute;
-        top: 1.25rem;
-        right: 1.25rem;
         z-index: 2;
-        width: 36px;
-        height: 36px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
-        border: none;
-        background: rgba(255,255,255,0.08);
-        color: rgba(255,255,255,0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        color: rgba(255, 255, 255, 0.5);
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background 0.2s, color 0.2s;
+        transition: all 0.3s ease;
     }
-    .album-lightbox-close:hover { background: rgba(255,255,255,0.15); color: white; }
-    .album-lightbox-prev,
-    .album-lightbox-next {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 2;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: none;
-        background: rgba(255,255,255,0.06);
-        color: rgba(255,255,255,0.6);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.2s, color 0.2s;
+
+    .alb-lightbox-close { top: 1.5rem; right: 1.5rem; }
+    .alb-lightbox-prev { left: 1.25rem; top: 50%; transform: translateY(-50%); }
+    .alb-lightbox-next { right: 1.25rem; top: 50%; transform: translateY(-50%); }
+
+    .alb-lightbox-close:hover,
+    .alb-lightbox-prev:hover,
+    .alb-lightbox-next:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--album-accent);
+        color: var(--album-accent);
     }
-    .album-lightbox-prev:hover,
-    .album-lightbox-next:hover { background: rgba(255,255,255,0.12); color: white; }
-    .album-lightbox-prev { left: 0.75rem; }
-    .album-lightbox-next { right: 0.75rem; }
-    .album-lightbox-stage {
+
+    .alb-lightbox-prev:hover,
+    .alb-lightbox-next:hover {
+        transform: translateY(-50%) scale(1.05);
+    }
+
+    .alb-lightbox-stage {
         position: relative;
         z-index: 1;
-        max-width: 90vw;
-        max-height: 82vh;
+        max-width: 92vw;
+        max-height: 84vh;
         display: flex;
         align-items: center;
         justify-content: center;
     }
-    .album-lightbox-img {
+
+    .alb-lightbox-img {
         max-width: 100%;
-        max-height: 82vh;
+        max-height: 84vh;
         object-fit: contain;
-        border-radius: 2px;
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
     }
-    .album-lightbox-info {
+
+    .alb-lightbox-info {
         position: absolute;
-        bottom: 1.5rem;
+        bottom: 2.5rem;
         left: 50%;
         transform: translateX(-50%);
         z-index: 2;
         display: flex;
-        gap: 0.75rem;
-        color: rgba(255,255,255,0.5);
-        font-size: 0.75rem;
-        letter-spacing: 0.03em;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        color: rgba(255, 255, 255, 0.4);
+        text-align: center;
+        max-width: 80vw;
     }
-    .album-lightbox-counter {
+
+    .alb-lightbox-caption {
+        font-family: var(--font-display, serif);
+        font-size: 0.9375rem;
+        font-style: italic;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.5;
+    }
+
+    .alb-lightbox-counter {
+        font-family: var(--font-mono, monospace);
+        font-size: 0.6875rem;
+        letter-spacing: 0.2em;
+        color: rgba(255, 255, 255, 0.35);
         font-variant-numeric: tabular-nums;
+    }
+
+    /* ─── TIMECONSOLE ─── */
+    .time-console {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        pointer-events: none;
+    }
+
+    .time-console-inner {
+        max-width: 32rem;
+        margin: 0 auto;
+        padding: 4rem 1.5rem 2.5rem;
+        pointer-events: auto;
+    }
+
+    .time-display {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .time-value {
+        font-family: var(--font-display, serif);
+        font-size: clamp(3rem, 8vw, 5.5rem);
+        font-weight: 200;
+        letter-spacing: 0.05em;
+        color: var(--tc-track, var(--album-accent));
+        text-shadow: 0 0 50px var(--tc-glow, rgba(200, 164, 100, 0.2));
+        line-height: 1;
+        transition: color 0.5s ease, text-shadow 0.5s ease;
+    }
+
+    .time-label {
+        font-size: 0.75rem;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.4);
+        font-weight: 400;
+        transition: color 0.5s ease;
+        margin-top: 0.5rem;
+    }
+
+    /* Seasonal Poem — exact from app TimeConsole.tsx */
+    .time-poem {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .time-poem-line {
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .time-poem-line:first-child {
+        font-family: var(--font-jp, var(--font-display, serif));
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 0.1em;
+    }
+
+    .time-poem-line:last-child {
+        font-family: var(--font-display, serif);
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Season Indicator Pill — exact from app TimeConsole.tsx */
+    .time-season-pill {
+        display: flex;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+
+    .time-season-name {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        border: 1px solid;
+        font-size: 0.625rem;
+        font-family: var(--font-body, sans-serif);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        transition: all 0.5s ease;
+    }
+
+    .time-slider-wrap {
+        position: relative;
+    }
+
+    .time-track-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.625rem;
+        letter-spacing: 0.1em;
+        color: rgba(255, 255, 255, 0.2);
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        padding: 0 2px;
+    }
+
+    .time-track-marks {
+        display: flex;
+        justify-content: space-between;
+        position: absolute;
+        bottom: -18px;
+        left: 0;
+        right: 0;
+        pointer-events: none;
+    }
+
+    .time-track-marks span {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .time-track-marks span::before {
+        content: '';
+        width: 1px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .time-track-marks span::after {
+        content: '';
+        font-size: 0.5625rem;
+        letter-spacing: 0.05em;
+        color: rgba(255, 255, 255, 0.12);
+    }
+
+    .time-track-marks span:nth-child(1)::after { content: '04:00'; }
+    .time-track-marks span:nth-child(2)::after { content: '08:00'; }
+    .time-track-marks span:nth-child(3)::after { content: '12:00'; }
+    .time-track-marks span:nth-child(4)::after { content: '16:00'; }
+    .time-track-marks span:nth-child(5)::after { content: '20:00'; }
+    .time-track-marks span:nth-child(6)::after { content: '24:00'; }
+
+    .time-slider-bar {
+        position: relative;
+        height: 2px;
+    }
+
+    .time-slider {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        transform: translateY(-50%);
+        z-index: 10;
+        width: 100%;
+        height: 28px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+        margin: 0;
+        cursor: pointer;
+        border: none;
+        padding: 0;
+    }
+
+    .time-slider:focus { outline: none; }
+
+    /* Force-hide native track + thumb across browsers */
+    .time-slider::-webkit-slider-runnable-track {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 0;
+        border: none;
+    }
+    .time-slider::-moz-range-track {
+        height: 2px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 0;
+        border: none;
+    }
+    .time-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        cursor: pointer;
+        margin-top: -7px;
+    }
+    .time-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        cursor: pointer;
+    }
+
+    .time-slider-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 60%;
+        background: var(--tc-track, var(--album-accent));
+        opacity: 0.35;
+        pointer-events: none;
+        z-index: 1;
+        transition: width 0.05s linear, background 0.5s ease;
+    }
+
+    .time-slider-thumb {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--tc-thumb, var(--album-accent));
+        box-shadow:
+            0 0 12px var(--tc-glow, rgba(200, 164, 100, 0.5)),
+            0 0 24px var(--tc-glow-soft, rgba(200, 164, 100, 0.25)),
+            0 0 4px rgba(0,0,0,0.3);
+        pointer-events: none;
+        z-index: 5;
+        transition: left 0.05s linear, background 0.5s ease, box-shadow 0.5s ease;
+    }
+</style>
+
+<style is:global>
+    /* ── Seasons: glass-panel for all body directives ── */
+
+    /* Grid directive */
+    [data-album-theme="seasons"] .adetail-body .md-directive-grid.md-grid-bg-card .md-grid-cell,
+    [data-album-theme="seasons"] .adetail-body .md-directive-grid.md-grid-bg-box .md-grid-cell {
+        background: rgba(255, 255, 255, 0.03) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 4px !important;
+        padding: 1rem 1.25rem !important;
+        box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.03), 0 4px 20px 0 rgba(0, 0, 0, 0.2) !important;
+    }
+    [data-album-theme="seasons"] .adetail-body .md-directive-grid {
+        gap: 0.75rem;
+    }
+
+    /* Timeline directive: wrap in glass panel */
+    [data-album-theme="seasons"] .adetail-body .md-directive-timeline {
+        background: rgba(255, 255, 255, 0.03) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 4px !important;
+        padding: 1.5rem 1.5rem 1.5rem 2rem !important;
+        box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.03), 0 4px 20px 0 rgba(0, 0, 0, 0.2) !important;
+        margin: 1.25rem 0 !important;
+    }
+    /* Adjust vertical line position for the new padding */
+    [data-album-theme="seasons"] .adetail-body .md-directive-timeline::before {
+        left: 26px !important;
+    }
+
+    /* ── Unified width for all body directives ── */
+    [data-album-theme="seasons"] .adetail-body .md-directive-grid,
+    [data-album-theme="seasons"] .adetail-body .md-directive-timeline,
+    [data-album-theme="seasons"] .adetail-body .md-directive-callout,
+    [data-album-theme="seasons"] .adetail-body .md-directive-panel {
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
 </style>
