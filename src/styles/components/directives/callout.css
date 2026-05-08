@@ -11,18 +11,22 @@
 
 .md-callout-inner {
     display: flex;
+    flex-direction: column;
     padding: var(--md-padding-md);
-    gap: var(--md-gap);
-    align-items: flex-start;
+    padding-left: calc(3px + var(--md-gap) + 18px);
+    gap: 6px;
+    position: relative;
 }
 
 .md-callout-inner::before {
     content: '';
+    position: absolute;
+    left: 18px;
+    top: 14px;
+    bottom: 14px;
     width: 3px;
-    flex-shrink: 0;
     background: var(--callout-bar);
     border-radius: 3px;
-    align-self: stretch;
 }
 
 .md-callout-title {
@@ -32,7 +36,6 @@
     font-size: var(--md-text-sm);
     font-weight: 600;
     color: var(--callout-bar);
-    margin-bottom: 6px;
 }
 
 .md-callout-body {
