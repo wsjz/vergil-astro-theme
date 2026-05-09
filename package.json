@@ -30,6 +30,7 @@
         "medium-zoom": "^1.1.0",
         "node-html-parser": "^7.0.1",
         "open-props": "^1.7.23",
+        "qrcode-svg": "^1.1.0",
         "remark-directive": "^4.0.0",
         "sharp": "^0.34.5",
         "sql-formatter": "^15.7.3",

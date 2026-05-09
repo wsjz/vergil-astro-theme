@@ -1492,6 +1492,118 @@ Blobcat 表情 :emoji[0_0]{source="blobcat"}
 
 ---
 
+---
+
+### 数字名片 (yoicard)
+
+文章末尾的"数字名片",1.75:1 横版比例,接近实体名片的厚纸质感。支持背景图/色/纹理/渐变、logo、Lucide icon、二维码、自定义字体和颜色。
+
+::::tabs
+tab: 演示效果
+
+:::yoicard{name="Ethan Donovan" role="Web Developer · Blogger"}
+
+折腾博客和摄影的开发者 — *记录每一次心动*
+
+<!-- contact -->
+
+**ethan.dev**
+ethan@example.com
+:::
+
+:::yoicard{name="全图背景" role="bg-image full" bg-image="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80" bg-overlay="dark" accent="#fbbf24" icon="lucide:sparkles" logo="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&q=80" qr="https://ethan.dev"}
+
+满配:全图 + 暗化遮罩 + 圆 logo + sparkles icon + 二维码
+
+<!-- contact -->
+
+**ethan.dev**
+ethan@example.com
+:::
+
+:::yoicard{name="半图(右)" role="bg-mode right" bg-image="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900&q=80" bg-mode="right"}
+
+图覆盖右半,文字在左侧白底
+
+<!-- contact -->
+
+**ethan.dev**
+ethan@example.com
+:::
+
+:::yoicard{name="深色撞色" role="bg + accent" bg="#1a3a2e" accent="#d4af37" icon="lucide:zap" font-name="Georgia, serif"}
+
+深底自动反白字 — *衬线名字 + 金色 accent*
+
+<!-- contact -->
+
+**ethan.dev**
+ethan@example.com
+:::
+
+:::yoicard{name="渐变温暖" role="warm gradient" bg-gradient="135deg, #fef3c7, #fed7aa" name-color="#c0392b"}
+
+文艺感渐变 + 自定义 name 颜色
+:::
+
+tab: 示例代码
+
+`````markdown
+:::yoicard{name="Ethan Donovan" role="Web Developer · Blogger"}
+
+折腾博客和摄影的开发者 — *记录每一次心动*
+
+<!-- contact -->
+
+**ethan.dev**
+ethan@example.com
+:::
+
+:::yoicard{name="全图背景" role="bg-image full" bg-image="..." bg-overlay="dark" accent="#fbbf24" icon="lucide:sparkles" logo="..." qr="https://ethan.dev"}
+
+满配:全图 + 暗化遮罩 + 圆 logo + sparkles icon + 二维码
+
+<!-- contact -->
+
+**ethan.dev**
+ethan@example.com
+:::
+`````
+
+**身份**
+- `name`(必填):名字
+- `role`:头衔/简介(单行)
+
+**背景**(四选一,优先级 image > gradient > pattern > color)
+- `bg`:纯色,如 `#1a3a2e`
+- `bg-image`:图片 URL/路径
+- `bg-pattern`:`diagonal` \| `dots` \| `grid` \| `grain`
+- `bg-gradient`:CSS 渐变,如 `"135deg, #fef3c7, #fed7aa"`
+- `bg-mode`(图专属):`full`(默认) \| `left` \| `right`
+- `bg-overlay`(仅 full):`dark`(默认) \| `light` \| `none` \| 自定义颜色
+
+**装饰**
+- `logo`:右上角 logo 图(默认圆形)
+- `logo-shape`:`circle`(默认) \| `square` \| `rounded`
+- `icon`:左上角 Iconify 图标,如 `lucide:sparkles`
+- `qr`:二维码内容(URL),build 时生成 SVG
+- `accent`:左上角线/icon 颜色
+
+**字体**
+- `font-name`:名字字体(完整 font-family 字符串)
+- `font-body`:其余文字字体
+
+**配色**
+- `text`:`auto`(默认按背景反转) \| `light` \| `dark` \| `#hex`
+- `name-color` / `role-color`:覆盖单个文字颜色
+
+**Slot 写法**
+- 开始标签和 `<!-- contact -->` 之间 = bio(自由 Markdown,以斜体小字呈现)
+- `<!-- contact -->` 之后 = 联系区,内部用 `---` 分左右两栏
+- 不写 `<!-- contact -->` → 整个 slot 都是 bio
+- 开始标签后直接 `<!-- contact -->` → 跳过 bio
+
+::::
 
 ---
 

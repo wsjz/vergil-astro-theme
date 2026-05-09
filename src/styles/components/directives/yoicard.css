@@ -1,0 +1,337 @@
+/*
+ * yoicard — digital business card directive
+ * Spec: docs/superpowers/specs/2026-05-09-yoicard-design.md
+ */
+
+.md-directive-yoicard {
+    --yc-bg: #fdfdfb;
+    --yc-text: #111;
+    --yc-text-muted: #6b7280;
+    --yc-border: rgba(0, 0, 0, 0.06);
+
+    aspect-ratio: 1.75 / 1;
+    width: 100%;
+    max-width: 480px;
+    margin: 1.5rem auto;
+    background: var(--yc-bg);
+    color: var(--yc-text);
+    border-radius: 6px;
+    box-shadow:
+        0 1px 1px rgba(0, 0, 0, 0.04),
+        0 6px 18px rgba(0, 0, 0, 0.08),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+    border: 1px solid var(--yc-border);
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.md-directive-yoicard .md-yc-body {
+    box-sizing: border-box;
+    padding: 18px 22px 16px;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 6px;
+    position: relative;
+}
+
+.md-directive-yoicard .md-yc-top {
+    padding-top: 14px;
+    margin: 0;
+}
+
+.md-directive-yoicard .md-yc-name {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+    line-height: 1.1;
+    color: var(--yc-name-color, var(--yc-text));
+    font-family: var(--yc-font-name, inherit);
+    margin: 0;
+}
+
+.md-directive-yoicard .md-yc-role {
+    font-size: 9.5px;
+    margin: 3px 0 0;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--yc-role-color, var(--yc-text-muted));
+    font-family: var(--yc-font-body, inherit);
+}
+
+/* Error state */
+.md-yc-error {
+    aspect-ratio: auto;
+    padding: 1rem;
+}
+
+/* ── Bio zone (middle, free Markdown) ── */
+.md-directive-yoicard .md-yc-bio {
+    align-self: center;
+    font-size: 11px;
+    line-height: 1.5;
+    font-style: italic;
+    opacity: 0.92;
+    color: var(--yc-text);
+    font-family: var(--yc-font-body, inherit);
+}
+
+.md-directive-yoicard .md-yc-bio p {
+    margin: 0;
+}
+
+.md-directive-yoicard .md-yc-bio em {
+    font-weight: 600;
+}
+
+/* ── Contact zone (bottom, mono) ── */
+.md-directive-yoicard .md-yc-contact {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    align-items: end;
+    font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+    font-size: 9px;
+    line-height: 1.55;
+    color: var(--yc-text-muted);
+}
+
+.md-directive-yoicard .md-yc-contact-text {
+    min-width: 0;
+}
+
+.md-directive-yoicard .md-yc-contact p {
+    margin: 0;
+}
+
+.md-directive-yoicard .md-yc-contact strong {
+    font-weight: 600;
+    color: var(--yc-text);
+}
+
+.md-directive-yoicard .md-yc-contact a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.md-directive-yoicard .md-yc-contact a:hover {
+    text-decoration: underline;
+}
+
+/* ── Background variants ── */
+.md-directive-yoicard.md-yc-has-color {
+    background: var(--yc-bg-color);
+}
+
+.md-directive-yoicard.md-yc-has-gradient {
+    background: var(--yc-bg-gradient);
+}
+
+.md-directive-yoicard.md-yc-has-image {
+    background-image: var(--yc-bg-image);
+    background-size: cover;
+    background-position: center;
+}
+
+.md-directive-yoicard.md-yc-has-image.md-yc-bg-mode-full::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--yc-bg-overlay, transparent);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.md-directive-yoicard.md-yc-has-image .md-yc-body {
+    z-index: 2;
+}
+
+.md-directive-yoicard.md-yc-bg-mode-left {
+    background-image:
+        linear-gradient(90deg, transparent 0%, transparent 40%, var(--yc-bg, #fdfdfb) 60%, var(--yc-bg, #fdfdfb) 100%),
+        var(--yc-bg-image);
+    background-size: cover;
+    background-position: left center;
+}
+
+.md-directive-yoicard.md-yc-bg-mode-right {
+    background-image:
+        linear-gradient(90deg, var(--yc-bg, #fdfdfb) 0%, var(--yc-bg, #fdfdfb) 40%, transparent 60%, transparent 100%),
+        var(--yc-bg-image);
+    background-size: cover;
+    background-position: right center;
+}
+
+/* ── Pattern presets ── */
+.md-directive-yoicard.md-yc-pattern-diagonal {
+    background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 6px,
+        rgba(0, 0, 0, 0.025) 6px,
+        rgba(0, 0, 0, 0.025) 7px
+    );
+}
+
+.md-directive-yoicard.md-yc-pattern-dots {
+    background-image: radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+    background-size: 10px 10px;
+}
+
+.md-directive-yoicard.md-yc-pattern-grid {
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
+.md-directive-yoicard.md-yc-pattern-grain {
+    background-image:
+        radial-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 0.5px),
+        radial-gradient(rgba(0, 0, 0, 0.015) 0.5px, transparent 0.5px);
+    background-size: 5px 5px, 9px 9px;
+    background-position: 0 0, 2px 2px;
+}
+
+/* ── Decorations: accent (top-left) ── */
+.md-directive-yoicard .md-yc-accent {
+    position: absolute;
+    top: 18px;
+    left: 22px;
+    z-index: 3;
+    color: var(--yc-accent, currentColor);
+    line-height: 0;
+}
+
+.md-directive-yoicard .md-yc-accent-line {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: currentColor;
+}
+
+.md-directive-yoicard .md-yc-accent-icon {
+    display: inline-flex;
+}
+
+.md-directive-yoicard .md-yc-accent-icon svg {
+    width: 16px;
+    height: 16px;
+    color: currentColor;
+}
+
+/* ── Decorations: logo (top-right, circle by default) ── */
+.md-directive-yoicard .md-yc-logo {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    z-index: 3;
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
+    background: #fff;
+    border: 1px solid #111;
+}
+
+.md-directive-yoicard .md-yc-logo-circle { border-radius: 50%; }
+.md-directive-yoicard .md-yc-logo-rounded { border-radius: 6px; }
+.md-directive-yoicard .md-yc-logo-square  { border-radius: 0; }
+
+/* ── Auto-invert: light text mode (dark backgrounds) ── */
+.md-directive-yoicard.md-yc-text-light {
+    --yc-text: #fff;
+    --yc-text-muted: rgba(255, 255, 255, 0.72);
+    --yc-border: rgba(255, 255, 255, 0.12);
+}
+
+/* When bg-image full with dark overlay, accent defaults to white */
+.md-directive-yoicard.md-yc-text-light .md-yc-accent {
+    color: var(--yc-accent, #fff);
+}
+
+/* ── QR code ── */
+.md-directive-yoicard .md-yc-qr {
+    width: 48px;
+    height: 48px;
+    background: #fff;
+    padding: 2px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    align-self: end;
+    line-height: 0;
+}
+
+.md-directive-yoicard .md-yc-qr svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* When QR is present, contact uses 2 columns: text | qr */
+.md-directive-yoicard.md-yc-has-qr .md-yc-contact {
+    grid-template-columns: 1fr auto;
+}
+
+/* QR only (no contact text): right-align the QR */
+.md-directive-yoicard.md-yc-has-qr .md-yc-contact:not(:has(.md-yc-contact-text)) {
+    grid-template-columns: 1fr;
+    justify-items: end;
+}
+
+/* ── Dark theme adaptation ── */
+.dark .md-directive-yoicard {
+    --yc-bg: #1f1f1f;
+    --yc-text: #f5f5f4;
+    --yc-text-muted: rgba(245, 245, 244, 0.65);
+    --yc-border: rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 1px 1px rgba(0, 0, 0, 0.18),
+        0 6px 18px rgba(0, 0, 0, 0.35),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.dark .md-directive-yoicard .md-yc-logo {
+    border-color: rgba(255, 255, 255, 0.85);
+}
+
+/* Pattern presets in dark mode: lighter strokes */
+.dark .md-directive-yoicard.md-yc-pattern-diagonal {
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(255, 255, 255, 0.04) 6px, rgba(255, 255, 255, 0.04) 7px);
+}
+.dark .md-directive-yoicard.md-yc-pattern-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 10px 10px;
+}
+.dark .md-directive-yoicard.md-yc-pattern-grid {
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 16px 16px;
+}
+
+/* ── Mobile (< 480px) ── */
+@media (max-width: 480px) {
+    .md-directive-yoicard {
+        max-width: 100%;
+    }
+    .md-directive-yoicard .md-yc-name {
+        font-size: 17px;
+    }
+    .md-directive-yoicard .md-yc-role {
+        font-size: 8.5px;
+    }
+    .md-directive-yoicard .md-yc-bio {
+        font-size: 10px;
+    }
+    .md-directive-yoicard .md-yc-contact {
+        font-size: 8.5px;
+    }
+    /* Hide QR on very narrow screens to keep contact info readable */
+    .md-directive-yoicard.md-yc-has-qr .md-yc-qr {
+        display: none;
+    }
+    .md-directive-yoicard.md-yc-has-qr .md-yc-contact {
+        grid-template-columns: 1fr;
+    }
+}
