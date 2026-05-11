@@ -13,13 +13,14 @@ const searchDataUrl = '/search-data.json';
 
     <dialog
         id="search-dialog"
-        class="m-auto max-h-[80vh] w-[90vw] max-w-2xl rounded-lg bg-main p-0 shadow-2xl backdrop:bg-black/50"
+        class="m-auto max-h-[85vh] w-[92vw] max-w-2xl rounded-xl bg-main p-0 shadow-2xl backdrop:bg-black/50 border border-light/30"
     >
         <div class="flex flex-col">
-            <div class="border-b border-dashed border-main p-4">
+            <!-- Search Input -->
+            <div class="border-b border-light/40 p-4">
                 <div class="relative">
                     <svg
-                        class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-secondary"
+                        class="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted"
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         fill="none"
@@ -34,19 +35,26 @@ const searchDataUrl = '/search-data.json';
                     <input
                         type="text"
                         id="search-input"
-                        placeholder="Type to search..."
-                        class="w-full rounded-md bg-secondary py-3 pl-10 pr-4 text-main outline-none placeholder:text-secondary"
+                        placeholder="搜索文章、项目、文档..."
+                        class="w-full rounded-lg bg-card py-3 pl-11 pr-4 text-main outline-none placeholder:text-muted/60 transition-colors focus:bg-card/80"
                         autocomplete="off"
                     />
                 </div>
             </div>
 
-            <div id="search-results" class="max-h-[60vh] overflow-y-auto p-4">
-                <p class="text-center text-secondary text-sm">Start typing to search</p>
+            <!-- Results -->
+            <div id="search-results" class="max-h-[62vh] overflow-y-auto px-2 py-2">
+                <p class="text-center text-secondary text-sm py-8">输入关键词，开始搜索</p>
             </div>
 
-            <div class="border-t border-dashed border-main p-3 text-center text-xs text-secondary">
-                Press <kbd class="rounded bg-secondary px-1.5 py-0.5">ESC</kbd> to close
+            <!-- Footer -->
+            <div class="border-t border-light/40 px-4 py-2.5 flex items-center justify-between text-[11px] text-muted">
+                <span id="search-status"></span>
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center gap-1"><kbd class="rounded bg-card px-1 py-0.5 border border-light/30">↑↓</kbd> 选择</span>
+                    <span class="flex items-center gap-1"><kbd class="rounded bg-card px-1 py-0.5 border border-light/30">↵</kbd> 打开</span>
+                    <span class="flex items-center gap-1"><kbd class="rounded bg-card px-1 py-0.5 border border-light/30">esc</kbd> 关闭</span>
+                </div>
             </div>
         </div>
     </dialog>
@@ -57,89 +65,298 @@ const searchDataUrl = '/search-data.json';
     const script = document.currentScript;
     const searchUrl = script.dataset.searchUrl;
 
-    const searchTrigger = document.getElementById('search-trigger');
-    const searchDialog = document.getElementById('search-dialog');
-    const searchInput = document.getElementById('search-input');
-    const searchResults = document.getElementById('search-results');
+    // 全局状态 — 跨 ViewTransitions 页面切换保持
+    const S = window._searchState = window._searchState || {
+        fuse: null,
+        searchData: [],
+        isLoading: false,
+        searchUrl: searchUrl,
+        listenersBound: false
+    };
+    if (searchUrl) S.searchUrl = searchUrl;
 
-    let fuse = null;
-    let searchData = [];
+    let selectedIndex = -1;
 
-    document.addEventListener('open-search', async () => {
-        if (!fuse) await initSearch();
-        searchDialog?.showModal();
-        searchInput?.focus();
-    });
+    const typeConfig = {
+        post:    { label: 'Post',    color: 'text-accent bg-accent/10 border-accent/20' },
+        project: { label: 'Project', color: 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/20 dark:border-emerald-800' },
+        doc:     { label: 'Doc',     color: 'text-violet-600 bg-violet-50 border-violet-200 dark:text-violet-400 dark:bg-violet-900/20 dark:border-violet-800' }
+    };
+
+    function getEls() {
+        return {
+            dialog: document.getElementById('search-dialog'),
+            input: document.getElementById('search-input'),
+            results: document.getElementById('search-results'),
+            status: document.getElementById('search-status')
+        };
+    }
+
+    function setStatus(text) {
+        const els = getEls();
+        if (els.status) els.status.textContent = text;
+    }
+
+    function setLoading(loading) {
+        S.isLoading = loading;
+        const els = getEls();
+        if (S.isLoading) {
+            if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">加载中...</p>';
+            setStatus('');
+        } else {
+            if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">输入关键词，开始搜索</p>';
+            setStatus('');
+        }
+    }
 
     async function initSearch() {
+        if (S.fuse) return;
         try {
-            const response = await fetch(searchUrl);
-            searchData = await response.json();
+            const response = await fetch(S.searchUrl);
+            S.searchData = await response.json();
             const Fuse = (await import('https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.mjs')).default;
-            fuse = new Fuse(searchData, {
+            S.fuse = new Fuse(S.searchData, {
                 keys: ['title', 'description', 'content', 'tags'],
-                threshold: 0.3,
-                includeScore: true
+                threshold: 0.35,
+                includeScore: true,
+                includeMatches: true
             });
         } catch (error) {
             console.error('Failed to initialize search:', error);
+            const els = getEls();
+            if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">Failed to load search data</p>';
+        }
+    }
+
+    function escapeHtml(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function highlightMatches(text, matches, key) {
+        if (!matches || !matches.length) return escapeHtml(text);
+
+        const keyMatches = matches.filter(m => m.key === key);
+        if (!keyMatches.length) return escapeHtml(text);
+
+        let indices = [];
+        keyMatches.forEach(m => {
+            indices.push(...m.indices);
+        });
+
+        indices.sort((a, b) => a[0] - b[0]);
+
+        let merged = [];
+        for (let i = 0; i < indices.length; i++) {
+            if (merged.length === 0) {
+                merged.push([...indices[i]]);
+            } else {
+                const last = merged[merged.length - 1];
+                if (indices[i][0] <= last[1] + 1) {
+                    last[1] = Math.max(last[1], indices[i][1]);
+                } else {
+                    merged.push([...indices[i]]);
+                }
+            }
+        }
+
+        let parts = [];
+        let lastEnd = text.length;
+        for (let i = merged.length - 1; i >= 0; i--) {
+            const [start, end] = merged[i];
+            parts.unshift(escapeHtml(text.slice(end + 1, lastEnd)));
+            parts.unshift('</mark>');
+            parts.unshift(escapeHtml(text.slice(start, end + 1)));
+            parts.unshift('<mark>');
+            lastEnd = start;
+        }
+        parts.unshift(escapeHtml(text.slice(0, lastEnd)));
+        return parts.join('');
+    }
+
+    function getItemUrl(item) {
+        if (item.url) return item.url;
+        if (item.type === 'post') return '/blog/' + item.id + '/';
+        if (item.type === 'project') return '/projects/' + item.id + '/';
+        return '/' + item.id + '/';
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        try {
+            return new Date(dateStr).toLocaleDateString();
+        } catch (e) {
+            return '';
         }
     }
 
     function renderResults(results) {
+        const els = getEls();
+        if (!els.results) return;
+
         if (!results.length) {
-            searchResults.innerHTML = '<p class="text-center text-secondary text-sm">No results found</p>';
+            els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">No results found</p>';
+            selectedIndex = -1;
+            setStatus('0 results');
             return;
         }
-        const html = results.map(result => {
+        selectedIndex = -1;
+        const html = results.map((result, idx) => {
             const item = result.item;
-            const url = item.type === 'post' ? `/blog/${item.id}/` : `/projects/${item.id}/`;
-            const typeLabel = item.type === 'post' ? 'Post' : 'Project';
+            const matches = result.matches;
+            const url = getItemUrl(item);
+            const tConfig = typeConfig[item.type] || typeConfig.post;
+            const titleHtml = highlightMatches(item.title, matches, 'title');
+            const desc = item.description || item.content.slice(0, 160) + '...';
+            const descHtml = highlightMatches(desc, matches, 'description') || highlightMatches(desc, matches, 'content');
+            const dateStr = formatDate(item.date);
             return `
-                <a href="${url}" class="block border-b border-dashed border-secondary py-4 last:border-0 hover:bg-secondary/30 transition-colors">
-                    <div class="flex items-center gap-2 text-xs text-secondary mb-1">
-                        <span class="rounded bg-secondary px-2 py-0.5">${typeLabel}</span>
-                        <time>${new Date(item.date).toLocaleDateString()}</time>
+                <a href="${url}" class="search-result-item group block rounded-lg px-3 py-3 hover:bg-hover transition-colors" data-index="${idx}">
+                    <div class="flex items-center gap-2 text-[11px] mb-1.5">
+                        <span class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-medium border ${tConfig.color}">${tConfig.label}</span>
+                        ${dateStr ? '<span class="text-muted">' + escapeHtml(dateStr) + '</span>' : ''}
                     </div>
-                    <h3 class="font-display text-lg text-main mb-1">${item.title}</h3>
-                    <p class="text-sm text-secondary line-clamp-2">${item.description || item.content.slice(0, 150)}...</p>
+                    <h3 class="font-display text-[15px] text-main mb-1 leading-snug">${titleHtml}</h3>
+                    <p class="text-[13px] text-secondary leading-relaxed line-clamp-2">${descHtml}</p>
                 </a>
             `;
         }).join('');
-        searchResults.innerHTML = html;
+        els.results.innerHTML = html;
+        setStatus(results.length + ' result' + (results.length > 1 ? 's' : ''));
     }
 
-    searchTrigger?.addEventListener('click', async () => {
-        if (!fuse) await initSearch();
-        searchDialog?.showModal();
-        searchInput?.focus();
-    });
+    function updateSelected() {
+        const els = getEls();
+        if (!els.results) return;
+        const items = els.results.querySelectorAll('.search-result-item');
+        items.forEach((item, idx) => {
+            if (idx === selectedIndex) {
+                item.classList.add('bg-accent/8');
+                item.classList.add('border-l-2');
+                item.classList.add('border-l-accent');
+                item.classList.add('pl-[10px]');
+                item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            } else {
+                item.classList.remove('bg-accent/8');
+                item.classList.remove('border-l-2');
+                item.classList.remove('border-l-accent');
+                item.classList.remove('pl-[10px]');
+            }
+        });
+    }
 
-    searchDialog?.addEventListener('click', (e) => {
-        if (e.target === searchDialog) {
-            searchDialog.close();
-        }
-    });
+    // 全局事件只绑定一次
+    if (!S.listenersBound) {
+        // open-search 事件
+        document.addEventListener('open-search', async () => {
+            if (!S.fuse && !S.isLoading) {
+                setLoading(true);
+                await initSearch();
+                setLoading(false);
+            }
+            const els = getEls();
+            els.dialog?.showModal();
+            setTimeout(() => els.input?.focus(), 50);
+        });
 
-    searchInput?.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        if (!query) {
-            searchResults.innerHTML = '<p class="text-center text-secondary text-sm">Start typing to search</p>';
-            return;
-        }
-        if (!fuse) return;
-        const results = fuse.search(query).slice(0, 10);
-        renderResults(results);
-    });
+        // 键盘快捷键 — 始终使用最新的 DOM 引用
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                document.dispatchEvent(new CustomEvent('open-search'));
+                return;
+            }
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-            e.preventDefault();
-            searchTrigger?.click();
-        }
-        if (e.key === 'Escape' && searchDialog?.open) {
-            searchDialog.close();
-        }
-    });
+            const els = getEls();
+            if (!els.dialog?.open) return;
+
+            if (e.key === 'Escape') {
+                els.dialog.close();
+                return;
+            }
+
+            if (!els.results) return;
+            const items = els.results.querySelectorAll('.search-result-item');
+            if (!items.length) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                updateSelected();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, -1);
+                updateSelected();
+                if (selectedIndex === -1) {
+                    els.input?.focus();
+                }
+            } else if (e.key === 'Enter') {
+                if (selectedIndex >= 0 && items[selectedIndex]) {
+                    e.preventDefault();
+                    items[selectedIndex].click();
+                }
+            }
+        });
+
+        // 事件委托：处理 search-results 内点击 和 dialog backdrop 点击
+        document.addEventListener('click', (e) => {
+            const els = getEls();
+
+            // dialog backdrop 点击关闭
+            if (els.dialog && e.target === els.dialog) {
+                els.dialog.close();
+                return;
+            }
+
+            // 搜索结果点击关闭
+            if (els.results && els.results.contains(e.target)) {
+                const link = e.target.closest('.search-result-item');
+                if (link && els.dialog) {
+                    els.dialog.close();
+                }
+            }
+        });
+
+        // 事件委托：input 输入
+        document.addEventListener('input', (e) => {
+            if (e.target.id !== 'search-input') return;
+            const els = getEls();
+            const query = e.target.value.trim();
+            if (!query) {
+                if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">Start typing to search</p>';
+                selectedIndex = -1;
+                setStatus('');
+                return;
+            }
+            if (!S.fuse) return;
+            const results = S.fuse.search(query).slice(0, 10);
+            renderResults(results);
+        });
+
+        S.listenersBound = true;
+    }
 })();
 </script>
+
+<style is:global>
+    #search-results mark {
+        background-color: var(--accent-color);
+        color: #fff;
+        border-radius: 2px;
+        padding: 0 2px;
+        font-weight: 500;
+    }
+    .bg-accent\\/8 {
+        background-color: var(--accent-color);
+        opacity: 0.08;
+    }
+    @supports (background-color: color-mix(in srgb, var(--accent-color) 8%, transparent)) {
+        .bg-accent\/8 {
+            background-color: color-mix(in srgb, var(--accent-color) 8%, transparent);
+            opacity: 1;
+        }
+    }
+</style>
