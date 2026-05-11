@@ -1,7 +1,9 @@
+console.log("YOICARD PLUGIN LOADED v2");
 import bx from '@iconify-json/bx/icons.json' with { type: 'json' };
 import lucide from '@iconify-json/lucide/icons.json' with { type: 'json' };
 import solar from '@iconify-json/solar/icons.json' with { type: 'json' };
 import crypto from 'node:crypto';
+import QRCode from 'qrcode-svg';
 import { visit } from 'unist-util-visit';
 
 const ICON_SETS = { lucide, bx, solar };
@@ -102,6 +104,26 @@ function encryptPrivateContent(text, password) {
     encrypted += cipher.final('base64');
     const payload = Buffer.concat([salt, iv, Buffer.from(encrypted, 'base64')]);
     return payload.toString('base64');
+}
+
+// ── helpers for yoicard ──
+function isLightBg(bgColor) {
+    if (!bgColor) return true;
+    const c = bgColor.trim().toLowerCase();
+    const hexMatch = c.match(/^#([0-9a-f]{3,8})$/);
+    if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+        if (hex.length === 8) hex = hex.slice(0, 6);
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        const luma = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+        return luma > 0.6;
+    }
+    const darkNames = ['black', 'navy', 'darkblue', 'darkred', 'darkgreen', 'maroon', 'midnightblue', 'darkslategray', 'darkslateblue'];
+    if (darkNames.includes(c)) return false;
+    return true;
 }
 
 // ── helpers for sites directive ──
@@ -1061,6 +1083,222 @@ export function remarkContentDirectives(options = {}) {
                     node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-video', style: containerStyle } };
                     node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">请提供 src、bilibili 或 youtube 属性</p>' }];
                 }
+            } else if (name === 'yoicard') {
+                const ycName = attrs.name || '';
+                const ycRole = attrs.role || '';
+
+                if (!ycName) {
+                    node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-yoicard md-yc-error' } };
+                    node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">请提供 <code>name</code> 属性,如 :::yoicard{name="..."}</p>' }];
+                    return;
+                }
+
+                // ── Background resolution (priority: image > gradient > pattern > color) ──
+                const bgImage = attrs['bg-image'] || '';
+                const bgGradient = attrs['bg-gradient'] || '';
+                const bgPattern = attrs['bg-pattern'] || '';
+                const bgColor = attrs.bg || '';
+                const bgMode = attrs['bg-mode'] || 'full';
+                const bgOverlay = attrs['bg-overlay'] || 'dark';
+
+                const cardClasses = ['md-directive', 'md-directive-yoicard'];
+                let cardStyle = '';
+
+                if (bgImage) {
+                    cardClasses.push('md-yc-has-image');
+                    cardClasses.push(`md-yc-bg-mode-${bgMode}`);
+                    const safeBgImage = bgImage.replace(/'/g, "\\'");
+                    cardStyle += `--yc-bg-image:url('${safeBgImage}');`;
+                    if (bgMode === 'full' && bgOverlay !== 'none') {
+                        const overlayMap = {
+                            dark: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.7) 100%)',
+                            light: 'linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.7) 100%)'
+                        };
+                        const overlay = overlayMap[bgOverlay] || `linear-gradient(${bgOverlay}, ${bgOverlay})`;
+                        cardStyle += `--yc-bg-overlay:${overlay};`;
+                    }
+                } else if (bgGradient) {
+                    cardClasses.push('md-yc-has-gradient');
+                    const gradient = /^(linear|radial|conic)-gradient/.test(bgGradient.trim()) ? bgGradient : `linear-gradient(${bgGradient})`;
+                    cardStyle += `--yc-bg-gradient:${gradient};`;
+                } else if (bgPattern) {
+                    const validPatterns = ['diagonal', 'dots', 'grid', 'grain'];
+                    const pattern = validPatterns.includes(bgPattern) ? bgPattern : 'diagonal';
+                    cardClasses.push('md-yc-has-pattern', `md-yc-pattern-${pattern}`);
+                } else if (bgColor) {
+                    cardClasses.push('md-yc-has-color');
+                    cardStyle += `--yc-bg-color:${bgColor};`;
+                }
+
+                // ── Text mode (auto-invert) ──
+                const textAttr = attrs.text || 'auto';
+                let isLight; // light card = dark text
+                if (textAttr === 'light') isLight = false;
+                else if (textAttr === 'dark') isLight = true;
+                else if (textAttr === 'auto') {
+                    if (bgImage && bgMode === 'full' && bgOverlay !== 'light') isLight = false;
+                    else if (bgImage && bgMode === 'full' && bgOverlay === 'light') isLight = true;
+                    else if (bgGradient) isLight = true;
+                    else if (bgColor) isLight = isLightBg(bgColor);
+                    else isLight = true;
+                } else if (/^#/.test(textAttr)) {
+                    cardStyle += `--yc-text:${textAttr};`;
+                    isLight = true;
+                } else {
+                    isLight = true;
+                }
+
+                if (!isLight) {
+                    cardClasses.push('md-yc-text-light');
+                }
+
+                // ── Custom fonts ──
+                const fontName = attrs['font-name'] || '';
+                const fontBody = attrs['font-body'] || '';
+                if (fontName) cardStyle += `--yc-font-name:${fontName};`;
+                if (fontBody) cardStyle += `--yc-font-body:${fontBody};`;
+
+                // ── Color overrides ──
+                const nameColor = attrs['name-color'] || '';
+                const roleColor = attrs['role-color'] || '';
+                if (nameColor) cardStyle += `--yc-name-color:${nameColor};`;
+                if (roleColor) cardStyle += `--yc-role-color:${roleColor};`;
+
+                // ── QR code (build-time SVG generation) ──
+                const qrAttr = attrs.qr || '';
+                let qrHtml = '';
+                if (qrAttr) {
+                    const qr = new QRCode({
+                        content: qrAttr,
+                        padding: 0,
+                        width: 64,
+                        height: 64,
+                        color: '#111',
+                        background: '#fff',
+                        ecl: 'M',
+                        join: true,
+                        container: 'svg-viewbox'
+                    });
+                    const svgContent = qr.svg().replace(/\u003c\?xml[^\u003e]*\?\u003e\s*/, '');
+                    qrHtml = `<div class="md-yc-qr">${svgContent}</div>`;
+                    cardClasses.push('md-yc-has-qr');
+                }
+
+                // ── Decorations: accent (line or icon) ──
+                const accentColor = attrs.accent || '';
+                if (accentColor) cardStyle += `--yc-accent:${accentColor};`;
+
+                const iconAttr = attrs.icon || '';
+                let accentHtml = '<span class="md-yc-accent-line"></span>';
+                if (iconAttr) {
+                    const svg = getIconSvg(iconAttr, '16px');
+                    if (svg) accentHtml = `<span class="md-yc-accent-icon">${svg}</span>`;
+                }
+
+                // ── Decorations: logo (image, top-right) ──
+                const logoAttr = attrs.logo || '';
+                const logoShape = attrs['logo-shape'] || 'circle';
+                let logoHtml = '';
+                if (logoAttr) {
+                    const shapeClass = `md-yc-logo-${['circle', 'square', 'rounded'].includes(logoShape) ? logoShape : 'circle'}`;
+                    logoHtml = `<img class="md-yc-logo ${shapeClass}" src="${escapeHtml(logoAttr)}" alt="" loading="lazy" onerror="this.style.display='none'" />`;
+                }
+
+                // ── Slot parsing ──
+                const originalChildren = node.children || [];
+                const bioChildren = [];
+                const contactChildren = [];
+                let inContact = false;
+
+                function isContactMarker(child) {
+                    if (child.type === 'html' && child.value) {
+                        return /<!--\s*contact\s*-->/.test(child.value);
+                    }
+                    if (child.type === 'paragraph' && child.children && child.children.length === 1) {
+                        const first = child.children[0];
+                        if (first.type === 'html' && first.value && /<!--\s*contact\s*-->/.test(first.value)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                for (const child of originalChildren) {
+                    if (!inContact && isContactMarker(child)) {
+                        inContact = true;
+                        continue;
+                    }
+                    if (inContact) {
+                        contactChildren.push(child);
+                    } else {
+                        bioChildren.push(child);
+                    }
+                }
+
+                // Filter out empty/whitespace-only paragraphs from bio
+                const meaningfulBioChildren = bioChildren.filter(child => {
+                    if (child.type === 'paragraph') {
+                        const text = (child.children || []).map(c => c.value || '').join('');
+                        return text.trim().length > 0;
+                    }
+                    return true;
+                });
+
+                // Normalize contact children: convert any heading nodes to paragraphs.
+                // Markdown may parse `text\n---\n` as a setext h2 underline, polluting the
+                // TOC; coercing all headings to paragraphs (rendered as <div>) prevents
+                // that and keeps contact area free of TOC entries regardless of input.
+                const normalizedContactChildren = contactChildren.map(child => {
+                    if (child.type === 'heading') {
+                        return {
+                            type: 'paragraph',
+                            children: child.children,
+                            data: { hName: 'div' }
+                        };
+                    }
+                    return child;
+                });
+
+                // ── Build hast tree ──
+                const bodyChildren = [];
+
+                // Top zone
+                bodyChildren.push({
+                    type: 'html',
+                    value: `<header class="md-yc-top"><div class="md-yc-name">${escapeHtml(ycName)}</div>${ycRole ? `<div class="md-yc-role">${escapeHtml(ycRole)}</div>` : ''}</header>`
+                });
+
+                // Bio zone (only if non-empty)
+                if (meaningfulBioChildren.length > 0) {
+                    bodyChildren.push({ type: 'html', value: '<div class="md-yc-bio">' });
+                    bodyChildren.push(...meaningfulBioChildren);
+                    bodyChildren.push({ type: 'html', value: '</div>' });
+                }
+
+                // Contact zone (render if there's contact text OR a QR code)
+                if (normalizedContactChildren.length > 0 || qrHtml) {
+                    bodyChildren.push({ type: 'html', value: '<footer class="md-yc-contact">' });
+                    if (normalizedContactChildren.length > 0) {
+                        bodyChildren.push({ type: 'html', value: '<div class="md-yc-contact-text">' });
+                        bodyChildren.push(...normalizedContactChildren);
+                        bodyChildren.push({ type: 'html', value: '</div>' });
+                    }
+                    if (qrHtml) {
+                        bodyChildren.push({ type: 'html', value: qrHtml });
+                    }
+                    bodyChildren.push({ type: 'html', value: '</footer>' });
+                }
+
+                const hProps = { class: cardClasses.join(' ') };
+                if (cardStyle) hProps.style = cardStyle;
+                node.data = { hName: 'div', hProperties: hProps };
+                node.children = [
+                    { type: 'html', value: `<div class="md-yc-accent">${accentHtml}</div>` },
+                    { type: 'html', value: logoHtml },
+                    { type: 'html', value: '<div class="md-yc-body">' },
+                    ...bodyChildren,
+                    { type: 'html', value: '</div>' }
+                ];
             } else if (name === 'audio') {
                 const src = attrs.src || '';
                 const netease = attrs.netease || '';
