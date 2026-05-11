@@ -88,7 +88,8 @@ function getLevelConfig(l: number) {
         const hasChildren = node.children.length > 0;
         const cfg = getLevelConfig(level);
 
-        const navHref = hasIndex ? `/docs/${docId}/${node.slug}/` : null;
+        const inDir = isInDir(node.dirPath, currentSlug);
+        const navHref = hasIndex && !inDir ? `/docs/${docId}/${node.slug}/` : null;
 
         const headerContent = (
             <>
@@ -98,11 +99,12 @@ function getLevelConfig(l: number) {
                 {/* 箭头 — 标识为目录，同时指示展开状态 */}
                 {hasChildren ? (
                     <span class="chevron-indicator">
-                        {expanded ? (
+                        <span class={`chevron-icon chevron-expanded ${expanded ? '' : 'hidden'}`}>
                             <ChevronDown class={`w-3.5 h-3.5 ${active || ancestorActive ? 'text-accent' : 'text-muted/50'}`} />
-                        ) : (
+                        </span>
+                        <span class={`chevron-icon chevron-collapsed ${expanded ? 'hidden' : ''}`}>
                             <ChevronRight class={`w-3.5 h-3.5 ${active || ancestorActive ? 'text-accent' : 'text-muted/50'}`} />
-                        )}
+                        </span>
                     </span>
                 ) : (
                     <span class="chevron-placeholder" />
@@ -232,6 +234,10 @@ function getLevelConfig(l: number) {
         background-color: var(--bg-hover);
     }
 
+    .docs-tree-group-header:not([href]) {
+        cursor: default;
+    }
+
     .docs-tree-group-header.active {
         background-color: color-mix(in srgb, var(--accent-color) 8%, transparent);
     }
@@ -313,28 +319,127 @@ function getLevelConfig(l: number) {
 
 <script is:inline>
 (function() {
+    var STORAGE_KEY = 'docsExpandedDirs';
+
+    function getExpandedDirs() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveExpandedDirs(dirs) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dirs));
+    }
+
+    function syncCurrentExpanded() {
+        var expandedDirs = getExpandedDirs();
+        document.querySelectorAll('.docs-tree-group-item').forEach(function(item) {
+            var wrapper = item.querySelector('.doc-children-wrapper');
+            var dirPath = item.dataset.dirPath;
+            if (!wrapper || !dirPath) return;
+            if (!wrapper.classList.contains('collapsed')) {
+                if (expandedDirs.indexOf(dirPath) === -1) {
+                    expandedDirs.push(dirPath);
+                }
+            }
+        });
+        saveExpandedDirs(expandedDirs);
+    }
+
+    function applyManualExpand() {
+        var expandedDirs = getExpandedDirs();
+        expandedDirs.forEach(function(dirPath) {
+            var item = document.querySelector('.docs-tree-group-item[data-dir-path="' + dirPath + '"]');
+            if (!item) return;
+            var wrapper = item.querySelector('.doc-children-wrapper');
+            var header = item.querySelector('.docs-tree-group-header');
+            if (wrapper) {
+                wrapper.classList.remove('collapsed');
+            }
+            if (header) {
+                var expandedIcon = header.querySelector('.chevron-expanded');
+                var collapsedIcon = header.querySelector('.chevron-collapsed');
+                if (expandedIcon) expandedIcon.classList.remove('hidden');
+                if (collapsedIcon) collapsedIcon.classList.add('hidden');
+            }
+        });
+    }
+
+    function toggleDir(groupItem) {
+        var wrapper = groupItem.querySelector('.doc-children-wrapper');
+        var header = groupItem.querySelector('.docs-tree-group-header');
+        if (!wrapper) return;
+
+        var dirPath = groupItem.dataset.dirPath;
+        var isNowCollapsed = !wrapper.classList.contains('collapsed');
+        wrapper.classList.toggle('collapsed');
+
+        // 切换箭头图标
+        if (header) {
+            var expandedIcon = header.querySelector('.chevron-expanded');
+            var collapsedIcon = header.querySelector('.chevron-collapsed');
+            if (expandedIcon && collapsedIcon) {
+                if (isNowCollapsed) {
+                    expandedIcon.classList.add('hidden');
+                    collapsedIcon.classList.remove('hidden');
+                } else {
+                    expandedIcon.classList.remove('hidden');
+                    collapsedIcon.classList.add('hidden');
+                }
+            }
+        }
+
+        // 同步 localStorage
+        var expandedDirs = getExpandedDirs();
+        if (isNowCollapsed) {
+            expandedDirs = expandedDirs.filter(function(p) { return p !== dirPath; });
+        } else {
+            if (expandedDirs.indexOf(dirPath) === -1) {
+                expandedDirs.push(dirPath);
+            }
+        }
+        saveExpandedDirs(expandedDirs);
+    }
+
     function init() {
-        // 为无 index 的目录行绑定点击展开/收起
+        // 先把当前页面展开的目录（含自动展开）同步到 localStorage
+        syncCurrentExpanded();
+        // 再恢复所有记录的展开状态
+        applyManualExpand();
+
+        // 箭头独立点击 → 展开/收起，阻止导航
+        document.querySelectorAll('.chevron-indicator').forEach(function(chevron) {
+            if (chevron.dataset.chevronBound) return;
+            chevron.dataset.chevronBound = 'true';
+
+            chevron.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var groupItem = chevron.closest('.docs-tree-group-item');
+                toggleDir(groupItem);
+            });
+        });
+
+        // div header（已进入的目录）点击 → 展开/收起
         document.querySelectorAll('.docs-tree-group-header[data-expandable="true"]').forEach(function(header) {
             if (header.dataset.expandBound) return;
             header.dataset.expandBound = 'true';
 
             header.addEventListener('click', function(e) {
-                // 如果是有链接的目录（有 index），让默认导航行为发生
-                // 但如果只是想在当前页展开/收起（比如右键或中键），这里不拦截
-                // 无 index 的目录是 div，需要手动处理展开/收起
-                if (header.tagName === 'A') return; // 有 index，正常导航
-
-                // 无 index 的 div，处理展开/收起
-                var wrapper = header.closest('.docs-tree-group-item').querySelector('.doc-children-wrapper');
-                if (!wrapper) return;
-
-                wrapper.classList.toggle('collapsed');
+                if (header.tagName === 'A') return; // 未进入的目录，走默认导航
+                var groupItem = header.closest('.docs-tree-group-item');
+                toggleDir(groupItem);
             });
         });
     }
 
-    init();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
     document.addEventListener('astro:page-load', init);
 })();
 </script>
