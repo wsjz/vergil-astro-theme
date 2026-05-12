@@ -1,0 +1,44 @@
+---
+/**
+ * SeasonsHeader — Centered header for the Seasons theme.
+ */
+import FormattedDate from '../../../ui/FormattedDate.astro';
+
+export interface Props {
+    title: string;
+    description?: string;
+    date: Date;
+    imageCount: number;
+    tags?: string[];
+}
+
+const { title, description, date, imageCount, tags } = Astro.props;
+---
+
+<header class="adetail-header">
+    <div class="adetail-header-inner">
+        <span class="adetail-section-label reveal">作品集 · Selected</span>
+        <h1 class="adetail-title reveal" style="--delay: 0.1s">{title}</h1>
+        {description ? <p class="adetail-desc reveal" style="--delay: 0.2s">{description}</p> : null}
+        <div class="adetail-meta reveal" style="--delay: 0.3s">
+            <span class="adetail-meta-item">
+                <span class="adetail-meta-key">Date</span>
+                <FormattedDate date={date} />
+            </span>
+            <span class="adetail-meta-divider"></span>
+            <span class="adetail-meta-item">
+                <span class="adetail-meta-key">Photos</span>
+                <span class="adetail-meta-value">{String(imageCount).padStart(2, '0')}</span>
+            </span>
+            {tags?.length > 0 ? (
+                <>
+                    <span class="adetail-meta-divider"></span>
+                    <span class="adetail-meta-item">
+                        <span class="adetail-meta-key">Tags</span>
+                        <span class="adetail-meta-value">{tags.join(' · ')}</span>
+                    </span>
+                </>
+            ) : null}
+        </div>
+    </div>
+</header>

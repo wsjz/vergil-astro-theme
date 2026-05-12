@@ -1,0 +1,31 @@
+---
+/**
+ * GoldenStats — Statistics bar for the Golden theme.
+ */
+export interface Props {
+    imageCount: number;
+    yearMonth: string;
+    primaryTag?: string;
+}
+
+const { imageCount, yearMonth, primaryTag } = Astro.props;
+---
+
+<section class="adetail-stats reveal">
+    <div class="adetail-stats-inner">
+        <div class="adetail-stat">
+            <span class="adetail-stat-num">{String(imageCount).padStart(2, '0')}</span>
+            <span class="adetail-stat-label">Photos</span>
+        </div>
+        <div class="adetail-stat-divider"></div>
+        <div class="adetail-stat">
+            <span class="adetail-stat-num">{yearMonth}</span>
+            <span class="adetail-stat-label">Date</span>
+        </div>
+        <div class="adetail-stat-divider"></div>
+        <div class="adetail-stat">
+            <span class="adetail-stat-num">{primaryTag || '—'}</span>
+            <span class="adetail-stat-label">Category</span>
+        </div>
+    </div>
+</section>

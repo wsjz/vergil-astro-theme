@@ -11,9 +11,17 @@ const avatarSrc = typeof avatar === 'string' ? avatar : avatar.src;
 const signature = '纵使生活有千般不如意，也不要自暴自弃！';
 const bannerUrl = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&h=400&fit=crop&q=80';
 
-// 自动读取 src/content/moments/ 下所有 JSON 文件
+interface MomentPost {
+    date: string;
+    content: string;
+    images?: string[];
+    linkCard?: Record<string, string>;
+    forward?: Record<string, unknown>;
+    tags?: string[];
+}
+
 const momentsDir = path.join(process.cwd(), 'src', 'content', 'moments');
-let allPosts: any[] = [];
+let allPosts: MomentPost[] = [];
 
 if (fs.existsSync(momentsDir)) {
     const files = fs.readdirSync(momentsDir)

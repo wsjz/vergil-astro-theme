@@ -1,0 +1,95 @@
+---
+/**
+ * GoldenGallery — Image gallery with numbered items and EXIF overlay for the Golden theme.
+ */
+import { Image } from 'astro:assets';
+import { ChevronRight } from '@lucide/astro';
+
+interface Props {
+    images: Array<{
+        src: ImageMetadata | string;
+        alt?: string;
+        caption?: string;
+        exif?: {
+            camera?: string;
+            model?: string;
+            focal?: string;
+            aperture?: string;
+            shutter?: string;
+            iso?: string;
+        };
+    }>;
+    title: string;
+    primaryTag?: string;
+    layout: string;
+}
+
+const { images, title, primaryTag, layout } = Astro.props;
+---
+
+<div class="adetail-gallery" data-layout={layout}>
+    {images.map((img, i) => {
+        const num = String(i + 1).padStart(2, '0');
+        const itemClass = 'adetail-g-item reveal';
+
+        const shutter = (
+            <div class="g-shutter-clip">
+                <div class="g-strip-clip g-strip-1" style="--s-delay: 0s"></div>
+                <div class="g-strip-clip g-strip-2" style="--s-delay: 0.08s"></div>
+                <div class="g-strip-clip g-strip-3" style="--s-delay: 0.16s"></div>
+            </div>
+        );
+
+        const exifBar = img.exif ? (
+            <div class="g-exif-bar">
+                <div class="g-exif-left">
+                    {img.exif.camera ? <span class="g-exif-brand">{img.exif.camera}</span> : null}
+                    {img.exif.model ? <span class="g-exif-model">{img.exif.model}</span> : null}
+                </div>
+                <div class="g-exif-right">
+                    {img.exif.focal ? <span>{img.exif.focal}</span> : null}
+                    {img.exif.aperture ? <span>{img.exif.aperture}</span> : null}
+                    {img.exif.shutter ? <span>{img.exif.shutter}</span> : null}
+                    {img.exif.iso ? <span>ISO {img.exif.iso}</span> : null}
+                </div>
+            </div>
+        ) : null;
+
+        const overlay = (
+            <div class="g-overlay">
+                <div class="g-overlay-inner">
+                    <span class="g-arrow">
+                        <ChevronRight class="w-3.5 h-3.5" style="stroke-width: 1.5" />
+                    </span>
+                    {img.caption ? <p class="g-overlay-caption g-caption-golden">{img.caption}</p> : null}
+                    {exifBar}
+                </div>
+            </div>
+        );
+
+        return (
+            <div class={itemClass} data-lightbox-index={i} data-index={i}>
+                <figure class="g-inner">
+                    <div class="g-media">
+                        <Image src={img.src} alt={img.alt || title} width={1200} class="g-img" loading={i < 4 ? 'eager' : 'lazy'} />
+                        {shutter}
+                        {overlay}
+                    </div>
+                    <span class="g-number">{num}</span>
+                </figure>
+                <div class="g-meta">
+                    <div class="g-meta-left">
+                        <h3 class="g-meta-title">{img.alt || title}</h3>
+                        {img.caption ? <p class="g-meta-caption">{img.caption}</p> : null}
+                    </div>
+                    <div class="g-meta-right">
+                        <span class="g-meta-cat">{primaryTag || ''}</span>
+                        <span class="g-meta-arrow">
+                            <ChevronRight class="w-3.5 h-3.5" style="stroke-width: 1.5" />
+                        </span>
+                    </div>
+                </div>
+            </div>
+        );
+    })}
+</div>

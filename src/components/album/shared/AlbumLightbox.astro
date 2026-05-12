@@ -1,0 +1,28 @@
+---
+/**
+ * AlbumLightbox — Shared lightbox component for all album themes.
+ *
+ * Supports keyboard navigation (Esc, ArrowLeft, ArrowRight) and touch swipes.
+ */
+import { ChevronLeft, ChevronRight, X } from '@lucide/astro';
+---
+
+<div class="alb-lightbox" id="alb-lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+    <div class="alb-lightbox-backdrop"></div>
+    <button class="alb-lightbox-close" aria-label="Close">
+        <X class="w-[18px] h-[18px]" style="stroke-width: 1.5" />
+    </button>
+    <button class="alb-lightbox-prev" aria-label="Previous">
+        <ChevronLeft class="w-[18px] h-[18px]" style="stroke-width: 1.5" />
+    </button>
+    <button class="alb-lightbox-next" aria-label="Next">
+        <ChevronRight class="w-[18px] h-[18px]" style="stroke-width: 1.5" />
+    </button>
+    <div class="alb-lightbox-stage">
+        <img class="alb-lightbox-img" src="" alt="" />
+    </div>
+    <div class="alb-lightbox-info">
+        <span class="alb-lightbox-caption"></span>
+        <span class="alb-lightbox-counter"></span>
+    </div>
+</div>

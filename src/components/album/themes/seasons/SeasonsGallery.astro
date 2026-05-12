@@ -1,0 +1,81 @@
+---
+/**
+ * SeasonsGallery — Masonry gallery with season badges for the Seasons theme.
+ */
+import { Image } from 'astro:assets';
+import { ChevronRight } from '@lucide/astro';
+
+const SEASON_COLORS: Record<string, string> = {
+    spring: '#FFC1CC', summer: '#FFD700', autumn: '#FF7F50', winter: '#F0F8FF',
+};
+const SEASON_NAMES: Record<string, string> = {
+    spring: '春', summer: '夏', autumn: '秋', winter: '冬',
+};
+
+interface Props {
+    images: Array<{
+        src: ImageMetadata | string;
+        alt?: string;
+        caption?: string;
+        season?: string;
+        exif?: {
+            camera?: string; model?: string; focal?: string;
+            aperture?: string; shutter?: string; iso?: string;
+        };
+    }>;
+    title: string;
+    layout: string;
+}
+
+const { images, title, layout } = Astro.props;
+---
+
+<div class="adetail-gallery" data-layout={layout}>
+    {images.map((img, i) => {
+        const itemClass = 'adetail-g-item reveal';
+        const imgSeason = img.season || '';
+        const seasonColor = SEASON_COLORS[imgSeason] || '';
+
+        const shutter = (
+            <div class="g-shutter-clip">
+                <div class="g-strip-clip g-strip-1" style="--s-delay: 0s"></div>
+                <div class="g-strip-clip g-strip-2" style="--s-delay: 0.08s"></div>
+                <div class="g-strip-clip g-strip-3" style="--s-delay: 0.16s"></div>
+            </div>
+        );
+
+        const overlay = (
+            <div class="g-overlay">
+                <div class="g-overlay-inner">
+                    {img.alt ? <p class="g-overlay-title">{img.alt}</p> : null}
+                    {img.caption ? <p class="g-overlay-caption">{img.caption}</p> : null}
+                    {img.exif ? (
+                        <div class="g-exif">
+                            {img.exif.camera ? <span>{img.exif.camera}</span> : null}
+                            {img.exif.focal ? <span>{img.exif.focal}</span> : null}
+                            {img.exif.aperture ? <span>{img.exif.aperture}</span> : null}
+                        </div>
+                    ) : null}
+                    <span class="g-arrow">
+                        <ChevronRight class="w-3.5 h-3.5" style="stroke-width: 1.5" />
+                    </span>
+                </div>
+            </div>
+        );
+
+        return (
+            <figure class={itemClass} data-lightbox-index={i} data-season={imgSeason} data-index={i}>
+                <div class="g-media">
+                    <Image src={img.src} alt={img.alt || title} width={1200} class="g-img" loading={i < 4 ? 'eager' : 'lazy'} />
+                    {shutter}
+                </div>
+                {imgSeason ? (
+                    <span class="g-season-badge" style={seasonColor ? `color:${seasonColor};border-color:${seasonColor}40` : ''}>
+                        {SEASON_NAMES[imgSeason] || imgSeason}
+                    </span>
+                ) : null}
+                {overlay}
+            </figure>
+        );
+    })}
+</div>

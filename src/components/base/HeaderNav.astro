@@ -11,7 +11,7 @@ interface Props {
 const { articleTitle = '', commentsEnabled = false, sticky = false } = Astro.props;
 const isArticlePage = articleTitle.length > 0;
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, unknown> = {
     Home, Database, Heart, MoreHorizontal, FolderOpen, BookOpen,
     FileText, Image, Lightbulb, MessageSquare, Clock
 };

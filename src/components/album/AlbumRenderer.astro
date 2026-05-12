@@ -1,0 +1,50 @@
+---
+/**
+ * AlbumRenderer — Theme dispatcher for album pages.
+ *
+ * Renders the appropriate theme package based on the theme field.
+ * All themes share Lightbox.
+ */
+import { getAlbumTheme, DEFAULT_ALBUM_THEME, type AlbumThemeName } from './themes/index';
+import AlbumLightbox from './shared/AlbumLightbox.astro';
+
+export interface Props {
+    theme: string;
+    title: string;
+    description?: string;
+    date: Date;
+    coverSrc?: string;
+    yearMonth: string;
+    imageCount: number;
+    tags?: string[];
+    tagCount: number;
+    images: Array<{
+        src: ImageMetadata | string;
+        alt?: string;
+        caption?: string;
+        season?: string;
+        exif?: {
+            camera?: string; model?: string; focal?: string;
+            aperture?: string; shutter?: string; iso?: string;
+        };
+    }>;
+    layout: string;
+    photoFit: string;
+    hasSeasons: boolean;
+    seasonFilter: boolean;
+    defaultSeason: string;
+    allImageCount: number;
+    seasonCounts: Record<string, number>;
+}
+
+const props = Astro.props;
+const ThemeComponent = getAlbumTheme(props.theme);
+---
+
+<article class="adetail" data-album-theme={props.theme} data-photo-fit={props.photoFit} data-layout={props.layout}>
+    <ThemeComponent {...props}>
+        <slot />
+    </ThemeComponent>
+</article>
+
+<AlbumLightbox />

@@ -1,0 +1,41 @@
+---
+/**
+ * Golden theme entry — composes all Golden theme sections.
+ */
+import GoldenHero from './GoldenHero.astro';
+import GoldenStats from './GoldenStats.astro';
+import AlbumBody from '../../shared/AlbumBody.astro';
+import GoldenGallery from './GoldenGallery.astro';
+
+export interface Props {
+    title: string;
+    description?: string;
+    coverSrc: string;
+    yearMonth: string;
+    imageCount: number;
+    primaryTag?: string;
+    images: Array<{
+        src: ImageMetadata | string;
+        alt?: string;
+        caption?: string;
+        exif?: {
+            camera?: string;
+            model?: string;
+            focal?: string;
+            aperture?: string;
+            shutter?: string;
+            iso?: string;
+        };
+    }>;
+    layout: string;
+}
+
+const { title, description, coverSrc, yearMonth, imageCount, primaryTag, images, layout } = Astro.props;
+---
+
+<GoldenHero title={title} description={description} coverSrc={coverSrc} />
+<GoldenStats imageCount={imageCount} yearMonth={yearMonth} primaryTag={primaryTag} />
+<AlbumBody>
+    <slot />
+</AlbumBody>
+<GoldenGallery images={images} title={title} primaryTag={primaryTag} layout={layout} />
