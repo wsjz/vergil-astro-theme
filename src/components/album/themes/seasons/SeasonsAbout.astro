@@ -1,0 +1,37 @@
+---
+/**
+ * SeasonsAbout — Polaroid card + description for the Seasons theme.
+ */
+export interface Props {
+    title: string;
+    description?: string;
+    coverSrc?: string;
+    yearMonth: string;
+    imageCount: number;
+    tagCount: number;
+}
+
+const { title, description, coverSrc, yearMonth, imageCount, tagCount } = Astro.props;
+---
+
+<section class="season-about reveal">
+    <div class="season-about-inner">
+        <div class="polaroid-card">
+            <div class="polaroid-img-wrap">
+                {coverSrc ? <img src={coverSrc} alt={title} loading="eager" /> : null}
+            </div>
+            <div class="polaroid-footer">
+                <span class="polaroid-label">{title}</span>
+                <span class="polaroid-date">{yearMonth}</span>
+            </div>
+        </div>
+        <div class="season-about-text">
+            {description ? <p class="season-about-desc">{description}</p> : null}
+            <div class="season-about-stats">
+                <div class="s-stat"><span class="s-stat-num">{String(imageCount).padStart(2, '0')}</span><span class="s-stat-label">Photos</span></div>
+                <div class="s-stat"><span class="s-stat-num">{tagCount}</span><span class="s-stat-label">Tags</span></div>
+                <div class="s-stat"><span class="s-stat-num">4</span><span class="s-stat-label">Seasons</span></div>
+            </div>
+        </div>
+    </div>
+</section>

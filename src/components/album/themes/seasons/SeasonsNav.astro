@@ -1,0 +1,32 @@
+---
+/**
+ * SeasonsNav — Season filter navigation.
+ */
+const SEASONS = ['spring', 'summer', 'autumn', 'winter'] as const;
+const SEASON_LABELS: Record<string, string> = { spring: '春', summer: '夏', autumn: '秋', winter: '冬' };
+
+export interface Props {
+    hasSeasons: boolean;
+    seasonFilter: boolean;
+    defaultSeason: string;
+    allImageCount: number;
+    seasonCounts: Record<string, number>;
+}
+
+const { hasSeasons, seasonFilter, defaultSeason, allImageCount, seasonCounts } = Astro.props;
+---
+
+{hasSeasons && seasonFilter ? (
+    <div class="season-nav reveal" data-default-season={defaultSeason}>
+        <button class="season-btn" data-season="all" data-active="true">
+            <span class="season-label">All</span>
+            <span class="season-count">{allImageCount}</span>
+        </button>
+        {SEASONS.map(s => seasonCounts[s] > 0 ? (
+            <button class="season-btn" data-season={s}>
+                <span class="season-label">{SEASON_LABELS[s]}</span>
+                <span class="season-count">{seasonCounts[s]}</span>
+            </button>
+        ) : null)}
+    </div>
+) : null}

@@ -108,9 +108,9 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                 currentLines: DialogueLine[];
                 currentIndex: number;
                 idleTimer: ReturnType<typeof setTimeout> | null;
-                riveInstance: any | null;
+                riveInstance: unknown | null;
                 riveStateMachineName: string | null;
-                live2dWidget: any | null;
+                live2dWidget: unknown | null;
                 hasShownGreeting: boolean;
             }
 
@@ -330,7 +330,7 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                             }
                             rive.resizeDrawingSurfaceToCanvas();
                         },
-                        onStateChange: (event: any) => {
+                        onStateChange: (event: { data?: unknown }) => {
                             console.log('[Agent] Rive state:', event.data);
                         },
                     });

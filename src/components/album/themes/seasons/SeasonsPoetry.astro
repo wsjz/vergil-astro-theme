@@ -1,0 +1,24 @@
+---
+/**
+ * SeasonsPoetry — Seasonal poetry card.
+ */
+export interface Props {
+    defaultSeason: string;
+}
+
+const { defaultSeason } = Astro.props;
+---
+
+<section class="season-poetry reveal" data-season={defaultSeason}>
+    <div class="season-poetry-card glass-panel">
+        <div class="season-poetry-label">
+            <div class="season-dot" id="poetry-dot"></div>
+            <span class="season-name-jp" id="poetry-name-jp">春</span>
+            <span class="season-name-en" id="poetry-name-en">Spring</span>
+        </div>
+        <div class="season-poetry-lines" id="poetry-lines">
+            {/* Content injected by JS */}
+        </div>
+        <div class="season-poetry-deco" id="poetry-deco">春</div>
+    </div>
+</section>

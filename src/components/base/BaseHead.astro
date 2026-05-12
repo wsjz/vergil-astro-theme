@@ -6,7 +6,7 @@ import type { ImageInput } from '../../types';
 
 import '../../styles/global.css';
 
-const fontsProp = (Astro.props as any).fonts;
+const { fonts: fontsProp } = Astro.props as Props;
 const { display: displayCss, body: bodyCss, ui: uiCss, mono: monoCss, cdnFonts, fileFonts } =
     fontsProp && (fontsProp.display || fontsProp.body)
         ? resolveFontOverrides(fontsProp)

@@ -46,7 +46,7 @@ export async function getDocSets(): Promise<DocSet[]> {
     for (const [id, groupEntries] of grouped) {
         const meta = groupEntries.find(isMetaEntry);
         if (!meta) continue;
-        const tree = buildTree(id, groupEntries, meta.data?.dirs as any);
+        const tree = buildTree(id, groupEntries, meta.data?.dirs as (string | Record<string, string[]>)[] | undefined);
         sets.push({ id, meta, tree });
     }
     sets.sort((a, b) => ((a.meta.data?.order as number) ?? 99) - ((b.meta.data?.order as number) ?? 99));
@@ -58,7 +58,7 @@ export async function getDocTree(docId: string): Promise<DocTreeNode[]> {
     const groupEntries = entries.filter((e) => getDocId(e.id) === docId);
     const meta = groupEntries.find(isMetaEntry);
     if (!meta) return [];
-    return buildTree(docId, groupEntries, meta.data?.dirs as any);
+    return buildTree(docId, groupEntries, meta.data?.dirs as (string | Record<string, string[]>)[] | undefined);
 }
 
 export async function getDocEntry(docId: string, slug: string): Promise<CollectionEntry<'docs'> | undefined> {

@@ -18,7 +18,7 @@ const blogItems = posts.map((p) => ({
 }));
 
 // 序列化文档树数据（保留层级结构）
-function serializeTree(nodes: DocTreeNode[], setId: string): any[] {
+function serializeTree(nodes: DocTreeNode[], setId: string): Record<string, unknown>[] {
     return nodes.map((n) => {
         if (n.type === 'article') {
             return {

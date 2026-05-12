@@ -1,0 +1,56 @@
+---
+/**
+ * Seasons theme entry — composes all Seasons theme sections.
+ */
+import SeasonsHeader from './SeasonsHeader.astro';
+import SeasonsAbout from './SeasonsAbout.astro';
+import AlbumBody from '../../shared/AlbumBody.astro';
+import SeasonsGallery from './SeasonsGallery.astro';
+import SeasonsPoetry from './SeasonsPoetry.astro';
+import SeasonsNav from './SeasonsNav.astro';
+import SeasonsTimeConsole from './SeasonsTimeConsole.astro';
+import SeasonsParticles from './SeasonsParticles.astro';
+
+export interface Props {
+    title: string;
+    description?: string;
+    date: Date;
+    imageCount: number;
+    tags?: string[];
+    coverSrc?: string;
+    yearMonth: string;
+    tagCount: number;
+    images: Array<{
+        src: ImageMetadata | string;
+        alt?: string;
+        caption?: string;
+        season?: string;
+        exif?: {
+            camera?: string; model?: string; focal?: string;
+            aperture?: string; shutter?: string; iso?: string;
+        };
+    }>;
+    layout: string;
+    hasSeasons: boolean;
+    seasonFilter: boolean;
+    defaultSeason: string;
+    allImageCount: number;
+    seasonCounts: Record<string, number>;
+}
+
+const {
+    title, description, date, imageCount, tags, coverSrc, yearMonth, tagCount,
+    images, layout, hasSeasons, seasonFilter, defaultSeason, allImageCount, seasonCounts
+} = Astro.props;
+---
+
+<SeasonsHeader title={title} description={description} date={date} imageCount={imageCount} tags={tags} />
+{coverSrc ? <SeasonsAbout title={title} description={description} coverSrc={coverSrc} yearMonth={yearMonth} imageCount={imageCount} tagCount={tagCount} /> : null}
+<AlbumBody>
+    <slot />
+</AlbumBody>
+<SeasonsPoetry defaultSeason={defaultSeason} />
+<SeasonsNav hasSeasons={hasSeasons} seasonFilter={seasonFilter} defaultSeason={defaultSeason} allImageCount={allImageCount} seasonCounts={seasonCounts} />
+<SeasonsGallery images={images} title={title} layout={layout} />
+<SeasonsTimeConsole />
+<SeasonsParticles defaultSeason={defaultSeason} />

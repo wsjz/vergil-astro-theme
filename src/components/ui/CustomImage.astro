@@ -36,7 +36,7 @@ const canUseAstroImage = isImageMetadata || isRemote;
             fetchpriority={fetchpriority}
             decoding={decoding}
             inferSize={isRemote ? (inferSize ?? true) : inferSize}
-            {...(rest as any)}
+            {...(rest as Record<string, unknown>)}
         />
     ) : (
         <img class={className} src={src} alt={alt} loading={loading} decoding={decoding} />

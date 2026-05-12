@@ -53,7 +53,7 @@ function getLastActive(): string {
   return diffDays + ' 天前';
 }
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, unknown> = {
   'Home': Home,
   'Blog': BookOpen,
   'Projects': Folder,
@@ -85,7 +85,7 @@ const navItems = [
 const leftConfig = siteConfig.sidebar?.left ?? ['recentPosts', 'siteInfo'];
 
 // Component registry for left sidebar
-const leftComponents: Record<string, any> = {
+const leftComponents: Record<string, unknown> = {
     recentPosts: SidebarRecentPosts,
     siteInfo: null, // handled inline
 };

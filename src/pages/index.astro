@@ -18,17 +18,22 @@ const totalPosts = posts.length;
 const totalPages = Math.ceil(totalPosts / pageSize);
 const pagePosts = posts.slice(0, pageSize);
 
-// 读取最新动态
+interface MomentData {
+    content: string;
+    date: string;
+    images?: string[];
+}
+
 const momentsDir = path.join(process.cwd(), 'src', 'content', 'moments');
-let latestMoment: any = null;
+let latestMoment: MomentData | null = null;
 if (fs.existsSync(momentsDir)) {
     const files = fs.readdirSync(momentsDir).filter(f => f.endsWith('.json'));
-    const moments = [];
+    const moments: MomentData[] = [];
     for (const file of files) {
         const raw = fs.readFileSync(path.join(momentsDir, file), 'utf-8');
         try { moments.push(JSON.parse(raw)); } catch { /* ignore */ }
     }
-    moments.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    moments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     latestMoment = moments[0] || null;
 }
 ---

@@ -1,0 +1,33 @@
+---
+/**
+ * GoldenHero — Full-screen video hero for the Golden theme.
+ */
+export interface Props {
+    title: string;
+    description?: string;
+    coverSrc: string;
+}
+
+const { title, description, coverSrc } = Astro.props;
+---
+
+<section class="adetail-hero reveal">
+    <div class="adetail-hero-bg">
+        <video autoplay muted loop playsinline class="adetail-hero-video" poster={coverSrc}>
+            <source src="/videos/hero-golden.mp4" type="video/mp4" />
+        </video>
+        <div class="adetail-hero-overlay"></div>
+        <div class="adetail-hero-vignette"></div>
+    </div>
+    <div class="adetail-hero-content">
+        <span class="adetail-section-label reveal">Selected Work · 当期影集</span>
+        <h1 class="adetail-title reveal" style="--delay: 0.1s">{title}</h1>
+        {description ? <p class="adetail-desc reveal" style="--delay: 0.2s">{description}</p> : null}
+        <div class="adetail-hero-scroll reveal" style="--delay: 0.5s">
+            <span>Scroll</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"/>
+            </svg>
+        </div>
+    </div>
+</section>

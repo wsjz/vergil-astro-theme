@@ -1,0 +1,47 @@
+---
+/**
+ * SeasonsTimeConsole — Time slider console with seasonal poems.
+ */
+---
+
+<div class="time-console" id="time-console"
+    style="background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, transparent 100%)">
+    <div class="time-console-inner">
+        <div class="time-display">
+            <span class="time-value" id="time-value">12:00</span>
+            <span class="time-label" id="time-label">正午</span>
+        </div>
+        <div class="time-poem" id="time-poem">
+            <p class="time-poem-line" id="time-poem-ja">春の匂いが、風の中で踊る</p>
+            <p class="time-poem-line" id="time-poem-zh">春天的气息，在风中起舞</p>
+        </div>
+        <div class="time-slider-wrap">
+            <div class="time-track-labels">
+                <span>04:00</span><span>12:00</span><span>24:00</span>
+            </div>
+            <div class="time-slider-bar">
+                <div class="time-track-marks">
+                    <span></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <input type="range" id="time-slider" class="time-slider" min="0" max="1200" value="720" data-default-real-time="true" />
+                <div class="time-slider-fill" id="time-fill"></div>
+                <div class="time-slider-thumb" id="time-thumb"></div>
+            </div>
+        </div>
+        <div class="time-season-pill" id="time-season-pill">
+            <span class="time-season-name" id="time-season-name">春 Spring</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .time-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; appearance: none;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: transparent; cursor: pointer; border: none;
+    }
+    .time-slider::-moz-range-thumb {
+        width: 16px; height: 16px; border-radius: 50%;
+        background: transparent; cursor: pointer; border: none;
+    }
+</style>
