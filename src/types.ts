@@ -78,6 +78,7 @@ export type SplashConfig = {
     slideDuration?: number;
     title?: string;
     subtitle?: string;
+    description?: string;
     nav?: { text: string; href: string; icon?: string }[];
 };
 

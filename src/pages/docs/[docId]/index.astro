@@ -6,7 +6,7 @@ import DocsLayout from '../../../layouts/DocsLayout.astro';
 import DocsNav from '../../../components/docs/DocsNav.astro';
 import FloatingToc from '../../../components/widgets/FloatingToc.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
-import DocSetSplash from '../../../components/docs/DocSetSplash.astro';
+import HeroSplash from '../../../components/content/HeroSplash.astro';
 
 export const getStaticPaths = (async () => {
     const sets = await getDocSets();
@@ -59,7 +59,7 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
     splashMode={splashEnabled}
 >
     {splashEnabled && (
-        <DocSetSplash
+        <HeroSplash
             slot="splash"
             title={(meta?.data?.title as string) || docId}
             subtitle={(meta?.data?.subtitle as string) || 'Documentation'}
@@ -72,6 +72,7 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
             gradientColor={splashConfig?.gradientColor}
             gradientHeight={splashConfig?.gradientHeight || 'h-56'}
             backdropBlur={splashConfig?.backdropBlur || '12px'}
+            snapScroll={true}
         />
     )}
 

@@ -187,7 +187,7 @@ const siteConfig: SiteConfig = {
         backdropBlur: '12px',
         slideDuration: 12,
         title: 'Vergil',
-        subtitle: 'Minimal Astro.js theme',
+        description: 'Minimal Astro.js theme',
         nav: [
             { text: 'Github', href: 'https://github.com', icon: 'github' },
             { text: '友链', href: '/links', icon: 'link' },
