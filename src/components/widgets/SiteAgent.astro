@@ -1,72 +1,104 @@
 ---
-import { ChevronRight } from '@lucide/astro';
+import { ChevronRight, RotateCcw } from '@lucide/astro';
 import siteConfig from '../../data/site-config';
 
 const agent = siteConfig.agent;
 const enabled = agent?.enabled ?? false;
+const agentName = agent?.name ?? 'Miki';
 const provider = agent?.provider ?? 'rive';
 const riveSrc = agent?.rive?.src ?? '';
 const live2dModelPath = agent?.live2d?.modelPath ?? '';
+const hasModel = (provider === 'rive' && !!riveSrc) || (provider === 'live2d' && !!live2dModelPath);
+const hasCharacter = hasModel;
 ---
 
 {enabled && (
     <div
         id="agent-root"
-        class="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-2 pointer-events-none"
+        class="fixed bottom-3 left-3 z-[100] flex flex-col gap-2 pointer-events-none w-max"
         data-agent-collapsed="true"
+        data-has-character={String(hasCharacter)}
         data-provider={provider}
         data-rive-src={riveSrc}
         data-live2d-model={live2dModelPath}
     >
-        <div id="agent-bubble" class="agent-bubble pointer-events-auto max-w-[260px] sm:max-w-[300px] rounded-2xl rounded-br-sm bg-surface2 text-main px-4 py-3 shadow-lg opacity-0 translate-y-2 transition-all duration-300 scale-95 origin-bottom-right">
-            <div id="agent-bubble-text" class="text-sm leading-relaxed min-h-[1.5em]"></div>
-            <div id="agent-bubble-cursor" class="inline-block w-0.5 h-4 bg-accent ml-0.5 align-middle animate-blink hidden"></div>
-            <div class="mt-2 flex items-center justify-between gap-2">
-                <span id="agent-name" class="text-xs text-muted opacity-60">V</span>
-                <button id="agent-next-btn" class="text-xs text-accent hover:opacity-80 transition-opacity hidden flex items-center gap-0.5">Next <ChevronRight class="w-3 h-3" /></button>
+        <div id="agent-bubble" class="agent-bubble pointer-events-auto rounded-2xl rounded-br-sm bg-card/30 border border-light/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.12),0_2px_8px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.4),0_2px_8px_-2px_rgba(0,0,0,0.2)] opacity-0 translate-y-2 transition-all duration-500 scale-95 origin-bottom-right backdrop-blur-lg overflow-hidden">
+            <!-- 头部横条 -->
+            <div class="flex items-center gap-2 px-4 pt-3 pb-2 border-b border-light/40">
+                <span class="text-[11px] font-medium text-secondary tracking-wide select-none">{agentName}</span>
+                <div class="flex-1"></div>
+                <button id="agent-close-btn" class="w-5 h-5 flex items-center justify-center rounded-full text-muted hover:text-main hover:bg-hover transition-all duration-200 text-sm leading-none cursor-pointer" title="关闭">×</button>
+            </div>
+            <!-- 内容区 -->
+            <div id="agent-content-area" class="px-4 pt-2.5 pb-1 cursor-pointer select-none relative" title="点击加速">
+                <div id="agent-bubble-text" class="text-sm leading-relaxed text-main min-h-[1.5em]"></div>
+            </div>
+            <!-- 底部 -->
+            <div class="px-4 pb-3 pt-1 flex items-center justify-end gap-2">
+                <button id="agent-next-btn" class="text-xs text-accent hover:text-accent-hover transition-all duration-200 hidden flex items-center gap-0.5 px-2 py-1 rounded-lg hover:bg-accent/5 cursor-pointer">
+                    继续 <ChevronRight class="w-3 h-3" />
+                </button>
+                <button id="agent-restart-btn" class="text-muted hover:text-main transition-all duration-200 hidden flex items-center justify-center w-7 h-7 rounded-lg hover:bg-hover cursor-pointer" title="回到起点">
+                    <RotateCcw class="w-3.5 h-3.5" />
+                </button>
             </div>
         </div>
 
-        <div id="agent-character" class="agent-character pointer-events-auto relative cursor-pointer group" title="Click to interact">
-            {provider === 'rive' && (
-                <canvas id="agent-rive-canvas" class="w-24 h-24" width="300" height="300"></canvas>
-            )}
-
-            {provider === 'live2d' && (
-                <div id="agent-live2d-mount" class="w-24 h-24"></div>
-            )}
-        </div>
+        {hasCharacter ? (
+            <div id="agent-character" class="agent-character pointer-events-auto relative cursor-pointer group" title="点击互动">
+                {provider === 'rive' && (
+                    <canvas id="agent-rive-canvas" class="w-24 h-24" width="300" height="300"></canvas>
+                )}
+                {provider === 'live2d' && (
+                    <div id="agent-live2d-mount" class="w-24 h-24"></div>
+                )}
+            </div>
+        ) : (
+            <div id="agent-mini-trigger" class="agent-mini-trigger pointer-events-auto px-3 py-2 rounded-xl bg-card/80 border border-light/60 shadow-lg cursor-pointer hover:scale-105 active:scale-95 transition-all duration-200 backdrop-blur-xl" title="点击展开对话">
+                <span class="text-xs font-medium text-secondary">{agentName}</span>
+            </div>
+        )}
     </div>
 
     <style>
         #agent-root {
-            transition: left 0.3s ease, top 0.3s ease;
+            transition: left 0.5s cubic-bezier(0.32, 0.72, 0, 1), top 0.5s cubic-bezier(0.32, 0.72, 0, 1);
         }
         #agent-root.agent-dragging {
             transition: none;
             cursor: grabbing;
         }
-        #agent-root.agent-dragging .agent-bubble {
-            opacity: 0 !important;
+
+        #agent-root.agent-splash-hidden {
+            opacity: 0;
             pointer-events: none;
+            transition: opacity 0.4s ease;
         }
 
-        #agent-root[data-agent-collapsed="false"] .agent-bubble {
+        .agent-bubble {
+            position: absolute;
+            left: 0;
+            bottom: calc(100% + 8px);
+            width: 280px;
+            max-width: calc(100vw - 24px);
             opacity: 1;
             transform: translateY(0) scale(1);
         }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
+        /* rootEl 在屏幕右半部分时，气泡右对齐避免超出屏幕 */
+        #agent-root[data-agent-align="right"] .agent-bubble {
+            left: auto;
+            right: 0;
         }
-        .animate-blink {
-            animation: blink 1s step-end infinite;
+        #agent-root[data-agent-collapsed="true"] .agent-bubble {
+            opacity: 0;
+            transform: translateY(8px) scale(0.95);
+            pointer-events: none;
         }
 
-        #agent-character {
+        #agent-character,
+        #agent-mini-trigger {
             animation: agent-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-            animation-delay: 1s;
+            animation-delay: 0.8s;
         }
         @keyframes agent-enter {
             from {
@@ -79,23 +111,49 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
             }
         }
 
+        /* 气泡展开时隐藏 mini trigger */
+        #agent-root[data-agent-collapsed="false"] #agent-mini-trigger {
+            display: none;
+        }
+
         .agent-bubble {
-            animation: bubble-breathe 3s ease-in-out infinite;
+            animation: bubble-breathe 4s ease-in-out infinite;
         }
         @keyframes bubble-breathe {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-2px) scale(1.01); }
+            0%, 100% { box-shadow: 0 8px 32px -8px rgba(0,0,0,0.12), 0 2px 8px -2px rgba(0,0,0,0.06); }
+            50% { box-shadow: 0 12px 40px -8px rgba(0,0,0,0.16), 0 4px 12px -2px rgba(0,0,0,0.08); }
+        }
+        .dark .agent-bubble {
+            animation: bubble-breathe-dark 4s ease-in-out infinite;
+        }
+        @keyframes bubble-breathe-dark {
+            0%, 100% { box-shadow: 0 8px 32px -8px rgba(0,0,0,0.4), 0 2px 8px -2px rgba(0,0,0,0.2); }
+            50% { box-shadow: 0 12px 40px -8px rgba(0,0,0,0.5), 0 4px 12px -2px rgba(0,0,0,0.25); }
         }
     </style>
 
     <script>
         import { agentConfig, getDialogueForPath } from '../../data/agent-dialogue';
 
-        const rootEl = document.getElementById('agent-root');
+        function getRoot() { return document.getElementById('agent-root'); }
+        function getBubble() { return document.getElementById('agent-bubble'); }
+        function getText() { return document.getElementById('agent-bubble-text'); }
+        function getNextBtn() { return document.getElementById('agent-next-btn') as HTMLButtonElement | null; }
+        function getRestartBtn() { return document.getElementById('agent-restart-btn') as HTMLButtonElement | null; }
+        function getChar() { return document.getElementById('agent-character'); }
+        function getMiniTrigger() { return document.getElementById('agent-mini-trigger'); }
+        function getCloseBtn() { return document.getElementById('agent-close-btn') as HTMLButtonElement | null; }
+        function getContentArea() { return document.getElementById('agent-content-area'); }
+
+        const rootEl = getRoot();
         if (!rootEl) {
             console.warn('[Agent] Root element not found, skipping');
             (() => {})();
         } else {
+            localStorage.removeItem('agent-collapsed');
+            localStorage.removeItem('agent-first-visit');
+
+            const hasCharacter = rootEl.dataset.hasCharacter === 'true';
             const provider = rootEl.dataset.provider as 'rive' | 'live2d';
             const riveSrc = rootEl.dataset.riveSrc || '';
             const live2dModelPath = rootEl.dataset.live2dModel || '';
@@ -108,9 +166,9 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                 currentLines: DialogueLine[];
                 currentIndex: number;
                 idleTimer: ReturnType<typeof setTimeout> | null;
+                typingTimer: ReturnType<typeof setTimeout> | null;
+                autoCollapseTimer: ReturnType<typeof setTimeout> | null;
                 riveInstance: unknown | null;
-                riveStateMachineName: string | null;
-                live2dWidget: unknown | null;
                 hasShownGreeting: boolean;
             }
 
@@ -120,32 +178,23 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                 currentLines: [],
                 currentIndex: 0,
                 idleTimer: null,
+                typingTimer: null,
+                autoCollapseTimer: null,
                 riveInstance: null,
-                riveStateMachineName: null,
-                live2dWidget: null,
                 hasShownGreeting: false,
             };
 
-            const bubbleEl = document.getElementById('agent-bubble')!;
-            const textEl = document.getElementById('agent-bubble-text')!;
-            const cursorEl = document.getElementById('agent-bubble-cursor')!;
-            const nextBtn = document.getElementById('agent-next-btn')! as HTMLButtonElement;
-            const charEl = document.getElementById('agent-character')!;
+            function syncDataset() {
+                const root = getRoot();
+                if (root) root.dataset.agentCollapsed = String(state.isCollapsed);
+            }
 
             function initAgent() {
-                const savedCollapsed = localStorage.getItem(agentConfig.collapsedKey);
-                if (savedCollapsed !== null) {
-                    state.isCollapsed = savedCollapsed === 'true';
-                }
+                state.isCollapsed = true;
+                syncDataset();
 
-                charEl.addEventListener('click', toggleAgent);
+                document.addEventListener('keydown', handleKeydown);
 
-                nextBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    showNextLine();
-                });
-
-                // 延迟加载 rive/live2d，优先保证主内容渲染
                 const loadCharacter = () => {
                     if (provider === 'rive' && riveSrc) {
                         initRive();
@@ -159,50 +208,147 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                     setTimeout(loadCharacter, 2000);
                 }
 
-                const isFirstVisit = !localStorage.getItem(agentConfig.firstVisitKey);
-                if (isFirstVisit) {
-                    localStorage.setItem(agentConfig.firstVisitKey, 'true');
-                    setTimeout(() => {
-                        expandAgent();
-                        showDialogueForCurrentRoute();
-                    }, 2500);
-                } else if (!state.isCollapsed) {
-                    expandAgent();
-                    showDialogueForCurrentRoute();
-                }
+                localStorage.setItem(agentConfig.firstVisitKey, 'true');
 
                 document.addEventListener('astro:page-load', () => {
-                    if (rootEl) {
-                        if (!state.isCollapsed) {
-                            showDialogueForCurrentRoute();
-                        }
+                    syncDataset();
+                    initSplashAware();
+                    if (!state.isCollapsed) {
+                        showDialogueForCurrentRoute();
                     }
                 });
 
                 initDraggable();
+                initSplashAware();
+            }
+
+            function handleKeydown(e: KeyboardEvent) {
+                const target = e.target as HTMLElement;
+                if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+                if (e.key === 'a' || e.key === 'A') {
+                    e.preventDefault();
+                    if (state.isCollapsed) {
+                        expandAgent();
+                        if (!state.hasShownGreeting) {
+                            showDialogueForCurrentRoute();
+                        }
+                    } else {
+                        collapseAgent();
+                    }
+                }
+            }
+
+            let _scrollHandler: (() => void) | null = null;
+
+            function initSplashAware() {
+                const root = getRoot();
+                if (!root) return;
+
+                if (_scrollHandler) {
+                    window.removeEventListener('scroll', _scrollHandler);
+                    _scrollHandler = null;
+                }
+
+                const splash = document.getElementById('hero-splash');
+                if (!splash) {
+                    root.classList.remove('agent-splash-hidden');
+                    if (state.isCollapsed) {
+                        expandAgent();
+                        showDialogueForCurrentRoute();
+                    }
+                    return;
+                }
+
+                const check = () => {
+                    const pastSplash = window.scrollY >= window.innerHeight * 0.5;
+                    if (pastSplash) {
+                        root.classList.remove('agent-splash-hidden');
+                        if (state.isCollapsed) {
+                            expandAgent();
+                            showDialogueForCurrentRoute();
+                        }
+                    } else {
+                        root.classList.add('agent-splash-hidden');
+                    }
+                };
+
+                check();
+                _scrollHandler = check;
+                window.addEventListener('scroll', check, { passive: true });
             }
 
             function expandAgent() {
+                const root = getRoot();
+                if (root) {
+                    const centerX = root.getBoundingClientRect().left + root.getBoundingClientRect().width / 2;
+                    if (centerX > window.innerWidth * 0.6) {
+                        root.dataset.agentAlign = 'right';
+                    } else {
+                        delete root.dataset.agentAlign;
+                    }
+                }
                 state.isCollapsed = false;
-                rootEl.dataset.agentCollapsed = 'false';
-                localStorage.setItem(agentConfig.collapsedKey, 'false');
+                syncDataset();
+                clearAutoCollapseTimer();
             }
 
             function collapseAgent() {
                 state.isCollapsed = true;
-                rootEl.dataset.agentCollapsed = 'true';
-                localStorage.setItem(agentConfig.collapsedKey, 'true');
+                syncDataset();
                 clearIdleTimer();
+                clearAutoCollapseTimer();
+                if (state.typingTimer) {
+                    clearTimeout(state.typingTimer);
+                    state.typingTimer = null;
+                }
+                setTimeout(() => snapToEdge(), 520);
             }
 
-            function toggleAgent() {
-                if (state.isCollapsed) {
-                    expandAgent();
-                    if (!state.hasShownGreeting) {
-                        showDialogueForCurrentRoute();
-                    }
+            function snapToEdge() {
+                const root = getRoot();
+                if (!root) return;
+                const bubble = getBubble();
+                if (bubble) bubble.style.display = 'none';
+                const rect = root.getBoundingClientRect();
+                if (bubble) bubble.style.display = '';
+
+                const centerX = rect.left + rect.width / 2;
+                const margin = 12;
+                const minBottomMargin = 48;
+
+                if (centerX > window.innerWidth * 0.6) {
+                    root.style.left = (window.innerWidth - rect.width - margin) + 'px';
+                    root.dataset.agentAlign = 'right';
                 } else {
-                    collapseAgent();
+                    root.style.left = margin + 'px';
+                    delete root.dataset.agentAlign;
+                }
+                root.style.right = 'auto';
+
+                const maxTop = window.innerHeight - rect.height - minBottomMargin;
+                if (rect.top > maxTop) {
+                    root.style.top = Math.max(0, maxTop) + 'px';
+                }
+                root.style.bottom = 'auto';
+            }
+
+            function skipTyping() {
+                if (!state.isTyping || state.typingTimer === null) return;
+                clearTimeout(state.typingTimer);
+                state.typingTimer = null;
+                state.isTyping = false;
+                const textEl = getText();
+                const nextBtn = getNextBtn();
+                const restartBtn = getRestartBtn();
+                const currentLine = state.currentLines[state.currentIndex];
+                if (textEl && currentLine) {
+                    textEl.textContent = currentLine.text;
+                }
+                if (nextBtn && state.currentIndex < state.currentLines.length - 1) {
+                    nextBtn.classList.remove('hidden');
+                } else if (restartBtn && state.currentIndex >= state.currentLines.length - 1) {
+                    restartBtn.classList.remove('hidden');
+                    scheduleAutoCollapse();
                 }
             }
 
@@ -212,6 +358,7 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                 state.currentLines = dialogue.lines;
                 state.currentIndex = 0;
                 state.hasShownGreeting = true;
+                clearAutoCollapseTimer();
                 showLine(state.currentLines[0]);
                 startIdleTimer(dialogue.idleLines || []);
             }
@@ -219,10 +366,17 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
             function showLine(line: DialogueLine) {
                 if (!line) return;
                 state.isTyping = true;
-                rootEl.dataset.agentSpeaking = 'true';
-                textEl.textContent = '';
-                cursorEl.classList.remove('hidden');
-                nextBtn.classList.add('hidden');
+                clearAutoCollapseTimer();
+                const textEl = getText();
+                if (textEl) textEl.textContent = '';
+                const nextBtn = getNextBtn();
+                const restartBtn = getRestartBtn();
+                if (nextBtn) nextBtn.classList.add('hidden');
+                if (restartBtn) restartBtn.classList.add('hidden');
+                if (state.typingTimer) {
+                    clearTimeout(state.typingTimer);
+                    state.typingTimer = null;
+                }
 
                 triggerCharacterReaction();
 
@@ -231,15 +385,19 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
 
                 const typeNext = () => {
                     if (i < chars.length) {
-                        textEl.textContent += chars[i];
+                        if (textEl) textEl.textContent += chars[i];
                         i++;
-                        setTimeout(typeNext, agentConfig.typeSpeed);
+                        state.typingTimer = setTimeout(typeNext, agentConfig.typeSpeed);
                     } else {
                         state.isTyping = false;
-                        rootEl.dataset.agentSpeaking = 'false';
-                        cursorEl.classList.add('hidden');
+                        state.typingTimer = null;
                         if (state.currentIndex < state.currentLines.length - 1) {
-                            nextBtn.classList.remove('hidden');
+                            const btn = getNextBtn();
+                            if (btn) btn.classList.remove('hidden');
+                        } else {
+                            const btn = getRestartBtn();
+                            if (btn) btn.classList.remove('hidden');
+                            scheduleAutoCollapse();
                         }
                     }
                 };
@@ -254,6 +412,13 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                 }
             }
 
+            function restartDialogue() {
+                const restartBtn = getRestartBtn();
+                if (restartBtn) restartBtn.classList.add('hidden');
+                state.currentIndex = 0;
+                showLine(state.currentLines[0]);
+            }
+
             function startIdleTimer(idleLines: DialogueLine[]) {
                 clearIdleTimer();
                 if (idleLines.length === 0) return;
@@ -263,6 +428,7 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                         startIdleTimer(idleLines);
                         return;
                     }
+                    clearAutoCollapseTimer();
                     const randomLine = idleLines[Math.floor(Math.random() * idleLines.length)];
                     showLine(randomLine);
                     startIdleTimer(idleLines);
@@ -273,6 +439,22 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                 if (state.idleTimer) {
                     clearTimeout(state.idleTimer);
                     state.idleTimer = null;
+                }
+            }
+
+            function clearAutoCollapseTimer() {
+                if (state.autoCollapseTimer) {
+                    clearTimeout(state.autoCollapseTimer);
+                    state.autoCollapseTimer = null;
+                }
+            }
+
+            function scheduleAutoCollapse() {
+                clearAutoCollapseTimer();
+                if (state.currentIndex >= state.currentLines.length - 1) {
+                    state.autoCollapseTimer = setTimeout(() => {
+                        collapseAgent();
+                    }, 5000);
                 }
             }
 
@@ -323,15 +505,10 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                         autoplay: true,
                         onLoad: () => {
                             const smNames = rive.stateMachineNames;
-                            console.log('[Agent] Rive state machines:', smNames);
                             if (smNames.length > 0) {
-                                state.riveStateMachineName = smNames[0];
                                 rive.play(smNames[0]);
                             }
                             rive.resizeDrawingSurfaceToCanvas();
-                        },
-                        onStateChange: (event: { data?: unknown }) => {
-                            console.log('[Agent] Rive state:', event.data);
                         },
                     });
 
@@ -350,8 +527,6 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
 
                 try {
                     const L2DWidget = await import('live2d-widget');
-                    state.live2dWidget = L2DWidget;
-
                     L2DWidget.init({
                         model: {
                             jsonPath: live2dModelPath,
@@ -384,21 +559,27 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
 
             function initDraggable() {
                 let isDragging = false;
+                let isClick = false;
+                let downTarget: HTMLElement | null = null;
                 let startX = 0, startY = 0;
                 let initialLeft = 0, initialTop = 0;
-                let hasMoved = false;
 
                 const onPointerDown = (e: PointerEvent) => {
+                    const target = e.target as HTMLElement;
+                    const root = getRoot();
+                    if (!root || !root.contains(target)) return;
+
                     isDragging = true;
-                    hasMoved = false;
+                    isClick = true;
+                    downTarget = target;
                     startX = e.clientX;
                     startY = e.clientY;
-                    const rect = rootEl.getBoundingClientRect();
+                    const rect = root.getBoundingClientRect();
                     initialLeft = rect.left;
                     initialTop = rect.top;
-                    rootEl.style.transition = 'none';
-                    rootEl.setPointerCapture(e.pointerId);
-                    rootEl.classList.add('agent-dragging');
+                    root.style.transition = 'none';
+                    root.setPointerCapture(e.pointerId);
+                    root.classList.add('agent-dragging');
                 };
 
                 const onPointerMove = (e: PointerEvent) => {
@@ -406,45 +587,84 @@ const live2dModelPath = agent?.live2d?.modelPath ?? '';
                     const dx = e.clientX - startX;
                     const dy = e.clientY - startY;
                     if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-                        hasMoved = true;
+                        isClick = false;
                     }
-                    let newLeft = initialLeft + dx;
-                    let newTop = initialTop + dy;
-                    const maxLeft = window.innerWidth - rootEl.offsetWidth;
-                    const maxTop = window.innerHeight - rootEl.offsetHeight;
-                    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-                    newTop = Math.max(0, Math.min(newTop, maxTop));
-                    rootEl.style.left = newLeft + 'px';
-                    rootEl.style.top = newTop + 'px';
-                    rootEl.style.right = 'auto';
-                    rootEl.style.bottom = 'auto';
+                    const root = getRoot();
+                    if (!root) return;
+                    root.style.left = (initialLeft + dx) + 'px';
+                    root.style.top = (initialTop + dy) + 'px';
+                    root.style.right = 'auto';
+                    root.style.bottom = 'auto';
                 };
 
                 const onPointerUp = (e: PointerEvent) => {
                     if (!isDragging) return;
                     isDragging = false;
-                    rootEl.style.transition = '';
-                    rootEl.classList.remove('agent-dragging');
-                    rootEl.releasePointerCapture(e.pointerId);
-
-                    const rect = rootEl.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const maxLeft = window.innerWidth - rect.width;
-                    const snapLeft = centerX < window.innerWidth / 2 ? 0 : maxLeft;
-                    rootEl.style.left = snapLeft + 'px';
-                    rootEl.style.top = rect.top + 'px';
-                    rootEl.style.right = 'auto';
-                    rootEl.style.bottom = 'auto';
-
-                    if (hasMoved) {
-                        e.preventDefault();
-                        e.stopPropagation();
+                    const root = getRoot();
+                    if (root) {
+                        root.style.transition = '';
+                        root.classList.remove('agent-dragging');
+                        root.releasePointerCapture(e.pointerId);
                     }
+
+                    if (isClick && downTarget) {
+                        handleTap(downTarget);
+                        e.preventDefault();
+                    } else if (!isClick) {
+                        snapToEdge();
+                    }
+
+                    downTarget = null;
                 };
 
-                rootEl.addEventListener('pointerdown', onPointerDown);
-                rootEl.addEventListener('pointermove', onPointerMove);
-                rootEl.addEventListener('pointerup', onPointerUp);
+                document.addEventListener('pointerdown', onPointerDown);
+                document.addEventListener('pointermove', onPointerMove);
+                document.addEventListener('pointerup', onPointerUp);
+            }
+
+            function handleTap(target: HTMLElement) {
+                if (target.closest('#agent-close-btn')) {
+                    collapseAgent();
+                    return;
+                }
+
+                if (target.closest('#agent-next-btn')) {
+                    showNextLine();
+                    return;
+                }
+
+                if (target.closest('#agent-restart-btn')) {
+                    restartDialogue();
+                    return;
+                }
+
+                if (target.closest('#agent-mini-trigger')) {
+                    expandAgent();
+                    if (!state.hasShownGreeting) {
+                        showDialogueForCurrentRoute();
+                    } else if (state.currentIndex >= state.currentLines.length - 1) {
+                        scheduleAutoCollapse();
+                    }
+                    return;
+                }
+
+                if (target.closest('#agent-character')) {
+                    if (state.isCollapsed) {
+                        expandAgent();
+                        if (!state.hasShownGreeting) {
+                            showDialogueForCurrentRoute();
+                        }
+                    } else {
+                        collapseAgent();
+                    }
+                    return;
+                }
+
+                if (target.closest('#agent-content-area')) {
+                    if (state.isTyping) {
+                        skipTyping();
+                    }
+                }
             }
 
             if (document.readyState === 'loading') {

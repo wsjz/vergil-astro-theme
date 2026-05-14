@@ -198,6 +198,7 @@ const siteConfig: SiteConfig = {
     agent: {
         enabled: true,
         provider: 'rive',
+        name: 'Miki',
         // rive: { src: '/model.riv' },
         // live2d: { modelPath: '/model.json' },
     },

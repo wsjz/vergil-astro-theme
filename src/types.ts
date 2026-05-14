@@ -154,6 +154,7 @@ export type AgentProvider = 'rive' | 'live2d';
 export type AgentConfig = {
     enabled?: boolean;
     provider: AgentProvider;
+    name?: string;
     rive?: {
         src: string;
         stateMachine?: string;
