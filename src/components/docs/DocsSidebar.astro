@@ -1,5 +1,5 @@
 ---
-import { BookOpen, Menu, X, ChevronsLeft, ChevronsRight } from '@lucide/astro';
+import { BookOpen, Menu, X, List } from '@lucide/astro';
 import { getDocTree, type DocTreeNode } from '../../utils/docs-utils';
 import DocsTreeNode from './DocsTreeNode.astro';
 
@@ -10,10 +10,6 @@ interface Props {
 
 const { docId, currentSlug = '' } = Astro.props;
 const tree = await getDocTree(docId);
-
-const metaEntry = tree.length > 0 ? undefined : undefined;
-// meta is loaded inside getDocTree but not exposed; we fetch it via getDocSets in page,
-// here we just render the tree. Title comes from parent page via slot or we can read collection.
 ---
 
 <!-- Mobile drawer toggle -->
@@ -27,19 +23,9 @@ const metaEntry = tree.length > 0 ? undefined : undefined;
     <X class="w-5 h-5 close-icon hidden" />
 </button>
 
-<!-- Desktop collapse toggle -->
-<button
-    id="docs-sidebar-desktop-toggle"
-    class="hidden md:flex fixed top-16 z-50 w-9 h-9 items-center justify-center bg-card/95 backdrop-blur-sm border border-light rounded-full shadow-md transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-main active:scale-95 group left-[calc(14rem+2%+12px-1.125rem)] xl:left-[calc(15rem+2%+16px-1.125rem)] 2xl:left-[calc(16rem+2%+16px-1.125rem)]"
-    aria-label="收起文档侧边栏"
->
-    <ChevronsLeft class="w-4 h-4 text-secondary group-hover:text-accent transition-colors duration-300 sidebar-collapse-icon" />
-    <ChevronsRight class="w-4 h-4 text-accent hidden sidebar-expand-icon" />
-</button>
-
 <aside
     id="docs-sidebar"
-    class="sidebar flex flex-col fixed left-0 lg:left-[2%] top-14 h-[calc(100vh-3.5rem)] w-64 lg:w-56 xl:w-60 2xl:w-64 bg-main overflow-y-auto z-40 transition-transform duration-300 translate-x-0"
+    class="sidebar flex flex-col fixed lg:sticky lg:self-start top-14 h-[calc(100vh-3.5rem)] w-64 lg:w-56 xl:w-60 2xl:w-64 bg-main overflow-y-auto z-40 transition-transform duration-300 translate-x-0"
 >
     <div class="flex-1 py-4 px-3">
         <slot name="title">
@@ -56,6 +42,15 @@ const metaEntry = tree.length > 0 ? undefined : undefined;
         )}
     </div>
 </aside>
+
+<!-- Desktop collapse toggle: fixed at same position always -->
+<button
+    id="docs-sidebar-desktop-toggle"
+    class="hidden lg:flex fixed left-3 top-[3.75rem] z-50 items-center text-muted hover:text-accent transition-colors duration-200 cursor-pointer"
+    aria-label="收起文档侧边栏"
+>
+    <List class="w-4 h-4" />
+</button>
 
 <!-- Overlay for mobile -->
 <div id="docs-sidebar-overlay" class="fixed inset-0 z-30 hidden opacity-0 transition-opacity duration-300 bg-black/20 backdrop-blur-sm"></div>
@@ -77,31 +72,23 @@ const metaEntry = tree.length > 0 ? undefined : undefined;
             isCollapsed = collapsed;
             const { sidebar, overlay, desktopToggle } = getElements();
             if (!sidebar) return;
-            const collapseIcon = desktopToggle?.querySelector('.sidebar-collapse-icon');
-            const expandIcon = desktopToggle?.querySelector('.sidebar-expand-icon');
             const isMobile = window.innerWidth < 768;
 
             if (collapsed) {
-                sidebar.classList.add('-translate-x-full');
+                sidebar.style.translate = '-100vw 0';
                 sidebar.classList.remove('translate-x-0');
-                collapseIcon?.classList.add('hidden');
-                expandIcon?.classList.remove('hidden');
                 desktopToggle?.setAttribute('aria-label', '展开文档侧边栏');
                 if (isMobile) {
                     overlay?.classList.add('hidden', 'opacity-0');
                 }
-                if (desktopToggle) desktopToggle.style.left = '1rem';
             } else {
-                sidebar.classList.remove('-translate-x-full');
+                sidebar.style.translate = '';
                 sidebar.classList.add('translate-x-0');
-                collapseIcon?.classList.remove('hidden');
-                expandIcon?.classList.add('hidden');
                 desktopToggle?.setAttribute('aria-label', '收起文档侧边栏');
                 if (isMobile) {
                     overlay?.classList.remove('hidden');
                     setTimeout(() => overlay?.classList.remove('opacity-0'), 10);
                 }
-                if (desktopToggle) desktopToggle.style.left = '';
             }
         }
 

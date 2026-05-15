@@ -295,15 +295,15 @@ const isArticle = head.pageType === 'article';
         )}
         <slot name="splash" />
 
-        <div id="main-stage" class={splashMode ? 'relative mt-[100vh] translate-y-0' : ''}>
+        <div id="main-stage" class={splashMode ? 'relative' : ''}>
             <TopNav articleTitle={articleTitle} commentsEnabled={commentsEnabled} sticky={splashMode} />
             <Search />
 
-            <div class="flex min-h-screen pt-16">
+            <div class="flex items-start justify-center gap-4 lg:gap-8 min-h-screen max-w-7xl mx-auto pt-16">
                 <DocsSidebar docId={docId} currentSlug={currentSlug}>
                     <slot name="title" slot="title" />
                 </DocsSidebar>
-                <div class="flex-1 lg:ml-[calc(14rem+2%+12px)] xl:ml-[calc(15rem+2%+16px)] xl:mr-[calc(12rem+2%+16px)] 2xl:mr-[calc(14rem+2%+16px)]">
+                <div class="w-full max-w-3xl flex-shrink-0">
                     <div class="flex flex-col min-h-screen px-4 md:px-8">
                         <div class="flex items-center justify-end gap-3 py-4">
                             {minimalEnabled && (
@@ -341,7 +341,7 @@ const isArticle = head.pageType === 'article';
                     </div>
                 </div>
 
-                <div class="right-sidebar-container hidden xl:block fixed right-[2%] top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-52 2xl:w-56 bg-main overflow-y-auto z-40">
+                <div class="right-sidebar-container hidden xl:block top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-52 2xl:w-56 bg-main overflow-y-auto z-40" style="position: sticky; align-self: flex-start;">
                     <slot name="right-sidebar">
                         <RightSidebar config={siteConfig.sidebar?.docRight} />
                     </slot>

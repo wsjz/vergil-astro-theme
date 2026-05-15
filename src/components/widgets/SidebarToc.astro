@@ -16,28 +16,47 @@ if (!headings || headings.length === 0) {
 const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
 ---
 
-<aside class="toc-sidebar h-full overflow-y-auto">
+<aside class="toc-sidebar h-full overflow-y-auto" data-toc-root>
     <div class="p-4">
         {tocHeadings.length > 0 && (
-            <div class="mb-6">
-                <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">文章目录</h3>
-                <nav class="border-l border-muted space-y-1">
-                    {tocHeadings.map((heading) => {
-                        const indentClass = heading.depth === 4 ? 'pl-7' : heading.depth === 3 ? 'pl-5' : 'pl-3';
-                        const colorClass = heading.depth === 2 ? 'text-secondary font-medium' : 'text-muted';
-                        return (
-                            <a
-                                href={`#${heading.slug}`}
-                                class={`toc-sidebar-link block text-xs transition-all duration-200 hover:text-accent -ml-px border-l-2 border-transparent py-0.5 ${indentClass} ${colorClass}`}
-                            >
-                                {heading.text}
-                            </a>
-                        );
-                    })}
-                </nav>
+            <div>
+                <button
+                    type="button"
+                    class="w-full flex items-center justify-between mb-3 group cursor-pointer"
+                    data-toc-toggle
+                    aria-expanded="true"
+                >
+                    <h3 class="text-xs font-medium text-muted uppercase tracking-wider">文章目录</h3>
+                    <span class="text-muted group-hover:text-accent transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-toc-icon>
+                            <line x1="8" y1="6" x2="21" y2="6" />
+                            <line x1="8" y1="12" x2="21" y2="12" />
+                            <line x1="8" y1="18" x2="21" y2="18" />
+                            <line x1="3" y1="6" x2="3.01" y2="6" />
+                            <line x1="3" y1="12" x2="3.01" y2="12" />
+                            <line x1="3" y1="18" x2="3.01" y2="18" />
+                        </svg>
+                    </span>
+                </button>
+                <div class="toc-nav-wrapper transition-all duration-300 ease-in-out overflow-hidden" data-toc-wrapper>
+                    <nav class="border-l border-muted space-y-1 pb-3" data-toc-nav>
+                        {tocHeadings.map((heading) => {
+                            const indentClass = heading.depth === 4 ? 'pl-7' : heading.depth === 3 ? 'pl-5' : 'pl-3';
+                            const colorClass = heading.depth === 2 ? 'text-secondary font-medium' : 'text-muted';
+                            return (
+                                <a
+                                    href={`#${heading.slug}`}
+                                    class={`toc-sidebar-link block text-xs transition-all duration-200 hover:text-accent -ml-px border-l-2 border-transparent py-0.5 ${indentClass} ${colorClass}`}
+                                >
+                                    {heading.text}
+                                </a>
+                            );
+                        })}
+                    </nav>
+                </div>
+                <div class="ml-3 border-b border-light/40"></div>
             </div>
         )}
-
     </div>
 </aside>
 
@@ -100,13 +119,53 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
         headings.forEach(heading => observer.observe(heading));
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initTocHighlight);
-    } else {
-        initTocHighlight();
+    function initTocToggle() {
+        document.querySelectorAll('[data-toc-toggle]').forEach(btn => {
+            if (btn.dataset.tocToggleInit) return;
+            btn.dataset.tocToggleInit = 'true';
+
+            const root = btn.closest('[data-toc-root]');
+            const wrapper = root?.querySelector('[data-toc-wrapper]');
+            if (!wrapper) return;
+
+            btn.addEventListener('click', () => {
+                const expanded = btn.getAttribute('aria-expanded') !== 'false';
+                btn.setAttribute('aria-expanded', String(!expanded));
+                if (expanded) {
+                    wrapper.style.maxHeight = wrapper.scrollHeight + 'px';
+                    wrapper.style.opacity = '1';
+                    // Force reflow
+                    wrapper.offsetHeight;
+                    wrapper.style.maxHeight = '0px';
+                    wrapper.style.opacity = '0';
+                } else {
+                    wrapper.style.maxHeight = wrapper.scrollHeight + 'px';
+                    wrapper.style.opacity = '1';
+                    wrapper.addEventListener('transitionend', function handler(e) {
+                        if (e.target === wrapper) {
+                            wrapper.style.maxHeight = '';
+                            wrapper.removeEventListener('transitionend', handler);
+                        }
+                    }, { once: true });
+                }
+            });
+        });
     }
 
-    document.addEventListener('astro:page-load', initTocHighlight);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            initTocHighlight();
+            initTocToggle();
+        });
+    } else {
+        initTocHighlight();
+        initTocToggle();
+    }
+
+    document.addEventListener('astro:page-load', () => {
+        initTocHighlight();
+        initTocToggle();
+    });
 </script>
 
 <style>

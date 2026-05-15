@@ -22,17 +22,6 @@ const isArticle = head.pageType === 'article';
 <html lang="en" class="wrap-break-words antialiased">
     <head>
         <BaseHead {...head} />
-        {splashMode && (
-            <style is:inline>
-                /* 首页 Splash CSS scroll-snap：在 splash 和主内容交界处自然吸附 */
-                html {
-                    scroll-snap-type: y proximity;
-                }
-                #main-stage {
-                    scroll-snap-align: start;
-                }
-            </style>
-        )}
         <script is:inline>
             (function() {
                 if (location.pathname !== '/') return;
@@ -297,13 +286,13 @@ const isArticle = head.pageType === 'article';
         )}
         <slot name="splash" />
 
-        <div id="main-stage" class={splashMode ? 'relative mt-[100vh] translate-y-0' : ''}>
+        <div id="main-stage" class={splashMode ? 'relative' : ''}>
             {showTopNav && <TopNav articleTitle={articleTitle} commentsEnabled={commentsEnabled} sticky={splashMode} />}
             <Search />
 
-            <div class={`flex min-h-screen ${showTopNav ? 'pt-16' : ''}`}>
-                {showSidebar && <LeftSidebar />}
-                <div class={`flex-1 ${showSidebar ? 'lg:ml-[calc(14rem+5%+4px)] xl:ml-[calc(15rem+5%+4px)]' : ''} ${showRightSidebar ? 'xl:mr-[calc(12rem+5%+4px)] 2xl:mr-[calc(14rem+5%+4px)]' : ''}`}>
+            <div class={`flex items-start justify-center gap-4 lg:gap-8 min-h-screen max-w-7xl mx-auto ${showTopNav ? 'pt-16' : ''}`}>
+                {showSidebar && <LeftSidebar splashMode={splashMode} />}
+                <div class="w-full max-w-3xl flex-shrink-0">
                     <div class="flex flex-col min-h-screen px-4 lg:px-6">
                         <div class="flex items-center justify-end gap-3 py-4">
                             {minimalEnabled && (
@@ -342,7 +331,7 @@ const isArticle = head.pageType === 'article';
                 </div>
 
                 {showRightSidebar && (
-                    <div class="right-sidebar-container hidden xl:block fixed right-[5%] top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-52 2xl:w-56 bg-main overflow-y-auto z-40">
+                    <div class="right-sidebar-container hidden xl:block top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-52 2xl:w-56 bg-main overflow-y-auto z-40" style="position: sticky; align-self: flex-start;">
                         <slot name="right-sidebar">
                             <RightSidebar config={rightSidebarConfig} />
                         </slot>

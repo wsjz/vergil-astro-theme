@@ -5,6 +5,7 @@ import { getDocSets, getFirstDocSlug, getAdjacentDocs } from '../../../utils/doc
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import DocsNav from '../../../components/docs/DocsNav.astro';
 import FloatingToc from '../../../components/widgets/FloatingToc.astro';
+import SidebarToc from '../../../components/widgets/SidebarToc.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
 import HeroSplash from '../../../components/content/HeroSplash.astro';
 
@@ -103,6 +104,8 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
             <a href="/docs/" class="mt-4 text-accent hover:underline">返回文档列表</a>
         </div>
     )}
+
+    <SidebarToc headings={headings} slot="right-sidebar" />
 
     <DocsNav docId={docId} prev={prev} next={next} />
 

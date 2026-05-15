@@ -69,12 +69,11 @@ const navItems = buttonText ? [] : (siteConfig.splash?.nav || []);
 const hasActions = !!buttonText || navItems.length > 0;
 ---
 
-<!-- Splash Overlay -->
+<!-- Splash -->
 <div
     id="hero-splash"
-    class={`fixed inset-0 z-[100] flex flex-col items-center justify-center ${resolvedFallbackBg}`}
+    class={`relative min-h-[100dvh] flex flex-col items-center justify-center ${resolvedFallbackBg}`}
     style={cssVars}
-    data-snap-scroll={snapScroll ? 'true' : undefined}
 >
     {images.map((url, i) => (
         <div
@@ -291,72 +290,19 @@ const hasActions = !!buttonText || navItems.length > 0;
 
         const splash = document.getElementById('hero-splash');
         const arrow = document.getElementById('splash-arrow');
-        const topNav = document.getElementById('top-nav-header');
-        const overlay = document.getElementById('splash-overlay');
 
         if (!splash || !arrow) return;
 
-        const viewportHeight = window.innerHeight;
-        const snapScroll = splash.dataset.snapScroll === 'true';
-        let ticking = false;
-        let isSnapping = false;
-
-        function updateOnScroll() {
-            const scrollY = window.scrollY;
-            splash!.style.transform = `translateY(${-scrollY}px)`;
-
-            if (overlay) {
-                const opacity = Math.max(0, 1 - scrollY / (viewportHeight * 0.8));
-                overlay.style.opacity = String(opacity);
-            }
-
-            if (topNav) {
-                const navOpacity = Math.min(1, Math.max(0, (scrollY - viewportHeight * 0.3) / (viewportHeight * 0.5)));
-                topNav.style.opacity = String(navOpacity);
-            }
-
-            if (snapScroll) {
-                if (scrollY >= viewportHeight) {
-                    splash!.style.pointerEvents = 'none';
-                } else {
-                    splash!.style.pointerEvents = '';
-                }
-            }
-        }
+        const splashHeight = splash.offsetHeight;
 
         function scrollToContent() {
-            if (snapScroll) {
-                snapTo(viewportHeight);
-            } else {
-                window.scrollTo({ top: viewportHeight, behavior: 'smooth' });
-            }
-        }
-
-        function snapTo(target: number) {
-            if (isSnapping) return;
-            isSnapping = true;
-            window.scrollTo({ top: target, behavior: 'smooth' });
-            setTimeout(() => { isSnapping = false; }, 800);
+            window.scrollTo({ top: splashHeight, behavior: 'smooth' });
         }
 
         window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-        splash.style.transform = 'translateY(0)';
-        if (overlay) overlay.style.opacity = '1';
-        if (topNav) topNav.style.opacity = '0';
-        updateOnScroll();
 
         // Start typewriter effect on description
         runTypewriter();
-
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    updateOnScroll();
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        }, { passive: true, signal });
 
         arrow.addEventListener('click', scrollToContent, { signal });
 
@@ -374,46 +320,10 @@ const hasActions = !!buttonText || navItems.length > 0;
             scrollToContent();
         }, { signal });
 
-        if (snapScroll) {
-            // Snap scroll: Enter/Space to enter, wheel/touch snap
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    scrollToContent();
-                }
-            }, { signal });
-
-            window.addEventListener('wheel', (e) => {
-                if (window.scrollY < viewportHeight && !isSnapping) {
-                    if (e.deltaY > 5) {
-                        e.preventDefault();
-                        snapTo(viewportHeight);
-                    } else if (e.deltaY < -5 && window.scrollY > 0) {
-                        e.preventDefault();
-                        snapTo(0);
-                    }
-                }
-            }, { passive: false, signal });
-
-            let touchStartY = 0;
-            window.addEventListener('touchstart', (e) => {
-                touchStartY = e.touches[0].clientY;
-            }, { passive: true, signal });
-
-            window.addEventListener('touchend', (e) => {
-                if (window.scrollY < viewportHeight) {
-                    const deltaY = touchStartY - e.changedTouches[0].clientY;
-                    if (deltaY > 30) snapTo(viewportHeight);
-                    else if (deltaY < -30) snapTo(0);
-                    else scrollToContent();
-                }
-            }, { passive: true, signal });
-        } else {
-            // Normal scroll: Escape to scroll down
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') scrollToContent();
-            }, { signal });
-        }
+        // Escape to scroll down
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') scrollToContent();
+        }, { signal });
     }
 
     document.addEventListener('astro:page-load', () => {
@@ -432,10 +342,6 @@ const hasActions = !!buttonText || navItems.length > 0;
     });
 
     document.addEventListener('astro:before-swap', () => {
-        const splash = document.getElementById('hero-splash');
-        const topNav = document.getElementById('top-nav-header');
-        if (splash) splash.style.transform = '';
-        if (topNav) topNav.style.opacity = '';
         _typewriterActive = false;
         if (_typewriterTimer) {
             clearTimeout(_typewriterTimer);

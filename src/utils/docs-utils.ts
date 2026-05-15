@@ -122,6 +122,16 @@ function flattenTree(nodes: DocTreeNode[], out: DocArticleNode[]) {
 function findFirstArticle(nodes: DocTreeNode[]): DocArticleNode | undefined {
     for (const node of nodes) {
         if (node.type === 'article') return node;
+        if (node.type === 'group' && node.slug) {
+            // Group has an index.md page — treat as the first article
+            return {
+                type: 'article',
+                title: node.title,
+                slug: node.slug,
+                order: node.order,
+                entry: null as any,
+            };
+        }
         const found = findFirstArticle(node.children);
         if (found) return found;
     }
