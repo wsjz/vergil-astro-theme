@@ -38,7 +38,7 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
 
         <div
             id="floating-toc-panel"
-            class="fixed right-4 bottom-36 z-40 xl:hidden w-72 max-h-[60vh] bg-card border border-light rounded-2xl shadow-2xl opacity-0 invisible translate-y-4 transition-all duration-300 overflow-hidden"
+            class="fixed right-4 bottom-36 z-[60] xl:hidden w-72 max-h-[60vh] bg-card border border-light rounded-2xl shadow-2xl opacity-0 invisible translate-y-4 transition-all duration-300 overflow-hidden"
             aria-hidden="true"
         >
             <div class="flex items-center justify-between px-4 py-3 border-b border-light">
@@ -77,7 +77,7 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
 
         <div
             id="floating-toc-backdrop"
-            class="fixed inset-0 z-30 xl:hidden bg-black/20 backdrop-blur-sm opacity-0 invisible transition-opacity duration-300"
+            class="fixed inset-0 z-50 xl:hidden bg-black/20 backdrop-blur-sm opacity-0 invisible transition-opacity duration-300"
             aria-hidden="true"
         />
     </>

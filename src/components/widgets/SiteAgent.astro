@@ -170,6 +170,7 @@ const hasCharacter = hasModel;
                 autoCollapseTimer: ReturnType<typeof setTimeout> | null;
                 riveInstance: unknown | null;
                 hasShownGreeting: boolean;
+                manuallyDismissed: boolean;
             }
 
             const state: AgentState = {
@@ -182,6 +183,7 @@ const hasCharacter = hasModel;
                 autoCollapseTimer: null,
                 riveInstance: null,
                 hasShownGreeting: false,
+                manuallyDismissed: false,
             };
 
             function syncDataset() {
@@ -213,6 +215,7 @@ const hasCharacter = hasModel;
                 document.addEventListener('astro:page-load', () => {
                     syncDataset();
                     initSplashAware();
+                    state.manuallyDismissed = false;
                     if (!state.isCollapsed) {
                         showDialogueForCurrentRoute();
                     }
@@ -263,7 +266,7 @@ const hasCharacter = hasModel;
                     const pastSplash = window.scrollY >= window.innerHeight * 0.5;
                     if (pastSplash) {
                         root.classList.remove('agent-splash-hidden');
-                        if (state.isCollapsed) {
+                        if (state.isCollapsed && !state.manuallyDismissed) {
                             expandAgent();
                             showDialogueForCurrentRoute();
                         }
@@ -624,6 +627,7 @@ const hasCharacter = hasModel;
 
             function handleTap(target: HTMLElement) {
                 if (target.closest('#agent-close-btn')) {
+                    state.manuallyDismissed = true;
                     collapseAgent();
                     return;
                 }
@@ -650,6 +654,7 @@ const hasCharacter = hasModel;
 
                 if (target.closest('#agent-character')) {
                     if (state.isCollapsed) {
+                        state.manuallyDismissed = false;
                         expandAgent();
                         if (!state.hasShownGreeting) {
                             showDialogueForCurrentRoute();
