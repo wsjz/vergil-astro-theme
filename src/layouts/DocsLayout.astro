@@ -3,7 +3,7 @@ import { ViewTransitions } from 'astro:transitions';
 import BaseHead, { type Props as HeadProps } from '../components/base/BaseHead.astro';
 import Footer from '../components/base/Footer.astro';
 import DocsSidebar from '../components/docs/DocsSidebar.astro';
-import ThemeToggle from '../components/ui/ThemeToggle.astro';
+import FloatingToolbar from '../components/base/FloatingToolbar.astro';
 import TopNav from '../components/base/HeaderNav.astro';
 import Search from '../components/widgets/Search.astro';
 import RightSidebar from '../components/base/RightSidebar.astro';
@@ -19,7 +19,6 @@ export type Props = HeadProps & {
 };
 
 const { docId, currentSlug = '', articleTitle = '', commentsEnabled = false, splashMode = false, ...head } = Astro.props;
-const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
 const isArticle = head.pageType === 'article';
 ---
 
@@ -299,42 +298,14 @@ const isArticle = head.pageType === 'article';
             <TopNav articleTitle={articleTitle} commentsEnabled={commentsEnabled} sticky={splashMode} />
             <Search />
 
-            <div class="flex items-start justify-center gap-4 lg:gap-8 min-h-screen max-w-7xl mx-auto pt-16">
+            <div class={`flex items-start justify-center gap-4 lg:gap-8 min-h-screen max-w-7xl mx-auto ${splashMode ? 'pt-4' : 'pt-12'}`}>
                 <DocsSidebar docId={docId} currentSlug={currentSlug}>
                     <slot name="title" slot="title" />
                 </DocsSidebar>
                 <div class="w-full max-w-3xl flex-shrink-0">
                     <div class="flex flex-col min-h-screen px-4 md:px-8">
-                        <div class="flex items-center justify-end gap-3 py-4">
-                            {minimalEnabled && (
-                                <a
-                                    href="/views/minimal/"
-                                    id="minimal-entry-btn"
-                                    class="text-xs text-secondary hover:text-accent transition-colors flex items-center gap-1"
-                                    title="进入沉浸模式"
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
-                                    <span>沉浸</span>
-                                </a>
-                            )}
-                            <ThemeToggle />
-                        </div>
-                        {minimalEnabled && (
-                            <script is:inline>
-                                (function(){
-                                    var btn = document.getElementById('minimal-entry-btn');
-                                    if(!btn) return;
-                                    btn.addEventListener('click', function(e){
-                                        var path = location.pathname;
-                                        if(path.startsWith('/blog/') || path.startsWith('/docs/')){
-                                            e.preventDefault();
-                                            location.href = '/views/minimal' + path;
-                                        }
-                                    });
-                                })();
-                            </script>
-                        )}
-                        <main class="mx-auto w-full max-w-3xl grow">
+                        <FloatingToolbar sidebarToggleEvent="toggle-docs-sidebar" />
+                        <main class="mx-auto w-full max-w-3xl grow pt-2">
                             <slot />
                         </main>
                         <Footer />

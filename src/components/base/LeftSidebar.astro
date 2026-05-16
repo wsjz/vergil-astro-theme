@@ -1,15 +1,10 @@
 ---
-import { Home, Folder, BookOpen, Tags, Image, Clock, Sparkles, MapPin, Archive, Users, Rss, Github, Search as SearchIcon, Flag, MessageCircle, Eye, Info, Award, List, Menu, X, LayoutGrid } from '@lucide/astro';
+import { Home, Folder, BookOpen, Tags, Image, Clock, Sparkles, MapPin, Archive, Users, Rss, Github, Search as SearchIcon, Flag, MessageCircle, Eye, Info, Award, LayoutGrid } from '@lucide/astro';
 import { getCollection } from 'astro:content';
 import siteConfig from '../../data/site-config';
 import CustomImage from '../ui/CustomImage.astro';
 import SidebarRecentPosts from '../widgets/SidebarRecentPosts.astro';
 
-interface Props {
-    splashMode?: boolean;
-}
-
-const { splashMode = false } = Astro.props;
 const currentPath = Astro.url.pathname;
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -103,8 +98,8 @@ function isActive(href: string): boolean {
 }
 ---
 
-<aside id="main-sidebar" class="sidebar flex flex-col fixed lg:sticky top-14 h-[calc(100vh-3.5rem)] w-64 lg:w-56 xl:w-60 2xl:w-64 bg-main overflow-y-auto z-40 transition-transform duration-300 translate-x-0" style="align-self: flex-start;">
-  <div class="flex-1 p-3 pt-10">
+<aside id="main-sidebar" class="sidebar flex flex-col fixed lg:sticky lg:self-start left-0 lg:left-auto top-14 h-[calc(100vh-3.5rem)] w-64 lg:w-56 xl:w-60 2xl:w-64 bg-main overflow-y-auto z-40 transition-transform duration-300">
+  <div class="flex-1 p-3 pt-4 lg:pt-10">
     <!-- Profile Card -->
     <div class="bg-card rounded-xl p-4 mb-3 text-center">
       <a href="/" class="inline-block mb-3 group" transition:name="brand">
@@ -224,55 +219,58 @@ function isActive(href: string): boolean {
       </div>
     </div>
     )}
+  </div>
 </aside>
-
-<!-- Desktop collapse toggle: fixed at same position always -->
-<button
-  id="sidebar-toggle"
-  class="hidden lg:flex fixed left-3 top-[4.5rem] z-50 items-center text-muted hover:text-accent transition-colors duration-200 cursor-pointer"
-  aria-label="收起侧边栏"
->
-  <List class="w-4 h-4" />
-</button>
 
 <!-- Overlay -->
 <div id="sidebar-overlay" class="fixed inset-0 z-30 hidden opacity-0 transition-opacity duration-300 bg-black/20 backdrop-blur-sm"></div>
 
 <script is:inline>
   (function() {
-    let wasMobile = window.innerWidth < 1024;
-    let isCollapsed = false;
+    var wasMobile = window.innerWidth < 1024;
+    var isCollapsed = wasMobile;
 
-    function getElements() {
-      return {
-        sidebar: document.getElementById('main-sidebar'),
-        toggle: document.getElementById('sidebar-toggle'),
-        overlay: document.getElementById('sidebar-overlay'),
-      };
+    function getSidebar() {
+      return document.getElementById('main-sidebar');
+    }
+
+    function applyTransform(collapsed, skipTransition) {
+      var sb = getSidebar();
+      if (!sb) return;
+      if (skipTransition) {
+        sb.style.transition = 'none';
+      }
+      sb.style.transform = collapsed ? 'translateX(-100vw)' : '';
+      if (skipTransition) {
+        void sb.offsetWidth;
+        sb.style.transition = '';
+      }
     }
 
     function setCollapsed(collapsed) {
       isCollapsed = collapsed;
-      const { sidebar, toggle, overlay } = getElements();
-      if (!sidebar || !toggle) return;
-      const isMobile = window.innerWidth < 1024;
+      var sb = getSidebar();
+      var overlay = document.getElementById('sidebar-overlay');
+      var desktopToggle = document.getElementById('sidebar-desktop-toggle');
+      var floatingTocBtn = document.getElementById('floating-toc-btn');
+      var isMobile = window.innerWidth < 1024;
 
       if (collapsed) {
-        sidebar.style.translate = '-100vw 0';
-        sidebar.classList.remove('translate-x-0');
-        sidebar.classList.add('border-transparent');
-        sidebar.classList.remove('border-light');
-        toggle.setAttribute('aria-label', '展开侧边栏');
+        sb && (sb.style.transform = 'translateX(-100vw)');
+        desktopToggle?.setAttribute('aria-label', '展开侧边栏');
         overlay?.classList.add('hidden', 'opacity-0');
+        floatingTocBtn?.classList.remove('hidden');
+        // Unlock scroll
+        document.documentElement.classList.remove('sidebar-locked');
       } else {
-        sidebar.style.translate = '';
-        sidebar.classList.add('translate-x-0');
-        sidebar.classList.remove('border-transparent');
-        sidebar.classList.add('border-light');
-        toggle.setAttribute('aria-label', '收起侧边栏');
+        sb && (sb.style.transform = '');
+        desktopToggle?.setAttribute('aria-label', '收起侧边栏');
         if (isMobile) {
           overlay?.classList.remove('hidden');
-          setTimeout(() => overlay?.classList.remove('opacity-0'), 10);
+          setTimeout(function() { overlay?.classList.remove('opacity-0'); }, 10);
+          floatingTocBtn?.classList.add('hidden');
+          // Lock scroll via CSS class on html element
+          document.documentElement.classList.add('sidebar-locked');
         }
       }
     }
@@ -281,26 +279,36 @@ function isActive(href: string): boolean {
       setCollapsed(!isCollapsed);
     }
 
-    function initSidebar() {
-      const { toggle, overlay } = getElements();
-      toggle?.addEventListener('click', toggleSidebar);
-      overlay?.addEventListener('click', () => setCollapsed(true));
+    function onOverlayClick() {
+      setCollapsed(true);
     }
+
+    function initSidebar() {
+      var overlay = document.getElementById('sidebar-overlay');
+      overlay?.removeEventListener('click', onOverlayClick);
+      overlay?.addEventListener('click', onOverlayClick);
+      document.removeEventListener('toggle-left-sidebar', toggleSidebar);
+      document.addEventListener('toggle-left-sidebar', toggleSidebar);
+    }
+
+    applyTransform(isCollapsed, true);
 
     if (!window.__sidebarGlobalListeners) {
       window.__sidebarGlobalListeners = true;
 
-      window.addEventListener('resize', () => {
-        const isMobile = window.innerWidth < 1024;
+      window.addEventListener('resize', function() {
+        var isMobile = window.innerWidth < 1024;
         if (isMobile && !wasMobile) {
-          setCollapsed(true);
+          applyTransform(true, true);
+          isCollapsed = true;
         } else if (!isMobile && wasMobile) {
-          setCollapsed(false);
+          applyTransform(false, true);
+          isCollapsed = false;
         }
         wasMobile = isMobile;
       });
 
-      document.addEventListener('astro:before-preparation', () => {
+      document.addEventListener('astro:before-preparation', function() {
         if (window.innerWidth < 1024 && !isCollapsed) {
           setCollapsed(true);
         }
@@ -308,18 +316,26 @@ function isActive(href: string): boolean {
     }
 
     initSidebar();
-    document.addEventListener('astro:page-load', initSidebar);
-
-    if (wasMobile) {
-      setCollapsed(true);
-    }
+    document.addEventListener('astro:page-load', function() {
+      applyTransform(isCollapsed, true);
+      initSidebar();
+    });
   })();
 </script>
 
 <style>
+  :global(html.sidebar-locked) {
+    overflow: hidden !important;
+  }
+  :global(html.sidebar-locked body) {
+    overflow: hidden !important;
+  }
+
   .sidebar {
     scrollbar-width: thin;
     scrollbar-color: var(--border-light) transparent;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .sidebar::-webkit-scrollbar {

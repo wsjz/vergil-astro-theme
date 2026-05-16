@@ -4,7 +4,7 @@ import BaseHead, { type Props as HeadProps } from '../components/base/BaseHead.a
 import Footer from '../components/base/Footer.astro';
 import LeftSidebar from '../components/base/LeftSidebar.astro';
 import RightSidebar from '../components/base/RightSidebar.astro';
-import ThemeToggle from '../components/ui/ThemeToggle.astro';
+import FloatingToolbar from '../components/base/FloatingToolbar.astro';
 import TopNav from '../components/base/HeaderNav.astro';
 import Search from '../components/widgets/Search.astro';
 import SiteAgent from '../components/widgets/SiteAgent.astro';
@@ -289,14 +289,12 @@ const isArticle = head.pageType === 'article';
             {showTopNav && <TopNav articleTitle={articleTitle} commentsEnabled={commentsEnabled} sticky={splashMode} />}
             <Search />
 
-            <div class={`flex items-start justify-center gap-4 lg:gap-8 min-h-screen max-w-7xl mx-auto ${showTopNav ? 'pt-16' : ''}`}>
+            <div class={`flex items-start justify-center gap-4 lg:gap-8 min-h-screen max-w-7xl mx-auto ${showTopNav ? 'pt-12' : ''}`}>
                 {showSidebar && <LeftSidebar />}
                 <div class="w-full max-w-3xl flex-shrink-0">
                     <div class="flex flex-col min-h-screen px-4 lg:px-6">
-                        <div class="flex items-center justify-end gap-3 py-4">
-                            <ThemeToggle />
-                        </div>
-                        <main class="mx-auto w-full max-w-3xl grow">
+                        <FloatingToolbar showSidebar={showSidebar} showThemeToggle={true} />
+                        <main class="mx-auto w-full max-w-3xl grow pt-2">
                             <slot />
                         </main>
                         <Footer />

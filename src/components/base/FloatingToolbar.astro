@@ -1,0 +1,129 @@
+---
+import ThemeToggle from '../ui/ThemeToggle.astro';
+import siteConfig from '../../data/site-config';
+
+interface Props {
+    showSidebar?: boolean;
+    showThemeToggle?: boolean;
+    sidebarToggleEvent?: string;
+}
+
+const { showSidebar = true, showThemeToggle = true, sidebarToggleEvent = 'toggle-left-sidebar' } = Astro.props;
+const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
+---
+
+<div class="floating-toolbar flex items-center gap-3 py-3 px-4 lg:px-6 -mx-4 lg:-mx-6 sticky top-14 z-30 bg-main/80 backdrop-blur-md transition-all duration-200" id="floating-toolbar">
+    {showSidebar && (
+        <button
+            id={`sidebar-desktop-toggle-${sidebarToggleEvent}`}
+            class="flex items-center text-muted hover:text-accent transition-colors duration-200 cursor-pointer shrink-0"
+            aria-label="收起侧边栏"
+            title="收起侧边栏"
+            data-event={sidebarToggleEvent}
+        >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"/>
+                <line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/>
+                <line x1="3" y1="12" x2="3.01" y2="12"/>
+                <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+        </button>
+    )}
+    <div class="flex-1"></div>
+    <div class="flex items-center gap-2">
+        {minimalEnabled && (
+            <a
+                href="/views/minimal/"
+                id="minimal-entry-btn"
+                class="text-xs text-secondary hover:text-accent transition-colors flex items-center gap-1 px-2 py-1 rounded-md hover:bg-card"
+                title="进入沉浸模式"
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>
+                    <path d="M8 7h6"/>
+                    <path d="M8 11h8"/>
+                </svg>
+                <span>沉浸</span>
+            </a>
+        )}
+        {showThemeToggle && <ThemeToggle />}
+    </div>
+</div>
+
+{minimalEnabled && (
+    <script is:inline>
+        (function(){
+            var btn = document.getElementById('minimal-entry-btn');
+            if(!btn) return;
+            btn.addEventListener('click', function(e){
+                var path = location.pathname;
+                if(path.startsWith('/blog/') || path.startsWith('/docs/')){
+                    e.preventDefault();
+                    location.href = '/views/minimal' + path;
+                }
+            });
+        })();
+    </script>
+)}
+
+<script is:inline>
+    (function(){
+        function initFloatingToolbar(){
+            document.querySelectorAll('[data-event]').forEach(function(btn){
+                if(btn.dataset.initialized) return;
+                btn.dataset.initialized = 'true';
+                var eventName = btn.getAttribute('data-event');
+                btn.addEventListener('click', function(){
+                    document.dispatchEvent(new CustomEvent(eventName));
+                });
+            });
+        }
+        if(document.readyState === 'loading'){
+            document.addEventListener('DOMContentLoaded', initFloatingToolbar);
+        } else {
+            initFloatingToolbar();
+        }
+        document.addEventListener('astro:page-load', initFloatingToolbar);
+    })();
+</script>
+
+<style>
+    .floating-toolbar {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    .floating-toolbar.is-scrolled {
+        box-shadow: none !important;
+    }
+</style>
+
+<script is:inline>
+    (function() {
+        function initToolbarScroll() {
+            var toolbar = document.getElementById('floating-toolbar');
+            if (!toolbar) return;
+
+            function update() {
+                if (window.scrollY > 10) {
+                    toolbar.classList.add('is-scrolled');
+                } else {
+                    toolbar.classList.remove('is-scrolled');
+                }
+            }
+
+            window.removeEventListener('scroll', update);
+            window.addEventListener('scroll', update, { passive: true });
+            update();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initToolbarScroll);
+        } else {
+            initToolbarScroll();
+        }
+        document.addEventListener('astro:page-load', initToolbarScroll);
+    })();
+</script>
