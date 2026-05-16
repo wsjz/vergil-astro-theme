@@ -324,6 +324,22 @@ const hasActions = !!buttonText || navItems.length > 0;
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') scrollToContent();
         }, { signal });
+
+        // Scroll past 1/4 of splash → same as clicking the arrow; below 1/4 → snap back to top
+        let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+        window.addEventListener('scroll', () => {
+            if (scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const y = window.scrollY;
+                if (y > 0 && y < splashHeight) {
+                    if (y > splashHeight * 0.25) {
+                        scrollToContent();
+                    } else {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }
+            }, 50);
+        }, { signal, passive: true });
     }
 
     document.addEventListener('astro:page-load', () => {
