@@ -1,5 +1,5 @@
 ---
-import { ChevronRight, RotateCcw } from '@lucide/astro';
+import { ChevronRight } from '@lucide/astro';
 import siteConfig from '../../data/site-config';
 
 const agent = siteConfig.agent;
@@ -38,8 +38,8 @@ const hasCharacter = hasModel;
                 <button id="agent-next-btn" class="text-xs text-accent hover:text-accent-hover transition-all duration-200 hidden flex items-center gap-0.5 px-2 py-1 rounded-lg hover:bg-accent/5 cursor-pointer">
                     继续 <ChevronRight class="w-3 h-3" />
                 </button>
-                <button id="agent-restart-btn" class="text-muted hover:text-main transition-all duration-200 hidden flex items-center justify-center w-7 h-7 rounded-lg hover:bg-hover cursor-pointer" title="回到起点">
-                    <RotateCcw class="w-3.5 h-3.5" />
+                <button id="agent-restart-btn" class="text-xs text-secondary hover:text-main transition-all duration-200 hidden items-center px-2 py-1 rounded-lg hover:bg-hover cursor-pointer" title="关闭">
+                    关闭
                 </button>
             </div>
         </div>
@@ -638,7 +638,8 @@ const hasCharacter = hasModel;
                 }
 
                 if (target.closest('#agent-restart-btn')) {
-                    restartDialogue();
+                    state.manuallyDismissed = true;
+                    collapseAgent();
                     return;
                 }
 

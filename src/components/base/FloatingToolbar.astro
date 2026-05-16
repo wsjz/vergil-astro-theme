@@ -6,13 +6,14 @@ interface Props {
     showSidebar?: boolean;
     showThemeToggle?: boolean;
     sidebarToggleEvent?: string;
+    class?: string;
 }
 
-const { showSidebar = true, showThemeToggle = true, sidebarToggleEvent = 'toggle-left-sidebar' } = Astro.props;
+const { showSidebar = true, showThemeToggle = true, sidebarToggleEvent = 'toggle-left-sidebar', class: className = '' } = Astro.props;
 const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
 ---
 
-<div class="floating-toolbar flex items-center gap-3 py-3 px-4 lg:px-6 -mx-4 lg:-mx-6 sticky top-14 z-30 bg-main/80 backdrop-blur-md transition-all duration-200" id="floating-toolbar">
+<div class={`floating-toolbar flex items-center justify-between gap-3 py-3 px-4 lg:px-6 -mx-4 lg:-mx-6 sticky top-14 z-30 bg-main/80 backdrop-blur-md transition-all duration-200 ${className}`} id="floating-toolbar">
     {showSidebar && (
         <button
             id={`sidebar-desktop-toggle-${sidebarToggleEvent}`}
@@ -31,7 +32,7 @@ const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
             </svg>
         </button>
     )}
-    <div class="flex-1"></div>
+
     <div class="flex items-center gap-2">
         {minimalEnabled && (
             <a

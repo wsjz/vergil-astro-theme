@@ -293,7 +293,7 @@ const isArticle = head.pageType === 'article';
                 {showSidebar && <LeftSidebar />}
                 <div class="w-full max-w-3xl flex-shrink-0">
                     <div class="flex flex-col min-h-screen px-4 lg:px-6">
-                        <FloatingToolbar showSidebar={showSidebar} showThemeToggle={true} />
+                        {showTopNav && <FloatingToolbar showSidebar={showSidebar} showThemeToggle={true} />}
                         <main class="mx-auto w-full max-w-3xl grow pt-2">
                             <slot />
                         </main>
