@@ -235,7 +235,25 @@ export function processBlockDirective(node, options = {}) {
             visit({ type: 'root', children: node.children }, 'text', (t) => { text += t.value; });
             text = text.trim();
             const defaultIcon = getIconSvg('bxs:quote-left', 28);
-            const html = `<div class="md-directive md-directive-quot">${icon ? `<span class="md-quot-icon">${icon}</span>` : `<span class="md-quot-icon-default">${defaultIcon}</span>`}<p class="md-quot-text">${text}</p></div>`;
+            let iconHtml = '';
+            if (icon) {
+                if (/^https?:\/\//i.test(icon)) {
+                    iconHtml = `<img class="md-quot-icon" src="${icon}" alt="" style="height:28px;width:auto;" />`;
+                } else {
+                    const iconifyMatch = icon.match(/^([a-z0-9-]+):([a-z0-9-]+)$/i);
+                    if (iconifyMatch) {
+                        iconHtml = `<span class="md-quot-icon">${getIconSvg(icon, '1.75rem')}</span>`;
+                    } else {
+                        const svg = getIconSvg(`lucide:${icon}`, '1.75rem');
+                        iconHtml = svg
+                            ? `<span class="md-quot-icon">${svg}</span>`
+                            : `<span class="md-quot-icon">${icon}</span>`;
+                    }
+                }
+            } else {
+                iconHtml = `<span class="md-quot-icon-default">${defaultIcon}</span>`;
+            }
+            const html = `<div class="md-directive md-directive-quot">${iconHtml}<p class="md-quot-text">${text}</p></div>`;
             node.data = { hName: 'div', hProperties: {} };
             node.children = [{ type: 'html', value: html }];
             break;
