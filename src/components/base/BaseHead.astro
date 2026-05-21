@@ -66,12 +66,18 @@ function formatCanonicalURL(url: string | URL) {
     <link rel="stylesheet" href={f.cdn} />
 ))}
 
-{fileFonts.map(f => (
-    <>
-        <link rel="preload" href={f.path} as="font" type={`font/${f.format === 'truetype' ? 'ttf' : f.format ?? 'ttf'}`} crossorigin />
-        <style set:html={`@font-face { font-family: "${f.cssName}"; src: url("${f.path}") format("${f.format ?? 'truetype'}"); font-display: swap; }`} />
-    </>
-))}
+{fileFonts.map(f => {
+    const subsetPath = f.path.replace('.woff2', '-subset.woff2');
+    const format = f.format ?? 'woff2';
+    return (
+        <>
+            {/* Subset 版本：preload，首屏立即渲染 */}
+            <link rel="preload" href={subsetPath} as="font" type={`font/${format}`} crossorigin />
+            {/* Full 版本：后台加载，补充缺失字形 */}
+            <style set:html={`@font-face { font-family: "${f.cssName}"; src: url("${subsetPath}") format("${format}"), url("${f.path}") format("${format}"); font-display: swap; }`} />
+        </>
+    );
+})}
 
 <style set:html={`
     :root {

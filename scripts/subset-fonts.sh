@@ -1,20 +1,23 @@
 #!/bin/bash
-# 字体子集化脚本（方案A：全站用字 + ASCII + GB2312 一级常用字）
-#
-# 说明：
-#   - 源文件放在 scripts/fonts-source/（.ttf 格式）
-#   - 输出到 public/fonts/（.woff2 格式）
-#   - 字符集覆盖：全站用字 + ASCII + GB2312 一级常用字 3755 字
-#   - 二级汉字自动回退到系统字体
+# 字体子集化脚本
+# 为每种字体生成两个文件：
+#   - 字体名-subset.woff2  = 全站精确用字 + ASCII（~100KB，首屏加载）
+#   - 字体名.woff2         = GB2312 一级常用字 + ASCII（~1.5MB，后台补充）
 #
 # 用法:
 #   bash scripts/subset-fonts.sh
+#
+# 添加新字体:
+#   1. 将 .ttf 文件放入 scripts/fonts-source/
+#   2. 运行 bash scripts/subset-fonts.sh
+#   3. 在 src/data/config/fonts.ts 中注册新字体
 
 set -e
 
 FONTS_SOURCE="scripts/fonts-source"
 FONTS_OUTPUT="public/fonts"
-CHARS_FILE="/tmp/font_subset_chars.txt"
+SUBSET_CHARS="/tmp/font_subset_chars.txt"
+FULL_CHARS="/tmp/font_full_chars.txt"
 
 echo "=== 字体子集化 ==="
 echo ""
@@ -32,10 +35,8 @@ if ! python3 -c "import brotli" 2>/dev/null; then
     exit 1
 fi
 
-# 检查源文件目录
 if [ ! -d "$FONTS_SOURCE" ]; then
     echo "错误: 源文件目录不存在: $FONTS_SOURCE"
-    echo "请将 .ttf 字体文件放入该目录"
     exit 1
 fi
 
@@ -45,48 +46,73 @@ if [ "$FONT_COUNT" -eq 0 ]; then
     exit 1
 fi
 
-# 生成字符集
+# 生成两个字符集
 echo "[1/2] 生成字符集..."
 python3 << 'PYEOF'
 import subprocess
 import string
 
-chars = set()
+def get_gb2312_level1():
+    """GB2312 一级常用字（3755字）"""
+    chars = []
+    for high in range(0xB0, 0xD8):
+        for low in range(0xA1, 0xFF):
+            if high == 0xD7 and low > 0xF9:
+                break
+            try:
+                chars.append(bytes([high, low]).decode('gb2312'))
+            except:
+                pass
+    return chars
 
-# 1. 全站实际用字（包括汉字、英文、数字等所有字符）
+def get_gb2312_level2():
+    """GB2312 二级汉字（3008字）"""
+    chars = []
+    for high in range(0xD8, 0xF8):
+        for low in range(0xA1, 0xFF):
+            try:
+                chars.append(bytes([high, low]).decode('gb2312'))
+            except:
+                pass
+    return chars
+
+# 全站用字（所有字符）
 result = subprocess.run(
     ['grep', '-orh', '.', 'src/content/', 'public/'],
     capture_output=True, text=True
 )
+site_chars = set()
 for c in result.stdout:
     code = ord(c)
     if 0x20 <= code <= 0x10FFFF and code not in (0x0A, 0x0D, 0x09):
-        chars.add(c)
+        site_chars.add(c)
 
-# 2. ASCII 全字符集（英文、数字、标点等）
-for c in string.ascii_letters + string.digits + string.punctuation + string.whitespace:
-    chars.add(c)
+# ASCII
+ascii_chars = set(string.ascii_letters + string.digits + string.punctuation + string.whitespace)
 
-# 3. GB2312 一级常用字（3755字）
-for high in range(0xB0, 0xD8):
-    for low in range(0xA1, 0xFF):
-        if high == 0xD7 and low > 0xF9:
-            break
-        try:
-            chars.add(bytes([high, low]).decode('gb2312'))
-        except:
-            pass
+# GB2312 一级
+level1 = set(get_gb2312_level1())
 
-result = ''.join(sorted(chars))
-han_count = len(set(c for c in chars if '\u4e00' <= c <= '\u9fff'))
-ascii_count = len(set(c for c in chars if ord(c) < 128))
-print(f'  全站用字:     ~{han_count} 汉字')
-print(f'  ASCII字符:    {ascii_count}')
-print(f'  GB2312一级:   3755')
-print(f'  合并去重后:   {len(chars)}')
+# 子集字符集 = 全站用字 + ASCII
+subset_chars = site_chars | ascii_chars
+
+# 完整字符集 = 子集 + GB2312 一级
+full_chars = subset_chars | level1
+
+# 输出统计
+subset_han = len([c for c in subset_chars if '\u4e00' <= c <= '\u9fff'])
+full_han = len([c for c in full_chars if '\u4e00' <= c <= '\u9fff'])
+
+print(f'  全站用字:     {subset_han} 汉字')
+print(f'  ASCII字符:    {len(subset_chars & ascii_chars)}')
+print(f'  子集总计:     {len(subset_chars)}')
+print(f'  完整总计:     {len(full_chars)}（含 GB2312 一级 {len(level1)} 字）')
 
 with open('/tmp/font_subset_chars.txt', 'w', encoding='utf-8') as f:
-    f.write(result)
+    f.write(''.join(sorted(subset_chars)))
+
+with open('/tmp/font_full_chars.txt', 'w', encoding='utf-8') as f:
+    f.write(''.join(sorted(full_chars)))
 PYEOF
 
 # 子集化
@@ -99,13 +125,16 @@ for font in "$FONTS_SOURCE"/*.ttf; do
     [ -f "$font" ] || continue
 
     filename=$(basename "$font" .ttf)
-    output="$FONTS_OUTPUT/${filename}.woff2"
+    subset_output="$FONTS_OUTPUT/${filename}-subset.woff2"
+    full_output="$FONTS_OUTPUT/${filename}.woff2"
 
-    echo "  $filename.ttf → ${filename}.woff2"
+    echo "  $filename.ttf"
 
+    # Subset 文件（全站用字 + ASCII）
+    echo "    → ${filename}-subset.woff2"
     python3 -m fontTools.subset "$font" \
-        --text-file="$CHARS_FILE" \
-        --output-file="$output" \
+        --text-file="$SUBSET_CHARS" \
+        --output-file="$subset_output" \
         --flavor=woff2 \
         --layout-features='*' \
         --glyph-names \
@@ -117,12 +146,32 @@ for font in "$FONTS_SOURCE"/*.ttf; do
         --name-IDs='*' \
         2>/dev/null
 
-    orig_size=$(du -h "$font" | cut -f1 | tr -d ' ')
-    new_size=$(du -h "$output" | cut -f1 | tr -d ' ')
-    echo "    $orig_size → $new_size"
+    # Full 文件（GB2312 一级 + ASCII）
+    echo "    → ${filename}.woff2"
+    python3 -m fontTools.subset "$font" \
+        --text-file="$FULL_CHARS" \
+        --output-file="$full_output" \
+        --flavor=woff2 \
+        --layout-features='*' \
+        --glyph-names \
+        --symbol-cmap \
+        --legacy-cmap \
+        --notdef-glyph \
+        --notdef-outline \
+        --recommended-glyphs \
+        --name-IDs='*' \
+        2>/dev/null
+
+    subset_size=$(du -h "$subset_output" | cut -f1 | tr -d ' ')
+    full_size=$(du -h "$full_output" | cut -f1 | tr -d ' ')
+    echo "      subset: $subset_size | full: $full_size"
 done
 
 echo ""
 echo "=== 完成 ==="
 echo "输出目录: $FONTS_OUTPUT/"
 ls -lh "$FONTS_OUTPUT"/
+echo ""
+echo "使用说明:"
+echo "  1. 在 src/data/config/fonts.ts 中注册字体（如未注册）"
+echo "  2. 构建后 subset 文件会自动 preload，full 文件后台加载"
