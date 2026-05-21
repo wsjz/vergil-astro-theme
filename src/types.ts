@@ -99,14 +99,10 @@ export type SiteConfig = {
     image?: ImageInput;
     headerNavLinks?: NavItem[];
     footerNavLinks?: Link[];
-    socialLinks?: Link[];
     hero?: Hero;
     subscribe?: Subscribe;
     postsPerPage?: number;
     projectsPerPage?: number;
-    search?: {
-        enabled: boolean;
-    };
     comments?: {
         enabled: boolean;
         provider: 'giscus' | 'artalk';
@@ -128,9 +124,6 @@ export type SiteConfig = {
             server: string;
             site?: string;
         };
-    };
-    albums?: {
-        enabled: boolean;
     };
     splash?: SplashConfig;
     agent?: AgentConfig;

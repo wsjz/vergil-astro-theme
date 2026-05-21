@@ -51,52 +51,7 @@ title: 关于我
 
 ## 简历页面
 
-除了普通页面，Vergil 还内置了简历视图，用于展示在线履历。
-
-### 文件位置
-
-`src/content/resume/index.md`
-
-### 格式示例
-
-```markdown
----
-title: 简历
-name: 张三
-avatar: ../../assets/images/avatar.jpg
-contact:
-  email: zhangsan@example.com
-  phone: 138****8888
-  location: 北京
-  website: https://example.com
----
-
-## 个人简介
-
-5 年前端开发经验...
-
-## 工作经历
-
-### 某某公司 — 高级前端工程师
-
-2022.03 - 至今
-
-- 负责核心产品前端架构
-- 带领 5 人团队完成重构
-
-## 技能
-
-- React / Vue / TypeScript
-- Node.js / Python
-```
-
-### 访问路径
-
-`/views/resume/`
-
-### 打印为 PDF
-
-简历视图已针对打印优化，按 `Ctrl+P`（或 `Cmd+P`）即可打印为 PDF。
+除了普通页面，Vergil 还内置了简历视图，用于展示在线履历。详细配置方法请参阅 [简历配置](../简历)。
 
 ## 在导航中添加页面
 

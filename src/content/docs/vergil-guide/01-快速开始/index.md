@@ -40,8 +40,76 @@ npm run dev
 
 命令执行后，终端会显示本地访问地址，通常是 `http://localhost:4321/`。用浏览器打开即可看到网站。
 
-:::callout{variant="tip"}
+:::callout{type="tip"}
 开发服务器支持**热更新**——你修改文件后，浏览器会自动刷新，无需手动重启。
+:::
+
+## 变成你的站点（最少改动）
+
+网站跑起来了，但展示的还是示例内容。下面这 5 项改完，网站就变成你的了。
+
+### 1. 网站名和描述
+
+打开 `src/data/config/identity.ts`，修改：
+
+```typescript
+export const siteInfo = {
+    title: '我的博客',           // ← 改成你的网站名
+    subtitle: '记录技术与生活',  // ← 改成你的副标题
+    description: '...',          // ← 改成你的站点描述
+};
+```
+
+### 2. 首页 Hero
+
+同一个文件里，修改 `heroData`：
+
+```typescript
+export const heroData = {
+    title: 'Hello，我是 **张三**!',
+    text: '我是 **张三**，一名前端开发者...',
+    // ...
+};
+```
+
+### 3. 顶部导航菜单
+
+打开 `src/data/config/nav.ts`，修改 `headerNavLinks`。去掉不想要的菜单项，添加你自己的：
+
+```typescript
+export const headerNavLinks = [
+    {
+        label: '博客',
+        icon: 'BookOpen',
+        children: [
+            { label: '主页', href: '/', icon: 'Home' },
+            { label: '笔记', href: '/blog', icon: 'FileText' },
+            { label: '相册', href: '/albums', icon: 'Image' },
+        ]
+    }
+];
+```
+
+### 4. 底部链接
+
+同一个文件里，修改 `footerNavLinks`（页脚导航）：
+
+```typescript
+export const footerNavLinks = [
+    { text: '关于', href: '/about' },
+    { text: '联系', href: '/contact' },
+    { text: 'GitHub', href: 'https://github.com/yourname' },
+];
+```
+
+### 5. 头像
+
+把你的头像图片替换掉 `src/assets/images/avatar.jpg`，同名覆盖即可。或者修改 `src/data/site-config.ts` 中的 `avatar.src` 指向你自己的图片路径。
+
+:::callout{type="tip"}
+**改完这 5 项，刷新浏览器，网站就是你的了。**
+
+其他配置（评论、搜索、开屏页、边栏等）都是可选的，之后有空再慢慢调整。
 :::
 
 ## 项目结构
@@ -60,13 +128,18 @@ my-blog/
 │   │   ├── docs/         ← 知识库
 │   │   └── pages/        ← 独立页面（关于、留言等）
 │   ├── data/
-│   │   └── site-config.ts ← 站点配置文件
+│   │   ├── site-config.ts     ← 站点配置入口（首次打开建议看这里）
+│   │   └── config/            ← 按功能拆分的配置子模块
+│   │       ├── nav.ts         ← 导航、视图、底部导航
+│   │       ├── identity.ts    ← 网站信息、Hero、订阅
+│   │       ├── features.ts    ← 搜索、评论、边栏等功能开关
+│   │       ├── splash.ts      ← 开屏页
+│   │       ├── links.ts       ← 网站卡片链接分组
+│   │       └── fonts.ts       ← 字体注册表
 │   └── pages/            ← 页面路由
 ├── public/               ← 静态资源（图片、字体等）
 └── package.json
 ```
-
-作为内容创作者，你最常接触的是 `src/content/` 和 `src/data/site-config.ts` 这两个目录。
 
 ## 发布第一篇文章
 
@@ -91,7 +164,7 @@ Vergil 支持 Markdown 的所有基础语法：
 保存文件后，刷新浏览器即可看到新文章。
 ```
 
-:::callout{variant="note"}
+:::callout{type="note"}
 文件头部的 `---` 之间的内容称为**信息头**，用于填写文章的标题、日期、标签等元信息。系统会读取这些信息来决定文章的展示方式。
 :::
 

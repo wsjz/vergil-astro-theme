@@ -1,0 +1,68 @@
+import type { SiteConfig } from '../../types';
+
+export const comments = {
+    enabled: true,
+    provider: 'giscus' as const,
+    giscus: {
+        repo: 'wsjz/issues',
+        repoId: 'R_kgDONgr0wg',
+        category: 'General',
+        categoryId: 'DIC_kwDONgr0ws4ClbF3',
+        mapping: 'pathname' as const,
+        strict: false,
+        reactionsEnabled: true,
+        emitMetadata: false,
+        inputPosition: 'top' as const,
+        theme: 'preferred_color_scheme' as const,
+        lang: 'zh-CN' as const,
+        loading: 'lazy' as const
+    },
+    artalk: {
+        server: 'https://artalk.example.com',
+        site: 'Vergil Blog'
+    }
+} satisfies NonNullable<SiteConfig['comments']>;
+
+export const agent = {
+    enabled: true,
+    provider: 'rive' as const,
+    name: 'Miki',
+    // rive: { src: '/model.riv' },
+    // live2d: { modelPath: '/model.json' },
+} satisfies NonNullable<SiteConfig['agent']>;
+
+export const sidebar = {
+    // 可配置：recentPosts, siteInfo
+    left: ['recentPosts', 'siteInfo'],
+    // 可配置：welcome, heatmap, recentPosts, featured, tags, ghCard
+    right: ['welcome', 'heatmap', 'featured', 'tags'],
+
+    // 文章页右侧（目前由页面 slot 覆盖，此配置暂未生效）
+    // 可配置：toc, related, featured
+    postRight: ['toc', 'featured'],
+    // 文档页右侧（目前由页面 slot 覆盖，此配置暂未生效）
+    // 可配置：toc
+    docRight: ['toc'],
+    components: {
+        welcome: {
+            text: '记录技术、生活与思考',
+        },
+        recentPosts: {
+            limit: 5,
+        },
+        featured: {
+            limit: 3,
+        },
+        tags: {
+            limit: 6,
+        },
+        related: {
+            limit: 3,
+        },
+    },
+};
+
+export const floatingAudio = {
+    enabled: true,
+    autoplay: false,
+};

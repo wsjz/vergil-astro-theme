@@ -26,14 +26,14 @@ order: 5
 ### 块级指令示例
 
 ```markdown
-:::callout{variant="tip"}
+:::callout{type="tip"}
 这是一个提示框，用来强调重要信息。
 :::
 ```
 
 效果：
 
-:::callout{variant="tip"}
+:::callout{type="tip"}
 这是一个提示框，用来强调重要信息。
 :::
 
@@ -59,19 +59,19 @@ order: 5
 ```markdown
 :::::grid{cols=2}
 ::::grid-cell
-:::callout{variant="tip"}
+:::callout{type="tip"}
 单元格内的提示框
 :::
 ::::
 ::::grid-cell
-:::callout{variant="note"}
+:::callout{type="note"}
 另一个单元格
 :::
 ::::
 :::::
 ```
 
-:::callout{variant="tip"}
+:::callout{type="tip"}
 记不住冒号数量？一个口诀：**容器永远比内容多一个冒号**。要包 `:::` 就用 `::::`，要包 `::::` 就用 `::::: `。
 :::
 
