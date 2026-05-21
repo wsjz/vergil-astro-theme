@@ -6,14 +6,14 @@ export const fontsRegistry: Record<string, { cssName: string; family: string; pa
     lxgwwenkai: {
         cssName: 'LXGW WenKai',
         family: 'sans-serif',
-        path: '/fonts/LXGWWenKai-Regular.ttf',
-        format: 'truetype',
+        path: '/fonts/LXGWWenKai-Regular.woff2',
+        format: 'woff2',
     },
     maokenZhuyuanTi: {
         cssName: 'MaokenZhuyuanTi',
         family: 'sans-serif',
-        path: '/fonts/maoken-zhuyuan-ti.ttf',
-        format: 'truetype',
+        path: '/fonts/maoken-zhuyuan-ti.woff2',
+        format: 'woff2',
     },
     monoFonts: {
         cssName: 'ui-monospace',
