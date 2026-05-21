@@ -261,7 +261,7 @@ export function processBlockDirective(node, options = {}) {
 
         case 'title': {
             const el = attrs.el || '';
-            const level = Math.min(Math.max(parseInt(el.replace('h', ''), 10) || parseInt(attrs.level, 10) || 2, 2), 6);
+            const level = Math.min(Math.max(parseInt(el.replace('h', ''), 10) || 2, 2), 6);
             const centered = attrs.centered === 'true' || attrs.centered === '' || attrs.centered === true;
             const icon = attrs.icon || '';
             const showPrefix = attrs.prefix !== 'false';
