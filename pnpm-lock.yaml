@@ -17,9 +17,6 @@ importers:
       '@fontsource-variable/inter':
         specifier: ^5.2.8
         version: 5.2.8
-      '@fontsource-variable/newsreader':
-        specifier: ^5.2.10
-        version: 5.2.10
       '@iconify-json/bx':
         specifier: ^1.2.3
         version: 1.2.3
@@ -463,9 +460,6 @@ packages:
 
   '@fontsource-variable/inter@5.2.8':
     resolution: {integrity: sha512-kOfP2D+ykbcX/P3IFnokOhVRNoTozo5/JxhAIVYLpea/UBmCQ/YWPBfWIDuBImXX/15KH+eKh4xpEUyS2sQQGQ==}
-
-  '@fontsource-variable/newsreader@5.2.10':
-    resolution: {integrity: sha512-MdI2iRwrqWpMOU/2aV2BgfZ4dJNlj/XlYaY8Zb7t87mWqHskYW0XiUANkt1cyOCiEfW2VQ0bQ5vZgGPp6B2B4w==}
 
   '@iconify-json/bx@1.2.3':
     resolution: {integrity: sha512-ihvX+2d688otgW7MAvUEdKVln+fZ28BJTlygazKUU/+RCODWT+2KObjAHe8+KPs4VhC8V6Tgoy1qrX0Myn/upA==}
@@ -2614,8 +2608,6 @@ snapshots:
     optional: true
 
   '@fontsource-variable/inter@5.2.8': {}
-
-  '@fontsource-variable/newsreader@5.2.10': {}
 
   '@iconify-json/bx@1.2.3':
     dependencies:

@@ -30,12 +30,23 @@ const isArticle = head.pageType === 'article';
                 window.scrollTo(0, 0);
             })();
         </script>
-        <script is:inline src="/js/theme-init.js"></script>
+        <script is:inline>
+            (function() {
+                try {
+                    const scheme = localStorage.getItem('colorScheme') || 'C';
+                    const isDark = localStorage.getItem('darkMode');
+                    document.documentElement.setAttribute('data-theme', scheme);
+                    if (isDark === 'true' || (isDark === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                        document.documentElement.classList.add('dark');
+                    }
+                } catch(e) {}
+            })();
+        </script>
         <ViewTransitions />
-        <script is:inline src="/theme-toggle.js"></script>
-        <script is:inline src="/js/copy-btn.js"></script>
-        <script is:inline src="/js/private-decrypt.js"></script>
-        <script is:inline src="/js/audio-player.js"></script>
+        <script is:inline src="/theme-toggle.js" defer></script>
+        <script is:inline src="/js/copy-btn.js" defer></script>
+        <script is:inline src="/js/private-decrypt.js" defer></script>
+        <script is:inline src="/js/audio-player.js" defer></script>
         <script is:inline>
         (function () {
             function formatTime(s) {
@@ -369,9 +380,8 @@ const isArticle = head.pageType === 'article';
         {siteConfig.floatingAudio?.enabled && <FloatingAudioPlayer />}
 
         <script>
-            import mediumZoom from 'medium-zoom';
-
-            function initZoom() {
+            async function initZoom() {
+                const { default: mediumZoom } = await import('medium-zoom');
                 mediumZoom('img[data-zoomable="1"]', {
                     background: 'rgba(0, 0, 0, 0.85)',
                     margin: 24,
@@ -499,7 +509,7 @@ const isArticle = head.pageType === 'article';
         </script>
 
         <!-- 滚动显现（reveal）-->
-        <script is:inline src="/js/reveal-scroll.js"></script>
-        <script is:inline src="/js/search-hotkey.js"></script>
+        <script is:inline src="/js/reveal-scroll.js" defer></script>
+        <script is:inline src="/js/search-hotkey.js" defer></script>
     </body>
 </html>

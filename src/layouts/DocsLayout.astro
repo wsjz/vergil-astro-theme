@@ -41,10 +41,10 @@ const isArticle = head.pageType === 'article';
             }
         </script>
         <ViewTransitions />
-        <script is:inline src="/theme-toggle.js"></script>
-        <script is:inline src="/js/copy-btn.js"></script>
-        <script is:inline src="/js/private-decrypt.js"></script>
-        <script is:inline src="/js/audio-player.js"></script>
+        <script is:inline src="/theme-toggle.js" defer></script>
+        <script is:inline src="/js/copy-btn.js" defer></script>
+        <script is:inline src="/js/private-decrypt.js" defer></script>
+        <script is:inline src="/js/audio-player.js" defer></script>
         <script is:inline>
         (function () {
             function formatTime(s) {
@@ -341,9 +341,8 @@ const isArticle = head.pageType === 'article';
         </script>
 
         <script>
-            import mediumZoom from 'medium-zoom';
-
-            function initZoom() {
+            async function initZoom() {
+                const { default: mediumZoom } = await import('medium-zoom');
                 mediumZoom('img[data-zoomable="1"]', {
                     background: 'rgba(0, 0, 0, 0.85)',
                     margin: 24,
@@ -405,6 +404,6 @@ const isArticle = head.pageType === 'article';
         </script>
 
         {siteConfig.floatingAudio?.enabled && <FloatingAudioPlayer />}
-        <script is:inline src="/js/search-hotkey.js"></script>
+        <script is:inline src="/js/search-hotkey.js" defer></script>
     </body>
 </html>

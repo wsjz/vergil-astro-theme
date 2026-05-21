@@ -448,12 +448,12 @@ import DefaultLayout from '../../layouts/DefaultLayout.astro';
     const sqlStatus = document.getElementById('sql-status')!;
     const sqlResultWrap = document.getElementById('sql-result-wrap')!;
 
-    // sql-formatter lazy load
-    let sqlFormatterModule: typeof import('sql-formatter') | null = null;
+    // sql-formatter lazy load (CDN, avoid bundling into global JS)
+    let sqlFormatterModule: any = null;
     async function loadSqlFormatter() {
         if (sqlFormatterModule) return sqlFormatterModule;
         sqlStatus.textContent = '...';
-        sqlFormatterModule = await import('sql-formatter');
+        sqlFormatterModule = await import('https://cdn.jsdelivr.net/npm/sql-formatter@15.7.3/dist/sql-formatter.min.mjs');
         sqlStatus.textContent = '';
         return sqlFormatterModule;
     }
