@@ -1,6 +1,7 @@
 ---
-import { ChevronDown, ChevronRight, Github, Link, User, TrainFront, BookOpen, FileText } from '@lucide/astro';
+import { ChevronDown, ChevronRight } from '@lucide/astro';
 import siteConfig from '../../data/site-config';
+import { lucideNavIcons } from '../../utils/lucide-icons';
 import '../../styles/components/splash.css';
 
 interface Props {
@@ -137,14 +138,9 @@ const hasActions = !!buttonText || navItems.length > 0;
                         href={item.href}
                         class="flex flex-col items-center justify-center px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-main hover:bg-white/50 dark:hover:bg-gray-800/50 transition-all duration-200 group"
                     >
-                        {item.icon && (
+                        {item.icon && lucideNavIcons[item.icon] && (
                             <span class="text-xl sm:text-2xl mb-1 group-hover:scale-110 transition-transform">
-                                {item.icon === 'github' && <Github class="w-5 h-5 sm:w-6 sm:h-6" />}
-                                {item.icon === 'link' && <Link class="w-5 h-5 sm:w-6 sm:h-6" />}
-                                {item.icon === 'user' && <User class="w-5 h-5 sm:w-6 sm:h-6" />}
-                                {item.icon === 'train' && <TrainFront class="w-5 h-5 sm:w-6 sm:h-6" />}
-                                {item.icon === 'book-open' && <BookOpen class="w-5 h-5 sm:w-6 sm:h-6" />}
-                                {item.icon === 'file-text' && <FileText class="w-5 h-5 sm:w-6 sm:h-6" />}
+                                <lucideNavIcons[item.icon] class="w-5 h-5 sm:w-6 sm:h-6" />
                             </span>
                         )}
                         <span class="text-xs sm:text-sm font-medium">{item.text}</span>

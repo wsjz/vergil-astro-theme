@@ -1,37 +1,37 @@
 export const headerNavLinks = [
     {
         label: '页面',
-        icon: 'Home',
+        icon: 'home',
         children: [
-            { label: '主页', href: '/', icon: 'Home' },
-            { label: '简历', href: '/views/resume/', icon: 'FileText' },
-            { label: '沉浸阅读', href: '/views/minimal/', icon: 'BookOpen' }
+            { label: '主页', href: '/', icon: 'home' },
+            { label: '简历', href: '/views/resume/', icon: 'file-text' },
+            { label: '沉浸阅读', href: '/views/minimal/', icon: 'book-open' }
         ]
     },
     {
         label: '知识库',
-        icon: 'Database',
+        icon: 'database',
         children: [
-            { label: '文档', href: '/docs', icon: 'BookOpen' },
-            { label: '专栏', href: '/series', icon: 'BookOpen' },
-            { label: '笔记', href: '/blog', icon: 'FileText' },
-            { label: '项目', href: '/projects', icon: 'FolderOpen' }
+            { label: '文档', href: '/docs', icon: 'book-open' },
+            { label: '专栏', href: '/series', icon: 'book-open' },
+            { label: '笔记', href: '/blog', icon: 'file-text' },
+            { label: '项目', href: '/projects', icon: 'folder-open' }
         ]
     },
     {
         label: '生活',
-        icon: 'Heart',
+        icon: 'heart',
         children: [
-            { label: '相册', href: '/albums', icon: 'Image' },
-            { label: '想法', href: '/thoughts', icon: 'Lightbulb' }
+            { label: '相册', href: '/albums', icon: 'image' },
+            { label: '想法', href: '/thoughts', icon: 'lightbulb' }
         ]
     },
     {
         label: '更多',
-        icon: 'MoreHorizontal',
+        icon: 'more-horizontal',
         children: [
-            { label: '留言', href: '/contact', icon: 'MessageSquare' },
-            { label: '建站历史', href: '/history', icon: 'Clock' }
+            { label: '留言', href: '/contact', icon: 'message-square' },
+            { label: '建站历史', href: '/history', icon: 'clock' }
         ]
     }
 ];
@@ -60,4 +60,3 @@ export const footerNavLinks = [
         href: 'https://github.com/sponsors'
     },
 ];
-

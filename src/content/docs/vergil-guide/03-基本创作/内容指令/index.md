@@ -64,7 +64,7 @@ order: 5
 :::
 ::::
 ::::grid-cell
-:::callout{type="note"}
+:::callout{type="info"}
 另一个单元格
 :::
 ::::

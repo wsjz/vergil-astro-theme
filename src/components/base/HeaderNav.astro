@@ -1,6 +1,7 @@
 ---
-import { Home, Database, Heart, MoreHorizontal, FolderOpen, BookOpen, FileText, Image, Lightbulb, MessageSquare, Clock, ChevronDown, Search, Menu, X } from '@lucide/astro';
+import { ChevronDown, Search, Menu, X, MessageSquare } from '@lucide/astro';
 import siteConfig from '../../data/site-config';
+import { lucideNavIcons } from '../../utils/lucide-icons';
 
 interface Props {
     articleTitle?: string;
@@ -11,21 +12,16 @@ interface Props {
 const { articleTitle = '', commentsEnabled = false, sticky = false } = Astro.props;
 const isArticlePage = articleTitle.length > 0;
 
-const iconMap: Record<string, unknown> = {
-    Home, Database, Heart, MoreHorizontal, FolderOpen, BookOpen,
-    FileText, Image, Lightbulb, MessageSquare, Clock
-};
-
 const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
 
 const navItems = (siteConfig.headerNavLinks ?? []).map((item) => ({
     ...item,
-    icon: iconMap[item.icon] ?? Home,
+    icon: lucideNavIcons[item.icon] ?? lucideNavIcons['Home'],
     children: item.children
         ?.filter((child) => minimalEnabled || !child.href.includes('/views/minimal/'))
         ?.map((child) => ({
             ...child,
-            icon: iconMap[child.icon ?? ''] ?? FileText
+            icon: lucideNavIcons[child.icon ?? ''] ?? lucideNavIcons['FileText']
         }))
 }));
 
