@@ -5,7 +5,7 @@ import DocsNav from '../../../components/docs/DocsNav.astro';
 import SidebarToc from '../../../components/widgets/SidebarToc.astro';
 import FloatingToc from '../../../components/widgets/FloatingToc.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
-import { getDocSets, getDocEntry, getAdjacentDocs, getDocGroup, getFirstDocSlug, type DocTreeNode } from '../../../utils/docs-utils';
+import { getDocSets, getDocEntry, getAdjacentDocs, getDocGroup, type DocTreeNode } from '../../../utils/docs-utils';
 import { ChevronRight } from '@lucide/astro';
 
 export async function getStaticPaths() {
@@ -25,12 +25,6 @@ const { docId, slug } = Astro.params;
 const entry = await getDocEntry(docId, slug);
 if (!entry) {
     return new Response('Not Found', { status: 404 });
-}
-
-// If this is the first doc, redirect to the splash page
-const firstSlug = await getFirstDocSlug(docId);
-if (firstSlug && slug.toLowerCase() === firstSlug.toLowerCase()) {
-    return Astro.redirect(`/docs/${docId}/`);
 }
 
 const { Content, headings } = await render(entry);
