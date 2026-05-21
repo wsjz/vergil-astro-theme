@@ -21,7 +21,7 @@ const navItems = (siteConfig.headerNavLinks ?? []).map((item) => ({
         ?.filter((child) => minimalEnabled || !child.href.includes('/views/minimal/'))
         ?.map((child) => ({
             ...child,
-            icon: lucideNavIcons[child.icon ?? ''] ?? lucideNavIcons['FileText']
+            icon: lucideNavIcons[child.icon] ?? lucideNavIcons['file-text']
         }))
 }));
 

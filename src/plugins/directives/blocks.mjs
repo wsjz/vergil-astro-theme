@@ -24,9 +24,10 @@ export function processBlockDirective(node, options = {}) {
                 danger: { bar: '#ef4444', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.22)' },
             };
             const c = colors[type] || colors.info;
+            const iconSvg = icons[type] || '';
             node.data = { hName: 'div', hProperties: { class: `md-directive md-directive-callout md-callout-${type}` } };
             node.children = [
-                { type: 'html', value: `<div style="--callout-bar:${c.bar};--callout-bg:${c.bg};--callout-border:${c.border}"><div class="md-callout-inner"><div class="md-callout-title">${icons[type]}<span>${title}</span></div><div class="md-callout-body">` },
+                { type: 'html', value: `<div style="--callout-bar:${c.bar};--callout-bg:${c.bg};--callout-border:${c.border}"><div class="md-callout-inner"><div class="md-callout-title">${iconSvg}<span>${title}</span></div><div class="md-callout-body">` },
                 ...node.children,
                 { type: 'html', value: '</div></div></div>' }
             ];
