@@ -43,10 +43,12 @@ const isArticle = head.pageType === 'article';
             })();
         </script>
         <ViewTransitions />
-        <script is:inline src="/theme-toggle.js" defer></script>
-        <script is:inline src="/js/copy-btn.js" defer></script>
-        <script is:inline src="/js/private-decrypt.js" defer></script>
-        <script is:inline src="/js/audio-player.js" defer></script>
+        <script>
+            import '../scripts/theme-toggle.js';
+            import '../scripts/copy-btn.js';
+            import '../scripts/private-decrypt.js';
+            import '../scripts/audio-player.js';
+        </script>
         <script is:inline>
         (function () {
             function formatTime(s) {
@@ -509,7 +511,9 @@ const isArticle = head.pageType === 'article';
         </script>
 
         <!-- 滚动显现（reveal）-->
-        <script is:inline src="/js/reveal-scroll.js" defer></script>
-        <script is:inline src="/js/search-hotkey.js" defer></script>
+        <script>
+            import '../scripts/reveal-scroll.js';
+            import '../scripts/search-hotkey.js';
+        </script>
     </body>
 </html>
