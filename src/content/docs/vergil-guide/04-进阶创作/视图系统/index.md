@@ -38,6 +38,26 @@ Vergil 提供多种页面视图模式，让读者可以选择不同的阅读体�
 
 点击页面底部的"返回"按钮，即可回到常规视图。
 
+### 启用与关闭
+
+沉浸阅读视图的开关在 `src/data/config/nav.ts` 中配置：
+
+```typescript
+export const views = {
+    default: { name: '主页', path: '/' },
+    resume: { name: '简历', path: '/views/resume/' },
+    minimal: { name: '沉浸阅读', path: '/views/minimal/', enabled: true }
+};
+```
+
+将 `enabled` 设为 `false` 即可关闭沉浸阅读入口：
+
+```typescript
+minimal: { name: '沉浸阅读', path: '/views/minimal/', enabled: false }
+```
+
+关闭后，导航菜单中将不再显示"沉浸阅读"选项。已发布的沉浸阅读页面 URL 仍可访问。
+
 ## 简历视图
 
 专门用于展示个人简历的视图模式。
