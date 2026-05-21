@@ -16,12 +16,12 @@ const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
 
 const navItems = (siteConfig.headerNavLinks ?? []).map((item) => ({
     ...item,
-    icon: lucideNavIcons[item.icon] ?? lucideNavIcons['Home'],
+    icon: lucideNavIcons[item.icon],
     children: item.children
         ?.filter((child) => minimalEnabled || !child.href.includes('/views/minimal/'))
         ?.map((child) => ({
             ...child,
-            icon: lucideNavIcons[child.icon] ?? lucideNavIcons['file-text']
+            icon: lucideNavIcons[child.icon]
         }))
 }));
 
