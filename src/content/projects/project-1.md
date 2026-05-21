@@ -10,7 +10,7 @@ seo:
 
 ![Project preview](../../assets/images/project-1.jpg)
 
-**Note:** This case study is entirely fictional and created for the purpose of showcasing [Vergil Astro.js theme functionality](https://justgoodui.com/astro-themes/vergil/).
+**Note:** This case study is entirely fictional and created for the purpose of showcasing [Vergil Astro.js theme functionality](https://github.com/wsjz/vergil-astro-theme).
 
 **Project Overview:**
 EcoBuddy is a revolutionary mobile application designed to make sustainable living accessible, engaging, and rewarding. With a focus on gamification and real-world impact, EcoBuddy encourages users to adopt eco-friendly habits, reduce their carbon footprint, and contribute to a healthier planet.
@@ -61,6 +61,6 @@ EcoBuddy has successfully created a community of environmentally conscious indiv
 
 ## Client Testimonial
 
-> We couldn't be happier with the results delivered by Ethan Donovan. From the initial concept discussions to the final product, their responsiveness and collaborative approach were impressive. Our startup's website now stands out, thanks to their creative input and commitment to excellence.
+> We couldn't be happier with the results delivered by Alex Chen. From the initial concept discussions to the final product, their responsiveness and collaborative approach were impressive. Our startup's website now stands out, thanks to their creative input and commitment to excellence.
 
-**Note:** This case study is entirely fictional and created for the purpose of showcasing [Vergil Astro.js theme functionality](https://justgoodui.com/astro-themes/vergil/).
+**Note:** This case study is entirely fictional and created for the purpose of showcasing [Vergil Astro.js theme functionality](https://github.com/wsjz/vergil-astro-theme).

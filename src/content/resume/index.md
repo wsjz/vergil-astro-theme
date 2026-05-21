@@ -1,9 +1,9 @@
 ---
 title: 个人简历
-name: Ethan Donovan
+name: Alex Chen
 avatar: /avatar.jpg
 contact:
-  email: ethan@example.com
+  email: alex@example.com
   phone: +86 138 0000 0000
   location: 中国，上海
   website: https://example.com
@@ -11,7 +11,7 @@ contact:
 
 ## 工作经历
 
-### 高级前端工程师 · Amazing Studio
+### 高级前端工程师 · 某科技公司
 
 *2022 - 至今*
 
@@ -20,7 +20,7 @@ contact:
 - 建立组件库与前端规范，服务 5 个业务线团队
 - 推进微前端架构落地，解决多团队协作的发布冲突问题
 
-### 前端工程师 · Creative Labs
+### 前端工程师 · 某互联网公司
 
 *2019 - 2022*
 
@@ -50,7 +50,7 @@ contact:
 ## 开源贡献
 
 - [awesome-project](https://github.com) - 一个实用的前端工具库，Star 2k+
-- [vergil-astro-theme](https://github.com) - 本博客使用的 Astro 主题
+- [vergil-astro-theme](https://github.com/wsjz/vergil-astro-theme) - 本博客使用的 Astro 主题
 
 ## 自我评价
 

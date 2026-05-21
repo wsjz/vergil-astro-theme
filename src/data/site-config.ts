@@ -27,7 +27,7 @@ const siteConfig: SiteConfig = {
     fonts,
     avatar: {
         src: avatar,
-        alt: 'Ethan Donovan'
+        alt: 'Alex'
     },
 
     // ── 网站信息 ──

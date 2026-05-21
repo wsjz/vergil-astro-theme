@@ -1501,24 +1501,24 @@ Blobcat 表情 :emoji[0_0]{source="blobcat"}
 ::::tabs
 tab: 演示效果
 
-:::yoicard{name="Ethan Donovan" role="Web Developer · Blogger"}
+:::yoicard{name="Alex Chen" role="Web Developer · Blogger"}
 
 折腾博客和摄影的开发者 — *记录每一次心动*
 
 <!-- contact -->
 
-**ethan.dev**
-ethan@example.com
+**alex.dev**
+alex@example.com
 :::
 
-:::yoicard{name="全图背景" role="bg-image full" bg-image="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80" bg-overlay="dark" accent="#fbbf24" icon="lucide:sparkles" logo="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&q=80" qr="https://ethan.dev"}
+:::yoicard{name="全图背景" role="bg-image full" bg-image="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80" bg-overlay="dark" accent="#fbbf24" icon="lucide:sparkles" logo="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&q=80" qr="https://alex.dev"}
 
 满配:全图 + 暗化遮罩 + 圆 logo + sparkles icon + 二维码
 
 <!-- contact -->
 
-**ethan.dev**
-ethan@example.com
+**alex.dev**
+alex@example.com
 :::
 
 :::yoicard{name="半图(右)" role="bg-mode right" bg-image="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900&q=80" bg-mode="right"}
@@ -1527,8 +1527,8 @@ ethan@example.com
 
 <!-- contact -->
 
-**ethan.dev**
-ethan@example.com
+**alex.dev**
+alex@example.com
 :::
 
 :::yoicard{name="深色撞色" role="bg + accent" bg="#1a3a2e" accent="#d4af37" icon="lucide:zap" font-name="Georgia, serif"}
@@ -1537,8 +1537,8 @@ ethan@example.com
 
 <!-- contact -->
 
-**ethan.dev**
-ethan@example.com
+**alex.dev**
+alex@example.com
 :::
 
 :::yoicard{name="渐变温暖" role="warm gradient" bg-gradient="135deg, #fef3c7, #fed7aa" name-color="#c0392b"}
@@ -1549,24 +1549,24 @@ ethan@example.com
 tab: 示例代码
 
 `````markdown
-:::yoicard{name="Ethan Donovan" role="Web Developer · Blogger"}
+:::yoicard{name="Alex Chen" role="Web Developer · Blogger"}
 
 折腾博客和摄影的开发者 — *记录每一次心动*
 
 <!-- contact -->
 
-**ethan.dev**
-ethan@example.com
+**alex.dev**
+alex@example.com
 :::
 
-:::yoicard{name="全图背景" role="bg-image full" bg-image="..." bg-overlay="dark" accent="#fbbf24" icon="lucide:sparkles" logo="..." qr="https://ethan.dev"}
+:::yoicard{name="全图背景" role="bg-image full" bg-image="..." bg-overlay="dark" accent="#fbbf24" icon="lucide:sparkles" logo="..." qr="https://alex.dev"}
 
 满配:全图 + 暗化遮罩 + 圆 logo + sparkles icon + 二维码
 
 <!-- contact -->
 
-**ethan.dev**
-ethan@example.com
+**alex.dev**
+alex@example.com
 :::
 `````
 

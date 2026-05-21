@@ -13,7 +13,7 @@ export const splash = {
     backdropBlur: '12px',
     slideDuration: 12,
     title: 'Vergil',
-    description: 'Minimal Astro.js theme',
+    description: 'Astro Framework for Content Creators',
     nav: [
         { text: '博客', href: '/blog', icon: 'book-open' },
         { text: '文档', href: '/docs/vergil-guide/', icon: 'file-text' },

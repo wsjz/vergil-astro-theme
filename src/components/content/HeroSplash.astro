@@ -1,5 +1,5 @@
 ---
-import { ChevronDown, ChevronRight, Github, Link, User, TrainFront } from '@lucide/astro';
+import { ChevronDown, ChevronRight, Github, Link, User, TrainFront, BookOpen, FileText } from '@lucide/astro';
 import siteConfig from '../../data/site-config';
 import '../../styles/components/splash.css';
 
@@ -143,6 +143,8 @@ const hasActions = !!buttonText || navItems.length > 0;
                                 {item.icon === 'link' && <Link class="w-5 h-5 sm:w-6 sm:h-6" />}
                                 {item.icon === 'user' && <User class="w-5 h-5 sm:w-6 sm:h-6" />}
                                 {item.icon === 'train' && <TrainFront class="w-5 h-5 sm:w-6 sm:h-6" />}
+                                {item.icon === 'book-open' && <BookOpen class="w-5 h-5 sm:w-6 sm:h-6" />}
+                                {item.icon === 'file-text' && <FileText class="w-5 h-5 sm:w-6 sm:h-6" />}
                             </span>
                         )}
                         <span class="text-xs sm:text-sm font-medium">{item.text}</span>

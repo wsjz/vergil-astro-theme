@@ -1,63 +1,61 @@
 ---
 import aboutImage from '../../assets/images/about.jpg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import OGCard from '../../components/widgets/OGCard.astro';
-
 import { Image } from 'astro:assets';
 ---
 
 <BaseLayout
-    title="About Me"
-    description="Learn more about the person behind the website and embark on a journey of inspiration and shared experiences."
-    image={{ src: aboutImage, alt: 'A person sitting at a desk in front of a computer' }}
+    title="关于"
+    description="了解更多关于本站和我的信息。"
+    image={{ src: aboutImage, alt: '关于页面' }}
     showHeader={false}
 >
     <article class="mb-16 sm:mb-24">
         <header class="mb-8">
-            <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">About</h1>
+            <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">关于我</h1>
         </header>
-        
+
         <div class="prose sm:prose-lg max-w-none">
-            <Image src={aboutImage} alt="A person sitting at a desk in front of a computer" class="w-full mb-8" />
-            
-            <p><strong>Note!:</strong> This about page is entirely fictional and created for the purpose of showcasing <a href="https://justgoodui.com/astro-themes/vergil/">Vergil Astro.js theme functionality</a>.</p>
+            <Image src={aboutImage} alt="关于页面配图" class="w-full mb-8 rounded-xl" />
 
-            <h2>Ethan Donovan - Web Developer based in Estonia</h2>
-            
-            <p><strong>Greetings!</strong> I'm Ethan Donovan, a passionate web developer residing in the picturesque landscapes of <a href="https://en.wikipedia.org/wiki/Estonia">Estonia</a>. With a keen eye for design and a love for crafting seamless digital experiences, I bring a unique blend of creativity and technical expertise to the world of web development.</p>
+            <p class="text-muted text-sm mb-6">
+                以下内容为示例，请替换为你自己的介绍。修改此文件：<code>src/pages/about/index.astro</code>
+            </p>
 
-            <h2>Skills and Expertise</h2>
-            
-            <p>I specialize in front-end and back-end development, utilizing the latest technologies to build responsive and user-friendly websites. My proficiency includes <strong>HTML</strong>, <strong>CSS</strong>, <strong>JavaScript</strong>, and frameworks such as <strong>Astro.js</strong> for dynamic and interactive user interfaces. On the server side, I'm well-versed in Node.js and have experience with database management systems like MongoDB.</p>
+            <h2>Alex — 开发者 / 写作者 / 摄影爱好者</h2>
 
-            <h3>推荐资源</h3>
-            <p>以下是我经常使用的工具和资源：</p>
-            
-            <OGCard url="https://astro.build" />
-            <OGCard url="https://tailwindcss.com" />
-            <OGCard url="https://github.com/JustGoodUI/vergil-astro-theme" />
+            <p>
+                你好，我是 Alex。这个网站是我用 Vergil 搭建的个人博客，用来记录技术学习、生活感悟和摄影创作。
+            </p>
 
-            <h2>Innovation and Problem-Solving</h2>
-            
-            <p>I thrive on solving complex problems and transforming ideas into functional, elegant websites. Whether it's optimizing performance, implementing new features, or troubleshooting issues, I approach each challenge with enthusiasm and a commitment to delivering high-quality solutions.</p>
+            <p>
+                我相信好的内容不需要复杂的排版。 Vergil 让我专注于写作本身，而不必关心网站的技术细节。如果你也想拥有一个这样的个人网站，欢迎查看<a href="/docs/vergil-guide/">文档</a>开始搭建。
+            </p>
 
-            <h2>Global Perspective, Local Impact</h2>
-            
-            <p>Living in Estonia has not only influenced my appreciation for nature and culture but has also shaped my approach to web development. I understand the importance of creating digital solutions that resonate with local audiences while maintaining a global perspective.</p>
+            <h2>技能与兴趣</h2>
 
-            <h2>Continuous Learning</h2>
-            
-            <p>The dynamic nature of the tech industry inspires me to stay up-to-date with the latest trends and advancements. I'm always eager to expand my skill set and embrace emerging technologies that enhance the functionality and aesthetics of the websites I create.</p>
+            <ul>
+                <li><strong>前端开发</strong>：Astro、React、TypeScript、Tailwind CSS</li>
+                <li><strong>后端</strong>：Node.js、Python</li>
+                <li><strong>设计</strong>：Figma、UI/UX 基础</li>
+                <li><strong>摄影</strong>：街拍、自然风光</li>
+                <li><strong>写作</strong>：技术博客、读书笔记</li>
+            </ul>
 
-            <h2>Collaboration and Communication</h2>
-            
-            <p>I believe in the power of collaboration and effective communication. Whether working with clients, designers, or fellow developers, I value clear communication to ensure the success of every project.</p>
+            <h2>联系我</h2>
 
-            <h2>Get in Touch</h2>
-            
-            <p>Are you looking to elevate your online presence or bring your digital ideas to life? I'd love to hear from you! Feel free to reach out for collaboration, consultation, or just a friendly chat about all things web development.</p>
+            <p>
+                如果你对我的文章感兴趣，或者有技术问题想交流，欢迎通过以下方式找到我：
+            </p>
 
-            <p><em>Let's build something amazing together!</em></p>
+            <ul>
+                <li>邮箱：<a href="mailto:alex@example.com">alex@example.com</a></li>
+                <li>GitHub：<a href="https://github.com" target="_blank" rel="noopener noreferrer">github.com</a></li>
+            </ul>
+
+            <p>
+                <em>感谢你的访问，祝阅读愉快！</em>
+            </p>
         </div>
     </article>
 </BaseLayout>

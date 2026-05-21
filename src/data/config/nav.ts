@@ -53,11 +53,11 @@ export const footerNavLinks = [
     },
     {
         text: '贡献',
-        href: 'https://github.com/justgoodui/vergil-astro-theme'
+        href: 'https://github.com/wsjz/vergil-astro-theme'
     },
     {
         text: '赞助',
-        href: 'https://github.com/sponsors/justgoodui'
+        href: 'https://github.com/sponsors'
     },
 ];
 
