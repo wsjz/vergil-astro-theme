@@ -78,6 +78,16 @@ export async function getFirstDocSlug(docId: string): Promise<string | undefined
     return node?.slug;
 }
 
+export async function getDocHomepageSlug(docId: string): Promise<string | undefined> {
+    const entries = await getCollection('docs', ({ data }) => !data.draft);
+    const meta = entries.find((e) => e.id === `${docId}/_meta` || e.id === docId);
+    if (meta) {
+        const homepage = meta.data.homepage as string | undefined;
+        if (homepage) return homepage;
+    }
+    return getFirstDocSlug(docId);
+}
+
 export async function getDocGroup(docId: string, dirPath: string): Promise<DocGroupNode | undefined> {
     const tree = await getDocTree(docId);
     return findGroupByPath(tree, dirPath);

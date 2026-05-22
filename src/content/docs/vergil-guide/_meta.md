@@ -3,6 +3,7 @@ title: Vergil 主题文档
 subtitle: 官方用户文档
 description: 官方用户文档，涵盖安装、配置、内容创作与进阶用法。
 order: 0
+homepage: 03-基本创作/内容形式
 tags:
   - 博客搭建
   - 主题

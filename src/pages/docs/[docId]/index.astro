@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
-import { getDocSets, getFirstDocSlug, getAdjacentDocs } from '../../../utils/docs-utils';
+import { getDocSets, getDocHomepageSlug, getAdjacentDocs } from '../../../utils/docs-utils';
 import DocsLayout from '../../../layouts/DocsLayout.astro';
 import DocsNav from '../../../components/docs/DocsNav.astro';
 import FloatingToc from '../../../components/widgets/FloatingToc.astro';
@@ -23,15 +23,15 @@ const meta = currentSet?.meta;
 const splashConfig = meta?.data?.splash as Record<string, any> | undefined;
 const splashEnabled = splashConfig?.enabled === true;
 
-// 获取第一篇文档
-const firstSlug = await getFirstDocSlug(docId);
+// 获取 homepage 文档
+const homepageSlug = await getDocHomepageSlug(docId);
 let entry = null;
 let Content = null;
 let headings: any[] = [];
 
-if (firstSlug) {
+if (homepageSlug) {
     const entries = await getCollection('docs', ({ data }) => !data.draft);
-    const expectedId = `${docId}/${firstSlug}`;
+    const expectedId = `${docId}/${homepageSlug}`;
     entry = entries.find((e) => !(e.id.endsWith('/_meta') || e.id === '_meta') && (e.id === expectedId || e.id === `${expectedId}/index`));
     if (entry) {
         const rendered = await render(entry);
@@ -55,7 +55,7 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
     description={(entry?.data?.excerpt as string) || (meta?.data?.description as string) || ''}
     pageType="article"
     docId={docId}
-    currentSlug={firstSlug || ''}
+    currentSlug={homepageSlug || ''}
     articleTitle={(entry?.data?.title as string) || (meta?.data?.title as string) || ''}
     splashMode={splashEnabled}
 >
@@ -92,7 +92,7 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
                 )}
             </header>
 
-            <div class="prose sm:prose-lg max-w-none" data-current-slug={firstSlug || ''}>
+            <div class="prose sm:prose-lg max-w-none" data-current-slug={homepageSlug || ''}>
                 <Content />
             </div>
         </article>

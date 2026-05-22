@@ -5,12 +5,21 @@ import DocsNav from '../../../components/docs/DocsNav.astro';
 import SidebarToc from '../../../components/widgets/SidebarToc.astro';
 import FloatingToc from '../../../components/widgets/FloatingToc.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
-import { getDocSets, getDocEntry, getAdjacentDocs, getDocGroup, type DocTreeNode } from '../../../utils/docs-utils';
+import { getDocSets, getDocEntry, getAdjacentDocs, getDocGroup, getDocHomepageSlug, type DocTreeNode } from '../../../utils/docs-utils';
 import { ChevronRight } from '@lucide/astro';
 
 export async function getStaticPaths() {
     const entries = await getCollection('docs', ({ data }) => !data.draft);
     const nonMeta = entries.filter((e) => !(e.id.endsWith('/_meta') || e.id === '_meta'));
+
+    // 获取每个文档集的 homepage slug，排除不生成独立页面
+    const sets = await getDocSets();
+    const homepages = new Map<string, string>();
+    for (const set of sets) {
+        const slug = await getDocHomepageSlug(set.id);
+        if (slug) homepages.set(set.id, slug.toLowerCase());
+    }
+
     return nonMeta
         .map((entry) => {
             const parts = entry.id.split('/');
@@ -18,7 +27,12 @@ export async function getStaticPaths() {
             const slug = parts.slice(1).join('/').replace(/\/index$/, '');
             return { params: { docId, slug } };
         })
-        .filter((p) => p.params.slug !== '');
+        .filter((p) => {
+            if (p.params.slug === '') return false;
+            const homepageSlug = homepages.get(p.params.docId);
+            if (homepageSlug && p.params.slug.toLowerCase() === homepageSlug) return false;
+            return true;
+        });
 }
 
 const { docId, slug } = Astro.params;

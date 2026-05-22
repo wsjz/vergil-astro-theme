@@ -124,6 +124,7 @@ const docs = defineCollection({
             excerpt: z.string().optional(),
             autoRender: z.boolean().default(true).optional(),
             draft: z.boolean().default(false),
+            homepage: z.string().optional(),
             tags: z.array(z.string()).default([]),
             cover: image().optional(),
             banner: z.string().optional(),

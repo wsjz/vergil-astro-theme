@@ -1,6 +1,6 @@
 ---
 import { BookOpen } from '@lucide/astro';
-import { getDocTree, type DocTreeNode } from '../../utils/docs-utils';
+import { getDocTree, getDocHomepageSlug, type DocTreeNode } from '../../utils/docs-utils';
 import DocsTreeNode from './DocsTreeNode.astro';
 
 interface Props {
@@ -10,6 +10,7 @@ interface Props {
 
 const { docId, currentSlug = '' } = Astro.props;
 const tree = await getDocTree(docId);
+const homepageSlug = await getDocHomepageSlug(docId);
 ---
 
 <aside
@@ -25,7 +26,7 @@ const tree = await getDocTree(docId);
         </slot>
 
         {tree.length > 0 ? (
-            <DocsTreeNode nodes={tree} currentSlug={currentSlug} docId={docId} />
+            <DocsTreeNode nodes={tree} currentSlug={currentSlug} docId={docId} homepageSlug={homepageSlug} />
         ) : (
             <p class="text-xs text-muted px-2">暂无文档</p>
         )}

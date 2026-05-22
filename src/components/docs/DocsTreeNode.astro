@@ -6,10 +6,19 @@ interface Props {
     nodes: DocTreeNode[];
     currentSlug: string;
     docId: string;
+    homepageSlug?: string;
     level?: number;
 }
 
-const { nodes, currentSlug, docId, level = 0 } = Astro.props;
+const { nodes, currentSlug, docId, homepageSlug, level = 0 } = Astro.props;
+
+function getArticleHref(slug: string): string {
+    const normalizedSlug = slug.replace(/\/index$/, '');
+    if (homepageSlug && normalizedSlug.toLowerCase() === homepageSlug.toLowerCase()) {
+        return `/docs/${docId}/`;
+    }
+    return `/docs/${docId}/${slug}/`;
+}
 
 function isActive(slug: string, current: string): boolean {
     return slug.toLowerCase() === current.toLowerCase();
@@ -19,6 +28,10 @@ function isInDir(dirPath: string, current: string): boolean {
     const lowerDir = dirPath.toLowerCase();
     const lowerCurrent = current.toLowerCase();
     return lowerCurrent === lowerDir || lowerCurrent.startsWith(lowerDir + '/');
+}
+
+function isOnIndex(dirPath: string, current: string): boolean {
+    return dirPath.toLowerCase() === current.toLowerCase();
 }
 
 function isAncestorActive(node: DocTreeNode, current: string): boolean {
@@ -68,7 +81,7 @@ function getLevelConfig(l: number) {
             return (
                 <li class="docs-tree-item">
                     <a
-                        href={`/docs/${docId}/${node.slug}/`}
+                        href={getArticleHref(node.slug)}
                         class={`docs-tree-link ${cfg.textSize} ${active ? 'active' : ''}`}
                         data-level={level}
                     >
@@ -89,7 +102,8 @@ function getLevelConfig(l: number) {
         const cfg = getLevelConfig(level);
 
         const inDir = isInDir(node.dirPath, currentSlug);
-        const navHref = hasIndex && !inDir ? `/docs/${docId}/${node.slug}/` : null;
+        const onIndex = isOnIndex(node.dirPath, currentSlug);
+        const navHref = hasIndex && !onIndex ? getArticleHref(node.slug!) : null;
 
         const headerContent = (
             <>
@@ -144,7 +158,7 @@ function getLevelConfig(l: number) {
                 {hasChildren && (
                     <div class={`doc-children-wrapper ${expanded ? '' : 'collapsed'}`}>
                         <div class="doc-children-inner">
-                            <Astro.self nodes={node.children} currentSlug={currentSlug} docId={docId} level={level + 1} />
+                            <Astro.self nodes={node.children} currentSlug={currentSlug} docId={docId} homepageSlug={homepageSlug} level={level + 1} />
                         </div>
                     </div>
                 )}
