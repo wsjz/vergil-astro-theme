@@ -97,7 +97,7 @@ EdgeOne Pages 提供免费额度，个人博客通常够用。具体限制请参
 
 1. 在仓库设置中启用 GitHub Pages
 2. 选择 GitHub Actions 作为部署来源
-3. 项目已包含 `.github/workflows/deploy.yml`，无需额外配置
+3. 创建 GitHub Actions 工作流文件 `.github/workflows/deploy.yml`（可参考 Astro 官方部署文档）
 
 :::callout{type="tip"}
 如果部署后页面样式丢失，请检查 `astro.config.mjs` 中的 `base` 配置是否正确设置为你的仓库名。

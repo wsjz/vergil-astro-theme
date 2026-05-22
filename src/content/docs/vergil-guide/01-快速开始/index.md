@@ -104,7 +104,7 @@ export const footerNavLinks = [
 
 ### 5. 头像
 
-把你的头像图片替换掉 `src/assets/images/avatar.jpg`，同名覆盖即可。或者修改 `src/data/site-config.ts` 中的 `avatar.src` 指向你自己的图片路径。
+把你的头像图片替换掉 `src/assets/images/avatar.jpg`，同名覆盖即可。
 
 :::callout{type="tip"}
 **改完这 5 项，刷新浏览器，网站就是你的了。**
@@ -167,6 +167,21 @@ Vergil 支持 Markdown 的所有基础语法：
 :::callout{type="info"}
 文件头部的 `---` 之间的内容称为**信息头**，用于填写文章的标题、日期、标签等元信息。系统会读取这些信息来决定文章的展示方式。
 :::
+
+## 使用外部图片
+
+文章中使用在线图片（如 `![描述](https://example.com/photo.jpg)`）时，需要先将域名加入 `astro.config.mjs` 的白名单：
+
+```js
+// astro.config.mjs
+export default defineConfig({
+  image: {
+    domains: ['images.unsplash.com', '你的域名.com']
+  }
+});
+```
+
+不加白名单的外部图片会被拦截，只显示 alt 文字。本地图片（`public/` 目录下）无需配置。
 
 ## 下一步
 
