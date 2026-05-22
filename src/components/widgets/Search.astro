@@ -193,14 +193,49 @@ const searchDataUrl = '/search-data.json';
         }
     }
 
+    function highlightAllInElement(el, query) {
+        if (!el || !query) return;
+        const lowerQuery = query.toLowerCase();
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+        const nodes = [];
+        let n;
+        while ((n = walker.nextNode())) {
+            if (n.parentElement && n.parentElement.closest('mark')) continue;
+            nodes.push(n);
+        }
+        nodes.forEach(function (node) {
+            const text = node.textContent || '';
+            const lowerText = text.toLowerCase();
+            let idx = lowerText.indexOf(lowerQuery);
+            if (idx === -1) return;
+            const parent = node.parentNode;
+            const frag = document.createDocumentFragment();
+            let last = 0;
+            while (idx !== -1) {
+                if (idx > last) {
+                    frag.appendChild(document.createTextNode(text.slice(last, idx)));
+                }
+                const mark = document.createElement('mark');
+                mark.textContent = text.slice(idx, idx + query.length);
+                frag.appendChild(mark);
+                last = idx + query.length;
+                idx = lowerText.indexOf(lowerQuery, last);
+            }
+            if (last < text.length) {
+                frag.appendChild(document.createTextNode(text.slice(last)));
+            }
+            parent.replaceChild(frag, node);
+        });
+    }
+
     function renderResults(results) {
         const els = getEls();
         if (!els.results) return;
 
         if (!results.length) {
-            els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">No results found</p>';
+            els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">未找到相关结果</p>';
             selectedIndex = -1;
-            setStatus('0 results');
+            setStatus('0 条结果');
             return;
         }
         selectedIndex = -1;
@@ -219,13 +254,22 @@ const searchDataUrl = '/search-data.json';
                         <span class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-medium border ${tConfig.color}">${tConfig.label}</span>
                         ${dateStr ? '<span class="text-muted">' + escapeHtml(dateStr) + '</span>' : ''}
                     </div>
-                    <h3 class="font-display text-[15px] text-main mb-1 leading-snug">${titleHtml}</h3>
-                    <p class="text-[13px] text-secondary leading-relaxed line-clamp-2">${descHtml}</p>
+                    <h3 class="font-display text-[15px] text-main mb-1 leading-snug search-result-title">${titleHtml}</h3>
+                    <p class="text-[13px] text-secondary leading-relaxed line-clamp-2 search-result-desc">${descHtml}</p>
                 </a>
             `;
         }).join('');
         els.results.innerHTML = html;
-        setStatus(results.length + ' result' + (results.length > 1 ? 's' : ''));
+        setStatus(results.length + ' 条结果');
+
+        const query = document.getElementById('search-input')?.value.trim();
+        if (query) {
+            const items = els.results.querySelectorAll('.search-result-item');
+            items.forEach(function (item) {
+                highlightAllInElement(item.querySelector('.search-result-title'), query);
+                highlightAllInElement(item.querySelector('.search-result-desc'), query);
+            });
+        }
     }
 
     function updateSelected() {
@@ -326,7 +370,7 @@ const searchDataUrl = '/search-data.json';
             const els = getEls();
             const query = e.target.value.trim();
             if (!query) {
-                if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">Start typing to search</p>';
+                if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">输入关键词，开始搜索</p>';
                 selectedIndex = -1;
                 setStatus('');
                 return;

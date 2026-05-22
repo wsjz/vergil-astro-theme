@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Home } from '@lucide/astro';
+---
+
+<BaseLayout title="页面未找到" description="你访问的页面不存在或已被移除。" showSidebar={false} showRightSidebar={false} showTopNav={false}>
+    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <h1 class="font-display text-7xl sm:text-9xl font-medium text-accent mb-4">404</h1>
+        <p class="text-xl sm:text-2xl text-main font-display mb-2">页面未找到</p>
+        <p class="text-secondary mb-8 max-w-md">
+            你访问的页面不存在或已被移除。检查一下 URL 是否正确，或者返回首页继续浏览。
+        </p>
+        <a
+            href="/"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+        >
+            <Home class="w-5 h-5" />
+            返回首页
+        </a>
+    </div>
+</BaseLayout>
