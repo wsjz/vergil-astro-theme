@@ -7,8 +7,8 @@ import HeroSplash from '../components/content/HeroSplash.astro';
 import Moment from '../components/content/Moment.astro';
 import PostPreview from '../components/content/PostPreview.astro';
 import siteConfig from '../data/site-config';
-import { ChevronRight } from '@lucide/astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Pagination from '../components/widgets/Pagination.astro';
 import { sortItemsByDateDesc } from '../utils/data-utils';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
@@ -17,6 +17,15 @@ const currentPage = 1;
 const totalPosts = posts.length;
 const totalPages = Math.ceil(totalPosts / pageSize);
 const pagePosts = posts.slice(0, pageSize);
+
+const page = {
+    url: {
+        prev: undefined,
+        next: totalPages > 1 ? '/page/2' : undefined
+    },
+    currentPage: 1,
+    lastPage: totalPages
+};
 
 interface MomentData {
     content: string;
@@ -85,19 +94,7 @@ if (fs.existsSync(momentsDir)) {
                     </div>
                 ))}
                 
-                <!-- Pagination -->
-                <nav aria-label="Pagination" class="relative px-12 py-2 text-center my-8">
-                    <span class="text-sm">Page {currentPage} of {totalPages}</span>
-                    {totalPages > 1 && (
-                        <a 
-                            href="/page/2" 
-                            class="absolute top-1/2 right-0 -translate-y-1/2 inline-flex items-center justify-center w-9 h-9 rounded-full border border-light hover:border-accent/40 hover:bg-accent/5 transition-all" 
-                            aria-label="Go to page 2"
-                        >
-                            <ChevronRight class="h-5 w-5" />
-                        </a>
-                    )}
-                </nav>
+                <Pagination page={page} class="my-16 sm:my-24" />
             </div>
         )
     }

@@ -5,25 +5,25 @@ import IconButton from '../ui/IconButton.astro';
 const { page, class: className } = Astro.props;
 ---
 
-<nav aria-label="Pagination" class:list={['relative px-12 py-2 text-center', className]}>
+<nav aria-label="分页" class:list={['relative px-12 py-2 text-center', className]}>
     {
         page.url.prev && (
             <IconButton
                 class="absolute top-1/2 left-0 -translate-y-1/2"
                 href={page.url.prev}
-                aria-label={`Go to page ${page.currentPage - 1} of ${page.lastPage}`}
+                aria-label={`前往第 ${page.currentPage - 1} 页，共 ${page.lastPage} 页`}
             >
                 <ChevronLeft class="h-5 w-5" />
             </IconButton>
         )
     }
-    <span class="text-sm" aria-current="page">Page {page.currentPage} of {page.lastPage}</span>
+    <span class="text-sm" aria-current="page">第 {page.currentPage} 页 / 共 {page.lastPage} 页</span>
     {
         page.url.next && (
             <IconButton
                 class="absolute top-1/2 right-0 -translate-y-1/2"
                 href={page.url.next}
-                aria-label={`Go to page ${page.currentPage + 1} of ${page.lastPage}`}
+                aria-label={`前往第 ${page.currentPage + 1} 页，共 ${page.lastPage} 页`}
             >
                 <ChevronRight class="h-5 w-5" />
             </IconButton>
