@@ -562,5 +562,14 @@ const isArticle = head.pageType === 'article';
             import '../scripts/search.js';
             import '../scripts/reveal-scroll.js';
         </script>
+
+        <!-- PWA Service Worker -->
+        <script is:inline>
+            (function() {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js').catch(function() {});
+                }
+            })();
+        </script>
     </body>
 </html>
