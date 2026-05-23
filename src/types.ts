@@ -181,10 +181,17 @@ export type SidebarComponentConfig = {
     };
 };
 
+export type SidebarNavItem = {
+    label: string;
+    href: string;
+    icon: string;
+};
+
 export type SidebarConfig = {
     left?: string[];
     right?: string[];
     postRight?: string[];
     docRight?: string[];
     components?: SidebarComponentConfig;
+    nav?: SidebarNavItem[];
 };

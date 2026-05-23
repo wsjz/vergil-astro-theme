@@ -1,7 +1,8 @@
 ---
-import { Home, Folder, BookOpen, Tags, Image, Clock, Sparkles, MapPin, Archive, Users, Rss, Github, Search as SearchIcon, Flag, MessageCircle, Eye, Info, Award, LayoutGrid } from '@lucide/astro';
+import { Sparkles, Github, Rss, Clock, Eye, Flag, Info, Award } from '@lucide/astro';
 import { getCollection } from 'astro:content';
 import siteConfig from '../../data/site-config';
+import { lucideNavIcons } from '../../utils/lucide-icons';
 import CustomImage from '../ui/CustomImage.astro';
 import SidebarRecentPosts from '../widgets/SidebarRecentPosts.astro';
 
@@ -53,34 +54,7 @@ function getLastActive(): string {
   return diffDays + ' 天前';
 }
 
-const iconMap: Record<string, unknown> = {
-  'Home': Home,
-  'Blog': BookOpen,
-  'Projects': Folder,
-  'Archives': Archive,
-  'Tags': Tags,
-  'Albums': Image,
-  'Now': Clock,
-};
-
-const nameMap: Record<string, string> = {
-  'Home': '首页',
-  'Blog': '博客',
-  'Projects': '项目',
-  'Archives': '归档',
-  'Tags': '标签',
-  'Albums': '相册',
-  'Now': '现在',
-};
-
-const navItems = [
-  { key: 'Home', href: '/' },
-  { key: 'Blog', href: '/blog' },
-  { key: 'Archives', href: '/archives' },
-  { key: 'categories', href: '/categories', icon: LayoutGrid, name: '分类' },
-  { key: 'contact', href: '/contact', icon: MessageCircle, name: '留言' },
-  { key: 'rss', href: '/rss.xml', icon: Rss, name: '订阅' },
-];
+const navItems = siteConfig.sidebar?.nav ?? [];
 
 const leftConfig = siteConfig.sidebar?.left ?? ['recentPosts', 'siteInfo'];
 
@@ -150,8 +124,7 @@ function isActive(href: string): boolean {
 
       <nav class="grid grid-cols-3 gap-1.5">
         {navItems.map((item) => {
-          const Icon = item.icon || iconMap[item.key] || Home;
-          const name = item.name || nameMap[item.key] || item.key;
+          const Icon = lucideNavIcons[item.icon];
           const active = isActive(item.href);
           return (
             <a
@@ -163,8 +136,8 @@ function isActive(href: string): boolean {
               }`}
               aria-current={active ? 'page' : undefined}
             >
-              <Icon class="w-4 h-4 mb-0.5" />
-              <span class="text-[11px]">{name}</span>
+              {Icon && <Icon class="w-4 h-4 mb-0.5" />}
+              <span class="text-[11px]">{item.label}</span>
             </a>
           );
         })}

@@ -5,7 +5,7 @@ export const headerNavLinks = [
         children: [
             { label: '主页', href: '/', icon: 'home' },
             { label: '简历', href: '/views/resume/', icon: 'file-text' },
-            { label: '沉浸阅读', href: '/views/minimal/', icon: 'book-open' }
+            { label: '极简模式', href: '/views/minimal/', icon: 'book-open' }
         ]
     },
     {

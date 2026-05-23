@@ -43,6 +43,15 @@ export const sidebar = {
     // 文档页右侧（目前由页面 slot 覆盖，此配置暂未生效）
     // 可配置：toc
     docRight: ['toc'],
+    // 左侧栏站内导航
+    nav: [
+        { label: '首页', href: '/', icon: 'home' },
+        { label: '博客', href: '/blog', icon: 'book-open' },
+        { label: '专栏', href: '/series', icon: 'bookmark' },
+        { label: '文档', href: '/docs', icon: 'book-text' },
+        { label: '相册', href: '/albums', icon: 'image' },
+        { label: '留言', href: '/contact', icon: 'message-circle' },
+    ],
     components: {
         welcome: {
             text: '记录技术、生活与思考',
