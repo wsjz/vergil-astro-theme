@@ -16,13 +16,14 @@ if (!headings || headings.length === 0) {
 const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
 ---
 
-<aside class="toc-sidebar h-full overflow-y-auto" data-toc-root>
-    <div class="p-4">
-        {tocHeadings.length > 0 && (
-            <div>
+<aside class="toc-sidebar max-h-[70vh] flex flex-col pb-2" data-toc-root>
+    {tocHeadings.length > 0 && (
+        <>
+            {/* 固定标题栏 */}
+            <div class="px-4 pt-4 pb-2 shrink-0">
                 <button
                     type="button"
-                    class="w-full flex items-center justify-between mb-3 group cursor-pointer"
+                    class="w-full flex items-center justify-between group cursor-pointer"
                     data-toc-toggle
                     aria-expanded="true"
                 >
@@ -38,8 +39,12 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
                         </svg>
                     </span>
                 </button>
+            </div>
+
+            {/* 可滚动导航区 */}
+            <div class="flex-1 overflow-y-auto px-4 pb-3 min-h-0">
                 <div class="toc-nav-wrapper transition-all duration-300 ease-in-out overflow-hidden" data-toc-wrapper>
-                    <nav class="border-l border-muted space-y-1 pb-3" data-toc-nav>
+                    <nav class="border-l border-muted space-y-1" data-toc-nav>
                         {tocHeadings.map((heading) => {
                             const indentClass = heading.depth === 4 ? 'pl-7' : heading.depth === 3 ? 'pl-5' : 'pl-3';
                             const colorClass = heading.depth === 2 ? 'text-secondary font-medium' : 'text-muted';
@@ -54,10 +59,13 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
                         })}
                     </nav>
                 </div>
-                <div class="ml-3 border-b border-light/40"></div>
             </div>
-        )}
-    </div>
+
+            <div class="px-2.5 pt-3.5 pb-1">
+                <div class="mx-2 border-t border-light/60" />
+            </div>
+        </>
+    )}
 </aside>
 
 <script>
@@ -78,7 +86,9 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
                     const id = href.slice(1);
                     const target = document.getElementById(id);
                     if (target) {
-                        const topNavHeight = 80;
+                        const header = document.getElementById('top-nav-header');
+                        const toolbar = document.getElementById('floating-toolbar');
+                        const topNavHeight = (header ? header.offsetHeight : 56) + (toolbar ? toolbar.offsetHeight : 0) + 16;
                         const targetPosition = target.getBoundingClientRect().top + window.scrollY - topNavHeight;
                         window.scrollTo({ top: targetPosition, behavior: 'smooth' });
                         history.pushState(null, '', href);
@@ -93,39 +103,50 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
             });
         });
 
-        const tocNav = document.querySelector('[data-toc-nav]');
+        let lastActiveId: string | null = null;
 
-        const observer = new IntersectionObserver((entries) => {
+        function getScrollOffset() {
+            const header = document.getElementById('top-nav-header');
+            const toolbar = document.getElementById('floating-toolbar');
+            return (header ? header.offsetHeight : 56) + (toolbar ? toolbar.offsetHeight : 0) + 16;
+        }
+
+        function updateActiveHeading() {
             if (isClickScrolling) return;
 
-            const visible: IntersectionObserverEntry[] = [];
-            entries.forEach(entry => {
-                if (entry.isIntersecting) visible.push(entry);
+            const offset = getScrollOffset();
+            let activeHeading: Element | null = null;
+            headings.forEach(heading => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= offset) {
+                    activeHeading = heading;
+                }
             });
-            if (visible.length === 0) return;
 
-            visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-            const id = visible[0].target.getAttribute('id');
+            if (!activeHeading) return;
+            const id = activeHeading.getAttribute('id');
+            if (!id || id === lastActiveId) return;
+            lastActiveId = id;
 
             tocLinks.forEach(l => l.classList.remove('toc-active'));
             const activeLink = document.querySelector(`.toc-sidebar a[href="#${id}"]`);
-            if (activeLink) {
-                activeLink.classList.add('toc-active');
-                if (tocNav) {
-                    const navRect = tocNav.getBoundingClientRect();
-                    const linkRect = activeLink.getBoundingClientRect();
-                    const offset = linkRect.top - navRect.top;
-                    if (offset < 0 || offset > navRect.height - linkRect.height) {
-                        tocNav.scrollTo({ top: tocNav.scrollTop + offset - navRect.height / 3, behavior: 'smooth' });
-                    }
-                }
-            }
-        }, {
-            rootMargin: '-80px 0px -60% 0px',
-            threshold: 0
-        });
+            if (!activeLink) return;
+            activeLink.classList.add('toc-active');
+            activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
 
-        headings.forEach(heading => observer.observe(heading));
+        let ticking = false;
+        const onScroll = () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    updateActiveHeading();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        updateActiveHeading();
     }
 
     function initTocToggle() {

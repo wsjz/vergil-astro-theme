@@ -174,7 +174,9 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
                         const id = href.slice(1);
                         const target = document.getElementById(id);
                         if (target) {
-                            const topNavHeight = 80;
+                            const header = document.getElementById('top-nav-header');
+                            const toolbar = document.getElementById('floating-toolbar');
+                            const topNavHeight = (header ? header.offsetHeight : 56) + (toolbar ? toolbar.offsetHeight : 0) + 16;
                             const targetPosition = target.getBoundingClientRect().top + window.scrollY - topNavHeight;
                             window.scrollTo({ top: targetPosition, behavior: 'smooth' });
                             history.pushState(null, '', href);
@@ -185,30 +187,61 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
 
             const links = panel.querySelectorAll('a[data-heading-id]');
             const headings = document.querySelectorAll('h2[id], h3[id], h4[id]');
+            const nav = panel.querySelector('nav');
+            let lastActiveId = null;
 
-            if (headings.length > 0 && links.length > 0) {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const id = entry.target.getAttribute('id');
-                            links.forEach(link => {
-                                link.classList.remove('text-accent', 'font-medium');
-                                link.classList.add('text-muted');
-                            });
-                            const activeLink = panel.querySelector(`a[data-heading-id="${id}"]`);
-                            if (activeLink) {
-                                activeLink.classList.remove('text-muted');
-                                activeLink.classList.add('text-accent', 'font-medium');
-                            }
-                        }
-                    });
-                }, {
-                    rootMargin: '-100px 0px -60% 0px',
-                    threshold: 0
-                });
-
-                headings.forEach(heading => observer.observe(heading));
+            function getScrollOffset() {
+                var header = document.getElementById('top-nav-header');
+                var toolbar = document.getElementById('floating-toolbar');
+                return (header ? header.offsetHeight : 56) + (toolbar ? toolbar.offsetHeight : 0) + 16;
             }
+
+            function updateActiveHeading() {
+                var offset = getScrollOffset();
+                var activeHeading = null;
+                headings.forEach(function(heading) {
+                    var rect = heading.getBoundingClientRect();
+                    if (rect.top <= offset) {
+                        activeHeading = heading;
+                    }
+                });
+                if (!activeHeading) return;
+                var id = activeHeading.getAttribute('id');
+                if (!id || id === lastActiveId) return;
+                lastActiveId = id;
+
+                links.forEach(function(link) {
+                    link.classList.remove('text-accent', 'font-medium');
+                    link.classList.add('text-muted');
+                });
+                var activeLink = panel.querySelector('a[data-heading-id="' + id + '"]');
+                if (!activeLink) return;
+                activeLink.classList.remove('text-muted');
+                activeLink.classList.add('text-accent', 'font-medium');
+
+                if (nav) {
+                    activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            var fticking = false;
+            function onScroll() {
+                if (!fticking) {
+                    requestAnimationFrame(function() {
+                        updateActiveHeading();
+                        fticking = false;
+                    });
+                    fticking = true;
+                }
+            }
+
+            // Clean up old listener before adding new one (for ViewTransitions)
+            if (window._floatingTocScrollHandler) {
+                window.removeEventListener('scroll', window._floatingTocScrollHandler);
+            }
+            window._floatingTocScrollHandler = onScroll;
+            window.addEventListener('scroll', onScroll, { passive: true });
+            updateActiveHeading();
         }
 
         initFloatingToc();
