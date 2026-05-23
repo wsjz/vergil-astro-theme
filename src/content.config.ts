@@ -167,4 +167,15 @@ const thoughts = defineCollection({
         })
 });
 
-export const collections = { blog, pages, projects, albums, docs, resume, thoughts };
+const series = defineCollection({
+    loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/series' }),
+    schema: () =>
+        z.object({
+            name: z.string(),
+            description: z.string().optional(),
+            cover: z.string().optional(),
+            icon: z.string().optional()
+        })
+});
+
+export const collections = { blog, pages, projects, albums, docs, resume, thoughts, series };

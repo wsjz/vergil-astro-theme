@@ -88,11 +88,14 @@ if (fs.existsSync(momentsDir)) {
                 <a href="/blog" class="inline-block">
                     <h2 class="font-sans text-xl font-medium mb-4 sm:text-2xl text-accent hover:opacity-80 transition-opacity">文章</h2>
                 </a>
-                {pagePosts.map((post) => (
-                    <div class="reveal">
-                        <PostPreview post={post} headingLevel="h3" />
-                    </div>
-                ))}
+                {pagePosts.map((post) => {
+                    const hasBanner = !!post.data.banner;
+                    return (
+                        <div class={`reveal rounded-[24px] bg-[var(--bg-card)] p-4 mb-4 sm:mb-4 shadow-[0_1px_4px_-2px_rgba(0,0,0,0.2)] hover:-translate-y-1 ${hasBanner ? 'hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.28),0_6px_12px_-2px_rgba(0,0,0,0.14)]' : 'hover:shadow-[0_6px_12px_-4px_rgba(0,0,0,0.10),0_4px_8px_-2px_rgba(0,0,0,0.06)]'}`}>
+                            <PostPreview post={post} headingLevel="h3" class="" />
+                        </div>
+                    );
+                })}
                 
                 <Pagination page={page} class="my-16 sm:my-24" />
             </div>

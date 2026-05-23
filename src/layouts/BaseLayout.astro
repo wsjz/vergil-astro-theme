@@ -302,10 +302,10 @@ const isArticle = head.pageType === 'article';
             {showTopNav && <TopNav articleTitle={articleTitle} commentsEnabled={commentsEnabled} sticky={splashMode} />}
             <Search />
 
-            <div class={`flex items-start justify-center gap-4 lg:gap-8 min-h-screen max-w-7xl mx-auto ${showTopNav ? (splashMode ? 'pt-4' : 'pt-12') : ''}`}>
+            <div class={`flex items-start justify-center gap-2 lg:gap-4 xl:gap-6 min-h-screen max-w-7xl mx-auto ${showTopNav ? (splashMode ? 'pt-4' : 'pt-12') : ''}`}>
                 {showSidebar && <LeftSidebar />}
                 <div class="w-full max-w-3xl flex-shrink-0">
-                    <div class="flex flex-col min-h-screen px-4 lg:px-6">
+                    <div class="flex flex-col min-h-screen px-3 lg:px-4">
                         {showTopNav && <FloatingToolbar showSidebar={showSidebar} showThemeToggle={showThemeToggle} />}
                         <main class="mx-auto w-full max-w-3xl grow pt-2">
                             <slot />
@@ -315,7 +315,7 @@ const isArticle = head.pageType === 'article';
                 </div>
 
                 {showRightSidebar && (
-                    <div class="right-sidebar-container hidden xl:block top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-52 2xl:w-56 bg-main overflow-y-auto z-40" style="position: sticky; align-self: flex-start;">
+                    <div class="right-sidebar-container hidden xl:block top-14 h-[calc(100vh-3.5rem)] w-48 xl:w-56 2xl:w-64 bg-main overflow-y-auto z-40" style="position: sticky; align-self: flex-start;">
                         <slot name="right-sidebar">
                             <RightSidebar config={rightSidebarConfig} />
                         </slot>

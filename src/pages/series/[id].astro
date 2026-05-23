@@ -1,10 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
+import PostPreview from '../../components/content/PostPreview.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import FormattedDate from '../../components/ui/FormattedDate.astro';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import { getAllSeries, getPostsBySeries, sortItemsByDateDesc } from '../../utils/data-utils';
-import { slugify } from '../../utils/common-utils';
 
 export async function getStaticPaths() {
     const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
@@ -24,34 +23,27 @@ const { id } = Astro.params;
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 const seriesPosts = getPostsBySeries(allPosts, id);
+
+// 从 series collection 读取描述
+const seriesEntries = await getCollection('series');
+const seriesMeta = seriesEntries.find((s) => s.id === id);
 ---
 
-<BaseLayout title={`专栏：${seriesName}`} description={`「${seriesName}」专栏全部文章`} showHeader={false}>
+<BaseLayout title={`专栏：${seriesName}`} description={seriesMeta?.data.description || `「${seriesName}」专栏全部文章`} showHeader={false}>
     <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '专栏', href: '/series' }, { text: seriesName }]} />
 
-    <h1 class="mb-4 font-display text-xl sm:text-2xl">{seriesName}</h1>
-    <p class="text-sm text-secondary mb-12">共 {seriesPosts.length} 篇文章</p>
+    <h1 class="mb-2 font-display text-xl sm:text-2xl">{seriesMeta?.data.name || seriesName}</h1>
+    {seriesMeta?.data.description && (
+        <p class="text-sm text-secondary mb-6">{seriesMeta.data.description}</p>
+    )}
+    <p class="text-sm text-muted mb-10">共 {seriesPosts.length} 篇文章</p>
 
-    <ol class="space-y-4">
-        {seriesPosts.map((post, index) => (
-            <li>
-                <a
-                    href={`/blog/${post.id}/`}
-                    class="group flex items-start gap-4 py-3 border-b border-light hover:border-accent/40 transition-colors"
-                >
-                    <span class="shrink-0 w-7 h-7 rounded-full bg-accent/10 text-accent text-xs font-medium flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-colors">
-                        {index + 1}
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <h2 class="font-display text-base font-medium group-hover:text-accent transition-colors line-clamp-2">
-                            {post.data.title}
-                        </h2>
-                        <p class="text-xs text-secondary mt-1">
-                            <FormattedDate date={post.data.publishDate} />
-                        </p>
-                    </div>
-                </a>
-            </li>
-        ))}
-    </ol>
+    {seriesPosts.map((post) => {
+        const hasBanner = !!post.data.banner;
+        return (
+            <div class={`reveal rounded-[24px] bg-[var(--bg-card)] p-4 mb-4 sm:mb-4 shadow-[0_1px_4px_-2px_rgba(0,0,0,0.2)] hover:-translate-y-1 ${hasBanner ? 'hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.28),0_6px_12px_-2px_rgba(0,0,0,0.14)]' : 'hover:shadow-[0_6px_12px_-4px_rgba(0,0,0,0.10),0_4px_8px_-2px_rgba(0,0,0,0.06)]'}`}>
+                <PostPreview post={post} class="" />
+            </div>
+        );
+    })}
 </BaseLayout>

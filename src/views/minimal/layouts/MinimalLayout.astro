@@ -87,7 +87,6 @@ const isArticle = head.pageType === 'article';
         </div>
         <script is:inline>
             (function(){
-                // 返回按钮（事件委托，DOM 替换后仍有效）
                 document.addEventListener('click', function(e){
                     var btn = e.target.closest('#minimal-back-btn');
                     if(!btn) return;
@@ -98,7 +97,6 @@ const isArticle = head.pageType === 'article';
                     }
                 });
 
-                // 回到顶部
                 function initBackToTop() {
                     var btn = document.getElementById('minimal-back-to-top');
                     if (!btn || btn.__bttInit) return;
