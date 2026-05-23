@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import { ChevronRight } from '@lucide/astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionNav from '../../components/ui/SectionNav.astro';
 import { getAllSeries, getPostsBySeries, sortItemsByDateDesc } from '../../utils/data-utils';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
@@ -9,7 +10,15 @@ const allSeries = getAllSeries(posts);
 ---
 
 <BaseLayout title="专栏" description="专栏文章合集" showHeader={false}>
-    <h1 class="mb-12 font-display text-xl sm:mb-16 sm:text-2xl">专栏</h1>
+    <SectionNav
+        items={[
+            { label: '近期发布', href: '/blog/' },
+            { label: '分类', href: '/categories/' },
+            { label: '标签', href: '/tags/' },
+            { label: '专栏', href: '/series/', active: true },
+            { label: '归档', href: '/archives/' }
+        ]}
+    />
     {allSeries.length === 0 ? (
         <p class="text-secondary">暂无专栏，在文章 frontmatter 中添加 <code>series: 专栏名称</code> 即可创建。</p>
     ) : (

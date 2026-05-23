@@ -14,7 +14,7 @@ export const headerNavLinks = [
         children: [
             { label: '文档', href: '/docs', icon: 'book-open' },
             { label: '专栏', href: '/series', icon: 'book-open' },
-            { label: '笔记', href: '/blog', icon: 'file-text' },
+            { label: '博客', href: '/blog', icon: 'file-text' },
             { label: '项目', href: '/projects', icon: 'folder-open' }
         ]
     },

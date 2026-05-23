@@ -46,6 +46,13 @@ function resolveBannerUrl(banner: string | undefined): string | null {
 
 const bannerUrl = resolveBannerUrl(banner);
 const { Content, headings } = await render(post);
+
+// 构建面包屑
+const postBreadcrumbs = [
+    { text: '博客', href: '/blog/' },
+    ...(category ? [{ text: category, href: `/categories/${slugify(category)}/` }] : []),
+    { text: title }
+];
 ---
 
 <BaseLayout
@@ -72,12 +79,7 @@ const { Content, headings } = await render(post);
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
             <div class="absolute inset-0 flex flex-col justify-between p-6 sm:p-8">
                 <div class="flex flex-wrap items-center gap-2 text-sm text-white/80 drop-shadow [&_a]:text-white/80 [&_a:hover]:text-white [&_span]:text-white/60">
-                    <Breadcrumb
-                        crumbs={[
-                            { text: '笔记', href: '/blog/' },
-                            { text: title }
-                        ]}
-                    />
+                    <Breadcrumb crumbs={postBreadcrumbs} />
                 </div>
                 <div>
                     <h1 class="font-display text-2xl leading-tight font-medium text-white sm:text-3xl sm:leading-tight drop-shadow-lg">{title}</h1>
@@ -97,12 +99,7 @@ const { Content, headings } = await render(post);
         <header class="mb-8">
             {bannerUrl ? null : (
                 <>
-                    <Breadcrumb
-                        crumbs={[
-                            { text: '笔记', href: '/blog/' },
-                            { text: title }
-                        ]}
-                    />
+                    <Breadcrumb crumbs={postBreadcrumbs} />
                     <h1 class="mt-4 font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{title}</h1>
                     <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-secondary">
                         <FormattedDate date={publishDate} />

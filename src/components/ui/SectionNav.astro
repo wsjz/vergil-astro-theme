@@ -1,0 +1,32 @@
+---
+interface NavItem {
+    label: string;
+    href: string;
+    active?: boolean;
+}
+
+interface Props {
+    items: NavItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav class="flex items-center gap-1 p-1 bg-card/60 backdrop-blur-sm shadow rounded-full mb-6">
+    {items.map((item) => {
+        const isActive = item.active;
+        return (
+            <a
+                href={item.href}
+                class:list={[
+                    'inline-flex items-center px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200',
+                    isActive
+                        ? 'bg-accent text-white shadow-sm'
+                        : 'text-secondary hover:text-main hover:bg-muted/50'
+                ]}
+            >
+                {item.label}
+            </a>
+        );
+    })}
+</nav>

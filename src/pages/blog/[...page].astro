@@ -4,6 +4,7 @@ import { type CollectionEntry, getCollection } from 'astro:content';
 import Pagination from '../../components/widgets/Pagination.astro';
 import PostPreview from '../../components/content/PostPreview.astro';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
+import SectionNav from '../../components/ui/SectionNav.astro';
 import siteConfig from '../../data/site-config';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { sortItemsByDateDesc } from '../../utils/data-utils';
@@ -19,11 +20,18 @@ const { page } = Astro.props;
 const blog = page.data;
 ---
 
-<BaseLayout title="笔记" description="记录个人思考与技术探索的笔记" showHeader={false}>
-    <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '笔记' }]} />
-    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">笔记</h1>
+<BaseLayout title="博客" description="记录个人思考与技术探索的博客" showHeader={false}>
+    <SectionNav
+        items={[
+            { label: '近期发布', href: '/blog/', active: true },
+            { label: '分类', href: '/categories/' },
+            { label: '标签', href: '/tags/' },
+            { label: '专栏', href: '/series/' },
+            { label: '归档', href: '/archives/' }
+        ]}
+    />
     {blog.map((post) => (
-        <div class="reveal rounded-xl bg-[var(--bg-card)] p-5 mb-4 sm:mb-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+        <div class="reveal rounded-xl bg-[var(--bg-card)] p-5 mb-4 sm:mb-4 border border-light/30 shadow-sm hover:shadow-md hover:-translate-y-0.5">
             <PostPreview post={post} class="" />
         </div>
     ))}

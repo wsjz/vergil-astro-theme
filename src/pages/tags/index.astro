@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { ChevronRight } from '@lucide/astro';
-import Breadcrumb from '../../components/ui/Breadcrumb.astro';
+import SectionNav from '../../components/ui/SectionNav.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
 
@@ -18,8 +18,15 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
     description="浏览所有标签，发现感兴趣的内容"
     showHeader={false}
 >
-    <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '标签' }]} />
-    <h1 class="mb-12 font-display text-xl sm:mb-16 sm:text-2xl">标签</h1>
+    <SectionNav
+        items={[
+            { label: '近期发布', href: '/blog/' },
+            { label: '分类', href: '/categories/' },
+            { label: '标签', href: '/tags/', active: true },
+            { label: '专栏', href: '/series/' },
+            { label: '归档', href: '/archives/' }
+        ]}
+    />
     {
         tags.map((tag) => {
             const postCount = getPostsByTag(posts, tag.id).length;

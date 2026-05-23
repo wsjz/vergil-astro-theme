@@ -83,7 +83,7 @@ export const headerNavLinks = [
         icon: 'BookOpen',
         children: [
             { label: '主页', href: '/', icon: 'Home' },
-            { label: '笔记', href: '/blog', icon: 'FileText' },
+            { label: '博客', href: '/blog', icon: 'FileText' },
             { label: '相册', href: '/albums', icon: 'Image' },
         ]
     }
