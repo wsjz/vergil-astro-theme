@@ -1,14 +1,12 @@
 ---
-import { getCollection } from 'astro:content';
-import { ChevronRight } from '@lucide/astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SectionNav from '../../components/ui/SectionNav.astro';
-import { getAllCategories, getPostsByCategory, sortItemsByDateDesc } from '../../utils/data-utils';
+import CategoryTreeNode from '../../components/widgets/CategoryTreeNode.astro';
+import { buildCategoryTree, sortItemsByDateDesc } from '../../utils/data-utils';
+import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
-const categories = getAllCategories(posts).sort((a, b) => {
-    return getPostsByCategory(posts, b.id).length - getPostsByCategory(posts, a.id).length;
-});
+const tree = buildCategoryTree(posts);
 ---
 
 <BaseLayout title="分类" description="浏览所有文章分类" showHeader={false}>
@@ -21,27 +19,16 @@ const categories = getAllCategories(posts).sort((a, b) => {
             { label: '归档', href: '/archives/' }
         ]}
     />
-    {categories.length === 0 ? (
+
+    {tree.length === 0 ? (
         <p class="text-secondary">暂无分类</p>
     ) : (
-        <div class="space-y-4">
-            {categories.map((cat) => {
-                const count = getPostsByCategory(posts, cat.id).length;
-                return (
-                    <a
-                        href={`/categories/${cat.id}`}
-                        class="reveal group flex items-center justify-between py-4 border-b border-light hover:border-accent/40 transition-colors"
-                    >
-                        <div>
-                            <h2 class="font-display text-xl font-medium group-hover:text-accent transition-colors">
-                                {cat.name}
-                            </h2>
-                            <p class="text-sm text-secondary mt-0.5">{count} 篇文章</p>
-                        </div>
-                        <ChevronRight class="w-4 h-4 text-secondary group-hover:text-accent transition-colors" />
-                    </a>
-                );
-            })}
+        <div class="reveal bg-card rounded-xl p-5 sm:p-6">
+            <div class="space-y-0.5">
+                {tree.map((node) => (
+                    <CategoryTreeNode node={node} />
+                ))}
+            </div>
         </div>
     )}
 </BaseLayout>

@@ -5,7 +5,7 @@ publishDate: 'Apr 15 2026'
 banner: https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1600&h=400&fit=crop&q=80
 tags:
   - 使用指南
-category: 博客相关
+categories: ["博客相关"]
 series: 博客搭建指南
 isFeatured: true
 ---

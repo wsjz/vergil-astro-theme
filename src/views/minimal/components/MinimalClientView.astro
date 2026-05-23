@@ -14,7 +14,7 @@ const blogItems = posts.map((p) => ({
     title: p.data.title,
     date: p.data.publishDate.toISOString(),
     href: `/views/minimal/blog/${p.id}/`,
-    categoryId: p.data.category ? slugify(p.data.category) : null
+    categoryId: p.data.categories && p.data.categories.length > 0 ? slugify(p.data.categories[p.data.categories.length - 1]) : null
 }));
 
 // 序列化文档树数据（保留层级结构）

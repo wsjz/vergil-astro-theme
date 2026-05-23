@@ -18,14 +18,15 @@ export async function getStaticPaths() {
 type Props = { post: CollectionEntry<'blog'> };
 
 const { post } = Astro.props;
-const { title, publishDate, updatedDate, excerpt, tags = [], seo, category } = post.data;
+const { title, publishDate, updatedDate, excerpt, tags = [], seo, categories } = post.data;
 const { Content } = await render(post);
 
-const categorySlug = category ? slugify(category) : null;
+const leafCategory = categories && categories.length > 0 ? categories[categories.length - 1] : null;
+const categorySlug = leafCategory ? slugify(leafCategory) : null;
 
 const crumbs = [
     { text: '博客', href: '/views/minimal/?type=blog' },
-    ...(categorySlug ? [{ text: category!, href: `/views/minimal/?type=blog&cat=${categorySlug}` }] : []),
+    ...(categorySlug ? [{ text: leafCategory!, href: `/views/minimal/?type=blog&cat=${categorySlug}` }] : []),
     { text: title }
 ];
 ---

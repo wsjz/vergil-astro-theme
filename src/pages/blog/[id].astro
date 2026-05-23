@@ -33,7 +33,7 @@ type Props = { post: CollectionEntry<'blog'>; prevPost: CollectionEntry<'blog'>;
 
 const { href } = Astro.url;
 const { post, prevPost, nextPost } = Astro.props;
-const { title, publishDate, updatedDate, excerpt, tags = [], seo, series, category, fonts, banner } = post.data;
+const { title, publishDate, updatedDate, excerpt, tags = [], seo, series, categories, fonts, banner } = post.data;
 
 function resolveBannerUrl(banner: string | undefined): string | null {
     if (!banner) return null;
@@ -47,10 +47,11 @@ function resolveBannerUrl(banner: string | undefined): string | null {
 const bannerUrl = resolveBannerUrl(banner);
 const { Content, headings } = await render(post);
 
-// 构建面包屑
+// 构建面包屑（取分类路径的最后一级作为叶子分类）
+const leafCategory = categories && categories.length > 0 ? categories[categories.length - 1] : null;
 const postBreadcrumbs = [
     { text: '博客', href: '/blog/' },
-    ...(category ? [{ text: category, href: `/categories/${slugify(category)}/` }] : []),
+    ...(leafCategory ? [{ text: leafCategory, href: `/categories/${slugify(leafCategory)}/` }] : []),
     { text: title }
 ];
 ---

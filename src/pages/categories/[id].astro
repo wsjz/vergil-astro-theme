@@ -1,40 +1,82 @@
 ---
 import { getCollection } from 'astro:content';
 import PostPreview from '../../components/content/PostPreview.astro';
-import Breadcrumb from '../../components/ui/Breadcrumb.astro';
+import SectionNav from '../../components/ui/SectionNav.astro';
+import CategoryTreeNav from '../../components/widgets/CategoryTreeNav.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getAllCategories, getPostsByCategory, sortItemsByDateDesc } from '../../utils/data-utils';
+import { getAllCategories, getPostsByCategory, sortItemsByDateDesc, buildCategoryTree, findCategoryPath } from '../../utils/data-utils';
+import type { CategoryNode } from '../../utils/data-utils';
 
 export async function getStaticPaths() {
     const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
+    const tree = buildCategoryTree(posts);
     const categories = getAllCategories(posts);
-    const paths = categories.map((category) => ({
-        params: { id: category.id },
-        props: { categoryName: category.name }
-    }));
-    // Astro 5 requires at least one path for dynamic routes
+
+    const paths = categories.map((category) => {
+        const path = findCategoryPath(tree, category.id);
+        return {
+            params: { id: category.id },
+            props: {
+                categoryName: category.name,
+                path: path || [{ name: category.name, id: category.id }]
+            }
+        };
+    });
+
     if (paths.length === 0) {
-        return [{ params: { id: '_' }, props: { categoryName: '' } }];
+        return [{ params: { id: '_' }, props: { categoryName: '', path: [] } }];
     }
     return paths;
 }
 
-interface Props { categoryName: string }
-const { categoryName } = Astro.props;
+interface Props {
+    categoryName: string;
+    path: CategoryNode[];
+}
+
+const { categoryName, path } = Astro.props;
 const { id } = Astro.params;
 
 const allPosts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
 const posts = getPostsByCategory(allPosts, id);
+
+const fullPath = path.map((node) => node.name).join(' / ');
+
+// 构建父分类跳转链接（如果有父级）
+const parentNode = path.length > 1 ? path[path.length - 2] : null;
+
+function getSiblingTree(fullTree: CategoryNode[], currentPath: CategoryNode[]): CategoryNode[] {
+    if (currentPath.length <= 1) return fullTree;
+    const rootId = currentPath[0].id;
+    const rootNode = fullTree.find((n) => n.id === rootId);
+    return rootNode ? [rootNode] : fullTree;
+}
+const siblingTree = getSiblingTree(buildCategoryTree(allPosts), path);
 ---
 
 <BaseLayout
-    title={`分类：${categoryName}`}
-    description={`浏览「${categoryName}」分类下的所有文章`}
+    title={`分类：${fullPath}`}
+    description={`浏览「${fullPath}」分类下的所有文章`}
     showHeader={false}
 >
-    <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '分类', href: '/categories' }, { text: categoryName }]} />
-    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">
-        分类：{categoryName}
-    </h1>
-    {posts.map((post) => <PostPreview post={post} class="mb-10 sm:mb-12" />)}
+    <SectionNav
+        items={[
+            { label: '近期发布', href: '/blog/' },
+            { label: `分类：${categoryName}`, href: parentNode ? `/categories/${parentNode.id}` : '/categories/', active: true },
+            { label: '标签', href: '/tags/' },
+            { label: '专栏', href: '/series/' },
+            { label: '归档', href: '/archives/' }
+        ]}
+    />
+    <div class="reveal bg-card rounded-xl p-5 sm:p-6 mb-8">
+        <CategoryTreeNav tree={siblingTree} currentId={id} />
+    </div>
+    {posts.map((post) => {
+        const hasBanner = !!post.data.banner;
+        return (
+            <div class={`reveal rounded-[24px] bg-[var(--bg-card)] p-4 mb-4 sm:mb-4 shadow-[0_1px_4px_-2px_rgba(0,0,0,0.2)] hover:-translate-y-1 ${hasBanner ? 'hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.28),0_6px_12px_-2px_rgba(0,0,0,0.14)]' : 'hover:shadow-[0_6px_12px_-4px_rgba(0,0,0,0.10),0_4px_8px_-2px_rgba(0,0,0,0.06)]'}`}>
+                <PostPreview post={post} class="" />
+            </div>
+        );
+    })}
 </BaseLayout>

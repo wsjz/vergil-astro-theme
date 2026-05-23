@@ -1,0 +1,33 @@
+---
+import { Folder } from '@lucide/astro';
+import type { CategoryNode } from '../../utils/data-utils';
+
+interface Props {
+    node: CategoryNode;
+    depth?: number;
+}
+
+const { node, depth = 0 } = Astro.props;
+const indentClass = depth === 0 ? '' : `pl-${Math.min(depth * 6, 12)}`;
+---
+
+<div>
+    <a
+        href={`/categories/${node.id}`}
+        class="group flex items-center justify-between py-2 hover:text-accent transition-colors"
+        style={`padding-left: ${depth * 24}px`}
+    >
+        <div class="flex items-center gap-2">
+            <Folder class="w-4 h-4 text-muted group-hover:text-accent transition-colors" />
+            <span class="text-sm text-main group-hover:text-accent transition-colors">{node.name}</span>
+        </div>
+        <span class="text-xs text-muted">({node.count})</span>
+    </a>
+    {node.children.length > 0 && (
+        <div>
+            {node.children.map((child) => (
+                <Astro.self node={child} depth={depth + 1} />
+            ))}
+        </div>
+    )}
+</div>

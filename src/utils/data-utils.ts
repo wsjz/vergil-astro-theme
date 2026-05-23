@@ -25,15 +25,70 @@ export function getPostsByTag(posts: CollectionEntry<'blog'>[], tagId: string) {
 }
 
 export function getAllCategories(posts: CollectionEntry<'blog'>[]) {
-    const categories = [...new Set(posts.map((post) => post.data.category).filter(Boolean))] as string[];
-    return categories.map((cat) => ({
+    const allCats = new Set<string>();
+    posts.forEach((post) => {
+        const cats = post.data.categories;
+        if (!cats) return;
+        cats.forEach((cat) => allCats.add(cat));
+    });
+    return [...allCats].map((cat) => ({
         name: cat,
         id: slugify(cat)
     }));
 }
 
 export function getPostsByCategory(posts: CollectionEntry<'blog'>[], categoryId: string) {
-    return posts.filter((post) => post.data.category && slugify(post.data.category) === categoryId);
+    return posts.filter((post) => {
+        const cats = post.data.categories;
+        if (!cats) return false;
+        return cats.some((cat) => slugify(cat) === categoryId);
+    });
+}
+
+// 分类树节点
+export type CategoryNode = {
+    name: string;
+    id: string;
+    count: number;
+    children: CategoryNode[];
+};
+
+export function buildCategoryTree(posts: CollectionEntry<'blog'>[]): CategoryNode[] {
+    const root: CategoryNode[] = [];
+
+    posts.forEach((post) => {
+        const cats = post.data.categories;
+        if (!cats || cats.length === 0) return;
+
+        let currentChildren = root;
+        cats.forEach((catName) => {
+            const id = slugify(catName);
+            let node = currentChildren.find((n) => n.id === id);
+            if (!node) {
+                node = { name: catName, id, count: 0, children: [] };
+                currentChildren.push(node);
+            }
+            node.count++;
+            currentChildren = node.children;
+        });
+    });
+
+    return root;
+}
+
+export function findCategoryPath(tree: CategoryNode[], targetId: string): CategoryNode[] | null {
+    for (const node of tree) {
+        if (node.id === targetId) {
+            return [node];
+        }
+        if (node.children.length > 0) {
+            const childPath = findCategoryPath(node.children, targetId);
+            if (childPath) {
+                return [node, ...childPath];
+            }
+        }
+    }
+    return null;
 }
 
 export function getAllSeries(posts: CollectionEntry<'blog'>[]) {

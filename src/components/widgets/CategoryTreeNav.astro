@@ -1,0 +1,35 @@
+---
+import { Folder } from '@lucide/astro';
+import type { CategoryNode } from '../../utils/data-utils';
+
+interface Props {
+    tree: CategoryNode[];
+    currentId: string;
+    depth?: number;
+}
+
+const { tree, currentId, depth = 0 } = Astro.props;
+---
+
+{tree.map((node) => (
+    <div>
+        <a
+            href={`/categories/${node.id}`}
+            class={`group flex items-center justify-between py-2 transition-colors ${
+                node.id === currentId ? 'text-accent font-medium' : 'hover:text-accent'
+            }`}
+            style={`padding-left: ${depth * 24}px`}
+        >
+            <div class="flex items-center gap-2">
+                <Folder class={`w-4 h-4 transition-colors ${node.id === currentId ? 'text-accent' : 'text-muted group-hover:text-accent'}`} />
+                <span class={`text-sm ${node.id === currentId ? 'text-accent' : 'text-main group-hover:text-accent'} transition-colors`}>
+                    {node.name}
+                </span>
+            </div>
+            <span class="text-xs text-muted">({node.count})</span>
+        </a>
+        {node.children.length > 0 && (
+            <Astro.self tree={node.children} currentId={currentId} depth={depth + 1} />
+        )}
+    </div>
+))}

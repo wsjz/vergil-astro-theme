@@ -3,7 +3,7 @@ import type { GetStaticPathsOptions, Page } from 'astro';
 import { type CollectionEntry, getCollection } from 'astro:content';
 import Pagination from '../../../components/widgets/Pagination.astro';
 import PostPreview from '../../../components/content/PostPreview.astro';
-import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
+import SectionNav from '../../../components/ui/SectionNav.astro';
 
 import siteConfig from '../../../data/site-config';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
@@ -35,8 +35,15 @@ const currentTag = allTags.find((tag) => {
 ---
 
 <BaseLayout title={`标签：${currentTag?.name}`} description={`「${currentTag?.name}」标签下的所有文章`} showHeader={false}>
-    <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '标签', href: '/tags' }, { text: currentTag?.name ?? params.id }]} />
-    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">标签：{currentTag?.name}</h1>
+    <SectionNav
+        items={[
+            { label: '近期发布', href: '/blog/' },
+            { label: '分类', href: '/categories/' },
+            { label: `标签：${currentTag?.name ?? params.id}`, href: '/tags/', active: true },
+            { label: '专栏', href: '/series/' },
+            { label: '归档', href: '/archives/' }
+        ]}
+    />
     {blog.map((post) => {
         const hasBanner = !!post.data.banner;
         return (
