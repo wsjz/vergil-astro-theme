@@ -1,6 +1,4 @@
 ---
-import { ChevronUp } from '@lucide/astro';
-
 interface Heading {
     depth: number;
     slug: string;
@@ -17,17 +15,20 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
 
 <button
     id="back-to-top-btn"
-    class="fixed right-4 xl:right-64 2xl:right-72 bottom-10 z-50 flex items-center justify-center w-10 h-10 bg-card border border-light rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/50 hover:shadow-xl transition-all duration-300 opacity-0 invisible translate-y-4"
-    aria-label="Back to top"
+    class="fixed right-4 xl:right-6 bottom-6 z-50 flex items-center justify-center w-10 h-10 bg-card/90 backdrop-blur-sm border border-light/60 rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/40 hover:shadow-xl hover:scale-110 transition-all duration-300 opacity-0 invisible translate-y-3"
+    aria-label="回到顶部"
+    title="回到顶部"
 >
-    <ChevronUp class="w-4 h-4" />
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+    </svg>
 </button>
 
 {tocHeadings.length > 0 && (
     <>
         <button
             id="floating-toc-btn"
-            class="fixed right-4 xl:right-[max(1rem,calc(2%+320px))] bottom-24 z-40 xl:hidden flex items-center justify-center w-10 h-10 bg-card border border-light rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/50 hover:shadow-xl transition-all duration-200"
+            class="fixed right-4 xl:right-[max(1rem,calc(2%+320px))] bottom-[5.5rem] z-40 xl:hidden flex items-center justify-center w-10 h-10 bg-card/90 backdrop-blur-sm border border-light/60 rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/40 hover:shadow-xl hover:scale-110 transition-all duration-300"
             aria-label="Open TOC"
             aria-expanded="false"
         >
@@ -85,33 +86,31 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
 
 <script is:inline>
     (function() {
-        let scrollListenerAdded = false;
-
-        function toggleBackToTop() {
-            const backToTopBtn = document.getElementById('back-to-top-btn');
-            if (!backToTopBtn) return;
-            if (window.scrollY > 300) {
-                backToTopBtn.classList.remove('opacity-0', 'invisible', 'translate-y-4');
-                backToTopBtn.classList.add('opacity-100', 'visible', 'translate-y-0');
-            } else {
-                backToTopBtn.classList.add('opacity-0', 'invisible', 'translate-y-4');
-                backToTopBtn.classList.remove('opacity-100', 'visible', 'translate-y-0');
+        // 返回顶部
+        (function() {
+            var btn = document.getElementById('back-to-top-btn');
+            if (!btn) return;
+            var ticking = false;
+            function update() {
+                if (window.scrollY > 400) {
+                    btn.classList.remove('opacity-0', 'invisible', 'translate-y-3');
+                    btn.classList.add('opacity-100', 'visible', 'translate-y-0');
+                } else {
+                    btn.classList.add('opacity-0', 'invisible', 'translate-y-3');
+                    btn.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                }
+                ticking = false;
             }
-        }
-
-        if (!scrollListenerAdded) {
-            let ticking = false;
-            window.addEventListener('scroll', () => {
+            window.addEventListener('scroll', function() {
                 if (!ticking) {
-                    window.requestAnimationFrame(() => {
-                        toggleBackToTop();
-                        ticking = false;
-                    });
+                    requestAnimationFrame(update);
                     ticking = true;
                 }
             }, { passive: true });
-            scrollListenerAdded = true;
-        }
+            btn.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        })();
 
         (function setupEscapeOnce() {
             if (window.__floatingTocEscapeSetup) return;
@@ -139,13 +138,6 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
             const panel = document.getElementById('floating-toc-panel');
             const closeBtn = document.getElementById('floating-toc-close');
             const backdrop = document.getElementById('floating-toc-backdrop');
-            const backToTopBtn = document.getElementById('back-to-top-btn');
-
-            if (backToTopBtn) {
-                backToTopBtn.addEventListener('click', () => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
-            }
 
             if (!btn || !panel || !closeBtn || !backdrop) return;
 

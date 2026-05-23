@@ -93,26 +93,35 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
             });
         });
 
+        const tocNav = document.querySelector('[data-toc-nav]');
+
         const observer = new IntersectionObserver((entries) => {
             if (isClickScrolling) return;
-            let topEntry: IntersectionObserverEntry | null = null;
+
+            const visible: IntersectionObserverEntry[] = [];
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    if (!topEntry || entry.boundingClientRect.top < topEntry.boundingClientRect.top) {
-                        topEntry = entry;
-                    }
-                }
+                if (entry.isIntersecting) visible.push(entry);
             });
-            if (topEntry) {
-                const id = topEntry.target.getAttribute('id');
-                tocLinks.forEach(l => l.classList.remove('toc-active'));
-                const activeLink = document.querySelector(`.toc-sidebar a[href="#${id}"]`);
-                if (activeLink) {
-                    activeLink.classList.add('toc-active');
+            if (visible.length === 0) return;
+
+            visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+            const id = visible[0].target.getAttribute('id');
+
+            tocLinks.forEach(l => l.classList.remove('toc-active'));
+            const activeLink = document.querySelector(`.toc-sidebar a[href="#${id}"]`);
+            if (activeLink) {
+                activeLink.classList.add('toc-active');
+                if (tocNav) {
+                    const navRect = tocNav.getBoundingClientRect();
+                    const linkRect = activeLink.getBoundingClientRect();
+                    const offset = linkRect.top - navRect.top;
+                    if (offset < 0 || offset > navRect.height - linkRect.height) {
+                        tocNav.scrollTo({ top: tocNav.scrollTop + offset - navRect.height / 3, behavior: 'smooth' });
+                    }
                 }
             }
         }, {
-            rootMargin: '-100px 0px -70% 0px',
+            rootMargin: '-80px 0px -60% 0px',
             threshold: 0
         });
 
