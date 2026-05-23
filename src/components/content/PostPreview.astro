@@ -7,7 +7,7 @@ import { slugify } from '../../utils/common-utils';
 type Props = { post: CollectionEntry<'blog'>; class?: string; headingLevel?: 'h2' | 'h3' };
 
 const { post, class: className, headingLevel = 'h2' } = Astro.props;
-const { title, publishDate, updatedDate, excerpt, tags } = post.data;
+const { title, publishDate, updatedDate, excerpt, tags, banner } = post.data;
 const TitleTag = headingLevel;
 
 function calculateReadingTime(content: string): number {
@@ -18,49 +18,82 @@ function calculateReadingTime(content: string): number {
 }
 
 const readingTime = calculateReadingTime(post.body || '');
+const hasBanner = !!banner;
 ---
 
-<div class:list={['py-6', className]}>
-    <a href={`/blog/${post.id}/`} class="block mb-4">
-        <TitleTag class="font-display text-xl font-medium text-main hover:text-accent transition-colors line-clamp-2">
-            {title}
-        </TitleTag>
-    </a>
-
-    <div class="flex items-center gap-4 text-sm text-secondary mb-3">
-        <span class="flex items-center gap-1">
-            <Calendar class="w-4 h-4" />
-            <FormattedDate date={publishDate} />
-        </span>
-        {updatedDate && (
-            <span class="text-muted">更新于 <FormattedDate date={updatedDate} /></span>
-        )}
-        <span class="flex items-center gap-1">
-            <Clock class="w-4 h-4" />
-            {readingTime} min
-        </span>
-    </div>
-    
-    {tags && tags.length > 0 && (
-        <div class="flex items-center gap-1 text-sm mb-4">
-            {tags.map((tag, index) => (
-                <span>
-                    {index > 0 && <span class="text-secondary">, </span>}
-                    <a
-                        href={`/tags/${slugify(tag)}`}
-                        class="text-accent hover:underline"
-                        onclick="event.stopPropagation();"
-                    >
-                        #{tag}
-                    </a>
-                </span>
-            ))}
-        </div>
-    )}
-    
-    {excerpt && (
-        <a href={`/blog/${post.id}/`} class="block text-base text-secondary leading-relaxed line-clamp-3 hover:text-accent transition-colors">
-            {excerpt}
+<div class:list={['', className]}>
+    {hasBanner ? (
+        <a href={`/blog/${post.id}/`} class="block relative -m-4 overflow-hidden rounded-[20px] group">
+            <img
+                src={banner}
+                alt={title}
+                class="w-full aspect-[2.35/1] object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 flex flex-col justify-end p-4 sm:p-5">
+                <TitleTag class="font-display text-lg sm:text-xl font-medium text-white drop-shadow line-clamp-2">
+                    {title}
+                </TitleTag>
+                {excerpt && (
+                    <p class="mt-1 text-sm text-white/80 line-clamp-2">{excerpt}</p>
+                )}
+                {tags && tags.length > 0 && (
+                    <div class="flex items-center gap-1 text-sm mt-1.5">
+                        {tags.map((tag, index) => (
+                            <span>
+                                {index > 0 && <span class="text-white/50">, </span>}
+                                <span class="text-white/70">#{tag}</span>
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
         </a>
+    ) : (
+        <a href={`/blog/${post.id}/`} class="block mb-2">
+            <TitleTag class="font-display text-lg font-medium text-main hover:text-accent transition-colors line-clamp-2">
+                {title}
+            </TitleTag>
+        </a>
+    )}
+
+    {!hasBanner && (
+        <>
+            {excerpt && (
+                <a href={`/blog/${post.id}/`} class="text-[15px] text-secondary leading-relaxed line-clamp-3 hover:text-accent transition-colors mb-3">
+                    {excerpt}
+                </a>
+            )}
+            <div class="flex items-center gap-3 text-sm text-secondary">
+                <span class="flex items-center gap-1">
+                    <Calendar class="w-4 h-4" />
+                    <FormattedDate date={publishDate} />
+                </span>
+                {updatedDate && (
+                    <span class="text-muted">更新于 <FormattedDate date={updatedDate} /></span>
+                )}
+                <span class="flex items-center gap-1">
+                    <Clock class="w-4 h-4" />
+                    {readingTime} min
+                </span>
+            </div>
+            {tags && tags.length > 0 && (
+                <div class="flex items-center gap-1 text-sm mt-2">
+                    {tags.map((tag, index) => (
+                        <span>
+                            {index > 0 && <span class="text-secondary">, </span>}
+                            <a
+                                href={`/tags/${slugify(tag)}`}
+                                class="text-accent hover:underline"
+                                onclick="event.stopPropagation();"
+                            >
+                                #{tag}
+                            </a>
+                        </span>
+                    ))}
+                </div>
+            )}
+        </>
     )}
 </div>

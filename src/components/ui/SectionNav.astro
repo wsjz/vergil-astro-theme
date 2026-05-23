@@ -12,7 +12,7 @@ interface Props {
 const { items } = Astro.props;
 ---
 
-<nav class="flex items-center gap-1 p-1 bg-card/60 backdrop-blur-sm shadow rounded-full mb-6">
+<nav class="flex items-center gap-1 p-1 bg-card/60 backdrop-blur-sm rounded-full mb-6 shadow-[0_1px_12px_rgba(0,0,0,0.04),0_8px_16px_-4px_rgba(0,0,0,0.03)]">
     {items.map((item) => {
         const isActive = item.active;
         return (

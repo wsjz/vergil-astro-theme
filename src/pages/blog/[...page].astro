@@ -31,7 +31,7 @@ const blog = page.data;
         ]}
     />
     {blog.map((post) => (
-        <div class="reveal rounded-xl bg-[var(--bg-card)] p-5 mb-4 sm:mb-4 border border-light/30 shadow-sm hover:shadow-md hover:-translate-y-0.5">
+        <div class="reveal rounded-[20px] bg-[var(--bg-card)] p-4 mb-4 sm:mb-4 hover:shadow-md hover:-translate-y-0.5">
             <PostPreview post={post} class="" />
         </div>
     ))}

@@ -107,7 +107,7 @@ img[loading="lazy"].img-loaded {
 .reveal {
     opacity: 0;
     transform: translateY(16px);
-    transition: all 0.2ms ease-out;
+    transition: all 0.2s ease-out;
 }
 .reveal.visible {
     opacity: 1;
