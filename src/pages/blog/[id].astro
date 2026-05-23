@@ -69,13 +69,14 @@ const postBreadcrumbs = [
     <FloatingToc headings={headings} />
 
     {bannerUrl && (
-        <div class="article-banner relative mb-8 overflow-hidden rounded-xl h-[180px] sm:h-[220px]">
+        <div class="article-banner group relative mb-8 overflow-hidden rounded-xl h-[180px] sm:h-[220px]">
             <img
                 src={bannerUrl}
                 alt={title}
                 class="absolute inset-0 w-full h-full object-cover"
                 loading="eager"
             />
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
             <div class="absolute inset-0 flex flex-col justify-between p-6 sm:p-8">
                 <div class="flex flex-wrap items-center gap-2 text-sm text-white/80 drop-shadow [&_a]:text-white/80 [&_a:hover]:text-white [&_span]:text-white/60">
