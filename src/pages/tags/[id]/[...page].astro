@@ -37,6 +37,13 @@ const currentTag = allTags.find((tag) => {
 <BaseLayout title={`标签：${currentTag?.name}`} description={`「${currentTag?.name}」标签下的所有文章`} showHeader={false}>
     <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '标签', href: '/tags' }, { text: currentTag?.name ?? params.id }]} />
     <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">标签：{currentTag?.name}</h1>
-    {blog.map((post) => <PostPreview post={post} class="mb-10 sm:mb-12" />)}
+    {blog.map((post) => {
+        const hasBanner = !!post.data.banner;
+        return (
+            <div class={`reveal rounded-[24px] bg-[var(--bg-card)] p-4 mb-4 sm:mb-4 shadow-[0_1px_4px_-2px_rgba(0,0,0,0.2)] hover:-translate-y-1 ${hasBanner ? 'hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.28),0_6px_12px_-2px_rgba(0,0,0,0.14)]' : 'hover:shadow-[0_6px_12px_-4px_rgba(0,0,0,0.10),0_4px_8px_-2px_rgba(0,0,0,0.06)]'}`}>
+                <PostPreview post={post} class="" />
+            </div>
+        );
+    })}
     <Pagination page={page} class="my-16 sm:my-24" />
 </BaseLayout>

@@ -66,16 +66,28 @@ const isArticle = head.pageType === 'article';
             </div>
         </main>
 
-        <div class="fixed bottom-6 left-0 right-0 flex justify-center z-50">
+        <button
+            id="minimal-back-to-top"
+            class="fixed right-4 xl:right-6 bottom-6 z-50 flex items-center justify-center w-10 h-10 bg-card/90 backdrop-blur-sm border border-light/60 rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/40 hover:shadow-xl hover:scale-110 transition-all duration-300 opacity-0 invisible translate-y-3"
+            aria-label="回到顶部"
+            title="回到顶部"
+        >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+            </svg>
+        </button>
+
+        <div class="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
             <button
                 id="minimal-back-btn"
-                class="px-4 py-2 rounded-full bg-card border border-light text-sm text-secondary hover:text-accent transition-colors shadow-sm cursor-pointer"
+                class="px-4 py-2 rounded-full bg-card/90 backdrop-blur-sm border border-light/60 shadow-lg text-sm text-secondary hover:text-accent hover:border-accent/40 hover:shadow-xl hover:scale-110 transition-all duration-300 cursor-pointer pointer-events-auto"
             >
                 返回
             </button>
         </div>
         <script is:inline>
             (function(){
+                // 返回按钮（事件委托，DOM 替换后仍有效）
                 document.addEventListener('click', function(e){
                     var btn = e.target.closest('#minimal-back-btn');
                     if(!btn) return;
@@ -85,6 +97,37 @@ const isArticle = head.pageType === 'article';
                         location.href = '/';
                     }
                 });
+
+                // 回到顶部
+                function initBackToTop() {
+                    var btn = document.getElementById('minimal-back-to-top');
+                    if (!btn || btn.__bttInit) return;
+                    btn.__bttInit = true;
+
+                    var ticking = false;
+                    function update() {
+                        if (window.scrollY > 400) {
+                            btn.classList.remove('opacity-0', 'invisible', 'translate-y-3');
+                            btn.classList.add('opacity-100', 'visible', 'translate-y-0');
+                        } else {
+                            btn.classList.add('opacity-0', 'invisible', 'translate-y-3');
+                            btn.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                        }
+                        ticking = false;
+                    }
+                    window.addEventListener('scroll', function() {
+                        if (!ticking) {
+                            requestAnimationFrame(update);
+                            ticking = true;
+                        }
+                    }, { passive: true });
+                    btn.addEventListener('click', function() {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                    update();
+                }
+                document.addEventListener('astro:page-load', initBackToTop);
+                initBackToTop();
             })();
         </script>
 

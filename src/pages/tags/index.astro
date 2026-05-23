@@ -1,16 +1,17 @@
 ---
 import { getCollection } from 'astro:content';
-import { ChevronRight } from '@lucide/astro';
 import SectionNav from '../../components/ui/SectionNav.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
-const tags = getAllTags(posts).sort((tagA, tagB) => {
-    const postCountTagA = getPostsByTag(posts, tagA.id).length;
-    const postCountTagB = getPostsByTag(posts, tagB.id).length;
-    return postCountTagB - postCountTagA;
-});
+const tags = getAllTags(posts);
+
+// 为每个标签计算文章数并排序
+const tagsWithCount = tags.map((tag) => {
+    const count = getPostsByTag(posts, tag.id).length;
+    return { ...tag, count };
+}).sort((a, b) => b.count - a.count);
 ---
 
 <BaseLayout
@@ -27,24 +28,19 @@ const tags = getAllTags(posts).sort((tagA, tagB) => {
             { label: '归档', href: '/archives/' }
         ]}
     />
-    {
-        tags.map((tag) => {
-            const postCount = getPostsByTag(posts, tag.id).length;
-            return (
-                <a class="reveal group mb-10 flex items-start justify-between gap-8 sm:mb-12" href={`/tags/${tag.id}`}>
-                    <div class="grow">
-                        <h2 class="font-display text-lg leading-tight font-medium group-hover:underline group-hover:decoration-dashed group-hover:decoration-1 group-hover:underline-offset-4 sm:text-xl">
-                            {tag.name}
-                        </h2>
-                        <div class="mt-1 text-sm leading-normal">
-                            {postCount} 篇
-                        </div>
-                    </div>
-                    <div class="hidden font-display opacity-0 transition group-hover:opacity-100 sm:inline-flex sm:shrink-0 sm:items-center sm:gap-1">
-                        查看文章 <ChevronRight class="h-4 w-4" />
-                    </div>
+
+    <div class="reveal flex flex-wrap gap-2.5">
+        {
+            tagsWithCount.map((tag) => (
+                <a
+                    href={`/tags/${tag.id}`}
+                    class="group inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-muted/40 text-sm hover:bg-accent/10 transition-colors duration-200"
+                    title={`${tag.name} · ${tag.count} 篇`}
+                >
+                    <span class="text-muted group-hover:text-accent/70 transition-colors">#</span>
+                    <span class="text-secondary group-hover:text-accent transition-colors">{tag.name} ({tag.count})</span>
                 </a>
-            );
-        })
-    }
+            ))
+        }
+    </div>
 </BaseLayout>
