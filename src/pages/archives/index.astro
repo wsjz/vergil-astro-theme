@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import { sortItemsByDateDesc } from '../../utils/data-utils';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
@@ -21,17 +21,17 @@ const sortedYears = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
 
 // Format month and day
 function formatDate(date: Date): string {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${months[date.getMonth()]} ${date.getDate()}`;
+    return `${date.getMonth() + 1}月${date.getDate()}日`;
 }
 ---
 
 <BaseLayout
-    title="Archives"
-    description="Browse all blog posts organized by year. Explore the complete archive of articles and insights."
+    title="归档"
+    description="按年份浏览所有博客文章，探索完整的文章归档。"
     showHeader={false}
 >
-    <h1 class="mb-12 font-display text-xl sm:mb-16 sm:text-2xl">Archives</h1>
+    <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '归档' }]} />
+    <h1 class="mb-12 font-display text-xl sm:mb-16 sm:text-2xl">归档</h1>
     
     <div class="space-y-16 sm:space-y-20">
         {sortedYears.map((year) => (
@@ -39,7 +39,7 @@ function formatDate(date: Date): string {
                 <h2 class="mb-8 flex items-baseline gap-4 font-display text-lg font-medium sm:text-xl">
                     <span>{year}</span>
                     <span class="text-sm font-normal text-secondary">
-                        {postsByYear[year].length} {postsByYear[year].length === 1 ? 'post' : 'posts'}
+                        {postsByYear[year].length} 篇文章
                     </span>
                 </h2>
                 <div class="space-y-1">

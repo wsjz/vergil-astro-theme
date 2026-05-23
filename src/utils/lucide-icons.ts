@@ -2,7 +2,7 @@ import {
     Home, Database, Heart, MoreHorizontal, FolderOpen, BookOpen,
     FileText, Image, Lightbulb, MessageSquare, Clock, Github,
     Link, User, TrainFront, ChevronDown, ChevronRight, Search,
-    Menu, X
+    Menu, X, Wrench
 } from '@lucide/astro';
 
 export const lucideNavIcons: Record<string, any> = {
@@ -22,6 +22,7 @@ export const lucideNavIcons: Record<string, any> = {
     'link': Link,
     'user': User,
     'train': TrainFront,
+    'wrench': Wrench,
     // 内部固定图标
     'chevron-down': ChevronDown,
     'chevron-right': ChevronRight,

@@ -120,7 +120,14 @@ const showAutoRender = autoRender && groupChildren.length > 0;
         <header class="mb-8">
             {!bannerUrl && (
                 <>
-                    <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{entry.data.title}</h1>
+                    <Breadcrumb
+                        crumbs={[
+                            { text: '文档', href: '/docs/' },
+                            { text: metaTitle, href: `/docs/${docId}/` },
+                            { text: String(entry.data.title) }
+                        ]}
+                    />
+                    <h1 class="mt-4 font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{entry.data.title}</h1>
                     {entry.data.excerpt && (
                         <p class="mt-3 text-sm text-secondary">{entry.data.excerpt}</p>
                     )}

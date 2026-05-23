@@ -30,6 +30,7 @@ export const headerNavLinks = [
         label: '更多',
         icon: 'more-horizontal',
         children: [
+            { label: '工具', href: '/tools', icon: 'wrench' },
             { label: '留言', href: '/contact', icon: 'message-square' },
             { label: '建站历史', href: '/history', icon: 'clock' }
         ]

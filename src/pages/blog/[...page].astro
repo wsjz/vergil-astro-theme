@@ -3,7 +3,7 @@ import type { GetStaticPathsOptions, Page } from 'astro';
 import { type CollectionEntry, getCollection } from 'astro:content';
 import Pagination from '../../components/widgets/Pagination.astro';
 import PostPreview from '../../components/content/PostPreview.astro';
-
+import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import siteConfig from '../../data/site-config';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { sortItemsByDateDesc } from '../../utils/data-utils';
@@ -19,8 +19,9 @@ const { page } = Astro.props;
 const blog = page.data;
 ---
 
-<BaseLayout title="Blog" description="Embark on a journey of personal insights and experiences through my blog" showHeader={false}>
-    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">Blog Archive</h1>
+<BaseLayout title="笔记" description="记录个人思考与技术探索的笔记" showHeader={false}>
+    <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '笔记' }]} />
+    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">笔记</h1>
     {blog.map((post) => (
         <div class="reveal rounded-xl bg-[var(--bg-card)] p-5 mb-4 sm:mb-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
             <PostPreview post={post} class="" />

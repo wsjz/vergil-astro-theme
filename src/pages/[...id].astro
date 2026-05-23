@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/ui/Breadcrumb.astro';
 import Comments from '../components/widgets/Comments.astro';
 import Subscribe from '../components/widgets/Subscribe.astro';
 import siteConfig from '../data/site-config';
@@ -23,6 +24,9 @@ const { Content } = await render(page);
 ---
 
 <BaseLayout title={seo?.title ?? title} description={seo?.description} image={seo?.image} showHeader={false} articleTitle={title} commentsEnabled={siteConfig.comments?.enabled} fonts={fonts}>
+    {page.id === 'contact' && (
+        <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '留言' }]} />
+    )}
     <article class="mb-16 sm:mb-24">
         <header class="mb-8">
             <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{title}</h1>

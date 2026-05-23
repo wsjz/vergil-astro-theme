@@ -74,7 +74,7 @@ const { Content, headings } = await render(post);
                 <div class="flex flex-wrap items-center gap-2 text-sm text-white/80 drop-shadow [&_a]:text-white/80 [&_a:hover]:text-white [&_span]:text-white/60">
                     <Breadcrumb
                         crumbs={[
-                            { text: 'Blog', href: '/blog/' },
+                            { text: '笔记', href: '/blog/' },
                             { text: title }
                         ]}
                     />
@@ -97,7 +97,13 @@ const { Content, headings } = await render(post);
         <header class="mb-8">
             {bannerUrl ? null : (
                 <>
-                    <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{title}</h1>
+                    <Breadcrumb
+                        crumbs={[
+                            { text: '笔记', href: '/blog/' },
+                            { text: title }
+                        ]}
+                    />
+                    <h1 class="mt-4 font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{title}</h1>
                     <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-secondary">
                         <FormattedDate date={publishDate} />
                         <ReadingTime content={post.body || ''} />
