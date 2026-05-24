@@ -140,6 +140,9 @@ export type SiteConfig = {
         enabled: boolean;
         autoplay?: boolean;
     };
+    tagCloud?: {
+        enabled: boolean;
+    };
 };
 
 export type AgentProvider = 'rive' | 'live2d';

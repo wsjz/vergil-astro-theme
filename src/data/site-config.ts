@@ -13,7 +13,7 @@ import { headerNavLinks, views, footerNavLinks } from './config/nav';
 import { siteInfo, heroData, subscribe, postsPerPage, projectsPerPage } from './config/identity';
 
 // ── 功能开关 ──
-import { comments, agent, sidebar, floatingAudio } from './config/features';
+import { comments, agent, sidebar, floatingAudio, tagCloud } from './config/features';
 
 // ── 开屏页 ──
 import { splash } from './config/splash';
@@ -58,6 +58,7 @@ const siteConfig: SiteConfig = {
     screenshotService,
     sidebar,
     floatingAudio,
+    tagCloud,
 };
 
 export default siteConfig;

@@ -75,3 +75,7 @@ export const floatingAudio = {
     enabled: true,
     autoplay: false,
 };
+
+export const tagCloud = {
+    enabled: true,
+};

@@ -3,15 +3,17 @@ import { getCollection } from 'astro:content';
 import SectionNav from '../../components/ui/SectionNav.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
+import siteConfig from '../../data/site-config';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
 const tags = getAllTags(posts);
 
-// 为每个标签计算文章数并排序
 const tagsWithCount = tags.map((tag) => {
     const count = getPostsByTag(posts, tag.id).length;
     return { ...tag, count };
 }).sort((a, b) => b.count - a.count);
+
+const tagListJson = JSON.stringify(tagsWithCount.map((t) => ({ name: t.name, id: t.id, count: t.count })));
 ---
 
 <BaseLayout
@@ -29,7 +31,7 @@ const tagsWithCount = tags.map((tag) => {
         ]}
     />
 
-    <div class="reveal flex flex-wrap gap-2.5">
+    <div class="reveal flex flex-wrap gap-2.5 mb-10">
         {
             tagsWithCount.map((tag) => (
                 <a
@@ -43,4 +45,356 @@ const tagsWithCount = tags.map((tag) => {
             ))
         }
     </div>
+
+    {siteConfig.tagCloud?.enabled && (
+    <div
+        id="tag-planet-scene"
+        class="reveal relative w-full overflow-hidden rounded-xl"
+        style="height: 400px;"
+    >
+        <div id="tag-planet-layer" class="absolute inset-0"></div>
+    </div>
+
+    <script is:inline define:vars={{ tagListJson }}>
+        window.__tagList = JSON.parse(tagListJson || '[]');
+    </script>
+
+    <style is:inline>
+        #tag-planet-scene {
+            cursor: grab;
+            touch-action: none;
+        }
+        #tag-planet-scene:active {
+            cursor: grabbing;
+        }
+        .tag-planet-node {
+            position: absolute;
+            white-space: nowrap;
+            will-change: transform, opacity;
+            display: flex;
+            align-items: center;
+        }
+        .tag-planet-node a {
+            display: inline-block;
+            text-decoration: none;
+            line-height: 1;
+            transition: transform 0.25s ease;
+            transform-origin: center center;
+        }
+        .tag-planet-node a:hover {
+            transform: scale(1.15);
+        }
+    </style>
+
+    <script is:inline>
+        (function() {
+            var tagList = window.__tagList || [];
+            if (tagList.length === 0) return;
+
+            function getAccentColor() {
+                return getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim() || '#c07818';
+            }
+            function getSecondaryColor() {
+                return getComputedStyle(document.documentElement).getPropertyValue('--color-secondary').trim() || '#6b6b6b';
+            }
+            function getMutedColor() {
+                return getComputedStyle(document.documentElement).getPropertyValue('--color-muted').trim() || '#9ca3af';
+            }
+
+            var scene, layer;
+            var tagElements = [];
+            var radius = 180;
+            var rotX = 15, rotY = 0;
+            var velX = 0, velY = 0;
+            var isDragging = false;
+            var autoRotate = true;
+            var hasDragged = false;
+            var dragStartX, dragStartY;
+            var rafId = null;
+            var isVisible = true;
+            var isPageVisible = !document.hidden;
+            var observer = null;
+            var resizeTimer = null;
+            var touchId = null;
+
+            function fibonacciSphere(n, r) {
+                var points = [];
+                var phi = Math.PI * (3 - Math.sqrt(5));
+                for (var i = 0; i < n; i++) {
+                    var y = 1 - (i / (n - 1)) * 2;
+                    var rad = Math.sqrt(1 - y * y);
+                    var theta = phi * i;
+                    points.push({
+                        x: Math.cos(theta) * rad * r,
+                        y: y * r,
+                        z: Math.sin(theta) * rad * r
+                    });
+                }
+                return points;
+            }
+
+            function startAnimation() {
+                if (!rafId && isVisible && isPageVisible) {
+                    rafId = requestAnimationFrame(animate);
+                }
+            }
+
+            function stopAnimation() {
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+            }
+
+            function initTagPlanet() {
+                if (scene) {
+                    scene.removeEventListener('mousedown', onMouseDown);
+                    scene.removeEventListener('click', onClick, true);
+                    scene.removeEventListener('touchstart', onTouchStart);
+                }
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', onTouchEnd);
+                if (observer) {
+                    observer.disconnect();
+                    observer = null;
+                }
+                stopAnimation();
+
+                scene = document.getElementById('tag-planet-scene');
+                layer = document.getElementById('tag-planet-layer');
+                if (!scene || !layer) return;
+
+                layer.innerHTML = '';
+                tagElements = [];
+                isVisible = true;
+
+                var W = scene.offsetWidth;
+                var H = scene.offsetHeight;
+                radius = Math.min(W, H) / 2.2;
+
+                var maxCount = Math.max.apply(null, tagList.map(function(t) { return t.count; }));
+                var minCount = Math.min.apply(null, tagList.map(function(t) { return t.count; }));
+                var range = maxCount - minCount || 1;
+                var accent = getAccentColor();
+                var secondary = getSecondaryColor();
+                var muted = getMutedColor();
+
+                var points = fibonacciSphere(tagList.length, radius);
+
+                tagList.forEach(function(tag, i) {
+                    var ratio = (tag.count - minCount) / range;
+                    var color = ratio >= 0.6 ? accent : (ratio >= 0.3 ? secondary : muted);
+                    var p = points[i];
+
+                    var node = document.createElement('div');
+                    node.className = 'tag-planet-node';
+
+                    var link = document.createElement('a');
+                    link.href = '/tags/' + tag.id;
+                    link.style.color = color;
+                    link.style.fontSize = (13 + ratio * 15) + 'px';
+
+                    var wrapper = document.createElement('span');
+                    wrapper.textContent = tag.name;
+                    wrapper.style.display = 'inline-block';
+                    wrapper.style.transformOrigin = 'center center';
+
+                    link.appendChild(wrapper);
+                    node.appendChild(link);
+                    layer.appendChild(node);
+
+                    tagElements.push({
+                        el: node,
+                        wrapper: wrapper,
+                        point: p,
+                        scaleRatio: 0.8 + ratio * 0.2,
+                        ratio: ratio
+                    });
+                });
+
+                scene.addEventListener('mousedown', onMouseDown);
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                scene.addEventListener('click', onClick, true);
+                scene.addEventListener('touchstart', onTouchStart, { passive: false });
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+
+                observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        isVisible = entry.isIntersecting;
+                        if (isVisible && isPageVisible) {
+                            startAnimation();
+                        } else {
+                            stopAnimation();
+                        }
+                    });
+                }, { threshold: 0.05 });
+                observer.observe(scene);
+
+                startAnimation();
+            }
+
+            function onMouseDown(e) {
+                if (e.button !== 0) return;
+                isDragging = true;
+                hasDragged = false;
+                autoRotate = false;
+                velX = 0; velY = 0;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+            }
+
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                var dx = e.clientX - dragStartX;
+                var dy = e.clientY - dragStartY;
+                if (Math.abs(dx) > 2 || Math.abs(dy) > 2) hasDragged = true;
+                if (hasDragged) {
+                    rotY += dx * 0.4;
+                    rotX -= dy * 0.4;
+                    velX = dx * 0.4;
+                    velY = -dy * 0.4;
+                    dragStartX = e.clientX;
+                    dragStartY = e.clientY;
+                }
+            }
+
+            function onMouseUp() {
+                isDragging = false;
+            }
+
+            function onClick(e) {
+                if (hasDragged) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    hasDragged = false;
+                }
+            }
+
+            function onTouchStart(e) {
+                if (e.touches.length !== 1) return;
+                var t = e.touches[0];
+                touchId = t.identifier;
+                isDragging = true;
+                hasDragged = false;
+                autoRotate = false;
+                velX = 0; velY = 0;
+                dragStartX = t.clientX;
+                dragStartY = t.clientY;
+            }
+
+            function onTouchMove(e) {
+                if (!isDragging || touchId === null) return;
+                var t = null;
+                for (var i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === touchId) {
+                        t = e.changedTouches[i];
+                        break;
+                    }
+                }
+                if (!t) return;
+                e.preventDefault();
+                var dx = t.clientX - dragStartX;
+                var dy = t.clientY - dragStartY;
+                if (Math.abs(dx) > 2 || Math.abs(dy) > 2) hasDragged = true;
+                if (hasDragged) {
+                    rotY += dx * 0.4;
+                    rotX -= dy * 0.4;
+                    velX = dx * 0.4;
+                    velY = -dy * 0.4;
+                    dragStartX = t.clientX;
+                    dragStartY = t.clientY;
+                }
+            }
+
+            function onTouchEnd(e) {
+                if (touchId === null) return;
+                var ended = false;
+                for (var i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === touchId) {
+                        ended = true;
+                        break;
+                    }
+                }
+                if (ended) {
+                    isDragging = false;
+                    touchId = null;
+                }
+            }
+
+            function animate() {
+                rafId = null;
+
+                if (!isDragging) {
+                    if (autoRotate) {
+                        rotY += 0.12;
+                        rotX += 0.04;
+                    } else {
+                        rotY += velY;
+                        rotX += velX;
+                        velY *= 0.92; velX *= 0.92;
+                        if (Math.abs(velY) < 0.02 && Math.abs(velX) < 0.02) autoRotate = true;
+                    }
+                }
+
+                var rx = rotX * Math.PI / 180;
+                var ry = rotY * Math.PI / 180;
+                var cosRX = Math.cos(rx);
+                var sinRX = Math.sin(rx);
+                var cosRY = Math.cos(ry);
+                var sinRY = Math.sin(ry);
+
+                tagElements.forEach(function(item) {
+                    var p = item.point;
+
+                    var x1 = p.x * cosRY + p.z * sinRY;
+                    var z1 = -p.x * sinRY + p.z * cosRY;
+                    var y2 = p.y * cosRX - z1 * sinRX;
+                    var z2 = p.y * sinRX + z1 * cosRX;
+
+                    var depth = (z2 + radius) / (2 * radius);
+                    if (depth < 0) depth = 0;
+                    if (depth > 1) depth = 1;
+
+                    var scale = item.scaleRatio * (0.8 + depth * 0.2);
+                    item.el.style.transform =
+                        'translate(' + x1.toFixed(2) + 'px, ' + y2.toFixed(2) + 'px) ' +
+                        'translate(-50%, -50%) ' +
+                        'translateZ(' + (depth * 10).toFixed(2) + 'px)';
+                    item.el.style.left = '50%';
+                    item.el.style.top = '50%';
+
+                    item.el.style.opacity = (0.3 + depth * 0.7).toFixed(3);
+                    item.wrapper.style.transform = 'scale(' + scale.toFixed(3) + ')';
+                });
+
+                startAnimation();
+            }
+
+            document.addEventListener('visibilitychange', function() {
+                isPageVisible = !document.hidden;
+                if (isPageVisible && isVisible) {
+                    startAnimation();
+                } else {
+                    stopAnimation();
+                }
+            });
+
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(initTagPlanet, 250);
+            });
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initTagPlanet);
+            } else {
+                initTagPlanet();
+            }
+            document.addEventListener('astro:page-load', initTagPlanet);
+        })();
+    </script>
+    )}
 </BaseLayout>
