@@ -39,28 +39,28 @@ function formatDate(date: Date): string {
             { label: '归档', href: '/archives/', active: true }
         ]}
     />
-    
-    <div class="space-y-16 sm:space-y-20">
+
+    <div class="space-y-4 sm:space-y-6">
         {sortedYears.map((year) => (
             <section class="reveal">
-                <h2 class="mb-8 flex items-baseline gap-4 font-display text-lg font-medium sm:text-xl">
+                <h2 class="mb-2 flex items-baseline gap-1.5 font-display text-base font-medium sm:text-lg">
                     <span>{year}</span>
                     <span class="text-sm font-normal text-secondary">
                         {postsByYear[year].length} 篇文章
                     </span>
                 </h2>
-                <div class="space-y-1">
+                <div class="space-y-0.5">
                     {postsByYear[year].map((post) => {
                         const postDate = new Date(post.data.publishDate);
                         return (
-                            <a 
+                            <a
                                 href={`/blog/${post.id}/`}
-                                class="group flex items-baseline gap-4 py-2 hover:bg-muted/50 -mx-2 px-2 rounded transition-colors"
+                                class="group flex items-baseline gap-2 py-0.5 px-1 -mx-1 rounded-md hover:bg-hover transition-colors"
                             >
                                 <time class="shrink-0 text-sm text-secondary tabular-nums w-16">
                                     {formatDate(postDate)}
                                 </time>
-                                <span class="font-display text-lg leading-tight group-hover:underline group-hover:decoration-dashed group-hover:decoration-1 group-hover:underline-offset-4">
+                                <span class="font-display text-base leading-snug text-main group-hover:text-accent transition-colors">
                                     {post.data.title}
                                 </span>
                             </a>

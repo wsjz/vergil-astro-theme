@@ -134,6 +134,27 @@ img[loading="lazy"].img-loaded {
 .reveal:nth-child(9) { transition-delay: 0.48s; }
 .reveal:nth-child(10) { transition-delay: 0.54s; }
 
+/* ── 侧边栏标题滚动── */
+.title-scroll {
+    container-type: inline-size;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.title-scroll-text {
+    display: inline-block;
+    will-change: transform;
+    animation: title-scroll-loop 5.5s linear infinite;
+}
+
+@keyframes title-scroll-loop {
+    0% { transform: translateX(0); }
+    55% { transform: translateX(min(0px, calc(-100% + 100cqw))); }
+    80% { transform: translateX(min(0px, calc(-100% + 100cqw))); }
+    84% { transform: translateX(0); }
+    100% { transform: translateX(0); }
+}
+
 /* ── 骨架屏脉冲 ── */
 .skeleton {
     background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-muted) 50%, var(--bg-card) 75%);

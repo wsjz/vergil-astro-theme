@@ -23,9 +23,11 @@ const featured = allPosts.filter((p) => p.data.isFeatured).slice(0, effectiveLim
                 <li>
                     <a
                         href={`/blog/${post.id}/`}
-                        class="text-[12px] text-secondary hover:text-accent transition-colors line-clamp-2 leading-snug block"
+                        class="group block title-scroll"
                     >
-                        {post.data.title}
+                        <span class="text-[11px] tracking-tight text-secondary group-hover:text-accent transition-colors leading-snug title-scroll-text">
+                            {post.data.title}
+                        </span>
                     </a>
                 </li>
             ))}
