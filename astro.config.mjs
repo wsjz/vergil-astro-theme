@@ -1,4 +1,5 @@
 import sitemap from '@astrojs/sitemap';
+import icon from 'astro-icon';
 import { transformerNotationDiff, transformerNotationHighlight, transformerNotationWordHighlight } from '@shikijs/transformers';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
@@ -18,7 +19,7 @@ export default defineConfig({
     vite: {
         plugins: [tailwindcss()]
     },
-    integrations: [sitemap()],
+    integrations: [sitemap(), icon()],
     markdown: {
         remarkPlugins: [remarkDirective, remarkImageDirectives, remarkPhotoDirectives, [remarkContentDirectives, { links: siteConfig.links, screenshotService: siteConfig.screenshotService }], remarkTerminal],
         rehypePlugins: [rehypeTitleHeadings],

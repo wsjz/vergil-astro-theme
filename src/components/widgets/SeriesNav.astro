@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import { getPostsBySeries } from '../../utils/data-utils';
 import { slugify } from '../../utils/common-utils';
+import { ChevronDown } from '@lucide/astro';
 
 interface Props {
     currentPostId: string;
@@ -13,27 +14,42 @@ const seriesId = slugify(series);
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 const seriesPosts = getPostsBySeries(allPosts, seriesId);
 const currentIndex = seriesPosts.findIndex((p) => p.id === currentPostId);
+const total = seriesPosts.length;
+const needsCollapse = total > 5;
+
+// 默认可见范围：始终显示 5 篇，当前项居中（边界处自动调整）
+const visibleStart = total > 5 ? Math.max(0, Math.min(currentIndex - 2, total - 5)) : 0;
+const visibleEnd = Math.min(total - 1, visibleStart + 4);
+const visibleIndices = new Set<number>();
+for (let i = visibleStart; i <= visibleEnd; i++) {
+    visibleIndices.add(i);
+}
 ---
 
-<div class="my-6 rounded-xl border border-accent/20 bg-accent/5 p-4">
+<div class="my-6 rounded-xl border border-accent/20 bg-accent/5 p-4" data-series-nav data-current-post-id={currentPostId}>
     <div class="flex items-center justify-between mb-3">
-        <a href={`/series/${seriesId}`} class="text-xs font-medium text-accent hover:underline">
+        <a href={`/series/${seriesId}/`} class="text-xs font-medium text-accent hover:underline">
             专栏：{series}
         </a>
-        <span class="text-xs text-secondary">{currentIndex + 1} / {seriesPosts.length}</span>
+        <span class="text-xs text-secondary">{currentIndex + 1} / {total}</span>
     </div>
-    <ol class="space-y-1.5">
+    <ol class="space-y-1.5" data-series-list data-current={currentIndex}>
         {seriesPosts.map((post, index) => {
             const isCurrent = post.id === currentPostId;
+            const isVisible = !needsCollapse || visibleIndices.has(index);
             return (
-                <li class="flex items-center gap-2">
+                <li
+                    class={`series-item flex items-center gap-2 ${!isVisible ? 'hidden' : ''}`}
+                    data-post-id={post.id}
+                    data-index={index}
+                >
                     <span class={`shrink-0 w-5 h-5 rounded-full text-[10px] font-medium flex items-center justify-center ${isCurrent ? 'bg-accent text-white' : 'bg-accent/10 text-accent'}`}>
                         {index + 1}
                     </span>
                     {isCurrent ? (
                         <span class="text-xs font-medium text-main line-clamp-1">{post.data.title}</span>
                     ) : (
-                        <a href={`/blog/${post.id}/`} class="text-xs text-secondary hover:text-accent transition-colors line-clamp-1">
+                        <a href={`/blog/${post.id}/`} class="text-xs text-muted hover:text-accent transition-colors line-clamp-1 series-link">
                             {post.data.title}
                         </a>
                     )}
@@ -41,4 +57,90 @@ const currentIndex = seriesPosts.findIndex((p) => p.id === currentPostId);
             );
         })}
     </ol>
+    {needsCollapse && (
+        <button
+            class="series-toggle mt-2 w-full flex items-center justify-center gap-1 text-[11px] text-secondary hover:text-accent transition-colors py-1"
+            data-expanded="false"
+            data-total={total}
+        >
+            <span class="toggle-text">展开全部 {total} 篇</span>
+            <ChevronDown class="w-3.5 h-3.5 toggle-icon transition-transform duration-200" />
+        </button>
+    )}
 </div>
+
+<style>
+    .series-link.is-read {
+        color: var(--text-secondary);
+    }
+</style>
+
+<script>
+    document.addEventListener('astro:page-load', () => {
+        const STORAGE_KEY = 'vergil:read-posts';
+
+        // 1. 记录当前文章为已读
+        const nav = document.querySelector('[data-series-nav]');
+        const currentPostId = nav?.getAttribute('data-current-post-id');
+        if (currentPostId) {
+            try {
+                const readPosts: string[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                if (!readPosts.includes(currentPostId)) {
+                    readPosts.push(currentPostId);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(readPosts));
+                }
+            } catch {
+                // localStorage 不可用，静默忽略
+            }
+        }
+
+        // 2. 标记已读文章
+        try {
+            const readPosts: string[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            document.querySelectorAll('.series-link').forEach((link) => {
+                const postId = link.closest('[data-post-id]')?.getAttribute('data-post-id');
+                if (postId && readPosts.includes(postId)) {
+                    link.classList.add('is-read');
+                }
+            });
+        } catch {
+            // 静默忽略
+        }
+
+        // 3. 展开/收起
+        document.querySelectorAll('.series-toggle').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const seriesNav = btn.closest('[data-series-nav]');
+                const list = seriesNav?.querySelector('[data-series-list]');
+                const currentIndex = parseInt(list?.getAttribute('data-current') || '0');
+                const isExpanded = btn.getAttribute('data-expanded') === 'true';
+                const total = parseInt(btn.getAttribute('data-total') || '0');
+                const textEl = btn.querySelector('.toggle-text');
+                const iconEl = btn.querySelector('.toggle-icon');
+
+                if (isExpanded) {
+                    // 收起：只显示当前附近的 5 篇
+                    const newStart = total > 5 ? Math.max(0, Math.min(currentIndex - 2, total - 5)) : 0;
+                    const newEnd = Math.min(total - 1, newStart + 4);
+                    list?.querySelectorAll('.series-item').forEach((item) => {
+                        const idx = parseInt(item.getAttribute('data-index') || '0');
+                        if (idx < newStart || idx > newEnd) {
+                            item.classList.add('hidden');
+                        }
+                    });
+                    btn.setAttribute('data-expanded', 'false');
+                    if (textEl) textEl.textContent = `展开全部 ${total} 篇`;
+                    iconEl?.classList.remove('rotate-180');
+                } else {
+                    // 展开：显示全部
+                    list?.querySelectorAll('.series-item').forEach((item) => {
+                        item.classList.remove('hidden');
+                    });
+                    btn.setAttribute('data-expanded', 'true');
+                    if (textEl) textEl.textContent = '收起';
+                    iconEl?.classList.add('rotate-180');
+                }
+            });
+        });
+    });
+</script>

@@ -59,6 +59,9 @@ const siteConfig: SiteConfig = {
     sidebar,
     floatingAudio,
     tagCloud,
+
+    // ── 版权提示 ──
+    copyright: '© 本文著作权归作者所有，转载请注明出处。',
 };
 
 export default siteConfig;

@@ -3,7 +3,8 @@ import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import Button from '../../components/ui/Button.astro';
-import { ChevronLeft, ChevronRight } from '@lucide/astro';
+import { ChevronLeft, ChevronRight, Link, Check, Share2 } from '@lucide/astro';
+import { Icon } from 'astro-icon/components';
 import FormattedDate from '../../components/ui/FormattedDate.astro';
 import ReadingTime from '../../components/ui/ReadingTime.astro';
 import Comments from '../../components/widgets/Comments.astro';
@@ -19,21 +20,71 @@ import { slugify } from '../../utils/common-utils';
 export async function getStaticPaths() {
     const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
     const postCount = posts.length;
-    return posts.map((post, index) => ({
-        params: { id: post.id },
-        props: {
-            post,
-            prevPost: index + 1 !== postCount ? posts[index + 1] : null,
-            nextPost: index !== 0 ? posts[index - 1] : null
+
+    // 预计算每个专栏的文章列表（按发布时间正序）
+    const seriesMap = new Map<string, CollectionEntry<'blog'>[]>();
+    posts.forEach((post) => {
+        if (post.data.series) {
+            const sid = slugify(post.data.series);
+            if (!seriesMap.has(sid)) {
+                seriesMap.set(sid, []);
+            }
+            seriesMap.get(sid)!.push(post);
         }
-    }));
+    });
+    seriesMap.forEach((list) => {
+        list.sort((a, b) => new Date(a.data.publishDate).getTime() - new Date(b.data.publishDate).getTime());
+    });
+
+    return posts.map((post, index) => {
+        // 全站 prev/next
+        const prevPost = index + 1 !== postCount ? posts[index + 1] : null;
+        const nextPost = index !== 0 ? posts[index - 1] : null;
+
+        // 专栏内 prev/next
+        let seriesPrev: CollectionEntry<'blog'> | null = null;
+        let seriesNext: CollectionEntry<'blog'> | null = null;
+        let seriesRecommend: CollectionEntry<'blog'> | null = null;
+        if (post.data.series) {
+            const sid = slugify(post.data.series);
+            const seriesPosts = seriesMap.get(sid) || [];
+            const sIndex = seriesPosts.findIndex((p) => p.id === post.id);
+            seriesPrev = sIndex > 0 ? seriesPosts[sIndex - 1] : null;
+            seriesNext = sIndex < seriesPosts.length - 1 ? seriesPosts[sIndex + 1] : null;
+
+            // 当前专栏没有下一篇时，推荐其他专栏的最新文章
+            if (!seriesNext) {
+                const otherSeriesPosts = posts
+                    .filter((p) => p.data.series && slugify(p.data.series) !== sid && p.id !== post.id)
+                    .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime());
+                seriesRecommend = otherSeriesPosts[0] || null;
+            }
+        }
+
+        return {
+            params: { id: post.id },
+            props: { post, prevPost, nextPost, seriesPrev, seriesNext, seriesRecommend }
+        };
+    });
 }
 
-type Props = { post: CollectionEntry<'blog'>; prevPost: CollectionEntry<'blog'>; nextPost: CollectionEntry<'blog'> };
+type Props = {
+    post: CollectionEntry<'blog'>;
+    prevPost: CollectionEntry<'blog'> | null;
+    nextPost: CollectionEntry<'blog'> | null;
+    seriesPrev: CollectionEntry<'blog'> | null;
+    seriesNext: CollectionEntry<'blog'> | null;
+    seriesRecommend: CollectionEntry<'blog'> | null;
+};
 
 const { href } = Astro.url;
-const { post, prevPost, nextPost } = Astro.props;
+const { post, prevPost, nextPost, seriesPrev, seriesNext, seriesRecommend } = Astro.props;
 const { title, publishDate, updatedDate, excerpt, tags = [], seo, series, categories, fonts, banner } = post.data;
+
+const navPrev = series ? seriesPrev : prevPost;
+const navNext = series ? seriesNext : nextPost;
+const recommendNext = series ? seriesRecommend : null;
+const hasNav = !!(navPrev || navNext || recommendNext);
 
 function resolveBannerUrl(banner: string | undefined): string | null {
     if (!banner) return null;
@@ -97,8 +148,8 @@ const postBreadcrumbs = [
         </div>
     )}
 
-    <article class="mb-16 sm:mb-24">
-        <header class="mb-8">
+    <article class="mb-5 sm:mb-10">
+        <header class="mb-5">
             {bannerUrl ? null : (
                 <>
                     <Breadcrumb crumbs={postBreadcrumbs} />
@@ -119,33 +170,93 @@ const postBreadcrumbs = [
         <div class="prose sm:prose-lg max-w-none">
             <Content />
         </div>
+        {siteConfig.copyright && (
+            <p class="mt-18 text-[12px] text-muted text-center">{siteConfig.copyright}</p>
+        )}
         <div class="mt-8 flex flex-wrap items-center justify-between gap-6 text-sm sm:mt-12 sm:text-base">
             {tags.length > 0 && (
                 <div class="flex flex-wrap gap-x-5 gap-y-1 text-sm">
                     {tags.map((tag) => (
-                        <a class="text-main hover:underline" href={`/tags/${slugify(tag)}`}>
+                        <a class="text-accent hover:underline" href={`/tags/${slugify(tag)}`}>
                             #{tag}
                         </a>
                     ))}
                 </div>
             )}
-            <Button class="copy-url-button" aria-label="Copy link" data-url={href} data-tooltip-default="Copy link" data-tooltip-success="Copied">Share</Button>
+            <div class="flex items-center gap-4 -translate-x-1">
+                <div class="relative">
+                    <button
+                        class="share-menu-trigger w-4 h-4 text-muted hover:text-accent transition-colors"
+                        aria-label="分享"
+                        title="分享"
+                    >
+                        <Share2 class="w-4 h-4" />
+                    </button>
+                    <div class="share-menu hidden absolute right-1 top-6 bg-card rounded-lg shadow-md p-2 z-10 min-w-[80px]">
+                        <button class="share-wechat w-full flex items-center gap-2 px-2 py-1 text-sm text-secondary hover:text-[#07C160] hover:bg-muted/50 rounded transition-colors">
+                            <Icon name="simple-icons:wechat" class="w-4 h-4" />
+                            <span>微信</span>
+                        </button>
+                        <button class="share-weibo w-full flex items-center gap-2 px-2 py-1 text-sm text-secondary hover:text-[#E6162D] hover:bg-muted/50 rounded transition-colors">
+                            <Icon name="simple-icons:sinaweibo" class="w-4 h-4" />
+                            <span>微博</span>
+                        </button>
+                    </div>
+                </div>
+                <button
+                    class="copy-url-button relative w-6 h-6 text-muted hover:text-accent transition-colors"
+                    aria-label="Copy link"
+                    data-url={href}
+                >
+                    <Link class="copy-url-icon absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4" />
+                    <Check class="copy-url-check absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 text-accent hidden" />
+                    <span class="copy-url-tooltip absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] text-accent bg-card px-2 py-0.5 rounded shadow-sm opacity-0 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
+                        data-show="false">已复制</span>
+                </button>
+            </div>
         </div>
     </article>
-    {(prevPost || nextPost) && (
-        <nav class="my-16 sm:my-24 grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-dashed border-main pt-8">
-            {prevPost ? (
-                <a href={`/blog/${prevPost.id}/`} class="group flex flex-col gap-1 rounded-xl border border-light p-5 hover:border-accent/40 hover:bg-accent/5 transition-all">
-                    <span class="text-xs text-secondary flex items-center gap-1"><ChevronLeft class="w-3 h-3" /> Prev</span>
-                    <span class="font-display text-base font-medium text-main group-hover:text-accent transition-colors line-clamp-2">{prevPost.data.title}</span>
-                </a>
-            ) : <div />}
-            {nextPost ? (
-                <a href={`/blog/${nextPost.id}/`} class="group flex flex-col gap-1 rounded-xl border border-light p-5 hover:border-accent/40 hover:bg-accent/5 transition-all text-right sm:text-right">
-                    <span class="text-xs text-secondary flex items-center justify-end gap-1">Next <ChevronRight class="w-3 h-3" /></span>
-                    <span class="font-display text-base font-medium text-main group-hover:text-accent transition-colors line-clamp-2">{nextPost.data.title}</span>
-                </a>
-            ) : <div />}
+    {hasNav && (
+        <nav class="mt-10 sm:mt-12 border-t border-light pt-6" data-post-id={post.id}>
+            {series && (
+                <div class="text-center mb-3">
+                    <span class="text-[11px] text-muted tracking-wider uppercase">专栏</span>
+                    <a href={`/series/${slugify(series)}/`} class="ml-1.5 text-sm font-medium text-accent hover:underline">
+                        {series}
+                    </a>
+                </div>
+            )}
+            <div class="flex items-start justify-between gap-6">
+                {navPrev ? (
+                    <a href={`/blog/${navPrev.id}/`} class="group flex items-center gap-3 min-w-0">
+                        <ChevronLeft class="w-5 h-5 text-muted group-hover:text-accent transition-colors shrink-0" />
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-[11px] text-muted tracking-wider">上一篇</span>
+                            <span class="text-sm font-medium text-secondary group-hover:text-accent transition-colors truncate">{navPrev.data.title}</span>
+                        </div>
+                    </a>
+                ) : <div class="w-5 shrink-0" />}
+                {navNext ? (
+                    <a href={`/blog/${navNext.id}/`} class="group flex items-center gap-3 min-w-0">
+                        <div class="flex flex-col items-end min-w-0">
+                            <span class="text-[11px] text-muted tracking-wider">下一篇</span>
+                            <span class="text-sm font-medium text-secondary group-hover:text-accent transition-colors truncate">{navNext.data.title}</span>
+                        </div>
+                        <ChevronRight class="w-5 h-5 text-muted group-hover:text-accent transition-colors shrink-0" />
+                    </a>
+                ) : recommendNext ? (
+                    <a href={`/blog/${recommendNext.id}/`} class="group flex items-center gap-3 min-w-0">
+                        <div class="flex flex-col items-end min-w-0">
+                            <span class="text-[11px] text-muted tracking-wider">推荐</span>
+                            <span class="text-sm font-medium text-secondary group-hover:text-accent transition-colors truncate">{recommendNext.data.title}</span>
+                            {recommendNext.data.series && (
+                                <span class="text-[11px] text-muted mt-0.5">来自专栏「{recommendNext.data.series}」</span>
+                            )}
+                        </div>
+                        <ChevronRight class="w-5 h-5 text-muted group-hover:text-accent transition-colors shrink-0" />
+                    </a>
+                ) : <div class="w-5 shrink-0" />}
+            </div>
         </nav>
     )}
     <div slot="right-sidebar">
@@ -159,6 +270,7 @@ const postBreadcrumbs = [
 
 <script>
     document.addEventListener('astro:page-load', () => {
+        // 复制链接
         const copyUrlButton = document.querySelector('.copy-url-button') as HTMLButtonElement;
         copyUrlButton?.addEventListener('click', async () => {
             await copyUrl(copyUrlButton);
@@ -166,12 +278,52 @@ const postBreadcrumbs = [
 
         async function copyUrl(button: HTMLButtonElement) {
             let url = button.getAttribute('data-url') || '';
-            let label = button.innerText;
             await navigator.clipboard.writeText(url);
-            button.innerText = 'Copied';
+
+            const icon = button.querySelector('.copy-url-icon');
+            const check = button.querySelector('.copy-url-check');
+            const tooltip = button.querySelector('.copy-url-tooltip');
+
+            icon?.classList.add('hidden');
+            check?.classList.remove('hidden');
+            if (tooltip) {
+                tooltip.setAttribute('data-show', 'true');
+                tooltip.classList.remove('opacity-0');
+            }
+
             setTimeout(() => {
-                button.innerText = label;
+                icon?.classList.remove('hidden');
+                check?.classList.add('hidden');
+                if (tooltip) {
+                    tooltip.setAttribute('data-show', 'false');
+                    tooltip.classList.add('opacity-0');
+                }
             }, 2500);
         }
+
+        // 分享菜单
+        const shareTrigger = document.querySelector('.share-menu-trigger') as HTMLButtonElement;
+        const shareMenu = document.querySelector('.share-menu') as HTMLDivElement;
+
+        shareTrigger?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            shareMenu?.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', () => {
+            shareMenu?.classList.add('hidden');
+        });
+
+        shareMenu?.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // 社交平台分享占位
+        document.querySelector('.share-wechat')?.addEventListener('click', () => {
+            console.log('微信分享待实现');
+        });
+        document.querySelector('.share-weibo')?.addEventListener('click', () => {
+            console.log('微博分享待实现');
+        });
     });
 </script>
