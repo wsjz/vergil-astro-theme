@@ -23,7 +23,7 @@ import { links, screenshotService } from './config/links';
 
 const siteConfig: SiteConfig = {
     // ── 基础设置 ──
-    website: 'https://example.com',
+    website: 'https://xxros.com',
     fonts,
     avatar: {
         src: avatar,
@@ -62,6 +62,11 @@ const siteConfig: SiteConfig = {
 
     // ── 版权提示 ──
     copyright: '© 本文著作权归作者所有，转载请注明出处。',
+
+    // ── 文章分享 ──
+    share: {
+        enabled: true
+    },
 };
 
 export default siteConfig;

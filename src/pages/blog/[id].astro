@@ -3,7 +3,7 @@ import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import Button from '../../components/ui/Button.astro';
-import { ChevronLeft, ChevronRight, Link, Check, Share2 } from '@lucide/astro';
+import { ChevronLeft, ChevronRight, Link, Check, ExternalLink } from '@lucide/astro';
 import { Icon } from 'astro-icon/components';
 import FormattedDate from '../../components/ui/FormattedDate.astro';
 import ReadingTime from '../../components/ui/ReadingTime.astro';
@@ -16,6 +16,7 @@ import SeriesNav from '../../components/widgets/SeriesNav.astro';
 import siteConfig from '../../data/site-config';
 import { sortItemsByDateDesc } from '../../utils/data-utils';
 import { slugify } from '../../utils/common-utils';
+import QRCode from 'qrcode-svg';
 
 export async function getStaticPaths() {
     const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
@@ -91,14 +92,17 @@ function resolveBannerUrl(banner: string | undefined): string | null {
     if (banner.startsWith('http')) {
         return banner;
     }
-    // 关键词模式：使用固定 unsplash 随机图
     return `https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1600&h=400&fit=crop&q=80`;
 }
 
 const bannerUrl = resolveBannerUrl(banner);
 const { Content, headings } = await render(post);
 
-// 构建面包屑（取分类路径的最后一级作为叶子分类）
+// 生成微信分享二维码
+const pageUrl = new URL(`/blog/${post.id}/`, siteConfig.website).toString();
+const qrCode = new QRCode({ content: pageUrl, width: 160, height: 160 });
+const qrCodeSvg = qrCode.svg();
+
 const leafCategory = categories && categories.length > 0 ? categories[categories.length - 1] : null;
 const postBreadcrumbs = [
     { text: '博客', href: '/blog/' },
@@ -183,37 +187,43 @@ const postBreadcrumbs = [
                     ))}
                 </div>
             )}
-            <div class="flex items-center gap-4 -translate-x-1">
-                <div class="relative">
-                    <button
-                        class="share-menu-trigger w-4 h-4 text-muted hover:text-accent transition-colors"
-                        aria-label="分享"
-                        title="分享"
-                    >
-                        <Share2 class="w-4 h-4" />
-                    </button>
-                    <div class="share-menu hidden absolute right-1 top-6 bg-card rounded-lg shadow-md p-2 z-10 min-w-[80px]">
-                        <button class="share-wechat w-full flex items-center gap-2 px-2 py-1 text-sm text-secondary hover:text-[#07C160] hover:bg-muted/50 rounded transition-colors">
-                            <Icon name="simple-icons:wechat" class="w-4 h-4" />
-                            <span>微信</span>
+            {siteConfig.share?.enabled && (
+                <div class="flex items-center gap-4 -translate-x-1">
+                    <div class="relative">
+                        <button
+                            class="share-menu-trigger w-4 h-4 text-muted hover:text-accent transition-colors cursor-pointer"
+                            aria-label="分享"
+                            title="分享"
+                        >
+                            <ExternalLink class="w-4 h-4" />
                         </button>
-                        <button class="share-weibo w-full flex items-center gap-2 px-2 py-1 text-sm text-secondary hover:text-[#E6162D] hover:bg-muted/50 rounded transition-colors">
-                            <Icon name="simple-icons:sinaweibo" class="w-4 h-4" />
-                            <span>微博</span>
-                        </button>
+                        <div class="share-menu hidden absolute right-1 top-6 bg-card rounded-lg shadow-md p-2 z-10 min-w-[80px]">
+                            <button class="share-wechat relative w-full flex items-center gap-2 px-2 py-1 text-sm text-secondary hover:text-[#07C160] hover:bg-muted/50 rounded transition-colors group">
+                                <Icon name="simple-icons:wechat" class="w-4 h-4" />
+                                <span>微信</span>
+                                <div class="wechat-qrcode-tooltip hidden group-hover:flex absolute right-full top-1/2 -translate-y-1/2 mr-2 bg-card rounded-lg shadow-md p-2 z-20 flex-col items-center gap-1 w-[180px]">
+                                    <div class="wechat-qrcode-image w-[160px] h-[160px]" set:html={qrCodeSvg} />
+                                    <span class="text-[10px] text-muted">扫码分享</span>
+                                </div>
+                            </button>
+                            <button class="share-weibo w-full flex items-center gap-2 px-2 py-1 text-sm text-secondary hover:text-[#E6162D] hover:bg-muted/50 rounded transition-colors">
+                                <Icon name="simple-icons:sinaweibo" class="w-4 h-4" />
+                                <span>微博</span>
+                            </button>
+                        </div>
                     </div>
+                    <button
+                        class="copy-url-button relative w-6 h-6 text-muted hover:text-accent transition-colors cursor-pointer"
+                        aria-label="Copy link"
+                        data-url={href}
+                    >
+                        <Link class="copy-url-icon absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4" />
+                        <Check class="copy-url-check absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 text-accent hidden" />
+                        <span class="copy-url-tooltip absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] text-accent bg-card px-2 py-0.5 rounded shadow-sm opacity-0 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
+                            data-show="false">已复制</span>
+                    </button>
                 </div>
-                <button
-                    class="copy-url-button relative w-6 h-6 text-muted hover:text-accent transition-colors"
-                    aria-label="Copy link"
-                    data-url={href}
-                >
-                    <Link class="copy-url-icon absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4" />
-                    <Check class="copy-url-check absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 text-accent hidden" />
-                    <span class="copy-url-tooltip absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] text-accent bg-card px-2 py-0.5 rounded shadow-sm opacity-0 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
-                        data-show="false">已复制</span>
-                </button>
-            </div>
+            )}
         </div>
     </article>
     {hasNav && (
@@ -266,6 +276,19 @@ const postBreadcrumbs = [
     </div>
 
     {siteConfig.comments?.enabled && <Comments pageId={`/blog/${post.id}/`} pageTitle={title} />}
+
+    <!-- 微信分享二维码弹窗 -->
+    <div class="wechat-qrcode-modal hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" data-url={pageUrl}>
+        <div class="wechat-qrcode-card bg-card rounded-xl shadow-xl p-5 w-[200px] mx-4 text-center relative">
+            <button class="wechat-qrcode-close absolute top-2 right-2 text-muted hover:text-main transition-colors" aria-label="关闭">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+            <div class="wechat-qrcode-image w-[160px] h-[160px] mx-auto" set:html={qrCodeSvg} />
+        </div>
+    </div>
 </BaseLayout>
 
 <script>
@@ -318,12 +341,30 @@ const postBreadcrumbs = [
             e.stopPropagation();
         });
 
-        // 社交平台分享占位
+        // 微信分享 - 显示二维码弹窗
+        const wechatModal = document.querySelector('.wechat-qrcode-modal') as HTMLDivElement;
+        const wechatClose = document.querySelector('.wechat-qrcode-close') as HTMLButtonElement;
+
         document.querySelector('.share-wechat')?.addEventListener('click', () => {
-            console.log('微信分享待实现');
+            shareMenu?.classList.add('hidden');
+            wechatModal?.classList.remove('hidden');
         });
+
+        wechatModal?.addEventListener('click', (e) => {
+            if (e.target === wechatModal) {
+                wechatModal.classList.add('hidden');
+            }
+        });
+
+        wechatClose?.addEventListener('click', () => {
+            wechatModal?.classList.add('hidden');
+        });
+
+        // 微博分享 - 跳转分享页
         document.querySelector('.share-weibo')?.addEventListener('click', () => {
-            console.log('微博分享待实现');
+            const url = encodeURIComponent(window.location.href);
+            const title = encodeURIComponent(document.title);
+            window.open(`https://service.weibo.com/share/share.php?url=${url}&title=${title}`, '_blank');
         });
     });
 </script>
