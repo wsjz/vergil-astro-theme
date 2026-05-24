@@ -80,11 +80,11 @@ export const heroData = {
 export const headerNavLinks = [
     {
         label: '博客',
-        icon: 'BookOpen',
+        icon: 'book-open',
         children: [
-            { label: '主页', href: '/', icon: 'Home' },
-            { label: '博客', href: '/blog', icon: 'FileText' },
-            { label: '相册', href: '/albums', icon: 'Image' },
+            { label: '主页', href: '/', icon: 'home' },
+            { label: '博客', href: '/blog', icon: 'file-text' },
+            { label: '相册', href: '/albums', icon: 'image' },
         ]
     }
 ];

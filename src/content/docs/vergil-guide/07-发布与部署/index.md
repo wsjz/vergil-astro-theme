@@ -27,7 +27,7 @@ seo:
 
 ### 网站 SEO 配置
 
-在 `src/data/site-config.ts` 中配置网站级的 SEO 信息：
+在 `src/data/config/identity.ts` 中配置网站级的 SEO 信息：
 
 ```typescript
 image: {

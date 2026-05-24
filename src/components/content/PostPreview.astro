@@ -7,7 +7,7 @@ import { slugify } from '../../utils/common-utils';
 type Props = { post: CollectionEntry<'blog'>; class?: string; headingLevel?: 'h2' | 'h3' };
 
 const { post, class: className, headingLevel = 'h2' } = Astro.props;
-const { title, publishDate, updatedDate, excerpt, tags, banner } = post.data;
+const { title, publishDate, updatedDate, excerpt, tags, categories, banner } = post.data;
 const TitleTag = headingLevel;
 
 function calculateReadingTime(content: string): number {
@@ -66,7 +66,7 @@ const hasBanner = !!banner;
                     {excerpt}
                 </a>
             )}
-            <div class="flex items-center gap-3 text-sm text-secondary">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-secondary">
                 <span class="flex items-center gap-1">
                     <Calendar class="w-4 h-4" />
                     <FormattedDate date={publishDate} />
@@ -74,27 +74,37 @@ const hasBanner = !!banner;
                 {updatedDate && (
                     <span class="text-muted">更新于 <FormattedDate date={updatedDate} /></span>
                 )}
+                {categories && categories.length > 0 ? (
+                    <span class="flex items-center gap-1">
+                        <a
+                            href={`/categories/${slugify(categories[categories.length - 1])}`}
+                            class="text-accent hover:underline"
+                            onclick="event.stopPropagation();"
+                        >
+                            {categories.join('/')}
+                        </a>
+                    </span>
+                ) : tags && tags.length > 0 ? (
+                    <span class="flex items-center gap-1">
+                        {tags.map((tag, index) => (
+                            <span>
+                                {index > 0 && <span class="text-secondary">, </span>}
+                                <a
+                                    href={`/tags/${slugify(tag)}`}
+                                    class="text-accent hover:underline"
+                                    onclick="event.stopPropagation();"
+                                >
+                                    #{tag}
+                                </a>
+                            </span>
+                        ))}
+                    </span>
+                ) : null}
                 <span class="flex items-center gap-1">
                     <Clock class="w-4 h-4" />
                     {readingTime} min
                 </span>
             </div>
-            {tags && tags.length > 0 && (
-                <div class="flex items-center gap-1 text-sm mt-2">
-                    {tags.map((tag, index) => (
-                        <span>
-                            {index > 0 && <span class="text-secondary">, </span>}
-                            <a
-                                href={`/tags/${slugify(tag)}`}
-                                class="text-accent hover:underline"
-                                onclick="event.stopPropagation();"
-                            >
-                                #{tag}
-                            </a>
-                        </span>
-                    ))}
-                </div>
-            )}
         </>
     )}
 </div>

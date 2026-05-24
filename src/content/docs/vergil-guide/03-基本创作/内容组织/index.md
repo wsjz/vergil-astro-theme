@@ -55,7 +55,8 @@ series: 搭建博客系列
 ```markdown
 ---
 title: React Hooks 指南
-category: 技术
+categories:
+  - 技术
 ---
 ```
 
