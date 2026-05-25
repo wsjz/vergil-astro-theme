@@ -6,10 +6,10 @@ export const comments = {
     enabled: true,
     provider: 'giscus' as const,
     giscus: {
-        repo: 'wsjz/issues',
-        repoId: 'R_kgDONgr0wg',
+        repo: 'rox/issues',
+        repoId: '',
         category: 'General',
-        categoryId: 'DIC_kwDONgr0ws4ClbF3',
+        categoryId: '',
         mapping: 'pathname' as const,
         strict: false,
         reactionsEnabled: true,
