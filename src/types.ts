@@ -172,18 +172,33 @@ export type Album = {
     tags?: string[];
 };
 
+export type MemoAction = {
+    text: string;
+    href: string;
+    icon?: string;
+    external?: boolean;
+};
+
+export type MemoItem = {
+    title?: string;
+    paragraphs?: string[];
+    quote?: string;
+    actions?: MemoAction[];
+};
+
 export type SidebarComponentConfig = {
     recentPosts?: { limit?: number };
     featured?: { limit?: number };
     tags?: { limit?: number };
     related?: { limit?: number };
-    welcome?: { text?: string };
     ghCard?: {
         mode: 'repo' | 'user';
         repo?: string;
         user?: string;
         bio?: string;
     };
+    // 允许任意自定义便签卡片或其他组件配置
+    [key: string]: unknown;
 };
 
 export type SidebarNavItem = {
