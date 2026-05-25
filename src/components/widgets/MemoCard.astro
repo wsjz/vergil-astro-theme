@@ -1,0 +1,74 @@
+---
+import { Globe, MessageCircle, Info, ArrowUpRight } from '@lucide/astro';
+import type { MemoItem, MemoAction } from '../../types';
+
+interface Props {
+    config?: Record<string, unknown>;
+}
+
+const { config } = Astro.props;
+
+// 判断是否是 MemoItem 结构
+function isMemoItem(c: Record<string, unknown> | undefined): c is MemoItem {
+    if (!c || typeof c !== 'object') return false;
+    return 'title' in c || 'paragraphs' in c || 'quote' in c || 'actions' in c;
+}
+
+const memoConfig = isMemoItem(config) ? config : null;
+
+// 图标映射表
+const iconMap: Record<string, any> = {
+    globe: Globe,
+    'message-circle': MessageCircle,
+    info: Info,
+    'arrow-up-right': ArrowUpRight,
+};
+
+function getIcon(name: string | undefined) {
+    if (!name) return null;
+    return iconMap[name] || iconMap['arrow-up-right'];
+}
+---
+
+{memoConfig && (
+    <div class="px-4 py-4">
+        {/* 标题在卡片外 */}
+        {memoConfig.title && (
+            <p class="text-xs text-muted mb-2">{memoConfig.title}</p>
+        )}
+
+        <div class="bg-card rounded-xl p-4">
+            {/* 正文段落 */}
+            {memoConfig.paragraphs && memoConfig.paragraphs.map((p: string) => (
+                <p class="text-[11px] text-main leading-relaxed mb-2 last:mb-0">{p}</p>
+            ))}
+
+            {/* 引用块 */}
+            {memoConfig.quote && (
+                <blockquote class="mt-3 mb-3 pl-3 border-l-2 border-muted text-[11px] text-muted leading-relaxed">
+                    {memoConfig.quote}
+                </blockquote>
+            )}
+
+            {/* 操作按钮 */}
+            {memoConfig.actions && memoConfig.actions.length > 0 && (
+                <div class="mt-3 space-y-2">
+                    {memoConfig.actions.map((action: MemoAction) => {
+                        const IconComp = getIcon(action.icon);
+                        return (
+                            <a
+                                href={action.href}
+                                target={action.external ? '_blank' : undefined}
+                                rel={action.external ? 'noopener noreferrer' : undefined}
+                                class="flex items-center justify-center gap-2 w-full px-3 py-2 text-[11px] text-secondary bg-muted/30 hover:bg-muted/60 rounded-lg transition-colors"
+                            >
+                                {IconComp && <IconComp class="w-3.5 h-3.5" />}
+                                <span>{action.text}</span>
+                            </a>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    </div>
+)}

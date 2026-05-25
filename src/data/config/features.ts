@@ -1,4 +1,6 @@
 import type { SiteConfig } from '../../types';
+import { welcome } from './welcome';
+import { notice } from './notice';
 
 export const comments = {
     enabled: true,
@@ -35,7 +37,7 @@ export const sidebar = {
     // 可配置：recentPosts, siteInfo
     left: ['recentPosts', 'siteInfo'],
     // 可配置：welcome, heatmap, recentPosts, featured, tags, ghCard
-    right: ['welcome', 'heatmap', 'featured', 'tags'],
+    right: ['welcome', 'heatmap', 'featured', 'tags', 'notice'],
 
     // 文章页右侧（目前由页面 slot 覆盖，此配置暂未生效）
     // 可配置：toc, related, featured
@@ -53,9 +55,8 @@ export const sidebar = {
         { label: '留言', href: '/contact', icon: 'message-circle' },
     ],
     components: {
-        welcome: {
-            text: '记录技术、生活与思考',
-        },
+        welcome,
+        notice,
         recentPosts: {
             limit: 5,
         },

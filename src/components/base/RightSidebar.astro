@@ -2,7 +2,7 @@
 import { type CollectionEntry, getCollection } from 'astro:content';
 import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
 import siteConfig from '../../data/site-config';
-import SidebarWelcome from '../widgets/SidebarWelcome.astro';
+import MemoCard from '../widgets/MemoCard.astro';
 import SidebarRecentPosts from '../widgets/SidebarRecentPosts.astro';
 import SidebarFeatured from '../widgets/SidebarFeatured.astro';
 import SidebarTagList from '../widgets/SidebarTagList.astro';
@@ -66,18 +66,28 @@ function formatDate(date: Date): string {
     }).replace(/\//g, '-');
 }
 
-// Component registry
+// Default Component registry
 const componentRegistry: Record<string, unknown> = {
-    welcome: SidebarWelcome,
     recentPosts: SidebarRecentPosts,
     featured: SidebarFeatured,
     tags: SidebarTagList,
     ghCard: SidebarGhCard,
     toc: SidebarToc,
 };
+
+function isMemoItemConfig(config: unknown): boolean {
+    if (!config || typeof config !== 'object') return false;
+    const c = config as Record<string, unknown>;
+    return (
+        typeof c.title === 'string' ||
+        Array.isArray(c.paragraphs) ||
+        typeof c.quote === 'string' ||
+        Array.isArray(c.actions)
+    );
+}
 ---
 
-<div class="p-3">
+<div class="p-1">
         {activeConfig.map((componentId) => {
             if (componentId === 'heatmap') {
                 return (
@@ -113,9 +123,16 @@ const componentRegistry: Record<string, unknown> = {
                 );
             }
 
+            const componentConfig = siteConfig.sidebar?.components?.[componentId];
             const Component = componentRegistry[componentId];
-            if (!Component) return null;
-            return <Component />;
+            if (Component) {
+                return <Component config={componentConfig} />;
+            }
+
+            if (isMemoItemConfig(componentConfig)) {
+                return <MemoCard config={componentConfig} />;
+            }
+            return null;
         })}
     <div id="heatmap-tooltip" class="fixed hidden z-50 bg-card border border-light rounded-lg shadow-lg px-4 py-3 max-w-xs">
         <div class="text-sm">
