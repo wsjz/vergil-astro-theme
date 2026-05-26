@@ -1,0 +1,78 @@
+/* Math formula rendering styles — supports both KaTeX and MathJax */
+
+/* ── KaTeX base styles (imported from npm) ── */
+@import 'katex/dist/katex.min.css';
+
+/* ── KaTeX: inline math ── */
+.katex {
+    font-size: 1.05em;
+    color: var(--text-main);
+}
+
+/* KaTeX block display */
+.katex-display {
+    margin: 1.2em 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.katex-display .katex {
+    font-size: 1.1em;
+}
+
+/* KaTeX dark mode color adaptation */
+.dark .katex,
+.dark .katex-display {
+    color: var(--text-main, #e5e5e5);
+}
+
+.dark .katex .fbox,
+.dark .katex .fcolorbox {
+    border-color: var(--text-main);
+}
+
+/* ── MathJax SVG styles ── */
+.MathJax[jax="SVG"]:not([display="true"]) {
+    display: inline !important;
+    margin: 0 0.15em !important;
+    padding: 0 !important;
+    vertical-align: middle;
+}
+
+.MathJax[jax="SVG"]:not([display="true"]) svg {
+    display: inline;
+    vertical-align: middle;
+}
+
+.MathJax[jax="SVG"][display="true"] {
+    display: block !important;
+    margin: 1.2em 0 !important;
+    text-align: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.MathJax[jax="SVG"][display="true"] svg {
+    display: inline-block;
+    max-width: 100%;
+}
+
+.dark .MathJax[jax="SVG"] {
+    color: var(--text-main, #e5e5e5);
+}
+
+.MathJax[jax="SVG"][display="true"] {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ── MathJax error fallback ── */
+.mathjax-error {
+    color: #cc0000;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.dark .mathjax-error {
+    color: #ff6b6b;
+}

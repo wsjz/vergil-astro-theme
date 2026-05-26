@@ -4,7 +4,9 @@ import { transformerNotationDiff, transformerNotationHighlight, transformerNotat
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 import remarkDirective from 'remark-directive';
+import remarkMath from 'remark-math';
 import siteConfig from './src/data/site-config';
+import { rehypeMathDispatcher } from './src/plugins/rehype-math-dispatcher.mjs';
 import { rehypeTitleHeadings } from './src/plugins/rehype-title-headings.mjs';
 import { remarkContentDirectives } from './src/plugins/directives/index.mjs';
 import { remarkImageDirectives } from './src/plugins/remark-image-directives.mjs';
@@ -21,8 +23,8 @@ export default defineConfig({
     },
     integrations: [sitemap(), icon()],
     markdown: {
-        remarkPlugins: [remarkDirective, remarkImageDirectives, remarkPhotoDirectives, [remarkContentDirectives, { links: siteConfig.links, screenshotService: siteConfig.screenshotService }], remarkTerminal],
-        rehypePlugins: [rehypeTitleHeadings],
+        remarkPlugins: [remarkDirective, remarkMath, remarkImageDirectives, remarkPhotoDirectives, [remarkContentDirectives, { links: siteConfig.links, screenshotService: siteConfig.screenshotService }], remarkTerminal],
+        rehypePlugins: [rehypeMathDispatcher, rehypeTitleHeadings],
         shikiConfig: {
             themes: {
                 light: 'github-light',
