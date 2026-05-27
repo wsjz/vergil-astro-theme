@@ -19,7 +19,10 @@ export default defineConfig({
         domains: ['images.unsplash.com']
     },
     vite: {
-        plugins: [tailwindcss()]
+        plugins: [tailwindcss()],
+        optimizeDeps: {
+            include: ['mermaid', 'echarts'],
+        },
     },
     integrations: [sitemap(), icon()],
     markdown: {
