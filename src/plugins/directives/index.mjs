@@ -19,7 +19,7 @@ export function remarkContentDirectives(options = {}) {
 
         visit(tree, 'containerDirective', (node) => {
             const name = node.name;
-            const blockNames = ['callout', 'note', 'folding', 'folders', 'timeline', 'tabs', 'grid', 'blockquote', 'quot', 'title', 'poetry', 'copy', 'reel', 'paper'];
+            const blockNames = ['callout', 'note', 'folding', 'folders', 'timeline', 'tabs', 'grid', 'blockquote', 'quot', 'title', 'poetry', 'copy', 'reel', 'paper', 'deadline'];
             const cardNames = ['ghcard', 'sites', 'posters', 'panel', 'yoicard'];
             const mediaNames = ['video', 'audio'];
 

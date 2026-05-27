@@ -1,0 +1,340 @@
+/* Deadline directive — flip clock countdown */
+
+.md-directive-deadline {
+    margin: 2rem auto;
+    padding: 1.5rem;
+    max-width: 360px;
+    width: 100%;
+    border-radius: var(--md-radius-lg);
+    text-align: center;
+    position: relative;
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.06),
+        0 4px 12px rgba(0,0,0,0.05);
+}
+
+.dark .md-directive-deadline,
+[data-theme="dark"] .md-directive-deadline {
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.15),
+        0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Title */
+.md-deadline-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.7rem;
+}
+
+.md-deadline-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+
+/* Countdown display row — fixed dimensions for consistent card sizing */
+.md-deadline-display {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.7rem;
+    flex-wrap: nowrap;
+    min-height: 96px;
+}
+
+/* Unit wrapper: panel + label */
+.md-deadline-unit-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ===== Flip Panel (portrait ratio ~0.83:1) ===== */
+.md-deadline-panel {
+    position: relative;
+    width: 48px;
+    --panel-h: 58px;
+    height: var(--panel-h);
+    perspective: 200px;
+    border-radius: 10px;
+    overflow: visible;
+    font-family: ui-monospace, 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1.2rem;
+    line-height: 1;
+    --deadline-p-bg: #faf8f5;
+    --deadline-p-text: #2d2420;
+    --deadline-p-crease: #d0c8bc;
+    --deadline-p-shadow: rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 2px 4px rgba(0,0,0,0.08),
+        0 4px 10px rgba(0,0,0,0.05),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(0,0,0,0.07);
+}
+
+.dark .md-deadline-panel,
+[data-theme="dark"] .md-deadline-panel {
+    --deadline-p-bg: #2a2520;
+    --deadline-p-text: #f0ece8;
+    --deadline-p-crease: rgba(0, 0, 0, 0.28);
+    --deadline-p-shadow: rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 2px 4px rgba(0,0,0,0.25),
+        0 4px 10px rgba(0,0,0,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* --- Static top half --- */
+.md-deadline-static-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    background: var(--deadline-p-bg);
+    color: var(--deadline-p-text);
+    z-index: 1;
+    border-radius: 9px 9px 0 0;
+}
+
+.md-deadline-static-top span {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--panel-h);
+    line-height: var(--panel-h);
+    text-align: center;
+}
+
+/* Crease line */
+.md-deadline-static-top::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 6%;
+    right: 6%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--deadline-p-crease), transparent);
+    z-index: 2;
+}
+
+/* --- Static bottom half --- */
+.md-deadline-static-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    background: var(--deadline-p-bg);
+    color: var(--deadline-p-text);
+    z-index: 1;
+    border-radius: 0 0 9px 9px;
+}
+
+.md-deadline-static-bottom span {
+    display: block;
+    position: absolute;
+    top: calc(var(--panel-h) * -0.5);
+    left: 0;
+    right: 0;
+    height: var(--panel-h);
+    line-height: var(--panel-h);
+    text-align: center;
+}
+
+/* --- Flip top half --- */
+.md-deadline-flip-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    background: var(--deadline-p-bg);
+    color: var(--deadline-p-text);
+    z-index: 3;
+    border-radius: 9px 9px 0 0;
+    backface-visibility: hidden;
+    transform-origin: bottom;
+    box-shadow: 0 2px 6px var(--deadline-p-shadow);
+}
+
+.md-deadline-flip-top span {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--panel-h);
+    line-height: var(--panel-h);
+    text-align: center;
+}
+
+/* Crease line on flip top */
+.md-deadline-flip-top::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 6%;
+    right: 6%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--deadline-p-crease), transparent);
+    z-index: 4;
+}
+
+/* --- Flip bottom half --- */
+.md-deadline-flip-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    background: var(--deadline-p-bg);
+    color: var(--deadline-p-text);
+    z-index: 3;
+    border-radius: 0 0 9px 9px;
+    backface-visibility: hidden;
+    transform-origin: top;
+    transform: rotateX(90deg);
+    box-shadow: 0 -2px 6px var(--deadline-p-shadow);
+}
+
+.md-deadline-flip-bottom span {
+    display: block;
+    position: absolute;
+    top: calc(var(--panel-h) * -0.5);
+    left: 0;
+    right: 0;
+    height: var(--panel-h);
+    line-height: var(--panel-h);
+    text-align: center;
+}
+
+/* ===== Animations ===== */
+.md-deadline-panel.flipping .md-deadline-flip-top {
+    animation: deadline-flip-out 0.55s ease-in forwards;
+}
+
+.md-deadline-panel.flipping .md-deadline-flip-bottom {
+    animation: deadline-flip-in 0.55s ease-out forwards;
+}
+
+@keyframes deadline-flip-out {
+    0% { transform: rotateX(0); }
+    100% { transform: rotateX(-90deg); }
+}
+
+@keyframes deadline-flip-in {
+    0% { transform: rotateX(90deg); }
+    100% { transform: rotateX(0); }
+}
+
+/* Colon separator */
+.md-deadline-sep {
+    display: flex;
+    align-items: center;
+    height: var(--panel-h);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    font-family: ui-monospace, monospace;
+    animation: deadline-blink 1.6s ease-in-out infinite;
+    user-select: none;
+    opacity: 0.6;
+}
+
+@keyframes deadline-blink {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.9; }
+}
+
+/* Unit label */
+.md-deadline-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+}
+
+/* Meta line */
+.md-deadline-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+/* Description */
+.md-deadline-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+/* Expired state */
+.md-deadline-expired {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 96px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    letter-spacing: 0.03em;
+    width: 100%;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 400px) {
+    .md-directive-deadline {
+        padding: 1.25rem 0.5rem;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .md-deadline-panel {
+        width: 48px;
+        --panel-h: 58px;
+        font-size: 1.2rem;
+        border-radius: 8px;
+    }
+
+    .md-deadline-static-top,
+    .md-deadline-flip-top {
+        border-radius: 7px 7px 0 0;
+    }
+
+    .md-deadline-static-bottom,
+    .md-deadline-flip-bottom {
+        border-radius: 0 0 7px 7px;
+    }
+
+    .md-deadline-sep {
+        font-size: 0.9rem;
+    }
+
+    .md-deadline-display {
+        gap: 5px;
+        min-height: 78px;
+    }
+}
