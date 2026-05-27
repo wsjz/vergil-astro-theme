@@ -1,0 +1,72 @@
+/* ========== Skeleton shimmer ========== */
+.md-mermaid-output,
+.md-echart-container {
+    position: relative;
+    min-height: 100px;
+}
+
+.md-mermaid-output:not([data-loaded="true"]),
+.md-echart-container:not([data-loaded="true"]) {
+    background: linear-gradient(
+        90deg,
+        var(--bg-card) 25%,
+        var(--bg-muted) 50%,
+        var(--bg-card) 75%
+    );
+    background-size: 200% 100%;
+    animation: chart-skeleton 1.5s ease-in-out infinite;
+}
+
+@keyframes chart-skeleton {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ========== Mermaid ========== */
+.md-directive-mermaid {
+    margin: 1.5rem 0;
+    border-radius: var(--md-radius);
+    border: var(--md-border);
+    background: var(--bg-card);
+    overflow: auto;
+}
+
+.md-directive-mermaid .md-mermaid-output {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.md-directive-mermaid .md-mermaid-output svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ========== ECharts ========== */
+.md-directive-echart {
+    margin: 1.5rem 0;
+    border-radius: var(--md-radius);
+    border: var(--md-border);
+    background: var(--bg-card);
+    overflow: hidden;
+}
+
+.md-echart-container {
+    width: 100%;
+}
+
+.md-echart-error {
+    padding: 1rem;
+    color: var(--color-danger);
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.22);
+    border-radius: var(--md-radius);
+}
+
+.md-echart-error-msg {
+    font-size: 0.875rem;
+}

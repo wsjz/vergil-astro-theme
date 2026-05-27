@@ -563,6 +563,11 @@ const isArticle = head.pageType === 'article';
             import '../scripts/reveal-scroll.js';
         </script>
 
+        <!-- Mermaid / ECharts lazy init -->
+        <script>
+            import '../scripts/charts-init.mjs';
+        </script>
+
         <!-- PWA Service Worker -->
         <script is:inline>
             (function() {
