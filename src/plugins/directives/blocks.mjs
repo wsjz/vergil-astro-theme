@@ -435,6 +435,47 @@ export function processBlockDirective(node, options = {}) {
             break;
         }
 
+        case 'deadline': {
+            const date = attrs.date || '';
+            const title = attrs.title || '';
+            const description = attrs.description || '';
+            const showSeconds = attrs.showSeconds !== 'false';
+            const expiredText = attrs.expiredText || '已截止';
+            const units = showSeconds
+                ? ['天', '时', '分', '秒']
+                : ['天', '时', '分'];
+            const uid = `dl-${Math.random().toString(36).slice(2, 7)}`;
+
+            // Build flip-clock panels with colon separators
+            const parts = [];
+            units.forEach((u, i) => {
+                parts.push(`<div class="md-deadline-unit-box"><div class="md-deadline-panel" data-unit="${i}"><div class="md-deadline-static-top"><span>00</span></div><div class="md-deadline-static-bottom"><span>00</span></div><div class="md-deadline-flip-top"><span>00</span></div><div class="md-deadline-flip-bottom"><span>00</span></div></div><span class="md-deadline-label">${u}</span></div>`);
+                if (i < units.length - 1) {
+                    parts.push('<span class="md-deadline-sep">:</span>');
+                }
+            });
+            const unitHtml = parts.join('');
+
+            const dateObj = new Date(date);
+            const dateStr = dateObj.toLocaleDateString('zh-CN', {
+                year: 'numeric', month: '2-digit', day: '2-digit'
+            });
+
+            // Inline JS: flip-clock countdown
+            const js = `<script>(function(el){var t=new Date(el.dataset.date),disp=el.querySelector('.md-deadline-display'),panels=disp.querySelectorAll('.md-deadline-panel');function tick(){var d=t-Date.now();if(d<=0){disp.innerHTML='<div class="md-deadline-expired">'+el.dataset.expired+'</div>';return;}var a=Math.floor(d/864e5),b=Math.floor(d%864e5/36e5),c=Math.floor(d%36e5/6e4),e=${showSeconds ? 'Math.floor(d%6e4/1e3)' : 'null'};var vals=[a,b,c,e];for(var i=0;i<panels.length;i++){if(vals[i]===null)continue;var p=panels[i];var nv=String(vals[i]).padStart(2,'0');var st=p.querySelector('.md-deadline-static-top span');var sb=p.querySelector('.md-deadline-static-bottom span');var ft=p.querySelector('.md-deadline-flip-top span');var fb=p.querySelector('.md-deadline-flip-bottom span');var ov=st.textContent;if(ov===nv)continue;p.classList.remove('flipping');void p.offsetHeight;ft.textContent=ov;fb.textContent=nv;st.textContent=nv;sb.textContent=nv;p.classList.add('flipping');}}tick();setInterval(tick,1e3);})(document.currentScript.previousElementSibling);</script>`;
+
+            const html = `<div class="md-directive md-directive-deadline" id="${uid}" data-date="${date}" data-expired="${expiredText}">` +
+                `${title ? `<div class="md-deadline-title"><span>${title}</span></div>` : ''}` +
+                `<div class="md-deadline-display">${unitHtml}</div>` +
+                `<div class="md-deadline-meta">目标日期 ${dateStr}</div>` +
+                `${description ? `<div class="md-deadline-desc">${description}</div>` : ''}` +
+                `</div>${js}`;
+
+            node.data = { hName: 'div', hProperties: {} };
+            node.children = [{ type: 'html', value: html }];
+            break;
+        }
+
         default:
             break;
     }

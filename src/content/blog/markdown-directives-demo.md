@@ -253,6 +253,37 @@ tab: 示例代码
 
 ---
 
+### Deadline 倒计时
+
+::::tabs
+tab: 演示效果
+
+:::deadline{date="2026-12-31" title="年度目标截止" description="保持节奏，稳步推进"}
+:::
+
+:::deadline{date="2025-01-01" title="已过期示例" expiredText="活动已结束" description="保持节奏，稳步推进" showSeconds="false"}
+:::
+
+tab: 示例代码
+
+````markdown
+:::deadline{date="2026-12-31" title="年度目标截止" description="保持节奏，稳步推进"}
+:::
+
+:::deadline{date="2025-01-01" title="已过期示例" expiredText="活动已结束" description="保持节奏，稳步推进" showSeconds="false"}
+:::
+````
+
+- `date`（**必填**）：目标日期，格式 `YYYY-MM-DD` 或 `YYYY-MM-DD HH:mm`
+- `title`：倒计时标题
+- `description`：描述文字
+- `showSeconds`：是否显示秒数，默认 `true`
+- `expiredText`：过期后显示的文案，默认 `已截止`
+
+::::
+
+---
+
 ### Tabs 选项卡
 
 #### 演示效果
