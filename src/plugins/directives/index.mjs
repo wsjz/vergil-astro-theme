@@ -6,6 +6,7 @@
 import { visit } from 'unist-util-visit';
 import { processInlineDirective } from './inline.mjs';
 import { processBlockDirective } from './blocks.mjs';
+import { processOkrBlock } from './blocks.mjs';
 import { processCardDirective } from './cards.mjs';
 import { processMediaDirective } from './media.mjs';
 import { processPrivateDirective } from './private.mjs';
@@ -27,6 +28,8 @@ export function remarkContentDirectives(options = {}) {
 
             if (blockNames.includes(name)) {
                 processBlockDirective(node, { links, screenshotService });
+            } else if (name === 'okr') {
+                processOkrBlock(node);
             } else if (cardNames.includes(name)) {
                 processCardDirective(node, { links, screenshotService });
             } else if (mediaNames.includes(name)) {
