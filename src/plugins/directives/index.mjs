@@ -6,12 +6,12 @@
 import { visit } from 'unist-util-visit';
 import { processInlineDirective } from './inline.mjs';
 import { processBlockDirective } from './blocks.mjs';
-import { processOkrBlock } from './blocks.mjs';
+import { processOkrDirective } from './okr.mjs';
 import { processCardDirective } from './cards.mjs';
 import { processMediaDirective } from './media.mjs';
 import { processPrivateDirective } from './private.mjs';
 import { processChartDirective } from './charts.mjs';
-import { processCalendarDirective } from '../directives-plan/calendar.mjs';
+import { processCalendarDirective } from './calendar.mjs';
 
 export function remarkContentDirectives(options = {}) {
     const { links, screenshotService } = options;
@@ -31,7 +31,7 @@ export function remarkContentDirectives(options = {}) {
             if (blockNames.includes(name)) {
                 processBlockDirective(node, { links, screenshotService });
             } else if (name === 'okr') {
-                processOkrBlock(node);
+                processOkrDirective(node);
             } else if (cardNames.includes(name)) {
                 processCardDirective(node, { links, screenshotService });
             } else if (mediaNames.includes(name)) {

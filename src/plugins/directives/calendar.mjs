@@ -13,7 +13,6 @@
  *   • User-defined events from markdown table with auto color assignment
  *   • Supports user-specified color via table column
  */
-import { uid } from './parser.mjs';
 import { Solar, HolidayUtil } from 'lunar-javascript';
 
 /* Color palette — auto-assigned to unknown tag types */
@@ -105,6 +104,10 @@ const NAV_SCRIPT = `<script>
   });
 })();
 </script>`;
+
+function uid(prefix) {
+    return `${prefix}-${Math.random().toString(36).slice(2, 7)}`;
+}
 
 export function processCalendarDirective(node) {
     const attrs       = node.attributes || {};
@@ -399,7 +402,7 @@ function generateMonthRange(month, range) {
 }
 
 function formatMonth(d) {
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}`;
 }
 
 function formatMonthLabel(s) {
