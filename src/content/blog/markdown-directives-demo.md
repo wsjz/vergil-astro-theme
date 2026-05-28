@@ -2122,21 +2122,21 @@ tab: 演示效果
 
 易用性与覆盖度
 
-| key result | target | current | desc | status |
-| ---------- | ------ | ------- | ---- | ------ |
-| 新增 5 个 Markdown 内容指令 | 5 | 2 | 当前已实现 plan、okr，待完成 calendar 和 timeline 视图 | 正常 |
-| 文档站点覆盖全部指令用法 | 30 | 18 | 每个指令需包含语法说明、示例代码、效果演示 | 风险 |
-| 零配置启动体验优化 | 1 | 0 | 简化主题初始化流程，降低新用户上手门槛 | 滞后 |
+| key result | target | current | desc | status | link |
+| ---------- | ------ | ------- | ---- | ------ | ---- |
+| 新增 5 个 Markdown 内容指令 | 5 | 2 | 当前已实现 plan、okr，待完成 calendar 和 timeline 视图 | 正常 | |
+| 文档站点覆盖全部指令用法 | 30 | 18 | 每个指令需包含语法说明、示例代码、效果演示 | 风险 | https://github.com/wsjz/vergil-astro-theme/issues |
+| 零配置启动体验优化 | 1 | 0 | 简化主题初始化流程，降低新用户上手门槛 | 滞后 | |
 
 ## 扩大社区影响力
 
 社区影响力
 
-| key result | target | current | desc | status |
-| ---------- | ------ | ------- | ---- | ------ |
-| GitHub Stars 突破 500 | 500 | 320 | 通过技术博客和社交媒体持续推广 | 正常 |
-| 发布 3 篇主题使用教程 | 3 | 1 | 覆盖安装、自定义、部署全流程 | 正常 |
-| 收集并处理 20 条用户反馈 | 20 | 12 | 在 GitHub Issues 中追踪和响应 | 正常 |
+| key result | target | current | desc | status | link |
+| ---------- | ------ | ------- | ---- | ------ | ---- |
+| GitHub Stars 突破 500 | 500 | 320 | 通过技术博客和社交媒体持续推广 | 正常 | |
+| 发布 3 篇主题使用教程 | 3 | 1 | 覆盖安装、自定义、部署全流程 | 正常 | https://github.com/wsjz/vergil-astro-theme/discussions |
+| 收集并处理 20 条用户反馈 | 20 | 12 | 在 GitHub Issues 中追踪和响应 | 正常 | |
 
 :::
 
@@ -2149,21 +2149,21 @@ tab: 示例代码
 
 易用性与覆盖度
 
-| key result | target | current | desc | status |
-| ---------- | ------ | ------- | ---- | ------ |
-| 新增 5 个 Markdown 内容指令 | 5 | 2 | 当前已实现 plan、okr... | 正常 |
-| 文档站点覆盖全部指令用法 | 30 | 18 | 每个指令需包含语法说明... | 风险 |
-| 零配置启动体验优化 | 1 | 0 | 简化主题初始化流程... | 滞后 |
+| key result | target | current | desc | status | link |
+| ---------- | ------ | ------- | ---- | ------ | ---- |
+| 新增 5 个 Markdown 内容指令 | 5 | 2 | 当前已实现 plan、okr... | 正常 | |
+| 文档站点覆盖全部指令用法 | 30 | 18 | 每个指令需包含语法说明... | 风险 | https://github.com/... |
+| 零配置启动体验优化 | 1 | 0 | 简化主题初始化流程... | 滞后 | |
 
 ## 扩大社区影响力
 
 社区影响力
 
-| key result | target | current | desc | status |
-| ---------- | ------ | ------- | ---- | ------ |
-| GitHub Stars 突破 500 | 500 | 320 | <通></通>过技术博客和社交媒体推广 | 正常 |
-| 发布 3 篇主题使用教程 | 3 | 1 | 覆盖安装、自定义、部署全流程 | 正常 |
-| 收集并处理 20 条用户反馈 | 20 | 12 | 在 GitHub Issues 中追踪和响应 | 正常 |
+| key result | target | current | desc | status | link |
+| ---------- | ------ | ------- | ---- | ------ | ---- |
+| GitHub Stars 突破 500 | 500 | 320 | 通过技术博客和社交媒体推广 | 正常 | |
+| 发布 3 篇主题使用教程 | 3 | 1 | 覆盖安装、自定义、部署全流程 | 正常 | https://github.com/... |
+| 收集并处理 20 条用户反馈 | 20 | 12 | 在 GitHub Issues 中追踪和响应 | 正常 | |
 
 :::
 ````
@@ -2171,7 +2171,7 @@ tab: 示例代码
 - 使用 `##` 标题定义 **Objective（目标）**
 - 每个 O 下方用 Markdown **表格**定义 **Key Results（关键结果）**
 - 表格列：`key result`（名称）、`target`（目标值）、`current`（当前值）
-- 可选列：`desc`（详细说明）、`status`（状态：正常/风险/滞后/完成）
+- 可选列：`desc`（详细说明）、`status`（状态：正常/风险/滞后/完成）、`link`（链接，带链接的 KR 整行可点击）
 - 支持 `title` 和 `period` 属性设置 OKR 标题与周期
 - 自动计算每个 KR、每个 O 以及**整体完成度**并渲染进度条
 
@@ -2188,12 +2188,12 @@ tab: 演示效果
 
 :::calendar{month="2026-05"}
 
-| date | type | content | color |
-| ---- | ---- | ------- | ----- |
-| 05-01 | 假期 | 五一假期开始 | red |
-| 05-05 | 工作 | 补班调休 | |
-| 05-20 | 生活 | 朋友聚会 | blue |
-| 05-25 | 项目 | Vergil v1.0 发布 | green |
+| date | type | content | color | link |
+| ---- | ---- | ------- | ----- | ---- |
+| 05-01 | 假期 | 五一假期开始 | red | |
+| 05-05 | 工作 | 补班调休 | | |
+| 05-20 | 生活 | 朋友聚会 | blue | |
+| 05-25 | 项目 | Vergil v1.0 发布 | green | https://github.com/wsjz/vergil-astro-theme |
 
 :::
 
@@ -2202,12 +2202,12 @@ tab: 示例代码
 ````markdown
 :::calendar{month="2026-05"}
 
-| date | type | content | color |
-| ---- | ---- | ------- | ----- |
-| 05-01 | 假期 | 五一假期开始 | red |
-| 05-05 | 工作 | 补班调休 | |
-| 05-20 | 生活 | 朋友聚会 | blue |
-| 05-25 | 项目 | Vergil v1.0 发布 | green |
+| date | type | content | color | link |
+| ---- | ---- | ------- | ----- | ---- |
+| 05-01 | 假期 | 五一假期开始 | red | |
+| 05-05 | 工作 | 补班调休 | | |
+| 05-20 | 生活 | 朋友聚会 | blue | |
+| 05-25 | 项目 | Vergil v1.0 发布 | green | https://github.com/wsjz/vergil-astro-theme |
 
 :::
 ````
@@ -2218,6 +2218,7 @@ tab: 示例代码
   - `type`：事件类型，相同类型自动分配同一种颜色
   - `content`：事件文字内容
   - `color`：指定颜色（`blue`、`green`、`red`、`purple`、`yellow`、`cyan`、`orange`、`pink`）
+  - `link`：可选链接，带链接的日程显示小箭头图标，点击可跳转
 - 自动功能（无需配置）：
   - 农历日期（初一至三十）
   - 二十四节气（立春、雨水、惊蛰…）

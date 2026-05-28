@@ -256,6 +256,30 @@
   padding-left: 3px;
 }
 
+/* ─── Linked events ─── */
+.md-calendar-event--link {
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.md-calendar-event--link:hover {
+  filter: brightness(0.92);
+}
+
+.md-calendar-event-arrow {
+  flex-shrink: 0;
+  opacity: 0.45;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.md-calendar-event--link:hover .md-calendar-event-arrow {
+  opacity: 0.85;
+  transform: translate(0.5px, -0.5px);
+}
+
 /* ─── Tooltip ─── */
 .md-calendar-tooltip {
   position: absolute;

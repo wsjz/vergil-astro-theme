@@ -14,6 +14,7 @@
  *   • Supports user-specified color via table column
  */
 import { Solar, HolidayUtil } from 'lunar-javascript';
+import { getIconSvg } from './shared.mjs';
 
 /* Color palette — auto-assigned to unknown tag types */
 const TAG_PALETTE = [
@@ -314,7 +315,12 @@ function renderCell(c, barPos) {
         if (e.kind === 'work') cfg = WORK_STYLE;
         else if (e.auto)        cfg = BAR_STYLE;
         else                    cfg = getTagStyle(e.type, e.color);
-        return `<div class="md-calendar-event ${cfg.cls}" style="--evt-bg:${cfg.bg};--evt-text:${cfg.text}">${escapeHtml(e.content)}</div>`;
+        const hasLink = !!e.link;
+        const tag = hasLink ? 'a' : 'div';
+        const linkAttr = hasLink ? ` href="${escapeHtml(e.link)}" target="_blank" rel="noopener noreferrer"` : '';
+        const linkCls = hasLink ? ' md-calendar-event--link' : '';
+        const arrowSvg = hasLink ? getIconSvg('lucide:external-link', 10).replace(/<svg/, '<svg class="md-calendar-event-arrow"') : '';
+        return `<${tag} class="md-calendar-event ${cfg.cls}${linkCls}" style="--evt-bg:${cfg.bg};--evt-text:${cfg.text}"${linkAttr}>${escapeHtml(e.content)}${arrowSvg}</${tag}>`;
     }).join('');
 
     const more = regular.length > maxEvt ? regular.length - maxEvt : 0;
@@ -363,6 +369,7 @@ function parseEvents(node) {
     const ti = headers.indexOf('type');
     const ci = headers.indexOf('content');
     const coi = headers.indexOf('color');
+    const li = headers.indexOf('link');
     const out = [];
     for (let i = 1; i < rows.length; i++) {
         const cells = rows[i].children.filter(c => c.type === 'tableCell');
@@ -371,6 +378,7 @@ function parseEvents(node) {
             type:    ti >= 0 ? extractText(cells[ti]).trim() : '',
             content: ci >= 0 ? extractText(cells[ci]).trim() : '',
             color:   coi >= 0 && cells[coi] ? extractText(cells[coi]).trim() : '',
+            link:    li >= 0 && cells[li] ? extractText(cells[li]).trim() : '',
         });
     }
     return out;

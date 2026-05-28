@@ -1,3 +1,5 @@
+import { getIconSvg } from './shared.mjs';
+
 /**
  * :::okr directive — Objectives and Key Results.
  *
@@ -33,16 +35,21 @@ export function processOkrDirective(node) {
             const desc = kr.description || '';
             const status = kr.status || '正常';
             const statusClass = getStatusClass(status);
+            const link = kr.link || '';
             totalKRs++;
             totalProgress += pct;
             objProgressSum += pct;
 
+            const krTag = link ? 'a' : 'div';
+            const linkAttr = link ? ` href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer"` : '';
+            const linkArrow = link ? getIconSvg('lucide:external-link', 13).replace(/<svg/, '<svg class="md-okr-arrow"') : '';
+
             return `
-                <div class="md-okr-kr">
+                <${krTag} class="md-okr-kr"${linkAttr}>
                     <div class="md-okr-kr-main">
                         <span class="md-okr-badge md-okr-badge--kr">KR${krIndex + 1}</span>
                         <div class="md-okr-kr-content">
-                            <div class="md-okr-kr-title">${escapeHtml(kr.name)}</div>
+                            <div class="md-okr-kr-title">${escapeHtml(kr.name)}${linkArrow}</div>
                             ${desc ? `<div class="md-okr-kr-desc">${escapeHtml(desc)}</div>` : ''}
                         </div>
                     </div>
@@ -55,7 +62,7 @@ export function processOkrDirective(node) {
                             <div class="md-okr-progress-fill" style="width:${pct}%"></div>
                         </div>
                     </div>
-                </div>
+                </${krTag}>
             `;
         }).join('');
 
@@ -202,6 +209,7 @@ function parseKRFromParagraph(node) {
     const currentIdx = headers.findIndex(h => h === 'current');
     const descIdx = headers.findIndex(h => ['description', 'desc', '说明', '描述', '備註'].includes(h));
     const statusIdx = headers.findIndex(h => ['status', 'state', '状态', '狀態'].includes(h));
+    const linkIdx = headers.findIndex(h => ['link', 'url', '链接'].includes(h));
 
     const krs = [];
     for (let i = 1; i < dataLines.length; i++) {
@@ -212,6 +220,7 @@ function parseKRFromParagraph(node) {
             current: currentIdx >= 0 ? cells[currentIdx] || '0' : '0',
             description: descIdx >= 0 ? cells[descIdx] || '' : '',
             status: statusIdx >= 0 ? cells[statusIdx] || '正常' : '正常',
+            link: linkIdx >= 0 ? cells[linkIdx] || '' : '',
         };
         krs.push(kr);
     }
@@ -233,6 +242,7 @@ function parseKRTable(tableNode) {
     const currentIdx = headers.findIndex(h => h === 'current');
     const descIdx = headers.findIndex(h => ['description', 'desc', '说明', '描述', '備註'].includes(h));
     const statusIdx = headers.findIndex(h => ['status', 'state', '状态', '狀態'].includes(h));
+    const linkIdx = headers.findIndex(h => ['link', 'url', '链接'].includes(h));
 
     for (let i = 1; i < rows.length; i++) {
         const cells = rows[i].children.filter(c => c.type === 'tableCell');
@@ -242,6 +252,7 @@ function parseKRTable(tableNode) {
             current: currentIdx >= 0 ? extractText(cells[currentIdx]).trim() : '0',
             description: descIdx >= 0 ? extractText(cells[descIdx]).trim() : '',
             status: statusIdx >= 0 ? extractText(cells[statusIdx]).trim() : '正常',
+            link: linkIdx >= 0 ? extractText(cells[linkIdx]).trim() : '',
         };
         krs.push(kr);
     }
