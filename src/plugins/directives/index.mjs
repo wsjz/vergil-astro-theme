@@ -11,6 +11,7 @@ import { processCardDirective } from './cards.mjs';
 import { processMediaDirective } from './media.mjs';
 import { processPrivateDirective } from './private.mjs';
 import { processChartDirective } from './charts.mjs';
+import { processCalendarDirective } from '../directives-plan/calendar.mjs';
 
 export function remarkContentDirectives(options = {}) {
     const { links, screenshotService } = options;
@@ -25,6 +26,7 @@ export function remarkContentDirectives(options = {}) {
             const cardNames = ['ghcard', 'sites', 'posters', 'panel', 'yoicard'];
             const mediaNames = ['video', 'audio'];
             const chartNames = ['mermaid', 'echart'];
+            const planNames = ['calendar'];
 
             if (blockNames.includes(name)) {
                 processBlockDirective(node, { links, screenshotService });
@@ -36,6 +38,8 @@ export function remarkContentDirectives(options = {}) {
                 processMediaDirective(node);
             } else if (chartNames.includes(name)) {
                 processChartDirective(node);
+            } else if (planNames.includes(name)) {
+                processCalendarDirective(node);
             } else if (name === 'private') {
                 processPrivateDirective(node);
             }
