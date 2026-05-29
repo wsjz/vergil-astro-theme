@@ -2227,3 +2227,70 @@ tab: 示例代码
   - 传统节日（儿童节、建党节等）
 
 ::::
+
+---
+
+### Plan 任务计划
+
+多视图数据指令，支持看板、列表、表格、时间轴、里程碑、进度六种视图。数据通过 Markdown 表格输入，构建时静态渲染，视图切换使用纯 CSS `:target`。
+
+表头支持 `name:type` 格式声明列类型，不写 `:type` 时默认为 `text`。
+
+::::tabs
+tab: 演示效果
+
+:::plan{title="项目开发计划" views="board,list,table,timeline,milestone,progress" default="board" filters="状态,优先级,负责人"}
+
+| 状态:status | 任务:text | 优先级:priority | 截止日期:date | 负责人:text | 完成度:progress |
+|-------------|-----------|-----------------|---------------|-------------|-----------------|
+| done        | 需求分析  | P0              | 2024-01-01    | Alice       | 100%            |
+| done        | 技术选型  | P1              | 2024-01-10    | Bob         | 100%            |
+| doing       | 前端开发  | P0              | 2024-02-01    | Carol       | 65%             |
+| todo        | 测试验收  | P0              | 2024-03-10    | Dave        | 0%              |
+
+:::
+
+tab: 示例代码
+
+````markdown
+:::plan{title="项目开发计划" views="board,list,table,timeline,milestone,progress" default="board" filters="状态,优先级,负责人"}
+
+| 状态:status | 任务:text | 优先级:priority | 截止日期:date | 负责人:text | 完成度:progress |
+|-------------|-----------|-----------------|---------------|-------------|-----------------|
+| done        | 需求分析  | P0              | 2024-01-01    | Alice       | 100%            |
+| done        | 技术选型  | P1              | 2024-01-10    | Bob         | 100%            |
+| doing       | 前端开发  | P0              | 2024-02-01    | Carol       | 65%             |
+| todo        | 测试验收  | P0              | 2024-03-10    | Dave        | 0%              |
+
+:::
+````
+
+- `title`：顶部标题
+- `views`：启用的视图，逗号分隔。默认 `board,list,table,timeline,milestone,progress`
+- `default`：默认显示的视图
+- `filters`：Table 视图的筛选列，逗号分隔（如 `filters="状态,优先级"`）。不写则无筛选下拉，仅保留搜索框。写 `filters="none"` 显式关闭筛选
+
+**列类型**：表头用 `name:type` 格式，支持的类型有 `text`、`status`、`priority`、`date`、`progress`、`number`（千分位格式化，Notion 风格标签）、`checkbox`、`select`、`link`。不写 `:type` 时默认 `text`。
+
+**列映射属性**：
+- `dateCol` — timeline/milestone 使用的日期列
+- `startDate` / `endDate` — timeline 范围模式，指定后渲染为时间条
+- `progressCol` — progress 视图使用的进度列
+- `statusCol` — board/list/timeline 使用的状态列
+- `titleCol` — 指定标题列
+- `ownerCol` — board/list/milestone 使用的负责人列
+- `priorityCol` — board/list/milestone/progress 使用的优先级列
+- `descCol` — milestone 使用的描述列
+
+**视图所需列**：
+
+| 视图 | 所需列 | 说明 |
+|------|--------|------|
+| table | 无 | 永远可渲染 |
+| list | 无 | 永远可渲染 |
+| board | 无 | 永远可渲染，默认按第一列分组 |
+| timeline | `dateCol` 或 `startDate` 或 `endDate` | 单点模式显示圆点，范围模式显示条 |
+| milestone | `dateCol` | 只支持单点模式 |
+| progress | `progressCol` | 必须显式指定进度列 |
+
+::::

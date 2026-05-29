@@ -1,5 +1,6 @@
 import { visit } from 'unist-util-visit';
 import { getIconSvg, resolveColor, escapeHtml, h, serializeToHtml } from './shared.mjs';
+import { processPlanDirective } from './plan.mjs';
 
 export function processBlockDirective(node, options = {}) {
     const { links, screenshotService } = options;
@@ -432,6 +433,11 @@ export function processBlockDirective(node, options = {}) {
                         footer + '</div></div>'
                 }
             ];
+            break;
+        }
+
+        case 'plan': {
+            processPlanDirective(node, options);
             break;
         }
 

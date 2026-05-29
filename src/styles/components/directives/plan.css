@@ -1,0 +1,1150 @@
+/* ============================================================
+   :::plan directive — 6 views (board, list, table, timeline, milestone, progress)
+   ============================================================ */
+
+.md-directive-plan {
+    --plan-radius: 10px;
+    --plan-radius-sm: 6px;
+    margin: 1.5rem 0;
+    border-radius: var(--plan-radius);
+    border: 1px solid var(--border-light);
+    background: var(--bg-card);
+    overflow: hidden;
+}
+
+/* Header */
+.md-plan-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-card);
+}
+
+.md-plan-header__title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Tab Navigation — Style F: sliding underline + icon + badge */
+.md-plan-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 0.75rem;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--bg-card);
+    overflow-x: auto;
+}
+
+.md-plan-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px 10px 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s;
+    cursor: pointer;
+    position: relative;
+    border: none;
+    background: transparent;
+}
+
+.md-plan-tab:hover {
+    color: var(--text-main);
+}
+
+/* Sliding underline */
+.md-plan-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    right: 50%;
+    height: 2.5px;
+    background: var(--accent-color);
+    border-radius: 2px 2px 0 0;
+    transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Icon */
+.md-plan-tab__icon {
+    width: 15px;
+    height: 15px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+
+/* Label */
+.md-plan-tab__label {
+    transition: color 0.2s;
+}
+
+/* Badge */
+.md-plan-tab__badge {
+    font-size: 0.62rem;
+    padding: 1px 5px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+/* Active state */
+.md-plan-state--0:checked ~ .md-plan-tabs .md-plan-tab--0,
+.md-plan-state--1:checked ~ .md-plan-tabs .md-plan-tab--1,
+.md-plan-state--2:checked ~ .md-plan-tabs .md-plan-tab--2,
+.md-plan-state--3:checked ~ .md-plan-tabs .md-plan-tab--3,
+.md-plan-state--4:checked ~ .md-plan-tabs .md-plan-tab--4,
+.md-plan-state--5:checked ~ .md-plan-tabs .md-plan-tab--5 {
+    color: var(--accent-color);
+}
+
+.md-plan-state--0:checked ~ .md-plan-tabs .md-plan-tab--0::after,
+.md-plan-state--1:checked ~ .md-plan-tabs .md-plan-tab--1::after,
+.md-plan-state--2:checked ~ .md-plan-tabs .md-plan-tab--2::after,
+.md-plan-state--3:checked ~ .md-plan-tabs .md-plan-tab--3::after,
+.md-plan-state--4:checked ~ .md-plan-tabs .md-plan-tab--4::after,
+.md-plan-state--5:checked ~ .md-plan-tabs .md-plan-tab--5::after {
+    left: 10px;
+    right: 10px;
+}
+
+.md-plan-state--0:checked ~ .md-plan-tabs .md-plan-tab--0 .md-plan-tab__icon,
+.md-plan-state--1:checked ~ .md-plan-tabs .md-plan-tab--1 .md-plan-tab__icon,
+.md-plan-state--2:checked ~ .md-plan-tabs .md-plan-tab--2 .md-plan-tab__icon,
+.md-plan-state--3:checked ~ .md-plan-tabs .md-plan-tab--3 .md-plan-tab__icon,
+.md-plan-state--4:checked ~ .md-plan-tabs .md-plan-tab--4 .md-plan-tab__icon,
+.md-plan-state--5:checked ~ .md-plan-tabs .md-plan-tab--5 .md-plan-tab__icon {
+    opacity: 0.9;
+}
+
+.md-plan-state--0:checked ~ .md-plan-tabs .md-plan-tab--0 .md-plan-tab__badge,
+.md-plan-state--1:checked ~ .md-plan-tabs .md-plan-tab--1 .md-plan-tab__badge,
+.md-plan-state--2:checked ~ .md-plan-tabs .md-plan-tab--2 .md-plan-tab__badge,
+.md-plan-state--3:checked ~ .md-plan-tabs .md-plan-tab--3 .md-plan-tab__badge,
+.md-plan-state--4:checked ~ .md-plan-tabs .md-plan-tab--4 .md-plan-tab__badge,
+.md-plan-state--5:checked ~ .md-plan-tabs .md-plan-tab--5 .md-plan-tab__badge {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+}
+
+/* Hidden radio inputs for CSS-only view switching */
+.md-plan-state {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+/* View switching — default: hide all */
+.md-plan-view {
+    display: none;
+    padding: 1.25rem;
+}
+
+/* Show view when its matching radio is checked (sibling combinator, no :has) */
+.md-plan-state--0:checked ~ .md-plan-view--idx-0 { display: block; }
+.md-plan-state--1:checked ~ .md-plan-view--idx-1 { display: block; }
+.md-plan-state--2:checked ~ .md-plan-view--idx-2 { display: block; }
+.md-plan-state--3:checked ~ .md-plan-view--idx-3 { display: block; }
+.md-plan-state--4:checked ~ .md-plan-view--idx-4 { display: block; }
+.md-plan-state--5:checked ~ .md-plan-view--idx-5 { display: block; }
+
+/* Active tab when matching radio is checked */
+.md-plan-state--0:checked ~ .md-plan-tabs .md-plan-tab--0,
+.md-plan-state--1:checked ~ .md-plan-tabs .md-plan-tab--1,
+.md-plan-state--2:checked ~ .md-plan-tabs .md-plan-tab--2,
+.md-plan-state--3:checked ~ .md-plan-tabs .md-plan-tab--3,
+.md-plan-state--4:checked ~ .md-plan-tabs .md-plan-tab--4,
+.md-plan-state--5:checked ~ .md-plan-tabs .md-plan-tab--5 {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+}
+
+/* Empty state */
+.md-plan-empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* ============================================================
+   Shared Components
+   ============================================================ */
+
+/* Pill badge */
+.md-plan-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+}
+
+.md-plan-priority--high {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+}
+
+.md-plan-priority--medium {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: color-mix(in srgb, var(--accent-color) 50%, transparent);
+}
+
+.md-plan-priority--low {
+    background: var(--bg-card);
+    color: var(--text-muted);
+}
+
+/* Number — Notion-style pill tag */
+.md-plan-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    padding: 1px 8px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--accent-color) 8%, transparent);
+    color: var(--accent-color);
+    font-family: ui-monospace, 'SF Mono', SFMono-Regular, monospace;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: -0.02em;
+}
+
+/* Status dot */
+.md-plan-status-dot {
+    font-size: 0.75rem;
+}
+
+.md-plan-status--done { color: var(--accent-color); }
+.md-plan-status--doing { color: var(--accent-color); }
+.md-plan-status--todo { color: var(--text-muted); }
+
+/* Progress bar */
+.md-plan-progress {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.md-plan-progress--small {
+    width: 120px;
+}
+
+.md-plan-progress--medium {
+    width: 160px;
+}
+
+.md-plan-progress__track {
+    flex: 1;
+    height: 6px;
+    background: color-mix(in srgb, var(--text-muted) 18%, transparent);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.md-plan-progress__fill {
+    height: 100%;
+    background: var(--accent-color);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    min-width: 2px;
+}
+
+.md-plan-progress__text {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 32px;
+    text-align: right;
+}
+
+/* ============================================================
+   Board View
+   ============================================================ */
+
+.md-plan-board {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.md-plan-board__column {
+    flex: 1;
+    min-width: 220px;
+    max-width: 320px;
+    background: var(--bg-card);
+    border-radius: var(--plan-radius-sm);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    max-height: 500px;
+}
+
+.md-plan-board__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
+}
+
+.md-plan-board__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    padding-top: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+}
+
+.md-plan-board__cards::-webkit-scrollbar {
+    width: 4px;
+}
+
+.md-plan-board__cards::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.md-plan-board__cards::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 2px;
+}
+
+.md-plan-board__header-bar {
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--text-muted);
+}
+
+.md-plan-board__header-bar--todo { background: var(--text-muted); }
+.md-plan-board__header-bar--doing { background: var(--accent-color); }
+.md-plan-board__header-bar--done { background: var(--accent-color); }
+.md-plan-board__header-bar--other { background: var(--text-secondary); }
+
+.md-plan-board__header-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.md-plan-board__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.md-plan-board__card {
+    background: var(--bg-card);
+    border-radius: var(--plan-radius-sm);
+    padding: 12px;
+    border: 1px solid var(--border-light);
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.md-plan-board__card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
+}
+
+.md-plan-board__card-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.md-plan-board__card-date {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.md-plan-board__card-owner {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .md-plan-board {
+        flex-direction: column;
+    }
+    .md-plan-board__column {
+        max-width: none;
+        min-width: auto;
+    }
+}
+
+/* ============================================================
+   List View
+   ============================================================ */
+
+.md-plan-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.md-plan-list__item {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+}
+
+.md-plan-list__item:not(:last-child) {
+    border-bottom: 1px solid var(--border-light);
+}
+
+.md-plan-list__bar {
+    width: 3px;
+    flex-shrink: 0;
+    border-radius: 0 2px 2px 0;
+    margin: 8px 0;
+}
+
+.md-plan-list__bar--done { background: var(--accent-color); }
+.md-plan-list__bar--doing { background: repeating-linear-gradient(to bottom, var(--accent-color) 0, var(--accent-color) 3px, transparent 3px, transparent 6px); }
+.md-plan-list__bar--todo { background: var(--border-light); }
+
+.md-plan-list__content {
+    flex: 1;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.md-plan-list__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.md-plan-list__title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.md-plan-list__date {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.md-plan-list__row--meta {
+    margin-top: 2px;
+}
+
+.md-plan-list__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.md-plan-list__owner {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+
+/* ============================================================
+   Table View — Toolbar (search + filter + sort)
+   ============================================================ */
+
+.md-plan-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.md-plan-search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 7px;
+    flex: 1;
+    max-width: 220px;
+    min-width: 140px;
+}
+
+.md-plan-search__icon {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.md-plan-search__input {
+    border: none;
+    background: transparent;
+    font-size: 0.78rem;
+    color: var(--text-main);
+    outline: none;
+    width: 100%;
+}
+
+.md-plan-search__input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Dropdown filter */
+.md-plan-filter-dropdown {
+    position: relative;
+}
+
+.md-plan-filter-trigger {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.md-plan-filter-trigger:hover {
+    background: var(--border-light);
+}
+
+.md-plan-filter-trigger svg {
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.md-plan-filter-dropdown.open .md-plan-filter-trigger svg {
+    transform: rotate(180deg);
+}
+
+.md-plan-filter-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 120px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    z-index: 10;
+    padding: 4px;
+}
+
+.md-plan-filter-dropdown.open .md-plan-filter-menu {
+    display: block;
+}
+
+.md-plan-filter-item {
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+
+.md-plan-filter-item:hover {
+    background: var(--bg-card);
+}
+
+.md-plan-filter-item.active {
+    background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* Sort icon in table headers — dual triangles */
+.md-plan-sort-icon {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.md-plan-sort-icon::before,
+.md-plan-sort-icon::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 3.5px solid transparent;
+    border-right: 3.5px solid transparent;
+    transition: border-color 0.15s;
+}
+
+.md-plan-sort-icon::before {
+    border-bottom: 4px solid var(--text-muted);
+}
+
+.md-plan-sort-icon::after {
+    border-top: 4px solid var(--text-muted);
+}
+
+.md-plan-table th:hover .md-plan-sort-icon::before {
+    border-bottom-color: color-mix(in srgb, var(--accent-color) 50%, transparent);
+}
+
+.md-plan-table th:hover .md-plan-sort-icon::after {
+    border-top-color: color-mix(in srgb, var(--accent-color) 50%, transparent);
+}
+
+.md-plan-sort-icon[data-sort-dir="asc"]::before {
+    border-bottom-color: var(--accent-color);
+}
+
+.md-plan-sort-icon[data-sort-dir="desc"]::after {
+    border-top-color: var(--accent-color);
+}
+
+/* ============================================================
+   Table View
+   ============================================================ */
+
+.md-plan-table-wrap {
+    overflow-x: auto;
+    margin-top: 8px;
+}
+
+.md-plan-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.md-plan-table thead,
+.md-plan-table thead tr {
+    background: transparent;
+}
+
+.md-plan-table th {
+    text-align: left;
+    padding: 8px 12px 12px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-bottom: 1.5px solid var(--border-light);
+    white-space: nowrap;
+    user-select: none;
+    background: transparent;
+    text-transform: none;
+}
+
+.md-plan-table th[data-sort-col] {
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.md-plan-table th[data-sort-col]:hover {
+    color: var(--accent-color);
+}
+
+.md-plan-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-main);
+    vertical-align: middle;
+    white-space: nowrap;
+    transition: background 0.12s;
+}
+
+.md-plan-table tbody tr {
+    transition: background 0.12s;
+}
+
+.md-plan-table tbody tr:hover {
+    background: var(--bg-card);
+}
+
+.md-plan-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ============================================================
+   Timeline View
+   ============================================================ */
+
+.md-plan-timeline {
+    padding: 0.5rem 0;
+}
+
+/* 统一行结构：label(108px) + gap(12px) + axis(flex:1) */
+.md-plan-timeline__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.md-plan-timeline__row-label {
+    width: 108px;
+    flex-shrink: 0;
+}
+
+.md-plan-timeline__row-axis {
+    flex: 1;
+    position: relative;
+}
+
+/* 月份行 */
+.md-plan-timeline__row--months {
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.md-plan-timeline__row-axis--months {
+    display: flex;
+    gap: 0;
+}
+
+.md-plan-timeline__month {
+    flex: 1;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding-bottom: 6px;
+}
+
+/* 刻度行 */
+.md-plan-timeline__row--ticks {
+    margin-bottom: 12px;
+    height: 18px;
+}
+
+.md-plan-timeline__tick {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* tracks */
+.md-plan-timeline__tracks {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.md-plan-timeline__track {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-light);
+}
+
+.md-plan-timeline__track:last-child {
+    border-bottom: none;
+}
+
+.md-plan-timeline__track-label {
+    width: 108px;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.md-plan-timeline__track-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border-light);
+    position: relative;
+}
+
+.md-plan-timeline__track-bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 6px;
+    background: var(--accent-color);
+    border-radius: 3px;
+    min-width: 2px;
+}
+
+.md-plan-timeline__track-bar--infinite {
+    background: repeating-linear-gradient(
+        90deg,
+        var(--accent-color) 0,
+        var(--accent-color) 6px,
+        transparent 6px,
+        transparent 10px
+    );
+    opacity: 0.4;
+}
+
+.md-plan-timeline__track-dot {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7rem;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.md-plan-timeline__track-dot[data-status="done"] {
+    color: var(--accent-color);
+}
+
+.md-plan-timeline__track-dot[data-status="doing"] {
+    color: var(--accent-color);
+    animation: plan-pulse 2s ease-in-out infinite;
+}
+
+.md-plan-timeline__track-dot[data-status="todo"] {
+    color: var(--text-muted);
+}
+
+@keyframes plan-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ============================================================
+   Milestone View
+   ============================================================ */
+
+.md-plan-milestone {
+    position: relative;
+    padding-left: 24px;
+}
+
+.md-plan-milestone__line {
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-light);
+}
+
+.md-plan-milestone__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 12px 0;
+    position: relative;
+}
+
+.md-plan-milestone__node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 60px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.md-plan-milestone__dot {
+    font-size: 0.9rem;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.md-plan-milestone__dot--done {
+    color: var(--accent-color);
+}
+
+.md-plan-milestone__dot--doing {
+    color: var(--accent-color);
+    animation: plan-pulse 2s ease-in-out infinite;
+}
+
+.md-plan-milestone__dot--todo {
+    color: var(--text-muted);
+}
+
+.md-plan-milestone__date {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.md-plan-milestone__card {
+    flex: 1;
+    background: var(--bg-card);
+    border-radius: var(--plan-radius-sm);
+    padding: 12px 14px;
+    border: 1px solid var(--border-light);
+}
+
+.md-plan-milestone__card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.md-plan-milestone__card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+
+.md-plan-milestone__card-desc {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* ============================================================
+   Progress View
+   ============================================================ */
+
+.md-plan-progress-view {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Overall section */
+.md-plan-progress-view__overall {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.md-plan-progress-view__donut {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+}
+
+.md-plan-donut {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.md-plan-donut__bg {
+    fill: none;
+    stroke: var(--bg-card);
+    stroke-width: 8;
+}
+
+.md-plan-donut__fg {
+    fill: none;
+    stroke: var(--accent-color);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s ease;
+}
+
+.md-plan-donut__text {
+    font-size: 18px;
+    font-weight: 700;
+    fill: var(--text-main);
+    transform: rotate(90deg);
+    transform-origin: center;
+}
+
+.md-plan-donut__label {
+    font-size: 8px;
+    fill: var(--text-secondary);
+    transform: rotate(90deg);
+    transform-origin: center;
+}
+
+.md-plan-progress-view__summary {
+    text-align: left;
+}
+
+.md-plan-progress-view__summary-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+
+.md-plan-progress-view__summary-desc {
+    font-size: 0.8rem;
+    color: var(--text-main);
+    line-height: 1.5;
+}
+
+/* Task list */
+.md-plan-progress-view__tasks {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.md-plan-progress-view__task {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    font-size: 0.8rem;
+}
+
+.md-plan-progress-view__task:not(:last-child) {
+    border-bottom: 1px solid var(--border-light);
+}
+
+.md-plan-progress-view__task-name {
+    color: var(--text-main);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.md-plan-progress-view__task-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.md-plan-progress-view__task-bar {
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+}
+
+.md-plan-progress-view__task-percent {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 36px;
+    text-align: right;
+}
+
+/* Stats section */
+.md-plan-progress-view__stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.md-plan-progress-view__stat-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.md-plan-progress-view__stat-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.md-plan-progress-view__stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+}
+
+.md-plan-progress-view__stat-label {
+    width: 60px;
+    flex-shrink: 0;
+    color: var(--text-main);
+}
+
+.md-plan-progress-view__stat-bar {
+    flex: 1;
+    font-family: ui-monospace, monospace;
+    font-size: 0.7rem;
+    letter-spacing: -1px;
+    color: var(--accent-color);
+}
+
+.md-plan-progress-view__stat-count {
+    width: 24px;
+    text-align: right;
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.md-plan-progress-view__stat-pct {
+    width: 36px;
+    text-align: right;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 480px) {
+    .md-plan-progress-view__stats {
+        grid-template-columns: 1fr;
+    }
+    .md-plan-progress-view__overall {
+        flex-direction: column;
+        text-align: center;
+    }
+    .md-plan-progress-view__summary {
+        text-align: center;
+    }
+}
+
