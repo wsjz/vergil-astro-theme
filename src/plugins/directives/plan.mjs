@@ -709,15 +709,154 @@ function renderPlanProgress(data, attrs, uid, mapping) {
     return html;
 }
 
+function renderPlanEbbinghaus(data, attrs, uid, mapping) {
+    const { columns, rows } = data;
+    if (rows.length === 0) return `<p class="md-plan-empty">暂无数据</p>`;
+
+    const titleCol = mapping.title || columns[0];
+    const dateCol = mapping.date;
+
+    if (!dateCol) {
+        return `<p class="md-plan-empty">缺少 date 列</p>`;
+    }
+
+    // Parse custom steps from attrs, default to standard Ebbinghaus intervals
+    let intervals = [1, 2, 4, 7, 15, 30];
+    if (attrs.steps) {
+        const parsed = String(attrs.steps)
+            .split(',')
+            .map(s => parseInt(s.trim(), 10))
+            .filter(n => !isNaN(n) && n > 0);
+        if (parsed.length > 0) intervals = parsed;
+    }
+
+    const dayMs = 86400000;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const entries = [];
+    for (const row of rows) {
+        const d = row[dateCol];
+        if (!d) continue;
+        const learnDate = new Date(d);
+        if (isNaN(learnDate)) continue;
+        learnDate.setHours(0, 0, 0, 0);
+
+        const nodes = [];
+        let completedCount = 0;
+        for (const interval of intervals) {
+            const reviewDate = new Date(learnDate.getTime() + interval * dayMs);
+            reviewDate.setHours(0, 0, 0, 0);
+
+            let status;
+            if (reviewDate.getTime() === today.getTime()) {
+                status = 'today';
+            } else if (reviewDate.getTime() < today.getTime()) {
+                status = 'completed';
+                completedCount++;
+            } else {
+                status = 'pending';
+            }
+
+            nodes.push({
+                nth: intervals.indexOf(interval) + 1,
+                date: reviewDate,
+                dateStr: `${String(reviewDate.getMonth() + 1).padStart(2, '0')}-${String(reviewDate.getDate()).padStart(2, '0')}`,
+                status
+            });
+        }
+
+        const pct = Math.round((completedCount / intervals.length) * 100);
+        entries.push({ row, nodes, pct });
+    }
+
+    if (entries.length === 0) {
+        return `<p class="md-plan-empty">暂无日期数据</p>`;
+    }
+
+    // Collect extra columns (excluding title and date) to show in hover cards
+    const extraCols = columns.filter(c => c !== titleCol && c !== dateCol);
+
+    let html = `<div class="md-plan-ebbinghaus">`;
+
+    for (const entry of entries) {
+        html += `<div class="md-plan-ebbinghaus__row">`;
+        html += `<div class="md-plan-ebbinghaus__label">${escapeHtml(entry.row[titleCol] || '')}</div>`;
+        html += `<div class="md-plan-ebbinghaus__track">`;
+
+        for (let i = 0; i < entry.nodes.length; i++) {
+            const node = entry.nodes[i];
+            const statusClass = `md-plan-ebbinghaus__node--${node.status}`;
+
+            const dotChar = node.status === 'completed' ? '&#9679;' : node.status === 'today' ? '&#9673;' : '&#9675;';
+            const arrowHtml = node.status === 'today' ? '<span class="md-plan-ebbinghaus__arrow">&#9660;</span>' : '';
+
+            html += `<div class="md-plan-ebbinghaus__node-wrap">`;
+            html += `<div class="md-plan-ebbinghaus__node ${statusClass}">`;
+            html += `${dotChar}${arrowHtml}`;
+            html += `</div>`;
+
+            // Hover card
+            html += `<div class="md-plan-ebbinghaus__card">`;
+            html += `<div class="md-plan-ebbinghaus__card-arrow"></div>`;
+            html += `<div class="md-plan-ebbinghaus__card-body">`;
+            html += `<div class="md-plan-ebbinghaus__card-title">第 ${node.nth} 次复习</div>`;
+            html += `<div class="md-plan-ebbinghaus__card-date">${escapeHtml(node.dateStr)}</div>`;
+            html += `<div class="md-plan-ebbinghaus__card-status">`;
+            if (node.status === 'completed') {
+                html += `<span class="md-plan-ebbinghaus__card-status--completed">已完成</span>`;
+            } else if (node.status === 'today') {
+                html += `<span class="md-plan-ebbinghaus__card-status--today">今天该复习</span>`;
+            } else {
+                html += `<span class="md-plan-ebbinghaus__card-status--pending">待复习</span>`;
+            }
+            html += `</div>`;
+
+            // Extra plan details from other columns
+            if (extraCols.length > 0) {
+                html += `<div class="md-plan-ebbinghaus__card-details">`;
+                for (const col of extraCols) {
+                    const val = entry.row[col];
+                    if (val) {
+                        html += `<div class="md-plan-ebbinghaus__card-detail">`;
+                        html += `<span class="md-plan-ebbinghaus__card-detail-label">${escapeHtml(col)}</span>`;
+                        html += `<span class="md-plan-ebbinghaus__card-detail-value">${escapeHtml(val)}</span>`;
+                        html += `</div>`;
+                    }
+                }
+                html += `</div>`;
+            }
+
+            html += `</div>`;
+            html += `</div>`;
+
+            html += `</div>`;
+
+            // Connector line between nodes (except after last)
+            if (i < entry.nodes.length - 1) {
+                html += `<div class="md-plan-ebbinghaus__line"></div>`;
+            }
+        }
+
+        html += `</div>`;
+        html += `<div class="md-plan-ebbinghaus__pct">${entry.pct}%</div>`;
+        html += `</div>`;
+    }
+
+    html += `</div>`;
+    return html;
+}
+
 /* ============================================================
    View Capability Model
    ============================================================ */
 
 // Views that need specific column mappings to render
 const VIEW_NEEDS = {
-    timeline:  ['date'],     // dateCol OR (startDate OR endDate)
-    milestone: ['date'],     // dateCol only
-    progress:  ['progress'], // progressCol required
+    timeline:   ['date'],     // dateCol OR (startDate OR endDate)
+    milestone:  ['date'],     // dateCol only
+    progress:   ['progress'], // progressCol required
+    ebbinghaus: ['date'],     // dateCol only
 };
 
 function resolveColumnMapping(columns, attrs) {
@@ -781,7 +920,8 @@ export function processPlanDirective(node, options = {}) {
             table: '\u8868\u683c',
             timeline: '\u65f6\u95f4\u8f74',
             milestone: '\u91cc\u7a0b\u7891',
-            progress: '\u8fdb\u5ea6'
+            progress: '\u8fdb\u5ea6',
+            ebbinghaus: '\u590d\u4e60'
         };
 
         const viewIcons = {
@@ -790,7 +930,8 @@ export function processPlanDirective(node, options = {}) {
             table: '<svg class="md-plan-tab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',
             timeline: '<svg class="md-plan-tab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
             milestone: '<svg class="md-plan-tab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
-            progress: '<svg class="md-plan-tab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>'
+            progress: '<svg class="md-plan-tab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+            ebbinghaus: '<svg class="md-plan-tab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>'
         };
 
         const totalRows = data.rows.length;
@@ -820,6 +961,7 @@ export function processPlanDirective(node, options = {}) {
                 case 'timeline': viewHtml = renderPlanTimeline(data, attrs, uid, mapping); break;
                 case 'milestone': viewHtml = renderPlanMilestone(data, attrs, uid, mapping); break;
                 case 'progress': viewHtml = renderPlanProgress(data, attrs, uid, mapping); break;
+                case 'ebbinghaus': viewHtml = renderPlanEbbinghaus(data, attrs, uid, mapping); break;
                 default: viewHtml = `<p>Unknown view: ${escapeHtml(view)}</p>`;
             }
             viewSections.push(`<section class="md-plan-view md-plan-view--${view} md-plan-view--idx-${i}">${viewHtml}</section>`);

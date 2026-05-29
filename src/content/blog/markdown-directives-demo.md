@@ -2232,7 +2232,7 @@ tab: 示例代码
 
 ### Plan 任务计划
 
-多视图数据指令，支持看板、列表、表格、时间轴、里程碑、进度六种视图。数据通过 Markdown 表格输入，构建时静态渲染，视图切换使用纯 CSS `:target`。
+多视图数据指令，支持看板、列表、表格、时间轴、里程碑、进度、艾宾浩斯复习七种视图。数据通过 Markdown 表格输入，构建时静态渲染，视图切换使用纯 CSS `:target`。
 
 表头支持 `name:type` 格式声明列类型，不写 `:type` 时默认为 `text`。
 
@@ -2266,7 +2266,7 @@ tab: 示例代码
 ````
 
 - `title`：顶部标题
-- `views`：启用的视图，逗号分隔。默认 `board,list,table,timeline,milestone,progress`
+- `views`：启用的视图，逗号分隔。默认 `board,list,table,timeline,milestone,progress,ebbinghaus`
 - `default`：默认显示的视图
 - `filters`：Table 视图的筛选列，逗号分隔（如 `filters="状态,优先级"`）。不写则无筛选下拉，仅保留搜索框。写 `filters="none"` 显式关闭筛选
 
@@ -2292,5 +2292,6 @@ tab: 示例代码
 | timeline | `dateCol` 或 `startDate` 或 `endDate` | 单点模式显示圆点，范围模式显示条 |
 | milestone | `dateCol` | 只支持单点模式 |
 | progress | `progressCol` | 必须显式指定进度列 |
+| ebbinghaus | `dateCol` | 艾宾浩斯复习计划，自动计算复习节点 |
 
 ::::

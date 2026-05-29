@@ -9,7 +9,6 @@
     border-radius: var(--plan-radius);
     border: 1px solid var(--border-light);
     background: var(--bg-card);
-    overflow: hidden;
 }
 
 /* Header */
@@ -844,6 +843,11 @@
     color: var(--text-muted);
 }
 
+@keyframes ebbinghaus-arrow-bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(2px); }
+}
+
 @keyframes plan-pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
@@ -1145,6 +1149,229 @@
     }
     .md-plan-progress-view__summary {
         text-align: center;
+    }
+}
+
+/* ============================================================
+   Ebbinghaus View
+   ============================================================ */
+
+.md-plan-ebbinghaus {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0.5rem 0;
+}
+
+.md-plan-ebbinghaus__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border-light);
+}
+
+.md-plan-ebbinghaus__row:last-child {
+    border-bottom: none;
+}
+
+.md-plan-ebbinghaus__label {
+    width: 108px;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.md-plan-ebbinghaus__track {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+}
+
+.md-plan-ebbinghaus__node-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.md-plan-ebbinghaus__node {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1;
+    font-size: 0.9rem;
+    line-height: 1;
+    transition: transform 0.15s;
+}
+
+.md-plan-ebbinghaus__node:hover {
+    transform: scale(1.15);
+}
+
+/* Node statuses */
+.md-plan-ebbinghaus__node--completed {
+    color: var(--accent-color);
+}
+
+.md-plan-ebbinghaus__node--today {
+    color: var(--accent-color);
+    animation: plan-pulse 2s ease-in-out infinite;
+}
+
+.md-plan-ebbinghaus__node--pending {
+    color: var(--text-muted);
+}
+
+/* Down arrow for today's node */
+.md-plan-ebbinghaus__arrow {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem;
+    line-height: 1;
+    color: var(--accent-color);
+    pointer-events: none;
+    animation: ebbinghaus-arrow-bounce 1.2s ease-in-out infinite;
+}
+
+/* Connector line */
+.md-plan-ebbinghaus__line {
+    width: 24px;
+    height: 1px;
+    background: var(--border-light);
+    flex-shrink: 0;
+}
+
+/* Progress percentage */
+.md-plan-ebbinghaus__pct {
+    width: 40px;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: right;
+}
+
+/* Hover card */
+.md-plan-ebbinghaus__card {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    min-width: 130px;
+}
+
+.md-plan-ebbinghaus__node-wrap:hover .md-plan-ebbinghaus__card {
+    display: block;
+}
+
+.md-plan-ebbinghaus__card-arrow {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid var(--bg-card);
+    margin: 0 auto;
+    filter: drop-shadow(0 -1px 0 var(--border-light));
+}
+
+.md-plan-ebbinghaus__card-body {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.md-plan-ebbinghaus__card-title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 2px;
+}
+
+.md-plan-ebbinghaus__card-date {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.md-plan-ebbinghaus__card-status {
+    font-size: 0.68rem;
+    font-weight: 500;
+}
+
+.md-plan-ebbinghaus__card-status--completed {
+    color: var(--accent-color);
+}
+
+.md-plan-ebbinghaus__card-status--today {
+    color: var(--accent-color);
+}
+
+.md-plan-ebbinghaus__card-status--pending {
+    color: var(--text-muted);
+}
+
+/* Card plan details */
+.md-plan-ebbinghaus__card-details {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-light);
+    text-align: left;
+}
+
+.md-plan-ebbinghaus__card-detail {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 0.68rem;
+    line-height: 1.6;
+}
+
+.md-plan-ebbinghaus__card-detail-label {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.md-plan-ebbinghaus__card-detail-value {
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+/* Prevent card from being cut off at bottom */
+.md-plan-ebbinghaus__row:last-child .md-plan-ebbinghaus__card {
+    top: auto;
+    bottom: calc(100% + 8px);
+}
+
+.md-plan-ebbinghaus__row:last-child .md-plan-ebbinghaus__card-arrow {
+    border-bottom: none;
+    border-top: 6px solid var(--bg-card);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    filter: drop-shadow(0 1px 0 var(--border-light));
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .md-plan-ebbinghaus__line {
+        width: 12px;
     }
 }
 
