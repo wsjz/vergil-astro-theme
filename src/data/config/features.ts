@@ -80,3 +80,7 @@ export const floatingAudio = {
 export const tagCloud = {
     enabled: true,
 };
+
+export const serviceWorker = {
+    enabled: false,
+};

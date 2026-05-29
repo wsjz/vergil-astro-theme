@@ -143,6 +143,9 @@ export type SiteConfig = {
     tagCloud?: {
         enabled: boolean;
     };
+    serviceWorker?: {
+        enabled: boolean;
+    };
     /** 文章版权提示，如 "本文著作权归作者所有" */
     copyright?: string;
     /** 文章分享功能 */

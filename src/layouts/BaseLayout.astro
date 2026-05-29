@@ -568,13 +568,30 @@ const isArticle = head.pageType === 'article';
             import '../scripts/charts-init.mjs';
         </script>
 
-        <!-- PWA Service Worker -->
-        <script is:inline>
-            (function() {
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('/sw.js').catch(function() {});
-                }
-            })();
-        </script>
+        {siteConfig.serviceWorker?.enabled ? (
+            <!-- PWA Service Worker -->
+            <script is:inline>
+                (function() {
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.register('/sw.js').catch(function() {});
+                    }
+                })();
+            </script>
+        ) : (
+            <!-- Service Worker -->
+            <script is:inline>
+                (function() {
+                    if (!('serviceWorker' in navigator)) return;
+                    navigator.serviceWorker.getRegistrations().then(function(regs) {
+                        regs.forEach(function(reg) { reg.unregister(); });
+                    });
+                    if ('caches' in window) {
+                        caches.keys().then(function(names) {
+                            names.forEach(function(name) { caches.delete(name); });
+                        });
+                    }
+                })();
+            </script>
+        )}
     </body>
 </html>
