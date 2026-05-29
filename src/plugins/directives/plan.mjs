@@ -1,3 +1,7 @@
+import { getIconSvg } from './shared.mjs';
+
+const LINK_ARROW_SVG = getIconSvg('lucide:external-link', 12).replace(/<svg/, '<svg class="md-plan-link-arrow"');
+
 /**
  * :::plan directive — 6 views (board, list, table, timeline, milestone, progress)
  *
@@ -166,19 +170,50 @@ function renderPlanBoard(data, attrs, uid, mapping) {
         groups[key].push(row);
     }
 
-    // Group order: status uses fixed order, others alphabetical
+    const groupColType = colTypes[groupCol] || 'text';
+
+    // Group order: user-specified groupOrder > default for status > alphabetical
+    const groupOrderAttr = (attrs.groupOrder || '').trim();
+    let groupOrder = groupOrderAttr
+        ? groupOrderAttr.split(',').map(s => s.trim()).filter(Boolean).slice(0, 8)
+        : null;
+
+    // Default group order for status column
+    if (!groupOrder && groupColType === 'status') {
+        groupOrder = ['待办', '进行中', '已完成'];
+    }
+
+    // Semantic status mapping: supports both EN and CN
+    const STATUS_MAP = {
+        'todo': ['todo', '待办'],
+        'doing': ['doing', '进行中'],
+        'done': ['done', '已完成'],
+    };
+    function statusMatches(tag, groupKey) {
+        const t = tag.toLowerCase().trim();
+        const g = groupKey.toLowerCase().trim();
+        if (t === g) return true;
+        for (const [_, aliases] of Object.entries(STATUS_MAP)) {
+            if (aliases.includes(t) && aliases.includes(g)) return true;
+        }
+        return false;
+    }
+
     let groupKeys;
-    const lowerGroup = groupCol.toLowerCase();
-    if (lowerGroup === 'status' || lowerGroup === 'state') {
-        const statusOrder = ['todo', 'doing', 'done'];
+    if (groupOrder) {
         const ordered = [];
         const others = [];
-        for (const key of Object.keys(groups)) {
-            const lower = key.toLowerCase();
-            if (statusOrder.includes(lower)) ordered.push(key);
-            else others.push(key);
+        const seen = new Set();
+        for (const key of groupOrder) {
+            const match = Object.keys(groups).find(g => statusMatches(key, g));
+            if (match && !seen.has(match)) {
+                ordered.push(match);
+                seen.add(match);
+            }
         }
-        ordered.sort((a, b) => statusOrder.indexOf(a.toLowerCase()) - statusOrder.indexOf(b.toLowerCase()));
+        for (const key of Object.keys(groups)) {
+            if (!seen.has(key)) others.push(key);
+        }
         others.sort();
         groupKeys = [...ordered, ...others];
     } else {
@@ -187,18 +222,15 @@ function renderPlanBoard(data, attrs, uid, mapping) {
 
     let html = `<div class="md-plan-board">`;
 
-    for (const key of groupKeys) {
+    for (let idx = 0; idx < groupKeys.length; idx++) {
+        const key = groupKeys[idx];
         const groupRows = groups[key];
-        const lowerKey = key.toLowerCase();
-        let barClass = 'other';
-        if (lowerKey === 'todo' || lowerKey === '待办') barClass = 'todo';
-        else if (lowerKey === 'doing' || lowerKey === '进行中') barClass = 'doing';
-        else if (lowerKey === 'done' || lowerKey === '已完成') barClass = 'done';
 
         html += `<div class="md-plan-board__column">`;
         html += `<div class="md-plan-board__header">`;
-        html += `<span class="md-plan-board__header-bar md-plan-board__header-bar--${barClass}"></span>`;
-        html += `<span class="md-plan-board__header-title">${escapeHtml(key)} (${groupRows.length})</span>`;
+        html += `<span class="md-plan-board__header-bar" data-bar-idx="${idx}"></span>`;
+        const displayKey = groupColType === 'status' ? getStatusInfo(key).label : key;
+        html += `<span class="md-plan-board__header-title">${escapeHtml(displayKey)} (${groupRows.length})</span>`;
         html += `</div>`;
         html += `<div class="md-plan-board__cards">`;
 
@@ -368,8 +400,15 @@ function renderTableRow(row, columns, colTypes, statusCol, priorityCol) {
             const mClass = month > 0 ? ` md-plan-date--m${month}` : '';
             html += `<span class="md-plan-date${mClass}">${escapeHtml(val)}</span>`;
         } else if (type === 'link') {
-            const url = val.startsWith('http') ? val : `https://${val}`;
-            html += `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-color);text-decoration:none;">${escapeHtml(val)}</a>`;
+            const mdLink = val.match(/^\[(.+?)\]\((.+?)\)$/);
+            if (mdLink) {
+                const name = mdLink[1];
+                const url = mdLink[2];
+                html += `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="md-plan-link">${escapeHtml(name)}${LINK_ARROW_SVG}</a>`;
+            } else {
+                const url = val.startsWith('http') ? val : `https://${val}`;
+                html += `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="md-plan-link">${escapeHtml(val)}${LINK_ARROW_SVG}</a>`;
+            }
         } else {
             html += escapeHtml(val);
         }
@@ -381,7 +420,7 @@ function renderTableRow(row, columns, colTypes, statusCol, priorityCol) {
 
 function buildTableRuntime(uid, columns, rows, colTypes, statusCol, priorityCol) {
     // Minified inline JS for table filter/sort/search
-    return `<script>(function(d){if(!d)return;var r=JSON.parse(d.dataset.planRows||'[]'),c=JSON.parse(d.dataset.planCols||'[]'),t=JSON.parse(d.dataset.planColtypes||'{}');var tbody=d.querySelector('[data-plan-tbody]');var searchInp=d.querySelector('[data-plan-search]');var filterDDs=d.querySelectorAll('.md-plan-filter-dropdown');var sortHeaders=d.querySelectorAll('[data-sort-col]');var curSort={col:'',dir:0};var filters={};function esc(s){return(s+'').replace(/\u0026/g,'\u0026amp;').replace(/\u003c/g,'\u0026lt;').replace(/\u003e/g,'\u0026gt;').replace(/"/g,'\u0026quot;');}function renderRows(rows){if(rows.length===0){tbody.innerHTML='\u003ctr\u003e\u003ctd colspan="'+c.length+'" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-size:0.85rem;"\u003e无匹配结果\u003c/td\u003e\u003c/tr\u003e';return;}tbody.innerHTML=rows.map(function(row){var h='\u003ctr\u003e';c.forEach(function(col){var v=row[col]||'',tp=t[col]||'text';h+='\u003ctd\u003e';if(tp==='status'){var s=v.toLowerCase().trim();var dot=s==='done'?'\u0026#9679;':s==='doing'?'\u0026#9673;':'\u0026#9675;';var cls=s==='done'?'md-plan-status--done':s==='doing'?'md-plan-status--doing':'md-plan-status--todo';h+='\u003cspan class="md-plan-status-dot '+cls+'"\u003e'+dot+'\u003c/span\u003e';}else if(tp==='priority'){var p=v.toUpperCase().trim();var pd=p==='P0'||p==='P1'?'\u0026#9679;':'\u0026#9675;';var pl=p||'-';var pcl=p==='P0'?'md-plan-priority--high':p==='P1'?'md-plan-priority--medium':'md-plan-priority--low';h+='\u003cspan class="md-plan-pill '+pcl+'"\u003e'+pd+' '+pl+'\u003c/span\u003e';}else if(tp==='checkbox'){var ch=v.toLowerCase()==='true'||v==='1'||v==='✓';var cd=ch?'\u0026#9679;':'\u0026#9675;';var ccl=ch?'md-plan-status--done':'md-plan-status--todo';h+='\u003cspan class="md-plan-status-dot '+ccl+'"\u003e'+cd+'\u003c/span\u003e';}else if(tp==='select'){h+='\u003cspan class="md-plan-pill"\u003e'+esc(v)+'\u003c/span\u003e';}else if(tp==='progress'||tp==='percent'){var m=(v+'').match(/(\\d+)/);var pct=m?Math.min(100,Math.max(0,parseInt(m[1]))):null;h+=pct!==null?'\u003cdiv class="md-plan-progress md-plan-progress--small"\u003e\u003cdiv class="md-plan-progress__track"\u003e\u003cdiv class="md-plan-progress__fill" style="width:'+pct+'%"\u003e\u003c/div\u003e\u003c/div\u003e\u003cspan class="md-plan-progress__text"\u003e'+pct+'%\u003c/span\u003e\u003c/div\u003e':esc(v);}else if(tp==='number'){var num=parseFloat(v);var dn=!isNaN(num)?num.toLocaleString('zh-CN'):esc(v);h+='\u003cspan class="md-plan-number"\u003e'+dn+'\u003c/span\u003e';}else if(tp==='date'){var d=new Date(v);var m=!isNaN(d)?d.getMonth()+1:0;var mc=m>0?' md-plan-date--m'+m:'';h+='\u003cspan class="md-plan-date'+mc+'"\u003e'+esc(v)+'\u003c/span\u003e';}else if(tp==='link'){var u=v.startsWith('http')?v:'https://'+v;h+='\u003ca href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" style="color:var(--accent-color);text-decoration:none;"\u003e'+esc(v)+'\u003c/a\u003e';}else{h+=esc(v);}h+='\u003c/td\u003e';});h+='\u003c/tr\u003e';return h;}).join('');}function applyFilters(){var result=r.slice();var q=searchInp?searchInp.value.toLowerCase().trim():'';if(q){result=result.filter(function(row){return c.some(function(col){return(row[col]||'').toLowerCase().includes(q);});});}Object.keys(filters).forEach(function(col){var val=filters[col];if(val){result=result.filter(function(row){return(row[col]||'')===val;});}});if(curSort.col\u0026\u0026curSort.dir){result.sort(function(a,b){var av=a[curSort.col]||'',bv=b[curSort.col]||'';var an=isNaN(+av)?av:+av;var bn=isNaN(+bv)?bv:+bv;if(an\u003c bn)return-1*curSort.dir;if(an\u003e bn)return curSort.dir;return 0;});}renderRows(result);}if(searchInp){searchInp.addEventListener('input',function(){applyFilters();});}filterDDs.forEach(function(dd){var col=dd.dataset.filterCol;var trigger=dd.querySelector('.md-plan-filter-trigger');var items=dd.querySelectorAll('.md-plan-filter-item');trigger.addEventListener('click',function(e){e.stopPropagation();document.querySelectorAll('.md-plan-filter-dropdown.open').forEach(function(o){if(o!==dd)o.classList.remove('open');});dd.classList.toggle('open');});items.forEach(function(item){item.addEventListener('click',function(){items.forEach(function(i){i.classList.remove('active');});item.classList.add('active');filters[col]=item.dataset.filterVal;var label=trigger.textContent.split(':')[0];trigger.innerHTML=esc(label)+': '+(item.dataset.filterVal?esc(item.dataset.filterVal):'全部')+' \u003csvg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"\u003e\u003cpolyline points="6 9 12 15 18 9"\/\u003e\u003c/svg\u003e';dd.classList.remove('open');applyFilters();});});});document.addEventListener('click',function(){document.querySelectorAll('.md-plan-filter-dropdown.open').forEach(function(dd){dd.classList.remove('open');});});sortHeaders.forEach(function(th){th.addEventListener('click',function(){var col=th.dataset.sortCol;var icon=th.querySelector('.md-plan-sort-icon');if(curSort.col===col){curSort.dir=curSort.dir===1?-1:curSort.dir===-1?0:1;}else{curSort.col=col;curSort.dir=1;}sortHeaders.forEach(function(h){var ic=h.querySelector('.md-plan-sort-icon');if(ic)ic.removeAttribute('data-sort-dir');});if(curSort.dir\u0026\u0026icon){icon.dataset.sortDir=curSort.dir===1?'asc':'desc';}applyFilters();});});})(document.currentScript.parentElement);\u003c/script\u003e`;
+    return `<script>(function(d){if(!d)return;var r=JSON.parse(d.dataset.planRows||'[]'),c=JSON.parse(d.dataset.planCols||'[]'),t=JSON.parse(d.dataset.planColtypes||'{}');var tbody=d.querySelector('[data-plan-tbody]');var searchInp=d.querySelector('[data-plan-search]');var filterDDs=d.querySelectorAll('.md-plan-filter-dropdown');var sortHeaders=d.querySelectorAll('[data-sort-col]');var curSort={col:'',dir:0};var filters={};function esc(s){return(s+'').replace(/\u0026/g,'\u0026amp;').replace(/\u003c/g,'\u0026lt;').replace(/\u003e/g,'\u0026gt;').replace(/"/g,'\u0026quot;');}function renderRows(rows){if(rows.length===0){tbody.innerHTML='\u003ctr\u003e\u003ctd colspan="'+c.length+'" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-size:0.85rem;"\u003e无匹配结果\u003c/td\u003e\u003c/tr\u003e';return;}tbody.innerHTML=rows.map(function(row){var h='\u003ctr\u003e';c.forEach(function(col){var v=row[col]||'',tp=t[col]||'text';h+='\u003ctd\u003e';if(tp==='status'){var s=v.toLowerCase().trim();var dot=s==='done'?'\u0026#9679;':s==='doing'?'\u0026#9673;':'\u0026#9675;';var cls=s==='done'?'md-plan-status--done':s==='doing'?'md-plan-status--doing':'md-plan-status--todo';h+='\u003cspan class="md-plan-status-dot '+cls+'"\u003e'+dot+'\u003c/span\u003e';}else if(tp==='priority'){var p=v.toUpperCase().trim();var pd=p==='P0'||p==='P1'?'\u0026#9679;':'\u0026#9675;';var pl=p||'-';var pcl=p==='P0'?'md-plan-priority--high':p==='P1'?'md-plan-priority--medium':'md-plan-priority--low';h+='\u003cspan class="md-plan-pill '+pcl+'"\u003e'+pd+' '+pl+'\u003c/span\u003e';}else if(tp==='checkbox'){var ch=v.toLowerCase()==='true'||v==='1'||v==='✓';var cd=ch?'\u0026#9679;':'\u0026#9675;';var ccl=ch?'md-plan-status--done':'md-plan-status--todo';h+='\u003cspan class="md-plan-status-dot '+ccl+'"\u003e'+cd+'\u003c/span\u003e';}else if(tp==='select'){h+='\u003cspan class="md-plan-pill"\u003e'+esc(v)+'\u003c/span\u003e';}else if(tp==='progress'||tp==='percent'){var m=(v+'').match(/(\\d+)/);var pct=m?Math.min(100,Math.max(0,parseInt(m[1]))):null;h+=pct!==null?'\u003cdiv class="md-plan-progress md-plan-progress--small"\u003e\u003cdiv class="md-plan-progress__track"\u003e\u003cdiv class="md-plan-progress__fill" style="width:'+pct+'%"\u003e\u003c/div\u003e\u003c/div\u003e\u003cspan class="md-plan-progress__text"\u003e'+pct+'%\u003c/span\u003e\u003c/div\u003e':esc(v);}else if(tp==='number'){var num=parseFloat(v);var dn=!isNaN(num)?num.toLocaleString('zh-CN'):esc(v);h+='\u003cspan class="md-plan-number"\u003e'+dn+'\u003c/span\u003e';}else if(tp==='date'){var d=new Date(v);var m=!isNaN(d)?d.getMonth()+1:0;var mc=m>0?' md-plan-date--m'+m:'';h+='\u003cspan class="md-plan-date'+mc+'"\u003e'+esc(v)+'\u003c/span\u003e';}else if(tp==='link'){var arr='\u003csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"md-plan-link-arrow\"\u003e\u003cpath fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 3h6v6m-11 5L21 3m-3 10v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\"\/\u003e\u003c\/svg\u003e';var mdl=v.match(/^\[(.+?)\]\((.+?)\)$/);if(mdl){h+='\u003ca href="'+esc(mdl[2])+'" target="_blank" rel="noopener noreferrer" class=\"md-plan-link\"\u003e'+esc(mdl[1])+arr+'\u003c/a\u003e';}else{var u=v.startsWith('http')?v:'https://'+v;h+='\u003ca href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" class=\"md-plan-link\"\u003e'+esc(v)+arr+'\u003c/a\u003e';}}else{h+=esc(v);}h+='\u003c/td\u003e';});h+='\u003c/tr\u003e';return h;}).join('');}function applyFilters(){var result=r.slice();var q=searchInp?searchInp.value.toLowerCase().trim():'';if(q){result=result.filter(function(row){return c.some(function(col){return(row[col]||'').toLowerCase().includes(q);});});}Object.keys(filters).forEach(function(col){var val=filters[col];if(val){result=result.filter(function(row){return(row[col]||'')===val;});}});if(curSort.col\u0026\u0026curSort.dir){result.sort(function(a,b){var av=a[curSort.col]||'',bv=b[curSort.col]||'';var an=isNaN(+av)?av:+av;var bn=isNaN(+bv)?bv:+bv;if(an\u003c bn)return-1*curSort.dir;if(an\u003e bn)return curSort.dir;return 0;});}renderRows(result);}if(searchInp){searchInp.addEventListener('input',function(){applyFilters();});}filterDDs.forEach(function(dd){var col=dd.dataset.filterCol;var trigger=dd.querySelector('.md-plan-filter-trigger');var items=dd.querySelectorAll('.md-plan-filter-item');trigger.addEventListener('click',function(e){e.stopPropagation();document.querySelectorAll('.md-plan-filter-dropdown.open').forEach(function(o){if(o!==dd)o.classList.remove('open');});dd.classList.toggle('open');});items.forEach(function(item){item.addEventListener('click',function(){items.forEach(function(i){i.classList.remove('active');});item.classList.add('active');filters[col]=item.dataset.filterVal;var label=trigger.textContent.split(':')[0];trigger.innerHTML=esc(label)+': '+(item.dataset.filterVal?esc(item.dataset.filterVal):'全部')+' \u003csvg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"\u003e\u003cpolyline points="6 9 12 15 18 9"\/\u003e\u003c/svg\u003e';dd.classList.remove('open');applyFilters();});});});document.addEventListener('click',function(){document.querySelectorAll('.md-plan-filter-dropdown.open').forEach(function(dd){dd.classList.remove('open');});});sortHeaders.forEach(function(th){th.addEventListener('click',function(){var col=th.dataset.sortCol;var icon=th.querySelector('.md-plan-sort-icon');if(curSort.col===col){curSort.dir=curSort.dir===1?-1:curSort.dir===-1?0:1;}else{curSort.col=col;curSort.dir=1;}sortHeaders.forEach(function(h){var ic=h.querySelector('.md-plan-sort-icon');if(ic)ic.removeAttribute('data-sort-dir');});if(curSort.dir\u0026\u0026icon){icon.dataset.sortDir=curSort.dir===1?'asc':'desc';}applyFilters();});});})(document.currentScript.parentElement);\u003c/script\u003e`;
 }
 
 function renderPlanTimeline(data, attrs, uid, mapping) {

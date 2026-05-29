@@ -245,6 +245,30 @@
 .md-plan-date--m11::before { background: #a5b4fc; }
 .md-plan-date--m12::before { background: #fca5a5; }
 
+/* Link with external-link icon */
+.md-plan-link {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.md-plan-link:hover {
+    opacity: 0.8;
+}
+
+.md-plan-link-arrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    margin-left: 3px;
+    padding-bottom: 2px;
+    color: var(--accent-color);
+    opacity: 0.7;
+    transition: opacity 0.15s;
+}
+
+.md-plan-link:hover .md-plan-link-arrow {
+    opacity: 1;
+}
+
 /* Number — Notion-style pill tag */
 .md-plan-number {
     display: inline-flex;
@@ -373,8 +397,20 @@
     height: 16px;
     border-radius: 2px;
     background: var(--text-muted);
+    flex-shrink: 0;
 }
 
+/* 8 colors derived from theme accent */
+.md-plan-board__header-bar[data-bar-idx="0"] { background: var(--text-muted); }
+.md-plan-board__header-bar[data-bar-idx="1"] { background: var(--accent-color); }
+.md-plan-board__header-bar[data-bar-idx="2"] { background: color-mix(in srgb, var(--accent-color) 70%, #ef4444); }
+.md-plan-board__header-bar[data-bar-idx="3"] { background: color-mix(in srgb, var(--accent-color) 70%, #22c55e); }
+.md-plan-board__header-bar[data-bar-idx="4"] { background: color-mix(in srgb, var(--accent-color) 70%, #f59e0b); }
+.md-plan-board__header-bar[data-bar-idx="5"] { background: color-mix(in srgb, var(--accent-color) 70%, #8b5cf6); }
+.md-plan-board__header-bar[data-bar-idx="6"] { background: color-mix(in srgb, var(--accent-color) 70%, #06b6d4); }
+.md-plan-board__header-bar[data-bar-idx="7"] { background: color-mix(in srgb, var(--accent-color) 70%, #ec4899); }
+
+/* Legacy classes for backward compatibility */
 .md-plan-board__header-bar--todo { background: var(--text-muted); }
 .md-plan-board__header-bar--doing { background: var(--accent-color); }
 .md-plan-board__header-bar--done { background: var(--accent-color); }
