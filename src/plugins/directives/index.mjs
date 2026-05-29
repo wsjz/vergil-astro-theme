@@ -22,7 +22,7 @@ export function remarkContentDirectives(options = {}) {
 
         visit(tree, 'containerDirective', (node) => {
             const name = node.name;
-            const blockNames = ['callout', 'note', 'folding', 'folders', 'timeline', 'tabs', 'grid', 'blockquote', 'quot', 'title', 'poetry', 'copy', 'reel', 'paper', 'deadline'];
+            const blockNames = ['callout', 'note', 'folding', 'folders', 'timeline', 'tabs', 'grid', 'blockquote', 'quot', 'title', 'poetry', 'copy', 'reel', 'paper', 'deadline', 'plan'];
             const cardNames = ['ghcard', 'sites', 'posters', 'panel', 'yoicard'];
             const mediaNames = ['video', 'audio'];
             const chartNames = ['mermaid', 'echart'];
@@ -43,6 +43,6 @@ export function remarkContentDirectives(options = {}) {
             } else if (name === 'private') {
                 processPrivateDirective(node);
             }
-        });
+        }, true);
     };
 }
