@@ -196,6 +196,8 @@
     font-weight: 600;
     letter-spacing: 0.02em;
     line-height: 1.4;
+    background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+    color: var(--text-secondary);
 }
 
 .md-plan-priority--high {
@@ -212,6 +214,36 @@
     background: var(--bg-card);
     color: var(--text-muted);
 }
+
+/* Date — month color bar */
+.md-plan-date {
+    position: relative;
+    display: inline-block;
+    padding-left: 8px;
+}
+
+.md-plan-date::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 2px;
+    bottom: 2px;
+    width: 3px;
+    border-radius: 2px;
+}
+
+.md-plan-date--m1::before { background: #93c5fd; }
+.md-plan-date--m2::before { background: #86efac; }
+.md-plan-date--m3::before { background: #f9a8d4; }
+.md-plan-date--m4::before { background: #fde047; }
+.md-plan-date--m5::before { background: #d8b4fe; }
+.md-plan-date--m6::before { background: #5eead4; }
+.md-plan-date--m7::before { background: #fdba74; }
+.md-plan-date--m8::before { background: #fda4af; }
+.md-plan-date--m9::before { background: #5eead4; }
+.md-plan-date--m10::before { background: #fcd34d; }
+.md-plan-date--m11::before { background: #a5b4fc; }
+.md-plan-date--m12::before { background: #fca5a5; }
 
 /* Number — Notion-style pill tag */
 .md-plan-number {
