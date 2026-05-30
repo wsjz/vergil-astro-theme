@@ -1,0 +1,222 @@
+/* ============================================================
+   :::story — Storyboard / Shot List
+   ============================================================ */
+
+.md-directive-story {
+    /* Base variables — map to theme */
+    --story-divider-color: var(--border-light, #e0dfdb);
+    --story-tag-bg: var(--bg-muted, #e8e7e3);
+    --story-tag-text: var(--text-secondary, #666);
+    --story-dialogue-border: var(--accent-color, #4a7c59);
+    --story-note-color: var(--text-muted, #999);
+    --story-number-color: var(--accent-color, #4a7c59);
+    --story-hover-bg: var(--bg-hover, #f0efeb);
+    --story-card-bg: var(--bg-card, #fff);
+    --story-text-main: var(--text-main, #2d2d2d);
+    --story-text-secondary: var(--text-secondary, #666);
+
+    /* Tag color palette (light mode) */
+    --story-tag-scene-bg: #e3f2fd;
+    --story-tag-scene-text: #1565c0;
+    --story-tag-scale-bg: #f3e5f5;
+    --story-tag-scale-text: #7b1fa2;
+    --story-tag-duration-bg: #e8f5e9;
+    --story-tag-duration-text: #2e7d32;
+    --story-tag-technique-bg: #fff3e0;
+    --story-tag-technique-text: #ef6c00;
+    --story-tag-location-bg: #e0f7fa;
+    --story-tag-location-text: #00838f;
+    --story-tag-time-bg: #fce4ec;
+    --story-tag-time-text: #c2185b;
+
+    margin: 1.25rem 0;
+}
+
+/* Dark mode overrides */
+.dark .md-directive-story,
+html.dark .md-directive-story {
+    --story-tag-scene-bg: rgba(25, 118, 210, 0.15);
+    --story-tag-scene-text: #64b5f6;
+    --story-tag-scale-bg: rgba(123, 31, 162, 0.15);
+    --story-tag-scale-text: #ce93d8;
+    --story-tag-duration-bg: rgba(46, 125, 50, 0.15);
+    --story-tag-duration-text: #81c784;
+    --story-tag-technique-bg: rgba(239, 108, 0, 0.15);
+    --story-tag-technique-text: #ffb74d;
+    --story-tag-location-bg: rgba(0, 131, 143, 0.15);
+    --story-tag-location-text: #4dd0e1;
+    --story-tag-time-bg: rgba(194, 24, 89, 0.15);
+    --story-tag-time-text: #f06292;
+}
+
+/* Single shot row */
+.md-story-shot {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--story-divider-color);
+    border-radius: 10px;
+    background: var(--story-card-bg);
+    transition: background 200ms ease, box-shadow 200ms ease;
+}
+
+.md-story-shot:hover {
+    background: var(--story-hover-bg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.dark .md-story-shot:hover,
+html.dark .md-story-shot:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Shot number */
+.md-story-number {
+    width: 24px;
+    text-align: right;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--story-number-color);
+    line-height: 1.4;
+    flex-shrink: 0;
+}
+
+/* Divider line */
+.md-story-divider {
+    width: 1px;
+    align-self: stretch;
+    background: var(--story-divider-color);
+    flex-shrink: 0;
+}
+
+/* Optional image */
+.md-story-image {
+    width: 160px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.md-story-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+/* Body content */
+.md-story-body {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Tags */
+.md-story-tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.md-story-tag {
+    display: inline-block;
+    background: var(--story-tag-bg);
+    color: var(--story-tag-text);
+    font-size: 10px;
+    padding: 1px 10px;
+    border-radius: 10px;
+    line-height: 1.6;
+    transition: background 200ms ease;
+}
+
+/* Colored tags by column type */
+.md-story-tag[data-tag="scene"] {
+    background: var(--story-tag-scene-bg);
+    color: var(--story-tag-scene-text);
+}
+
+.md-story-tag[data-tag="scale"] {
+    background: var(--story-tag-scale-bg);
+    color: var(--story-tag-scale-text);
+}
+
+.md-story-tag[data-tag="duration"] {
+    background: var(--story-tag-duration-bg);
+    color: var(--story-tag-duration-text);
+}
+
+.md-story-tag[data-tag="technique"] {
+    background: var(--story-tag-technique-bg);
+    color: var(--story-tag-technique-text);
+}
+
+.md-story-tag[data-tag="location"],
+.md-story-tag[data-tag="place"] {
+    background: var(--story-tag-location-bg);
+    color: var(--story-tag-location-text);
+}
+
+.md-story-tag[data-tag="time"] {
+    background: var(--story-tag-time-bg);
+    color: var(--story-tag-time-text);
+}
+
+/* Description */
+.md-story-desc {
+    font-size: 13px;
+    color: var(--story-text-main);
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+
+/* Dialogue */
+.md-story-dialogue {
+    font-size: 12px;
+    color: var(--story-text-secondary);
+    border-left: 2px solid var(--story-dialogue-border);
+    padding-left: 8px;
+    font-style: italic;
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
+
+/* Note */
+.md-story-note {
+    font-size: 10px;
+    color: var(--story-note-color);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* Empty / Error states */
+.md-story-empty,
+.md-story-error {
+    padding: 20px;
+    text-align: center;
+    color: var(--story-note-color);
+    font-size: 14px;
+}
+
+.md-story-error {
+    color: var(--color-error, #ef4444);
+}
+
+/* Responsive: mobile */
+@media (max-width: 768px) {
+    .md-story-shot {
+        flex-wrap: wrap;
+    }
+
+    .md-story-image {
+        width: 100%;
+        order: -1;
+        margin-bottom: 8px;
+    }
+
+    .md-story-image img {
+        aspect-ratio: 16 / 9;
+    }
+}

@@ -12,6 +12,7 @@ import { processMediaDirective } from './media.mjs';
 import { processPrivateDirective } from './private.mjs';
 import { processChartDirective } from './charts.mjs';
 import { processCalendarDirective } from './calendar.mjs';
+import { processStoryDirective } from './story.mjs';
 
 export function remarkContentDirectives(options = {}) {
     const { links, screenshotService } = options;
@@ -42,6 +43,8 @@ export function remarkContentDirectives(options = {}) {
                 processCalendarDirective(node);
             } else if (name === 'private') {
                 processPrivateDirective(node);
+            } else if (name === 'story') {
+                processStoryDirective(node, options);
             }
         }, true);
     };
