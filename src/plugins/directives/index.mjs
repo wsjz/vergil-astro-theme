@@ -13,6 +13,7 @@ import { processPrivateDirective } from './private.mjs';
 import { processChartDirective } from './charts.mjs';
 import { processCalendarDirective } from './calendar.mjs';
 import { processStoryDirective } from './story.mjs';
+import { processMindDirective } from './mind.mjs';
 
 export function remarkContentDirectives(options = {}) {
     const { links, screenshotService } = options;
@@ -45,6 +46,8 @@ export function remarkContentDirectives(options = {}) {
                 processPrivateDirective(node);
             } else if (name === 'story') {
                 processStoryDirective(node, options);
+            } else if (name === 'mind') {
+                processMindDirective(node, options);
             }
         }, true);
     };

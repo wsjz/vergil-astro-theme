@@ -1,0 +1,44 @@
+/* ============================================================
+   :::mind — Markmap.js Mindmap Container
+   ============================================================ */
+
+.md-directive-mind {
+    --mind-line-color: var(--border-light, #e0dfdb);
+    --mind-node-bg: var(--bg-card, #fff);
+    /*--markmap-font: 300 16px / 20px sans-serif;*/
+    margin: 1.5rem 0;
+    border: 1px solid var(--mind-line-color);
+    border-radius: 12px;
+    background: var(--mind-node-bg);
+}
+
+.dark .md-directive-mind,
+html.dark .md-directive-mind {
+    --mind-line-color: var(--border-light, #333);
+    background: var(--mind-node-bg);
+}
+
+/* Markmap container */
+.md-directive-mind .markmap {
+    position: relative;
+    width: 100%;
+    min-height: 380px;
+    box-sizing: border-box;
+    /*font: var(--markmap-font);*/
+    color: var(--text-color-main, #fff);
+}
+
+/* Markmap SVG */
+.md-directive-mind .markmap > svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Empty state */
+.md-mind-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-muted, #999);
+    font-size: 14px;
+}
