@@ -41,7 +41,7 @@ function hasActiveChild(children?: { href: string }[]): boolean {
 ---
 
 <header class={`${sticky ? 'sticky top-0' : 'fixed top-0 left-0 right-0'} z-50`} id="top-nav-header" data-is-article={isArticlePage ? 'true' : 'false'} data-article-title={articleTitle} data-comments-enabled={commentsEnabled ? 'true' : 'false'} data-splash-mode={sticky ? 'true' : 'false'}>
-    <div class="h-14 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-white/20 dark:border-gray-700/30 relative">
+    <div class="h-14 nav-glass backdrop-blur-lg relative">
         <nav class="nav-normal flex items-center justify-between h-full max-w-7xl mx-auto px-4 lg:px-6 absolute inset-0 transition-all duration-300 ease-out">
             <a href="/" class="flex items-center gap-2 text-main hover:text-accent transition-colors">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -75,7 +75,7 @@ function hasActiveChild(children?: { href: string }[]): boolean {
                                     </button>
 
                                     <div class="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                                        <div class="bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg rounded-xl border border-white/20 dark:border-gray-700/30 shadow-xl shadow-black/10 py-2 min-w-[140px]">
+                                        <div class="dropdown-glass backdrop-blur-lg rounded-xl shadow-xl shadow-black/10 py-2 min-w-[140px]">
                                             {item.children?.map((child) => {
                                                 const ChildIcon = child.icon;
                                                 const isChildActive = isActive(child.href);
@@ -122,7 +122,7 @@ function hasActiveChild(children?: { href: string }[]): boolean {
                 >
                     <Search class="w-4 h-4" />
                 <span class="hidden sm:inline">搜索</span>
-                    <kbd class="hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-gray-800 rounded text-muted">
+                    <kbd class="hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-[var(--bg-muted)] rounded text-muted">
                         ⌘ K
                     </kbd>
                 </button>
@@ -178,7 +178,7 @@ function hasActiveChild(children?: { href: string }[]): boolean {
 
     <div
         id="mobile-menu-panel"
-        class="md:hidden fixed top-14 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-b border-white/20 dark:border-gray-700/30 shadow-xl shadow-black/10 p-4 opacity-0 invisible -translate-y-4 transition-all duration-300 z-50"
+        class="md:hidden fixed top-14 left-0 right-0 mobile-menu-glass backdrop-blur-lg shadow-xl shadow-black/10 p-4 opacity-0 invisible -translate-y-4 transition-all duration-300 z-50"
     >
         <ul class="space-y-1 max-w-7xl mx-auto">
             {navItems.map((item) => {
@@ -407,8 +407,38 @@ function hasActiveChild(children?: { href: string }[]): boolean {
     })();
 </script>
 
-<style>
+<style is:global>
     .group:hover .group-hover\:rotate-180 {
         transform: rotate(180deg);
+    }
+
+    /* Navbar — theme-aware glass effect */
+    .nav-glass {
+        background: rgba(255, 255, 255, 0.8);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    html.dark .nav-glass {
+        background: color-mix(in srgb, var(--bg-card) 90%, transparent);
+        border-bottom-color: color-mix(in srgb, var(--border-light) 40%, transparent);
+    }
+
+    /* Dropdown menu */
+    .dropdown-glass {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    html.dark .dropdown-glass {
+        background: color-mix(in srgb, var(--bg-card) 95%, transparent);
+        border-color: color-mix(in srgb, var(--border-light) 40%, transparent);
+    }
+
+    /* Mobile menu panel */
+    .mobile-menu-glass {
+        background: rgba(255, 255, 255, 0.95);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    html.dark .mobile-menu-glass {
+        background: color-mix(in srgb, var(--bg-card) 97%, transparent);
+        border-bottom-color: color-mix(in srgb, var(--border-light) 40%, transparent);
     }
 </style>

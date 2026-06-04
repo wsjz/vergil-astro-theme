@@ -1,0 +1,1044 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import siteConfig from '../data/site-config';
+
+const analytics = siteConfig.analytics;
+const umami = analytics?.umami;
+const statsConfig = umami?.statsPage;
+const modules = statsConfig?.modules ?? ['overview', 'trends', 'pages', 'referrers', 'devices', 'locations', 'realtime'];
+const defaultRange = statsConfig?.defaultRange ?? '7d';
+
+const configJson = JSON.stringify({
+    enabled: analytics?.enabled ?? false,
+    apiHost: umami?.apiHost ?? '',
+    apiToken: umami?.apiToken ?? '',
+    websiteId: umami?.websiteId ?? '',
+    modules,
+    defaultRange,
+});
+---
+
+<BaseLayout
+    title="站点数据"
+    description="站点访问统计"
+    showSidebar={false}
+    showRightSidebar={false}
+>
+    <div class="stats-page" data-config={configJson}>
+        <!-- 配置缺失提示 -->
+        <div id="stats-config-error" class="hidden config-error">
+            <div class="config-error-inner">
+                <h2>站点分析未配置</h2>
+                <p>请在 <code>src/data/config/analytics.ts</code> 中配置 Umami 参数：</p>
+                <ul>
+                    <li><code>websiteId</code> — 在 Umami Cloud 后台获取</li>
+                    <li><code>apiToken</code> — 在 Umami Cloud 后台生成 API Key</li>
+                    <li>将 <code>enabled</code> 设为 <code>true</code></li>
+                </ul>
+                <p class="config-hint">配置完成后重新构建站点即可看到数据。</p>
+            </div>
+        </div>
+
+        <!-- 正常页面内容 -->
+        <div id="stats-content" class="hidden">
+            <header class="stats-header">
+                <div class="stats-header-left">
+                    <h1 class="stats-title">站点数据</h1>
+                    <p class="stats-subtitle">Powered by Umami Analytics</p>
+                </div>
+                <div class="range-switcher" id="range-switcher">
+                    <button class="range-btn" data-range="today">今日</button>
+                    <button class="range-btn active" data-range="7d">7 天</button>
+                    <button class="range-btn" data-range="30d">30 天</button>
+                    <button class="range-btn" data-range="year">今年</button>
+                </div>
+            </header>
+
+            <!-- 加载状态 -->
+            <div id="stats-loading" class="stats-loading">
+                <div class="loading-spinner"></div>
+                <span>正在加载数据...</span>
+            </div>
+
+            <!-- 错误状态 -->
+            <div id="stats-error" class="hidden stats-error">
+                <p>数据加载失败，请检查 API Token 是否有效。</p>
+                <p id="stats-error-detail" class="stats-error-detail"></p>
+                <button id="retry-btn" class="retry-btn">重试</button>
+            </div>
+
+            <!-- 数据内容 -->
+            <div id="stats-data" class="hidden">
+                <!-- Overview -->
+                <section data-module="overview" class="stats-section">
+                    <div class="overview-strip" id="overview-strip"></div>
+                </section>
+
+                <!-- Trend Chart -->
+                <section data-module="trends" class="stats-section">
+                    <h2 class="section-title">流量趋势</h2>
+                    <div class="chart-frame">
+                        <svg id="trend-chart" class="chart-svg" viewBox="0 0 800 220" preserveAspectRatio="none"></svg>
+                    </div>
+                </section>
+
+                <!-- Two column: Top Pages + Referrers -->
+                <div class="data-grid">
+                    <section data-module="pages" class="stats-section">
+                        <h2 class="section-title">热门页面</h2>
+                        <ul class="data-list" id="top-pages"></ul>
+                    </section>
+                    <section data-module="referrers" class="stats-section">
+                        <h2 class="section-title">来源分析</h2>
+                        <ul class="data-list" id="referrers"></ul>
+                    </section>
+                </div>
+
+                <!-- Distribution: Browser / Device / Geo -->
+                <div class="dist-strip">
+                    <section data-module="devices" class="dist-section">
+                        <div class="dist-group">
+                            <h3 class="dist-title">浏览器</h3>
+                            <div class="dist-tags" id="browsers-list"></div>
+                        </div>
+                    </section>
+                    <section data-module="devices" class="dist-section">
+                        <div class="dist-group">
+                            <h3 class="dist-title">设备</h3>
+                            <div class="dist-tags" id="devices-list"></div>
+                        </div>
+                    </section>
+                    <section data-module="locations" class="dist-section">
+                        <div class="dist-group">
+                            <h3 class="dist-title">地区</h3>
+                            <div class="dist-tags" id="locations-list"></div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Realtime -->
+                <section data-module="realtime" class="stats-section">
+                    <div class="realtime-strip">
+                        <span class="pulse-dot"></span>
+                        <span class="realtime-text">
+                            <span class="realtime-count" id="realtime-count">--</span> 人正在浏览
+                        </span>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</BaseLayout>
+
+<script>
+    // ── Types (inline for client-side) ──
+    type TimeRange = 'today' | '7d' | '30d' | 'year';
+
+    interface UmamiStatValue {
+        value: number;
+        prev: number;
+    }
+
+    interface UmamiStats {
+        pageviews: number | UmamiStatValue;
+        visitors: number | UmamiStatValue;
+        visits: number | UmamiStatValue;
+        bounces: number | UmamiStatValue;
+        totaltime: number | UmamiStatValue;
+    }
+
+    interface UmamiPageviews {
+        pageviews: Array<{ x: string; y: number }>;
+        sessions: Array<{ x: string; y: number }>;
+    }
+
+    interface UmamiMetric {
+        x: string;
+        y: number;
+    }
+
+    interface UmamiActive {
+        x: number;
+    }
+
+    // ── Helpers ──
+    function getRangeTimestamps(range: TimeRange): { startAt: number; endAt: number } {
+        const endAt = Date.now();
+        const now = new Date();
+        let startAt: number;
+
+        switch (range) {
+            case 'today':
+                startAt = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+                break;
+            case '7d':
+                startAt = endAt - 7 * 24 * 60 * 60 * 1000;
+                break;
+            case '30d':
+                startAt = endAt - 30 * 24 * 60 * 60 * 1000;
+                break;
+            case 'year':
+                startAt = new Date(now.getFullYear(), 0, 1).getTime();
+                break;
+            default:
+                startAt = endAt - 7 * 24 * 60 * 60 * 1000;
+        }
+
+        return { startAt, endAt };
+    }
+
+    function formatNumber(n: number): string {
+        if (n >= 10000) return (n / 10000).toFixed(1) + 'w';
+        if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+        return String(n);
+    }
+
+    function formatDuration(seconds: number): string {
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        if (m >= 60) {
+            const h = Math.floor(m / 60);
+            return `${h}h ${m % 60}m`;
+        }
+        return `${m}m ${s}s`;
+    }
+
+    function calcChange(current: number, prev: number): string {
+        if (!prev) return '';
+        const change = ((current - prev) / prev) * 100;
+        const sign = change >= 0 ? '+' : '';
+        return `${sign}${change.toFixed(1)}%`;
+    }
+
+    // ── Umami API Client ──
+    class UmamiClient {
+        private apiHost: string;
+        private apiToken: string;
+        private websiteId: string;
+
+        constructor(apiHost: string, apiToken: string, websiteId: string) {
+            this.apiHost = apiHost.replace(/\/$/, '');
+            this.apiToken = apiToken;
+            this.websiteId = websiteId;
+        }
+
+        private async fetchJson<T>(path: string, params: Record<string, string> = {}): Promise<T> {
+            const base = this.apiHost.replace(/\/$/, '');
+            const urlPath = path.startsWith('/') ? path : '/' + path;
+            const url = new URL(base + urlPath);
+            Object.entries(params).forEach(([k, v]) => {
+                if (v != null) url.searchParams.set(k, v);
+            });
+
+            const res = await fetch(url.toString(), {
+                headers: {
+                    'x-umami-api-key': this.apiToken,
+                    Accept: 'application/json',
+                },
+            });
+
+            if (!res.ok) {
+                const text = await res.text().catch(() => '');
+                throw new Error(`Umami ${res.status}: ${text}`);
+            }
+
+            return res.json() as Promise<T>;
+        }
+
+        getStats(range: TimeRange) {
+            const { startAt, endAt } = getRangeTimestamps(range);
+            return this.fetchJson<UmamiStats>(`/websites/${this.websiteId}/stats`, {
+                startAt: String(startAt),
+                endAt: String(endAt),
+            });
+        }
+
+        getPageviews(range: TimeRange) {
+            const { startAt, endAt } = getRangeTimestamps(range);
+            const unit = range === 'today' ? 'hour' : range === 'year' ? 'month' : 'day';
+            return this.fetchJson<UmamiPageviews>(`/websites/${this.websiteId}/pageviews`, {
+                startAt: String(startAt),
+                endAt: String(endAt),
+                unit,
+            });
+        }
+
+        getMetrics(type: string, range: TimeRange) {
+            const { startAt, endAt } = getRangeTimestamps(range);
+            return this.fetchJson<UmamiMetric[]>(`/websites/${this.websiteId}/metrics`, {
+                type,
+                startAt: String(startAt),
+                endAt: String(endAt),
+            });
+        }
+
+        getActive() {
+            return this.fetchJson<UmamiActive>(`/websites/${this.websiteId}/active`);
+        }
+    }
+
+    // ── UI Renderers ──
+    function getStatValue(stat: number | UmamiStatValue): number {
+        return typeof stat === 'number' ? stat : stat?.value ?? 0;
+    }
+    function getStatPrev(stat: number | UmamiStatValue): number {
+        return typeof stat === 'number' ? 0 : stat?.prev ?? 0;
+    }
+
+    function renderOverview(stats: UmamiStats) {
+        const container = document.getElementById('overview-strip');
+        if (!container) return;
+
+        const pv = getStatValue(stats.pageviews);
+        const uv = getStatValue(stats.visitors);
+        const vi = getStatValue(stats.visits);
+        const bo = getStatValue(stats.bounces);
+        const tt = getStatValue(stats.totaltime);
+
+        const items = [
+            { label: '浏览量', value: formatNumber(pv), change: calcChange(pv, getStatPrev(stats.pageviews)) },
+            { label: '访客数', value: formatNumber(uv), change: calcChange(uv, getStatPrev(stats.visitors)) },
+            { label: '访问次数', value: formatNumber(vi), change: calcChange(vi, getStatPrev(stats.visits)) },
+            { label: '跳出率', value: vi ? `${Math.min((bo / vi) * 100, 100).toFixed(1)}%` : '--', change: '' },
+            { label: '平均停留', value: vi ? formatDuration(Math.round(tt / vi)) : '--', change: '' },
+        ];
+
+        container.innerHTML = items.map(item => {
+            const changeClass = item.change.startsWith('+') ? 'change-up' : item.change.startsWith('-') ? 'change-down' : '';
+            const changeText = item.change ? `<span class="overview-change ${changeClass}">${item.change}</span>` : '';
+            return `
+                <div class="overview-item">
+                    <span class="overview-value">${item.value}</span>
+                    <span class="overview-label">${item.label}</span>
+                    ${changeText}
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderTrendChart(data: UmamiPageviews, range: TimeRange) {
+        const svg = document.getElementById('trend-chart');
+        if (!svg) return;
+
+        const points = data.pageviews;
+        if (!points.length) {
+            svg.innerHTML = '<text x="400" y="110" text-anchor="middle" fill="var(--text-muted)" font-size="14">暂无数据</text>';
+            return;
+        }
+
+        // 少于 2 个点时显示单点提示
+        if (points.length < 2) {
+            const p = points[0];
+            const date = new Date(p.x);
+            let dateStr: string;
+            let hintText: string;
+            if (range === 'today') {
+                dateStr = `${date.getHours().toString().padStart(2, '0')}:00`;
+                hintText = '今日仅有一个小时有数据';
+            } else if (range === 'year') {
+                dateStr = `${date.getMonth() + 1}月`;
+                hintText = '今年仅有1个月的数据';
+            } else {
+                dateStr = `${date.getMonth() + 1}月${date.getDate()}日`;
+                hintText = '该时段仅有一天有数据';
+            }
+            svg.innerHTML = `
+                <text x="400" y="95" text-anchor="middle" fill="var(--text-secondary)" font-size="20" font-weight="600" font-family="var(--font-sans, sans-serif)">${p.y}</text>
+                <text x="400" y="120" text-anchor="middle" fill="var(--text-muted)" font-size="12" font-family="var(--font-sans, sans-serif)">${dateStr} · ${hintText}</text>
+                <circle cx="400" cy="145" r="5" fill="var(--accent-color)" opacity="0.5"/>
+            `;
+            return;
+        }
+
+        const maxY = Math.max(...points.map(p => p.y), 1);
+        const w = 800;
+        const h = 220;
+        const padLeft = 40;
+        const padBottom = 30;
+        const chartW = w - padLeft;
+        const chartH = h - padBottom;
+
+        const getX = (i: number) => {
+            const raw = padLeft + (i / (points.length - 1 || 1)) * chartW;
+            return Math.max(padLeft + 16, Math.min(w - 16, raw));
+        };
+        const getY = (v: number) => chartH - (v / maxY) * (chartH - 20);
+
+        const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(p.y)}`).join(' ');
+
+        // Area path
+        const areaD = `${pathD} L ${getX(points.length - 1)} ${chartH} L ${getX(0)} ${chartH} Z`;
+
+        // Grid lines
+        const gridLines = [0.25, 0.5, 0.75].map(pct => {
+            const y = chartH * pct;
+            return `<line x1="${padLeft}" y1="${y}" x2="${w}" y2="${y}" stroke="var(--border-light)" stroke-width="1" opacity="0.5"/>`;
+        }).join('');
+
+        // X-axis label formatter
+        function formatXLabel(dateStr: string, r: TimeRange): string {
+            const date = new Date(dateStr);
+            if (r === 'today') return `${date.getHours().toString().padStart(2, '0')}:00`;
+            if (r === 'year') return `${date.getMonth() + 1}月`;
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        }
+
+        // Smart label selection — avoid crowding
+        function getLabelIndices(count: number): number[] {
+            if (count <= 8) return Array.from({ length: count }, (_, i) => i);
+            if (count <= 16) {
+                const step = Math.ceil(count / 6);
+                const indices = [];
+                for (let i = 0; i < count; i += step) indices.push(i);
+                if (indices[indices.length - 1] !== count - 1) indices.push(count - 1);
+                return [...new Set(indices)];
+            }
+            // For dense data, show first, last, and evenly spaced
+            const maxLabels = 7;
+            const step = Math.floor((count - 1) / (maxLabels - 1));
+            const indices = [];
+            for (let i = 0; i < maxLabels; i++) {
+                const idx = Math.min(i * step, count - 1);
+                if (!indices.includes(idx)) indices.push(idx);
+            }
+            return indices;
+        }
+
+        const labelIndices = getLabelIndices(points.length);
+        const xLabels = labelIndices.map(i => {
+            const text = formatXLabel(points[i].x, range);
+            return `<text x="${getX(i)}" y="${h - 8}" text-anchor="middle" fill="var(--text-muted)" font-size="11" font-family="var(--font-sans, sans-serif)">${text}</text>`;
+        }).join('');
+
+        // Y-axis labels
+        const yLabels = [0, 0.5, 1].map(pct => {
+            const val = Math.round(maxY * pct);
+            const y = chartH - pct * (chartH - 20) + 4;
+            return `<text x="${padLeft - 8}" y="${y}" text-anchor="end" fill="var(--text-muted)" font-size="10" font-family="var(--font-sans, sans-serif)">${val}</text>`;
+        }).join('');
+
+        svg.innerHTML = `
+            <defs>
+                <linearGradient id="trendAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--accent-color)" stop-opacity="0.15"/>
+                    <stop offset="100%" stop-color="var(--accent-color)" stop-opacity="0"/>
+                </linearGradient>
+            </defs>
+            ${gridLines}
+            ${xLabels}
+            ${yLabels}
+            <path d="${areaD}" fill="url(#trendAreaGrad)"/>
+            <path d="${pathD}" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="${getX(points.length - 1)}" cy="${getY(points[points.length - 1].y)}" r="4" fill="var(--bg-card)" stroke="var(--accent-color)" stroke-width="2"/>
+        `;
+    }
+
+    function renderList(containerId: string, items: UmamiMetric[], maxItems = 5) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const sliced = items.slice(0, maxItems);
+        if (!sliced.length) {
+            container.innerHTML = '<li class="data-row data-row-empty"><span class="data-empty-text">暂无数据</span></li>';
+            return;
+        }
+
+        const maxVal = Math.max(...sliced.map(i => i.y), 1);
+
+        container.innerHTML = sliced.map((item, idx) => {
+            const pct = (item.y / maxVal) * 100;
+            const name = item.x || '(direct)';
+            return `
+                <li class="data-row">
+                    <span class="data-rank">${idx + 1}</span>
+                    <span class="data-name" title="${name}">${name}</span>
+                    <div class="data-bar-track"><div class="data-bar-fill" style="width: ${pct}%"></div></div>
+                    <span class="data-value">${formatNumber(item.y)}</span>
+                </li>
+            `;
+        }).join('');
+    }
+
+    function renderDistList(containerId: string, items: UmamiMetric[]) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const sliced = items.slice(0, 5);
+        if (!sliced.length) {
+            container.innerHTML = '<span class="dist-empty-text">暂无数据</span>';
+            return;
+        }
+
+        const total = sliced.reduce((sum, i) => sum + i.y, 0);
+
+        container.innerHTML = sliced.map((item, idx) => {
+            const pct = total > 0 ? ((item.y / total) * 100).toFixed(0) : '0';
+            const sep = idx < sliced.length - 1 ? '<span class="dist-sep">·</span>' : '';
+            return `
+                <span class="dist-tag">
+                    <span class="dist-tag-name">${item.x || 'Other'}</span>
+                    <span class="dist-tag-pct">${pct}%</span>
+                </span>
+                ${sep}
+            `;
+        }).join('');
+    }
+
+    // ── Main Controller ──
+    let currentRange: TimeRange = '7d';
+    let client: UmamiClient | null = null;
+    let refreshInterval: ReturnType<typeof setInterval> | null = null;
+
+    async function loadData(range: TimeRange) {
+        if (!client) return;
+
+        const loadingEl = document.getElementById('stats-loading');
+        const errorEl = document.getElementById('stats-error');
+        const dataEl = document.getElementById('stats-data');
+
+        loadingEl?.classList.remove('hidden');
+        errorEl?.classList.add('hidden');
+        dataEl?.classList.add('hidden');
+
+        try {
+            const config = JSON.parse(document.querySelector('.stats-page')?.getAttribute('data-config') || '{}');
+            const modules: string[] = config.modules || [];
+
+            const promises: Promise<unknown>[] = [];
+
+            if (modules.includes('overview')) {
+                promises.push(client.getStats(range).then(renderOverview));
+            }
+            if (modules.includes('trends')) {
+                promises.push(client.getPageviews(range).then(d => renderTrendChart(d, range)));
+            }
+            if (modules.includes('pages')) {
+                promises.push(client.getMetrics('url', range).then(d => renderList('top-pages', d)));
+            }
+            if (modules.includes('referrers')) {
+                promises.push(client.getMetrics('referrer', range).then(d => renderList('referrers', d)));
+            }
+            if (modules.includes('devices')) {
+                promises.push(
+                    client.getMetrics('browser', range).then(d => renderDistList('browsers-list', d)),
+                    client.getMetrics('device', range).then(d => renderDistList('devices-list', d)),
+                );
+            }
+            if (modules.includes('locations')) {
+                promises.push(client.getMetrics('country', range).then(d => renderDistList('locations-list', d)));
+            }
+
+            await Promise.all(promises);
+
+            loadingEl?.classList.add('hidden');
+            dataEl?.classList.remove('hidden');
+        } catch (err) {
+            console.error('Stats load error:', err);
+            loadingEl?.classList.add('hidden');
+            errorEl?.classList.remove('hidden');
+            const errorDetail = document.getElementById('stats-error-detail');
+            if (errorDetail) {
+                errorDetail.textContent = err instanceof Error ? err.message : String(err);
+            }
+        }
+    }
+
+    async function loadRealtime() {
+        if (!client) return;
+        try {
+            const data = await client.getActive();
+            const el = document.getElementById('realtime-count');
+            if (el) el.textContent = String(data.x || 0);
+        } catch {
+            // Silently fail for realtime
+        }
+    }
+
+    function init() {
+        const config = JSON.parse(document.querySelector('.stats-page')?.getAttribute('data-config') || '{}');
+
+        if (!config.enabled || !config.apiHost || !config.apiToken || !config.websiteId) {
+            document.getElementById('stats-config-error')?.classList.remove('hidden');
+            return;
+        }
+
+        document.getElementById('stats-content')?.classList.remove('hidden');
+
+        client = new UmamiClient(config.apiHost, config.apiToken, config.websiteId);
+        currentRange = config.defaultRange || '7d';
+
+        // Set active range button
+        document.querySelectorAll('.range-btn').forEach(btn => {
+            const range = btn.getAttribute('data-range');
+            btn.classList.toggle('active', range === currentRange);
+            btn.addEventListener('click', () => {
+                if (range) {
+                    currentRange = range as TimeRange;
+                    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    loadData(currentRange);
+                }
+            });
+        });
+
+        // Retry button
+        document.getElementById('retry-btn')?.addEventListener('click', () => {
+            loadData(currentRange);
+        });
+
+        // Load data
+        loadData(currentRange);
+
+        // Realtime polling
+        if (config.modules?.includes('realtime')) {
+            loadRealtime();
+            refreshInterval = setInterval(loadRealtime, 30000);
+        }
+
+        // Hide modules not in config
+        config.modules?.forEach((mod: string) => {
+            document.querySelectorAll(`[data-module="${mod}"]`).forEach(el => {
+                (el as HTMLElement).style.display = '';
+            });
+        });
+        // Hide modules not enabled
+        const allModules = ['overview', 'trends', 'pages', 'referrers', 'devices', 'locations', 'realtime'];
+        allModules.forEach(mod => {
+            if (!config.modules?.includes(mod)) {
+                document.querySelectorAll(`[data-module="${mod}"]`).forEach(el => {
+                    (el as HTMLElement).style.display = 'none';
+                });
+            }
+        });
+    }
+
+    // Init on page load and after Astro ViewTransitions
+    if (document.readyState !== 'loading') {
+        init();
+    } else {
+        document.addEventListener('DOMContentLoaded', init);
+    }
+    document.addEventListener('astro:page-load', init);
+
+    // Cleanup on navigation
+    document.addEventListener('astro:before-swap', () => {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+        }
+    });
+</script>
+
+<style is:global>
+    .stats-page {
+        padding-bottom: 48px;
+    }
+
+    /* Config Error */
+    .config-error {
+        padding: 48px 0;
+    }
+    .config-error-inner {
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        padding: 32px;
+        max-width: 560px;
+    }
+    .config-error-inner h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: 12px;
+    }
+    .config-error-inner p {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+    }
+    .config-error-inner ul {
+        margin: 12px 0;
+        padding-left: 20px;
+    }
+    .config-error-inner li {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+    }
+    .config-error-inner code {
+        background: var(--bg-muted);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        color: var(--accent-color);
+    }
+    .config-hint {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-light);
+        color: var(--text-muted) !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* Header */
+    .stats-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-light);
+    }
+    .stats-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--text-main);
+        line-height: 1.2;
+    }
+    .stats-subtitle {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        margin-top: 4px;
+    }
+
+    /* Range Switcher */
+    .range-switcher {
+        display: inline-flex;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        padding: 3px;
+        gap: 2px;
+        flex-shrink: 0;
+    }
+    .range-btn {
+        padding: 5px 14px;
+        border-radius: 6px;
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+    .range-btn:hover {
+        color: var(--text-secondary);
+    }
+    .range-btn.active {
+        background: var(--bg-main);
+        color: var(--text-main);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    /* Loading */
+    .stats-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 48px 0;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--border-light);
+        border-top-color: var(--accent-color);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Error */
+    .stats-error {
+        text-align: center;
+        padding: 48px 0;
+        color: var(--text-secondary);
+    }
+    .stats-error-detail {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin: 8px 0 16px;
+        font-family: var(--font-mono, monospace);
+        word-break: break-all;
+        max-width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .retry-btn {
+        margin-top: 12px;
+        padding: 8px 20px;
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+        font-family: inherit;
+    }
+    .retry-btn:hover {
+        background: var(--accent-hover);
+    }
+
+    /* Section spacing */
+    .stats-section {
+        margin-bottom: 24px;
+    }
+    .stats-section[data-module="overview"] {
+        padding-bottom: 16px;
+    }
+
+    /* Section Title */
+    .section-title {
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    /* Overview — flat strip, no cards */
+    .overview-strip {
+        display: flex;
+        gap: 28px;
+        flex-wrap: wrap;
+    }
+    .overview-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 64px;
+    }
+    .overview-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+    }
+    .overview-label {
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+    .overview-change {
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-top: 2px;
+    }
+    .change-up { color: var(--accent-color); }
+    .change-down { color: #c45a4a; }
+    .dark .change-down { color: #e07060; }
+
+    /* Chart — keep card (only card on the page) */
+    .chart-frame {
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        padding: 16px;
+    }
+    .chart-svg {
+        width: 100%;
+        height: 220px;
+    }
+
+    /* Data Grid — two column */
+    .data-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+        .data-grid { grid-template-columns: 1fr; }
+        .overview-strip { gap: 20px; }
+        .stats-header { flex-direction: column; }
+        .data-row {
+            grid-template-columns: 24px minmax(0, 1fr) 80px 44px;
+            gap: 8px;
+            padding: 10px 8px;
+            margin: 0 -8px;
+        }
+        .data-bar-track { width: 80px; }
+        .data-name { font-size: 0.8125rem; }
+        .data-value { font-size: 0.8125rem; }
+    }
+
+    /* Data List — no card, divider + hover feedback */
+    .data-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .data-row {
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr) 100px 52px;
+        gap: 12px;
+        padding: 11px 10px;
+        border-bottom: 1px solid var(--border-light);
+        align-items: center;
+        transition: background 0.15s ease, border-radius 0.15s ease;
+        margin: 0 -10px;
+    }
+    .data-row:last-child {
+        border-bottom: none;
+    }
+    .data-row:hover {
+        background: var(--bg-muted);
+        border-radius: 8px;
+        border-bottom-color: transparent;
+    }
+    .data-row:hover + .data-row {
+        border-top: 1px solid var(--border-light);
+    }
+    .data-row-empty {
+        grid-column: 1 / -1;
+        padding: 24px 10px;
+        text-align: center;
+        border-bottom: none;
+    }
+    .data-empty-text {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+    }
+    .data-rank {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+    .data-name {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+    }
+    .data-bar-track {
+        height: 4px;
+        background: var(--bg-muted);
+        border-radius: 2px;
+        overflow: hidden;
+        width: 100px;
+    }
+    .data-bar-fill {
+        height: 100%;
+        background: var(--accent-color);
+        border-radius: 2px;
+        opacity: 0.25;
+        transition: width 0.6s ease;
+    }
+    .data-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        text-align: right;
+    }
+
+    /* Distribution — inline tag cloud, no cards */
+    .dist-strip {
+        margin-bottom: 24px;
+    }
+    .dist-section {
+        padding: 14px 0;
+        border-top: 1px solid var(--border-light);
+    }
+    .dist-section:first-child {
+        border-top: none;
+        padding-top: 0;
+    }
+    .dist-group {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .dist-title {
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        font-weight: 600;
+        min-width: 40px;
+        flex-shrink: 0;
+    }
+    .dist-tags {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+    }
+    .dist-empty-text {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+    }
+    .dist-tag {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 4px;
+        padding: 2px 0;
+    }
+    .dist-tag-name {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+    .dist-tag-pct {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+    }
+    .dist-sep {
+        color: var(--border-light);
+        font-size: 0.875rem;
+        margin: 0 2px;
+        user-select: none;
+    }
+
+    /* Realtime — simplified, no card */
+    .realtime-strip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    .pulse-dot {
+        width: 7px;
+        height: 7px;
+        background: var(--accent-color);
+        border-radius: 50%;
+        animation: pulse 2.4s ease-in-out infinite;
+        flex-shrink: 0;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.3; transform: scale(0.85); }
+    }
+    .realtime-count {
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .hidden {
+        display: none !important;
+    }
+</style>

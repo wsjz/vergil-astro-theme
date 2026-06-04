@@ -291,6 +291,9 @@ const isArticle = head.pageType === 'article';
             document.addEventListener('astro:page-load', initVideoPip);
         })();
         </script>
+        {siteConfig.analytics?.enabled && siteConfig.analytics.provider === 'umami' && siteConfig.analytics.umami.websiteId && (
+            <script is:inline defer src={siteConfig.analytics.umami.scriptUrl} data-website-id={siteConfig.analytics.umami.websiteId} data-astro-rerun></script>
+        )}
     </head>
     <body class="bg-main text-main">
         {isArticle && (

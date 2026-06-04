@@ -15,6 +15,9 @@ import { siteInfo, heroData, subscribe, postsPerPage, projectsPerPage } from './
 // ── 功能开关 ──
 import { comments, agent, sidebar, floatingAudio, tagCloud, serviceWorker } from './config/features';
 
+// ── 站点分析 ──
+import { analytics } from './config/analytics';
+
 // ── 开屏页 ──
 import { splash } from './config/splash';
 
@@ -68,6 +71,7 @@ const siteConfig: SiteConfig = {
     floatingAudio,
     tagCloud,
     serviceWorker,
+    analytics,
 };
 
 export default siteConfig;

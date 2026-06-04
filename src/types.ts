@@ -152,6 +152,28 @@ export type SiteConfig = {
     share?: {
         enabled: boolean;
     };
+    /** 站点分析 */
+    analytics?: AnalyticsConfig;
+};
+
+export type AnalyticsModule = 'overview' | 'trends' | 'pages' | 'referrers' | 'devices' | 'locations' | 'realtime';
+
+export type UmamiAnalyticsConfig = {
+    websiteId: string;
+    scriptUrl: string;
+    apiHost: string;
+    apiToken: string;
+    statsPage?: {
+        path?: string;
+        modules?: AnalyticsModule[];
+        defaultRange?: 'today' | '7d' | '30d' | 'year';
+    };
+};
+
+export type AnalyticsConfig = {
+    enabled: boolean;
+    provider: 'umami';
+    umami: UmamiAnalyticsConfig;
 };
 
 export type AgentProvider = 'rive' | 'live2d';
