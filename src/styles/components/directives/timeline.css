@@ -2,7 +2,7 @@
 .md-directive-timeline {
     margin: 1.5rem 0 !important;
     padding: 0 !important;
-    padding-inline-start: 0 !important;
+    padding-inline-start: 3px !important;
     list-style: none !important;
     position: relative;
 }
@@ -10,12 +10,18 @@
 .md-directive-timeline::before {
     content: '';
     position: absolute;
-    left: 5px;
-    top: 8px;
-    bottom: 8px;
+    left: 8px;
+    top: 0;
+    bottom: 0;
     width: 2px;
-    background: var(--border-light);
+    background: color-mix(in srgb, var(--accent-color) 25%, var(--border-light));
     border-radius: 2px;
+    transition: background 0.2s ease;
+}
+
+/* hover 时竖线退为灰色，只高亮节点 */
+.md-directive-timeline:has(.md-timeline-node:hover)::before {
+    background: var(--border-light);
 }
 
 .prose .md-directive-timeline > .md-timeline-node,
@@ -24,7 +30,7 @@
     align-items: flex-start;
     gap: var(--md-gap);
     position: relative;
-    padding-bottom: 1.25rem;
+    padding-bottom: 0.875rem;
     margin-left: 0 !important;
     padding-left: 0 !important;
 }

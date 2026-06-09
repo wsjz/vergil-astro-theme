@@ -39,12 +39,5 @@ const { Content } = await render(project);
             <Content />
         </div>
     </article>
-    {(prevProject || nextProject) && (
-        <div class="my-16 sm:my-24">
-            <h2 class="mb-12 font-display text-lg sm:mb-16 sm:text-xl">View Next</h2>
-            {nextProject && <ProjectPreview project={nextProject} class="mb-10 sm:mb-12" headingLevel="h3" />}
-            {prevProject && <ProjectPreview project={prevProject} class="mb-10 sm:mb-12" headingLevel="h3" />}
-        </div>
-    )}
     {siteConfig.comments?.enabled && <Comments pageId={`/projects/${project.id}/`} pageTitle={title} />}
 </BaseLayout>
