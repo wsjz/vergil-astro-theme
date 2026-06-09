@@ -88,7 +88,9 @@ function getLevelConfig(l: number) {
                         <span class="active-indicator" aria-hidden="true" />
                         <span class="indent-spacer" aria-hidden="true" data-level={level} />
                         <span class="article-placeholder" aria-hidden="true" />
-                        <span class={`truncate ${cfg.fontWeight} ${cfg.opacity}`}>{node.title}</span>
+                        <span class="title-scroll flex-1 min-w-0">
+                            <span class={`title-scroll-text ${cfg.fontWeight} ${cfg.opacity}`}>{node.title}</span>
+                        </span>
                     </a>
                 </li>
             );
@@ -125,8 +127,10 @@ function getLevelConfig(l: number) {
                 )}
 
                 {/* 目录标题 */}
-                <span class={`docs-group-title ${cfg.textSize} ${cfg.fontWeight} ${active ? 'text-accent' : ''}`}>
-                    {node.title}
+                <span class="title-scroll flex-1 min-w-0">
+                    <span class={`title-scroll-text ${cfg.textSize} ${cfg.fontWeight} ${active ? 'text-accent' : ''}`}>
+                        {node.title}
+                    </span>
                 </span>
             </>
         );
@@ -254,15 +258,6 @@ function getLevelConfig(l: number) {
 
     .docs-tree-group-header.active {
         background-color: color-mix(in srgb, var(--accent-color) 8%, transparent);
-    }
-
-    .docs-group-title {
-        flex: 1;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: inherit;
     }
 
     /* ── 箭头指示 ── */

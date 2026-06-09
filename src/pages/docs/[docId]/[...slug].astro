@@ -7,6 +7,8 @@ import FloatingToc from '../../../components/widgets/FloatingToc.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
 import { getDocSets, getDocEntry, getAdjacentDocs, getDocGroup, getDocHomepageSlug, type DocTreeNode } from '../../../utils/docs-utils';
 import { ChevronRight } from '@lucide/astro';
+import Comments from '../../../components/widgets/Comments.astro';
+import siteConfig from '../../../data/site-config';
 
 export async function getStaticPaths() {
     const entries = await getCollection('docs', ({ data }) => !data.draft);
@@ -79,6 +81,7 @@ const showAutoRender = autoRender && groupChildren.length > 0;
     docId={docId}
     currentSlug={slug}
     articleTitle={String(entry.data.title)}
+    commentsEnabled={siteConfig.comments?.enabled}
 >
     <div slot="right-sidebar">
         <SidebarToc headings={headings} />
@@ -171,4 +174,6 @@ const showAutoRender = autoRender && groupChildren.length > 0;
     </article>
 
     <DocsNav docId={docId} prev={prev} next={next} />
+
+    {siteConfig.comments?.enabled && <Comments pageId={`/docs/${docId}/${slug}/`} pageTitle={String(entry.data.title)} />}
 </DocsLayout>

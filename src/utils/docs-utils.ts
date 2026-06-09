@@ -46,6 +46,8 @@ export async function getDocSets(): Promise<DocSet[]> {
     for (const [id, groupEntries] of grouped) {
         const meta = groupEntries.find(isMetaEntry);
         if (!meta) continue;
+        const hasVisibleArticles = groupEntries.some((e) => !isMetaEntry(e));
+        if (!hasVisibleArticles) continue;
         const tree = buildTree(id, groupEntries, meta.data?.dirs as (string | Record<string, string[]>)[] | undefined);
         sets.push({ id, meta, tree });
     }
@@ -124,6 +126,17 @@ function flattenTree(nodes: DocTreeNode[], out: DocArticleNode[]) {
         if (node.type === 'article') {
             out.push(node);
         } else {
+            // Group 有 index.md 页面时，把它也当作 article 加入 flat 列表，
+            // 这样 getAdjacentDocs 才能找到 group 首页的相邻文档
+            if (node.slug) {
+                out.push({
+                    type: 'article',
+                    title: node.title,
+                    slug: node.slug,
+                    order: node.order,
+                    entry: null as any,
+                });
+            }
             flattenTree(node.children, out);
         }
     }

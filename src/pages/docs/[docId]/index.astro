@@ -8,6 +8,8 @@ import FloatingToc from '../../../components/widgets/FloatingToc.astro';
 import SidebarToc from '../../../components/widgets/SidebarToc.astro';
 import Breadcrumb from '../../../components/ui/Breadcrumb.astro';
 import HeroSplash from '../../../components/content/HeroSplash.astro';
+import Comments from '../../../components/widgets/Comments.astro';
+import siteConfig from '../../../data/site-config';
 
 export const getStaticPaths = (async () => {
     const sets = await getDocSets();
@@ -58,6 +60,7 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
     currentSlug={homepageSlug || ''}
     articleTitle={(entry?.data?.title as string) || (meta?.data?.title as string) || ''}
     splashMode={splashEnabled}
+    commentsEnabled={siteConfig.comments?.enabled}
 >
     {splashEnabled && (
         <HeroSplash
@@ -108,6 +111,8 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
     <SidebarToc headings={headings} slot="right-sidebar" />
 
     <DocsNav docId={docId} prev={prev} next={next} />
+
+    {siteConfig.comments?.enabled && entry && <Comments pageId={`/docs/${docId}/${articleSlug}/`} pageTitle={String(entry.data.title)} />}
 
     <script is:inline>
         (function() {
