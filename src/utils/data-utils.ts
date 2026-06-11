@@ -99,5 +99,5 @@ export function getAllSeries(posts: CollectionEntry<'blog'>[]) {
 export function getPostsBySeries(posts: CollectionEntry<'blog'>[], seriesId: string) {
     return posts
         .filter((p) => p.data.series && slugify(p.data.series) === seriesId)
-        .sort((a, b) => new Date(a.data.publishDate).getTime() - new Date(b.data.publishDate).getTime());
+        .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime());
 }

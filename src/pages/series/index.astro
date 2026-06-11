@@ -8,14 +8,19 @@ import { getPostsBySeries, sortItemsByDateDesc } from '../../utils/data-utils';
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
 const allSeries = await getCollection('series');
 
-// 为每个专栏计算文章数
-const seriesWithMeta = allSeries.map((s) => {
-    const seriesPosts = getPostsBySeries(posts, s.id);
-    return {
-        ...s,
-        postCount: seriesPosts.length,
-    };
-});
+const seriesWithMeta = allSeries
+    .map((s) => {
+        const seriesPosts = getPostsBySeries(posts, s.id);
+        const latestDate = seriesPosts.length > 0
+            ? new Date(seriesPosts[0].data.publishDate).getTime()
+            : 0;
+        return {
+            ...s,
+            postCount: seriesPosts.length,
+            latestDate,
+        };
+    })
+    .sort((a, b) => b.latestDate - a.latestDate);
 ---
 
 <BaseLayout title="专栏" description="专栏文章合集" showHeader={false}>

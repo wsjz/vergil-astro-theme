@@ -68,31 +68,50 @@ export function processBlockDirective(node, options = {}) {
         }
 
         case 'folders': {
+            // 全局展开策略：first（默认第一个展开）| none（全部折叠）| all（全部展开）
+            const expand = attrs.expand || 'first';
             const folders = [];
             let currentFolder = null;
             let currentContent = [];
+            let currentOpen = null; // null = 未指定，使用全局默认
+
             for (const child of node.children) {
                 if (child.type === 'paragraph') {
                     const text = child.children.map(c => c.value || '').join('').trim();
                     if (text.startsWith('folder:')) {
-                        if (currentFolder !== null) folders.push({ title: currentFolder, children: currentContent });
-                        currentFolder = text.slice(7).trim();
+                        if (currentFolder !== null) folders.push({ title: currentFolder, children: currentContent, open: currentOpen });
+                        const raw = text.slice(7).trim();
+                        // 解析 folder 级别的 {open} 或 {closed} 标记
+                        const m = raw.match(/^(.*?)\s*\{(open|closed)\}\s*$/);
+                        currentFolder = m ? m[1].trim() : raw;
+                        currentOpen = m ? (m[2] === 'open') : null;
                         currentContent = [];
                         continue;
                     }
                 }
                 if (currentFolder !== null) currentContent.push(child);
             }
-            if (currentFolder !== null) folders.push({ title: currentFolder, children: currentContent });
+            if (currentFolder !== null) folders.push({ title: currentFolder, children: currentContent, open: currentOpen });
 
             node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-folders' } };
-            node.children = folders.map((f, i) => {
-                const summaryHtml = `<summary><span class="md-folder-title">${f.title}</span><span class="md-folder-arrow">${getIconSvg('lucide:chevron-down', 12)}</span></summary>`;
-                return h('details', { class: 'md-folder', ...(i === 0 ? { open: true } : {}) }, [
-                    { type: 'html', value: summaryHtml },
-                    h('div', { class: 'md-folder-body' }, f.children)
-                ]);
-            });
+
+            const result = [];
+            for (let i = 0; i < folders.length; i++) {
+                const f = folders[i];
+                // 优先级：folder 级别 > 全局 expand
+                const isOpen = f.open !== null ? f.open
+                    : expand === 'all' ? true
+                    : expand === 'none' ? false
+                    : i === 0; // expand === 'first'
+
+                result.push({
+                    type: 'html',
+                    value: `<details class="md-folder"${isOpen ? ' open' : ''}><summary><span class="md-folder-title">${escapeHtml(f.title)}</span><span class="md-folder-arrow">${getIconSvg('lucide:chevron-down', 12)}</span></summary><div class="md-folder-body">`
+                });
+                result.push(...f.children);
+                result.push({ type: 'html', value: '</div></details>' });
+            }
+            node.children = result;
             break;
         }
 
