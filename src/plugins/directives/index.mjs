@@ -14,6 +14,7 @@ import { processChartDirective } from './charts.mjs';
 import { processCalendarDirective } from './calendar.mjs';
 import { processStoryDirective } from './story.mjs';
 import { processMindDirective } from './mind.mjs';
+import { processThennowDirective } from './thennow.mjs';
 
 export function remarkContentDirectives(options = {}) {
     const { links, screenshotService } = options;
@@ -48,6 +49,8 @@ export function remarkContentDirectives(options = {}) {
                 processStoryDirective(node, options);
             } else if (name === 'mind') {
                 processMindDirective(node, options);
+            } else if (name === 'thennow') {
+                processThennowDirective(node);
             }
         }, true);
     };

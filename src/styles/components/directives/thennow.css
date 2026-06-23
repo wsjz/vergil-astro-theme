@@ -1,0 +1,169 @@
+.md-directive-thennow {
+    margin: 1.5rem 0;
+}
+
+.thennow-container {
+    position: relative;
+    width: 100%;
+    border-radius: var(--radius-xl, 24px);
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-muted);
+    touch-action: none;
+    user-select: none;
+}
+
+.thennow-layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thennow-layer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* before 图在底层铺满（左侧可见）；after 图裁去左边、显示在右侧，与右下角的 After 标签一致 */
+.thennow-after {
+    clip-path: inset(0 0 0 var(--split, 50%));
+}
+
+.thennow-label {
+    position: absolute;
+    bottom: 14px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background: rgba(0, 0, 0, 0.42);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(8px) saturate(140%);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    pointer-events: none;
+    z-index: 5;
+    transition: opacity 0.2s ease;
+}
+
+.thennow-label-before {
+    left: 14px;
+}
+
+.thennow-label-after {
+    right: 14px;
+}
+
+/* 拖拽时让标签淡出，保证对比观感不受遮挡 */
+.thennow-container.is-dragging .thennow-label {
+    opacity: 0;
+}
+
+.thennow-slider {
+    position: absolute;
+    inset: 0;
+    cursor: ew-resize;
+    z-index: 4;
+}
+
+.thennow-track {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--split, 50%);
+    width: 2px;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.82);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+    pointer-events: none;
+}
+
+.thennow-handle {
+    position: absolute;
+    top: 50%;
+    left: var(--split, 50%);
+    width: 40px;
+    height: 40px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: #fff;
+    color: rgba(0, 0, 0, 0.68);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.thennow-handle svg {
+    width: 18px;
+    height: 18px;
+    opacity: 0.9;
+}
+
+/* 悬停 / 拖拽 / 键盘聚焦反馈 */
+.thennow-slider:hover .thennow-handle {
+    transform: translate(-50%, -50%) scale(1.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.32);
+}
+
+.thennow-container.is-dragging .thennow-handle {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.36);
+}
+
+.thennow-slider:focus-visible {
+    outline: none;
+}
+
+.thennow-slider:focus-visible .thennow-handle {
+    box-shadow: 0 0 0 3px var(--accent-color, #4a7c59), 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+
+.md-thennow-fallback {
+    padding: 1rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl, 24px);
+}
+
+@media (max-width: 640px) {
+    .thennow-handle {
+        width: 36px;
+        height: 36px;
+    }
+
+    .thennow-handle svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .thennow-label {
+        font-size: 0.75rem;
+        padding: 5px 11px;
+        bottom: 10px;
+    }
+
+    .thennow-label-before {
+        left: 10px;
+    }
+
+    .thennow-label-after {
+        right: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .thennow-handle,
+    .thennow-label {
+        transition: none;
+    }
+}
