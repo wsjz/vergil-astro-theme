@@ -5,7 +5,7 @@
  *          :sup[] :sub[] :hashtag[] :button[] :step-brackets[]
  *          :checkbox[] :radio[] :emoji[]
  */
-import { getIconSvg, resolveColor, escapeHtml, HASHTAG_COLORS, EMOJI_SOURCES } from './shared.mjs';
+import { getIconSvg, resolveColor, escapeHtml, escapeUrl, safeUrl, safeCssValue, HASHTAG_COLORS, EMOJI_SOURCES } from './shared.mjs';
 
 let hashtagIndex = 0;
 
@@ -55,7 +55,7 @@ export function processInlineDirective(node) {
                 hashtagIndex = (hashtagIndex + 1) % HASHTAG_COLORS.length;
             }
             const hashIcon = '<svg class="md-hash-svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M426.6 64.8c34.8 5.8 58.4 38.8 52.6 73.6l-19.6 117.6h190.2l23-138.6c5.8-34.8 38.8-58.4 73.6-52.6s58.4 38.8 52.6 73.6l-19.4 117.6H896c35.4 0 64 28.6 64 64s-28.6 64-64 64h-137.8l-42.6 256H832c35.4 0 64 28.6 64 64s-28.6 64-64 64h-137.8l-23 138.6c-5.8 34.8-38.8 58.4-73.6 52.6s-58.4-38.8-52.6-73.6l19.6-117.4h-190.4l-23 138.6c-5.8 34.8-38.8 58.4-73.6 52.6s-58.4-38.8-52.6-73.6l19.4-117.8H128c-35.4 0-64-28.6-64-64s28.6-64 64-64h137.8l42.6-256H192c-35.4 0-64-28.6-64-64s28.6-64 64-64h137.8l23-138.6c5.8-34.8 38.8-58.4 73.6-52.6z m11.6 319.2l-42.6 256h190.2l42.6-256h-190.2z"/></svg>';
-            node.data = { hName: 'a', hProperties: { href: attrs.href || '#', class: 'md-tag-hashtag', style: `--tag-hash-color:${color}` } };
+            node.data = { hName: 'a', hProperties: { href: safeUrl(attrs.href, '#') || '#', class: 'md-tag-hashtag', style: `--tag-hash-color:${color}` } };
             node.children = [
                 { type: 'html', value: `<span class="md-hash-icon">${hashIcon}</span>` },
                 { type: 'text', value: text }
@@ -64,7 +64,7 @@ export function processInlineDirective(node) {
         }
         case 'button': {
             const color = resolveColor(attrs.color || 'accent');
-            const href = attrs.href || '#';
+            const href = safeUrl(attrs.href, '#') || '#';
             const icon = attrs.icon || '';
             const size = attrs.size || '';
             const classes = ['md-tag-button'];
@@ -73,7 +73,7 @@ export function processInlineDirective(node) {
             const children = [];
             if (icon) {
                 if (/^https?:\/\//i.test(icon)) {
-                    children.push({ type: 'html', value: `<img class="md-btn-icon" src="${icon}" alt="" />` });
+                    children.push({ type: 'html', value: `<img class="md-btn-icon" src="${escapeUrl(icon)}" alt="" />` });
                 } else {
                     const iconifyMatch = icon.match(/^([a-z0-9-]+):([a-z0-9-]+)$/i);
                     if (iconifyMatch) {
@@ -92,8 +92,8 @@ export function processInlineDirective(node) {
             const title = attrs.title || '';
             node.data = { hName: 'div', hProperties: { class: 'md-step-brackets' } };
             node.children = [
-                { type: 'html', value: `<span class="md-step-badge">${num}</span>` },
-                ...(title ? [{ type: 'html', value: `<span class="md-step-title">${title}</span>` }] : [])
+                { type: 'html', value: `<span class="md-step-badge">${escapeHtml(num)}</span>` },
+                ...(title ? [{ type: 'html', value: `<span class="md-step-title">${escapeHtml(title)}</span>` }] : [])
             ];
             break;
         }
@@ -140,7 +140,7 @@ export function processInlineDirective(node) {
             break;
         }
         case 'emoji': {
-            const height = attrs.height || '1.75em';
+            const height = safeCssValue(attrs.height, '1.75em');
             let source = attrs.source;
             let emojiName = attrs.name;
 
@@ -161,7 +161,7 @@ export function processInlineDirective(node) {
                     hProperties: { class: 'md-tag-emoji', style: `--emoji-height:${height}` }
                 };
                 node.children = [
-                    { type: 'html', value: `<img src="${url}" alt="${emojiName}" loading="lazy" style="height:${height}" />` }
+                    { type: 'html', value: `<img src="${escapeUrl(url)}" alt="${escapeHtml(emojiName)}" loading="lazy" style="height:${escapeHtml(height)}" />` }
                 ];
             }
             break;

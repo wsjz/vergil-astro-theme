@@ -1,8 +1,8 @@
 ---
-import DefaultLayout from '../../layouts/DefaultLayout.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 
-<DefaultLayout title="在线工具箱" description="JSON 解析、文本 Diff、图片转 WebP 等实用工具" showSidebar={false} showRightSidebar={false}>
+<BaseLayout title="在线工具箱" description="JSON 解析、文本 Diff、图片转 WebP 等实用工具" showSidebar={false} showRightSidebar={false}>
     <div class="max-w-3xl mx-auto py-8 px-4">
         <h1 class="text-2xl font-bold text-main mb-1.5">在线工具箱</h1>
         <p class="text-sm text-secondary mb-8">纯前端运行，数据不会上传到服务器。</p>
@@ -195,7 +195,7 @@ import DefaultLayout from '../../layouts/DefaultLayout.astro';
             </div>
         </div>
     </div>
-</DefaultLayout>
+</BaseLayout>
 
 <script>
     // ===== Tab Switching =====
@@ -448,12 +448,12 @@ import DefaultLayout from '../../layouts/DefaultLayout.astro';
     const sqlStatus = document.getElementById('sql-status')!;
     const sqlResultWrap = document.getElementById('sql-result-wrap')!;
 
-    // sql-formatter lazy load (CDN, avoid bundling into global JS)
+    // sql-formatter lazy load (code-split chunk, kept out of the global JS)
     let sqlFormatterModule: any = null;
     async function loadSqlFormatter() {
         if (sqlFormatterModule) return sqlFormatterModule;
         sqlStatus.textContent = '...';
-        sqlFormatterModule = await import('https://cdn.jsdelivr.net/npm/sql-formatter@15.7.3/dist/sql-formatter.min.mjs');
+        sqlFormatterModule = await import('sql-formatter');
         sqlStatus.textContent = '';
         return sqlFormatterModule;
     }

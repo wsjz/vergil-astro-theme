@@ -115,7 +115,8 @@ function escapeHtml(text) {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 function countByStatus(rows, statusCol = 'status') {
@@ -362,9 +363,9 @@ function renderPlanTable(data, attrs, uid, mapping) {
     const js = buildTableRuntime(uid, columns, rows, colTypes, statusCol, priorityCol);
 
     // Embed data as JSON for JS to read
-    const dataJson = JSON.stringify(rows).replace(/'/g, "\\'").replace(/</g, '\\u003c');
-    const colsJson = JSON.stringify(columns);
-    const colTypesJson = JSON.stringify(colTypes);
+    const dataJson = escapeHtml(JSON.stringify(rows));
+    const colsJson = escapeHtml(JSON.stringify(columns));
+    const colTypesJson = escapeHtml(JSON.stringify(colTypes));
 
     return `<div class="md-plan-table-wrap" data-plan-id="${uid}" data-plan-rows='${dataJson}' data-plan-cols='${colsJson}' data-plan-coltypes='${colTypesJson}' data-plan-status="${escapeHtml(statusCol)}" data-plan-priority="${escapeHtml(priorityCol)}">${toolbarHtml}${tableHtml}${js}</div>`;
 }

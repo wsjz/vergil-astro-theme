@@ -35,10 +35,17 @@ const isArticle = head.pageType === 'article';
                 window.scrollTo(0, 0);
             })();
         </script>
-        <script>
-            if (localStorage.theme === 'dark') {
-                document.documentElement.classList.add('dark');
-            }
+        <script is:inline>
+            (function() {
+                try {
+                    const scheme = localStorage.getItem('colorScheme') || 'C';
+                    const isDark = localStorage.getItem('darkMode');
+                    document.documentElement.setAttribute('data-theme', scheme);
+                    if (isDark === 'true' || (isDark === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                        document.documentElement.classList.add('dark');
+                    }
+                } catch(e) {}
+            })();
         </script>
         <ViewTransitions />
         <script>

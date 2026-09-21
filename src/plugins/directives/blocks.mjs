@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import { getIconSvg, resolveColor, escapeHtml, h, serializeToHtml } from './shared.mjs';
+import { getIconSvg, resolveColor, escapeHtml, escapeUrl, safeCssValue, h, serializeToHtml } from './shared.mjs';
 import { processPlanDirective } from './plan.mjs';
 
 export function processBlockDirective(node, options = {}) {
@@ -28,7 +28,7 @@ export function processBlockDirective(node, options = {}) {
             const iconSvg = icons[type] || '';
             node.data = { hName: 'div', hProperties: { class: `md-directive md-directive-callout md-callout-${type}` } };
             node.children = [
-                { type: 'html', value: `<div style="--callout-bar:${c.bar};--callout-bg:${c.bg};--callout-border:${c.border}"><div class="md-callout-inner"><div class="md-callout-title">${iconSvg}<span>${title}</span></div><div class="md-callout-body">` },
+                { type: 'html', value: `<div style="--callout-bar:${c.bar};--callout-bg:${c.bg};--callout-border:${c.border}"><div class="md-callout-inner"><div class="md-callout-title">${iconSvg}<span>${escapeHtml(title)}</span></div><div class="md-callout-body">` },
                 ...node.children,
                 { type: 'html', value: '</div></div></div>' }
             ];
@@ -40,7 +40,7 @@ export function processBlockDirective(node, options = {}) {
             const color = resolveColor(attrs.color || 'accent');
             node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-note' } };
             node.children = [
-                { type: 'html', value: `<div style="--note-color:${color}">${title ? `<div class="md-note-title">${title}</div>` : ''}<div class="md-note-body">` },
+                { type: 'html', value: `<div style="--note-color:${color}">${title ? `<div class="md-note-title">${escapeHtml(title)}</div>` : ''}<div class="md-note-body">` },
                 ...node.children,
                 { type: 'html', value: '</div></div>' }
             ];
@@ -60,7 +60,7 @@ export function processBlockDirective(node, options = {}) {
                 }
             };
             node.children = [
-                { type: 'html', value: `<summary><span class="md-folding-title">${title}</span><span class="md-folding-arrow">${getIconSvg('lucide:chevron-down', 12)}</span></summary><div class="md-folding-body">` },
+                { type: 'html', value: `<summary><span class="md-folding-title">${escapeHtml(title)}</span><span class="md-folding-arrow">${getIconSvg('lucide:chevron-down', 12)}</span></summary><div class="md-folding-body">` },
                 ...node.children,
                 { type: 'html', value: '</div>' }
             ];
@@ -123,7 +123,7 @@ export function processBlockDirective(node, options = {}) {
                 const parts = text.split('|').map(s => s.trim());
                 if (parts.length >= 2) items.push({ date: parts[0], title: parts[1], desc: parts[2] || '' });
             });
-            const html = `<ol class="md-directive md-directive-timeline">${items.map((item, i) => `<li class="md-timeline-node"><div class="md-timeline-dot${i === 0 ? ' md-timeline-dot-first' : ''}"></div><div class="md-timeline-content"><time>${item.date}</time><h3>${item.title}</h3>${item.desc ? `<p>${item.desc}</p>` : ''}</div></li>`).join('')}</ol>`;
+            const html = `<ol class="md-directive md-directive-timeline">${items.map((item, i) => `<li class="md-timeline-node"><div class="md-timeline-dot${i === 0 ? ' md-timeline-dot-first' : ''}"></div><div class="md-timeline-content"><time>${escapeHtml(item.date)}</time><h3>${escapeHtml(item.title)}</h3>${item.desc ? `<p>${escapeHtml(item.desc)}</p>` : ''}</div></li>`).join('')}</ol>`;
             node.data = { hName: 'div', hProperties: {} };
             node.children = [{ type: 'html', value: html }];
             break;
@@ -155,9 +155,9 @@ export function processBlockDirective(node, options = {}) {
             const uid = `tabs-${Math.random().toString(36).slice(2, 7)}`;
             const navHtml = tabs.map((t, i) => {
                 const isActive = i === 0 ? 'md-tab-active' : '';
-                const colorStyle = t.color ? ` style="--tab-active-color:${t.color}"` : '';
+                const colorStyle = t.color ? ` style="--tab-active-color:${escapeHtml(t.color)}"` : '';
                 const href = `${uid}-pane-${i}`;
-                return `<a href="#${href}" role="tab" aria-selected="${i === 0 ? 'true' : 'false'}" class="md-tab-btn ${isActive}"${colorStyle} data-tab-index="${i}" data-tabs-id="${uid}">${t.label}</a>`;
+                return `<a href="#${href}" role="tab" aria-selected="${i === 0 ? 'true' : 'false'}" class="md-tab-btn ${isActive}"${colorStyle} data-tab-index="${i}" data-tabs-id="${uid}">${escapeHtml(t.label)}</a>`;
             }).join('');
             const paneEls = tabs.map((t, i) => {
                 const isVisible = i === 0 ? 'md-tab-visible' : '';
@@ -186,9 +186,9 @@ export function processBlockDirective(node, options = {}) {
             const footer = attrs.footer || '';
             node.data = { hName: 'div', hProperties: {} };
             node.children = [
-                { type: 'html', value: `<div class="md-directive md-directive-poetry"><div class="md-poetry-content">${title ? `<div class="md-poetry-title">${title}</div>` : ''}${(author || date) ? `<div class="md-poetry-meta">${[author, date].filter(Boolean).join(' \u00b7 ')}</div>` : ''}<div class="md-poetry-body">` },
+                { type: 'html', value: `<div class="md-directive md-directive-poetry"><div class="md-poetry-content">${title ? `<div class="md-poetry-title">${escapeHtml(title)}</div>` : ''}${(author || date) ? `<div class="md-poetry-meta">${escapeHtml([author, date].filter(Boolean).join(' \u00b7 '))}</div>` : ''}<div class="md-poetry-body">` },
                 ...node.children,
-                { type: 'html', value: `</div>${footer ? `<div class="md-poetry-footer">${footer}</div>` : ''}</div></div>` }
+                { type: 'html', value: `</div>${footer ? `<div class="md-poetry-footer">${escapeHtml(footer)}</div>` : ''}</div></div>` }
             ];
             break;
         }
@@ -199,19 +199,19 @@ export function processBlockDirective(node, options = {}) {
             visit({ type: 'root', children: node.children }, 'text', (t) => { text += t.value; });
             text = text.trim();
             const uid = `copy-${Math.random().toString(36).slice(2, 7)}`;
-            const safeText = text.replace(/"/g, '"').replace(/</g, '<').replace(/>/g, '>');
+            const safeText = escapeHtml(text);
             const copyIcon = getIconSvg('lucide:copy', 14);
-            const html = `<div class="md-directive md-directive-copy" data-md-copy="1">${label ? `<span class="md-copy-label">${label}</span>` : ''}<input id="${uid}" readonly value="${safeText}" class="md-copy-input" style="width:${Math.max(text.length * 8, 120)}px"><button class="md-copy-btn" data-copy-target="${uid}">${copyIcon}</button></div>`;
+            const html = `<div class="md-directive md-directive-copy" data-md-copy="1">${label ? `<span class="md-copy-label">${escapeHtml(label)}</span>` : ''}<input id="${uid}" readonly value="${safeText}" class="md-copy-input" style="width:${Math.max(text.length * 8, 120)}px"><button class="md-copy-btn" data-copy-target="${uid}">${copyIcon}</button></div>`;
             node.data = { hName: 'div', hProperties: {} };
             node.children = [{ type: 'html', value: html }];
             break;
         }
 
         case 'grid': {
-            const cols = attrs.cols || '';
-            const gap = attrs.gap || '16';
-            const minw = attrs.minw || '240px';
-            const bg = attrs.bg || 'card';
+            const cols = /^\d{1,2}$/.test(attrs.cols || '') ? attrs.cols : '';
+            const gap = /^\d{1,3}$/.test(attrs.gap || '') ? attrs.gap : '16';
+            const minw = safeCssValue(attrs.minw, '240px');
+            const bg = /^[a-z0-9-]+$/i.test(attrs.bg || '') ? attrs.bg : 'card';
             const cells = [];
             let currentCell = [];
             for (const child of node.children) {
@@ -258,7 +258,7 @@ export function processBlockDirective(node, options = {}) {
             let iconHtml = '';
             if (icon) {
                 if (/^https?:\/\//i.test(icon)) {
-                    iconHtml = `<img class="md-quot-icon" src="${icon}" alt="" style="height:28px;width:auto;" />`;
+                    iconHtml = `<img class="md-quot-icon" src="${escapeUrl(icon)}" alt="" style="height:28px;width:auto;" />`;
                 } else {
                     const iconifyMatch = icon.match(/^([a-z0-9-]+):([a-z0-9-]+)$/i);
                     if (iconifyMatch) {
@@ -267,13 +267,13 @@ export function processBlockDirective(node, options = {}) {
                         const svg = getIconSvg(`lucide:${icon}`, '1.75rem');
                         iconHtml = svg
                             ? `<span class="md-quot-icon">${svg}</span>`
-                            : `<span class="md-quot-icon">${icon}</span>`;
+                            : `<span class="md-quot-icon">${escapeHtml(icon)}</span>`;
                     }
                 }
             } else {
                 iconHtml = `<span class="md-quot-icon-default">${defaultIcon}</span>`;
             }
-            const html = `<div class="md-directive md-directive-quot">${iconHtml}<p class="md-quot-text">${text}</p></div>`;
+            const html = `<div class="md-directive md-directive-quot">${iconHtml}<p class="md-quot-text">${escapeHtml(text)}</p></div>`;
             node.data = { hName: 'div', hProperties: {} };
             node.children = [{ type: 'html', value: html }];
             break;
@@ -301,7 +301,7 @@ export function processBlockDirective(node, options = {}) {
             function renderIcon(value) {
                 if (!value) return '';
                 if (/^https?:\/\//i.test(value)) {
-                    return { type: 'html', value: `<img class="md-title-icon-img" src="${value}" alt="" />` };
+                    return { type: 'html', value: `<img class="md-title-icon-img" src="${escapeUrl(value)}" alt="" />` };
                 }
                 const iconifyMatch = value.match(/^([a-z0-9-]+):([a-z0-9-]+)$/i);
                 if (iconifyMatch) {
@@ -371,13 +371,13 @@ export function processBlockDirective(node, options = {}) {
             const reelChildren = node.children;
             node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-reel' } };
             node.children = [
-                { type: 'html', value: '<div class="md-reel-content"><div class="md-reel-title">' + title + '</div>' },
-                ...(author ? [{ type: 'html', value: '<div class="md-reel-meta"><span>' + author + '</span></div>' }] : []),
+                { type: 'html', value: '<div class="md-reel-content"><div class="md-reel-title">' + escapeHtml(title) + '</div>' },
+                ...(author ? [{ type: 'html', value: '<div class="md-reel-meta"><span>' + escapeHtml(author) + '</span></div>' }] : []),
                 { type: 'html', value: '<div class="md-reel-body"><div class="md-reel-main">' },
                 ...reelChildren,
                 { type: 'html', value: '</div></div>' },
-                ...(date ? [{ type: 'html', value: '<div class="md-reel-date">' + date + '</div>' }] : []),
-                { type: 'html', value: '<div class="md-reel-footer">' + footer + '</div></div>' }
+                ...(date ? [{ type: 'html', value: '<div class="md-reel-date">' + escapeHtml(date) + '</div>' }] : []),
+                { type: 'html', value: '<div class="md-reel-footer">' + escapeHtml(footer) + '</div></div>' }
             ];
             break;
         }
@@ -404,7 +404,7 @@ export function processBlockDirective(node, options = {}) {
                 } else if (currentType === 'section') {
                     sectionNodes.push(
                         h('div', { class: 'md-paper-section' }, [
-                            { type: 'html', value: '<div class="md-paper-section-title">' + currentTitle + '</div>' },
+                            { type: 'html', value: '<div class="md-paper-section-title">' + escapeHtml(currentTitle) + '</div>' },
                             h('div', { class: 'md-paper-section-content' }, currentContent)
                         ])
                     );
@@ -441,15 +441,15 @@ export function processBlockDirective(node, options = {}) {
 
             node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-paper' } };
             node.children = [
-                { type: 'html', value: '<div class="' + contentClasses.join(' ') + '"><div class="md-paper-title">' + title + '</div>' },
+                { type: 'html', value: '<div class="' + escapeHtml(contentClasses.join(' ')) + '"><div class="md-paper-title">' + escapeHtml(title) + '</div>' },
                 h('div', { class: 'md-paper-body' }, sectionNodes),
                 {
                     type: 'html', value: '<div class="md-paper-footer">' +
                         ((author || date) ? '<div class="md-paper-author-date">' +
-                            (author ? '<span class="md-paper-author">' + author + '</span>' : '') +
-                            (date ? '<span class="md-paper-date">' + date + '</span>' : '') +
+                            (author ? '<span class="md-paper-author">' + escapeHtml(author) + '</span>' : '') +
+                            (date ? '<span class="md-paper-date">' + escapeHtml(date) + '</span>' : '') +
                             '</div>' : '') +
-                        footer + '</div></div>'
+                        escapeHtml(footer) + '</div></div>'
                 }
             ];
             break;
@@ -489,11 +489,11 @@ export function processBlockDirective(node, options = {}) {
             // Inline JS: flip-clock countdown
             const js = `<script>(function(el){var t=new Date(el.dataset.date),disp=el.querySelector('.md-deadline-display'),panels=disp.querySelectorAll('.md-deadline-panel');function tick(){var d=t-Date.now();if(d<=0){disp.innerHTML='<div class="md-deadline-expired">'+el.dataset.expired+'</div>';return;}var a=Math.floor(d/864e5),b=Math.floor(d%864e5/36e5),c=Math.floor(d%36e5/6e4),e=${showSeconds ? 'Math.floor(d%6e4/1e3)' : 'null'};var vals=[a,b,c,e];for(var i=0;i<panels.length;i++){if(vals[i]===null)continue;var p=panels[i];var nv=String(vals[i]).padStart(2,'0');var st=p.querySelector('.md-deadline-static-top span');var sb=p.querySelector('.md-deadline-static-bottom span');var ft=p.querySelector('.md-deadline-flip-top span');var fb=p.querySelector('.md-deadline-flip-bottom span');var ov=st.textContent;if(ov===nv)continue;p.classList.remove('flipping');void p.offsetHeight;ft.textContent=ov;fb.textContent=nv;st.textContent=nv;sb.textContent=nv;p.classList.add('flipping');}}tick();setInterval(tick,1e3);})(document.currentScript.previousElementSibling);</script>`;
 
-            const html = `<div class="md-directive md-directive-deadline" id="${uid}" data-date="${date}" data-expired="${expiredText}">` +
-                `${title ? `<div class="md-deadline-title"><span>${title}</span></div>` : ''}` +
+            const html = `<div class="md-directive md-directive-deadline" id="${uid}" data-date="${escapeHtml(date)}" data-expired="${escapeHtml(expiredText)}">` +
+                `${title ? `<div class="md-deadline-title"><span>${escapeHtml(title)}</span></div>` : ''}` +
                 `<div class="md-deadline-display">${unitHtml}</div>` +
                 `<div class="md-deadline-meta">目标日期 ${dateStr}</div>` +
-                `${description ? `<div class="md-deadline-desc">${description}</div>` : ''}` +
+                `${description ? `<div class="md-deadline-desc">${escapeHtml(description)}</div>` : ''}` +
                 `</div>${js}`;
 
             node.data = { hName: 'div', hProperties: {} };

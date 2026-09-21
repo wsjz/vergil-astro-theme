@@ -42,9 +42,40 @@ export function getIconSvg(name, size = '1em') {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${width} ${height}" fill="currentColor">${body}</svg>`;
 }
 
-/** Resolve color name to CSS value */
+export const DEFAULT_COLOR = 'var(--accent-color,#4a7c59)';
+
+/** Whitelist of CSS color forms accepted from user-authored attributes */
+const SAFE_COLOR_RE = /^(#[0-9a-f]{3,8}|[a-z]+|(rgb|rgba|hsl|hsla)\(\s*[0-9a-z.,%\/\s+-]*\)|var\(\s*--[a-z0-9-]+\s*(,\s*[^;<>"'()]*)?\))$/i;
+
+/** Resolve color name to CSS value, rejecting anything that could break out of a declaration */
 export function resolveColor(c) {
-    return NAMED_COLORS[c] || c || 'var(--accent-color,#4a7c59)';
+    if (NAMED_COLORS[c]) return NAMED_COLORS[c];
+    if (typeof c !== 'string') return DEFAULT_COLOR;
+    const v = c.trim();
+    if (!v) return DEFAULT_COLOR;
+    return SAFE_COLOR_RE.test(v) ? v : DEFAULT_COLOR;
+}
+
+/** Reject CSS values that could terminate the declaration or the attribute */
+export function safeCssValue(v, fallback = '') {
+    if (typeof v !== 'string') return fallback;
+    const value = v.trim();
+    if (!value) return fallback;
+    return /[;<>"'{}\\]|@import|javascript:|expression\(/i.test(value) ? fallback : value;
+}
+
+/** Restrict URLs to safe schemes so href/src cannot execute script */
+export function safeUrl(url, fallback = '') {
+    if (typeof url !== 'string') return fallback;
+    const v = url.trim();
+    if (!v) return fallback;
+    // eslint-disable-next-line no-control-regex
+    const scheme = v.replace(/[\u0000-\u0020]/g, '').match(/^([a-z][a-z0-9+.-]*):/i);
+    if (!scheme) return v; // relative, protocol-relative, hash or query
+    const proto = scheme[1].toLowerCase();
+    if (proto === 'http' || proto === 'https' || proto === 'mailto' || proto === 'tel') return v;
+    if (proto === 'data' && /^data:image\/(png|jpe?g|gif|webp|avif|svg\+xml);/i.test(v)) return v;
+    return fallback;
 }
 
 /** Create a hast container node */
@@ -56,13 +87,20 @@ export function h(tagName, properties, children) {
     };
 }
 
-/** HTML escape */
+/** HTML escape, safe for both text nodes and quoted attribute values */
 export function escapeHtml(text) {
-    return text
+    if (text === null || text === undefined) return '';
+    return String(text)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/** Escape a URL for use inside a quoted HTML attribute */
+export function escapeUrl(url, fallback = '') {
+    return escapeHtml(safeUrl(url, fallback));
 }
 
 /** Serialize AST nodes to HTML string */
@@ -76,12 +114,12 @@ export function serializeToHtml(nodes) {
             case 'strong': return `<strong>${serializeToHtml(node.children)}</strong>`;
             case 'emphasis': return `<em>${serializeToHtml(node.children)}</em>`;
             case 'delete': return `<del>${serializeToHtml(node.children)}</del>`;
-            case 'link': return `<a href="${node.url || '#'}">${serializeToHtml(node.children)}</a>`;
-            case 'image': return `<img src="${node.url || ''}" alt="${node.alt || ''}" loading="lazy" />`;
+            case 'link': return `<a href="${escapeUrl(node.url, '#')}">${serializeToHtml(node.children)}</a>`;
+            case 'image': return `<img src="${escapeUrl(node.url)}" alt="${escapeHtml(node.alt || '')}" loading="lazy" />`;
             case 'break': return '<br>';
             case 'paragraph': return `<p>${serializeToHtml(node.children)}</p>`;
             case 'heading': return `<h${node.depth || 2}>${serializeToHtml(node.children)}</h${node.depth || 2}>`;
-            case 'code': return `<pre><code class="language-${node.lang || ''}">${escapeHtml(node.value || '')}</code></pre>`;
+            case 'code': return `<pre><code class="language-${escapeHtml(node.lang || '')}">${escapeHtml(node.value || '')}</code></pre>`;
             case 'blockquote': return `<blockquote>${serializeToHtml(node.children)}</blockquote>`;
             case 'list': {
                 const tag = node.ordered ? 'ol' : 'ul';

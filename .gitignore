@@ -28,3 +28,9 @@ pnpm-debug.log*
 # worktrees
 .worktrees/
 package-lock.json
+
+# pnpm build-script approval file, regenerated locally
+pnpm-workspace.yaml
+
+# local scratch notes
+roadmap.md

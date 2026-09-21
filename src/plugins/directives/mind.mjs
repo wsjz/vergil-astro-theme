@@ -61,7 +61,11 @@ ${markdown}
     if (window.__markmapAutoloaderLoaded) return;
     window.__markmapAutoloaderLoaded = true;
     var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/markmap-autoloader@0.17.0';
+    // Pinned to the exact published file (not the bare package path, which the CDN
+    // re-minifies on the fly) so integrity can verify the bytes we expect.
+    s.src = 'https://cdn.jsdelivr.net/npm/markmap-autoloader@0.17.0/dist/index.js';
+    s.integrity = 'sha384-pUqJuHzQ7bXIUItjDQCTIFV49r14dRr4H7T6ojJQCxy8GHSuARuwucheqOlNCJwB';
+    s.crossOrigin = 'anonymous';
     s.async = true;
     document.head.appendChild(s);
   }

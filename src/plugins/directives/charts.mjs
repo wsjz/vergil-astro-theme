@@ -1,5 +1,5 @@
 import { visit } from 'unist-util-visit';
-import { escapeHtml } from './shared.mjs';
+import { escapeHtml, safeCssValue } from './shared.mjs';
 
 /** Extract raw text content from directive children */
 function extractText(children) {
@@ -82,14 +82,14 @@ export function processChartDirective(node) {
                     class: 'md-directive md-directive-echart',
                     'data-echart': '1',
                     'data-echart-id': uid,
-                    style: `--echart-height:${height}`,
+                    style: `--echart-height:${safeCssValue(height, '400px')}`,
                 },
             };
             const safeOption = escapeHtml(JSON.stringify(option));
             node.children = [
                 {
                     type: 'html',
-                    value: `<div class="md-echart-container" style="height:${height}" data-option="${safeOption}"></div>`,
+                    value: `<div class="md-echart-container" style="height:${escapeHtml(safeCssValue(height, '400px'))}" data-option="${safeOption}"></div>`,
                 },
             ];
             break;

@@ -1,4 +1,4 @@
-import { getIconSvg, resolveColor, escapeHtml, h, isLightBg, labelTextColor, getScreenshotUrl } from './shared.mjs';
+import { getIconSvg, resolveColor, escapeHtml, escapeUrl, safeCssValue, h, isLightBg, labelTextColor, getScreenshotUrl } from './shared.mjs';
 import QRCode from 'qrcode-svg';
 
 export function processCardDirective(node, options = {}) {
@@ -8,8 +8,11 @@ export function processCardDirective(node, options = {}) {
     switch (node.name) {
         case 'ghcard': {
             const type = attrs.type || 'repo';
-            const repo = attrs.repo || '';
-            const user = attrs.user || '';
+            const rawRepo = attrs.repo || '';
+            const rawUser = attrs.user || '';
+            // GitHub owner/repo and login names only, so nothing can break out of the URL or attribute
+            const repo = /^[\w.-]+\/[\w.-]+$/.test(rawRepo) ? rawRepo : '';
+            const user = /^[\w-]+$/.test(rawUser) ? rawUser : '';
 
             if (type === 'repo' && repo) {
                 const apiUrl = `https://api.github.com/repos/${repo}`;
@@ -88,7 +91,7 @@ export function processCardDirective(node, options = {}) {
                 node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">Please provide a group attribute, e.g. :::sites{group="friends"}</p>' }];
             } else if (items.length === 0) {
                 node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-sites' } };
-                node.children = [{ type: 'html', value: `<p style="color:var(--text-secondary);font-size:0.875rem;">Group "${group}" has no site data</p>` }];
+                node.children = [{ type: 'html', value: `<p style="color:var(--text-secondary);font-size:0.875rem;">Group "${escapeHtml(group)}" has no site data</p>` }];
             } else {
                 const cells = items.map(item => {
                     const cover = item.cover || getScreenshotUrl(item.url, screenshotService);
@@ -100,19 +103,19 @@ export function processCardDirective(node, options = {}) {
                             item.labels.map(l => {
                                 const color = l.color || '#3b82f6';
                                 const textColor = labelTextColor(color);
-                                return `<span class="md-sites-label" style="background:${color};color:${textColor}">${l.name}</span>`;
+                                return `<span class="md-sites-label" style="background:${escapeHtml(resolveColor(color))};color:${escapeHtml(textColor)}">${escapeHtml(l.name)}</span>`;
                             }).join('') +
                             '</div>';
                     }
                     return `<div class="md-sites-cell">` +
-                        `<a class="md-sites-link" href="${item.url}" target="_blank" rel="external nofollow noopener noreferrer">` +
+                        `<a class="md-sites-link" href="${escapeUrl(item.url, '#')}" target="_blank" rel="external nofollow noopener noreferrer">` +
                         `<div class="md-sites-cover">` +
-                        `<img src="${cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.add('md-sites-cover-fallback');" />` +
+                        `<img src="${escapeUrl(cover)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.style.display='none';this.parentElement.classList.add('md-sites-cover-fallback');" />` +
                         `</div>` +
                         `<div class="md-sites-info">` +
-                        `<img class="md-sites-icon" src="${icon}" alt="" loading="lazy" onerror="this.style.display='none'" />` +
-                        `<span class="md-sites-title">${item.title}</span>` +
-                        `<span class="md-sites-desc">${desc}</span>` +
+                        `<img class="md-sites-icon" src="${escapeUrl(icon)}" alt="" loading="lazy" onerror="this.style.display='none'" />` +
+                        `<span class="md-sites-title">${escapeHtml(item.title)}</span>` +
+                        `<span class="md-sites-desc">${escapeHtml(desc)}</span>` +
                         `</div>` +
                         labelsHtml +
                         `</a>` +
@@ -137,28 +140,28 @@ export function processCardDirective(node, options = {}) {
                 node.children = [{ type: 'html', value: '<p style="color:var(--text-secondary);font-size:0.875rem;">Please provide a group attribute, e.g. :::posters{group="movies"}</p>' }];
             } else if (items.length === 0) {
                 node.data = { hName: 'div', hProperties: { class: 'md-directive md-directive-posters' } };
-                node.children = [{ type: 'html', value: `<p style="color:var(--text-secondary);font-size:0.875rem;">Group "${group}" has no poster data</p>` }];
+                node.children = [{ type: 'html', value: `<p style="color:var(--text-secondary);font-size:0.875rem;">Group "${escapeHtml(group)}" has no poster data</p>` }];
             } else {
                 const cells = items.map(item => {
                     const cover = item.cover || item.icon || '';
                     const title = item.title || '';
                     return `<div class="md-posters-cell">` +
                         (item.url
-                            ? `<a class="md-posters-link" href="${item.url}" target="_blank" rel="external nofollow noopener noreferrer">`
+                            ? `<a class="md-posters-link" href="${escapeUrl(item.url, '#')}" target="_blank" rel="external nofollow noopener noreferrer">`
                             : `<div class="md-posters-link">`) +
                         `<div class="md-posters-cover">` +
                         (cover
-                            ? `<img src="${cover}" alt="${title}" loading="lazy" onerror="this.style.display='none'" />`
+                            ? `<img src="${escapeUrl(cover)}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.style.display='none'" />`
                             : '') +
                         `</div>` +
                         `<div class="md-posters-meta">` +
-                        (title ? `<span class="md-posters-caption">${title}</span>` : '') +
+                        (title ? `<span class="md-posters-caption">${escapeHtml(title)}</span>` : '') +
                         `</div>` +
                         (item.url ? `</a>` : `</div>`) +
                         `</div>`;
                 }).join('');
 
-                const html = `<div class="md-directive md-directive-posters" data-ratio="${ratio}"${cols ? ` data-cols="${cols}"` : ''}><div class="md-posters-grid">${cells}</div></div>`;
+                const html = `<div class="md-directive md-directive-posters" data-ratio="${escapeHtml(ratio)}"${cols ? ` data-cols="${escapeHtml(cols)}"` : ''}><div class="md-posters-grid">${cells}</div></div>`;
                 node.data = { hName: 'div', hProperties: {} };
                 node.children = [{ type: 'html', value: html }];
             }
@@ -230,9 +233,9 @@ export function processCardDirective(node, options = {}) {
                         segCopyText = c.value;
                     }
                 }
-                const safeSegCopyText = segCopyText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                const leftLabel = seg.left ? `<span class="md-segment-label-left">${seg.left}</span>` : '';
-                const rightHtml = seg.right ? `<span class="md-segment-right">${seg.right}</span>` : '';
+                const safeSegCopyText = escapeHtml(segCopyText);
+                const leftLabel = seg.left ? `<span class="md-segment-label-left">${escapeHtml(seg.left)}</span>` : '';
+                const rightHtml = seg.right ? `<span class="md-segment-right">${escapeHtml(seg.right)}</span>` : '';
                 const copyHtml = segCopyText ? `<button class="md-copy-btn md-segment-copy" data-copy-target="${segUid}" aria-label="Copy">${copyIcon}</button>` : '';
                 const metaHtml = (rightHtml || copyHtml) ? `<div class="md-segment-meta">${rightHtml}${copyHtml}</div>` : '';
                 const headerHtml = (leftLabel || metaHtml) ? `<div class="md-segment-header">${leftLabel}${metaHtml}</div>` : '';
@@ -277,28 +280,30 @@ export function processCardDirective(node, options = {}) {
 
             if (bgImage) {
                 cardClasses.push('md-yc-has-image');
-                cardClasses.push(`md-yc-bg-mode-${bgMode}`);
-                const safeBgImage = bgImage.replace(/'/g, "\\'");
-                cardStyle += `--yc-bg-image:url('${safeBgImage}');`;
+                cardClasses.push(`md-yc-bg-mode-${/^[a-z0-9-]+$/i.test(bgMode) ? bgMode : 'full'}`);
+                const safeBgImage = safeCssValue(bgImage).replace(/[()\s]/g, encodeURIComponent);
+                if (safeBgImage) cardStyle += `--yc-bg-image:url('${safeBgImage}');`;
                 if (bgMode === 'full' && bgOverlay !== 'none') {
                     const overlayMap = {
                         dark: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.7) 100%)',
                         light: 'linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.7) 100%)'
                     };
-                    const overlay = overlayMap[bgOverlay] || `linear-gradient(${bgOverlay}, ${bgOverlay})`;
+                    const safeOverlay = resolveColor(bgOverlay);
+                    const overlay = overlayMap[bgOverlay] || `linear-gradient(${safeOverlay}, ${safeOverlay})`;
                     cardStyle += `--yc-bg-overlay:${overlay};`;
                 }
             } else if (bgGradient) {
                 cardClasses.push('md-yc-has-gradient');
-                const gradient = /^(linear|radial|conic)-gradient/.test(bgGradient.trim()) ? bgGradient : `linear-gradient(${bgGradient})`;
-                cardStyle += `--yc-bg-gradient:${gradient};`;
+                const safeGradient = safeCssValue(bgGradient);
+                const gradient = /^(linear|radial|conic)-gradient/.test(safeGradient) ? safeGradient : `linear-gradient(${safeGradient})`;
+                if (safeGradient) cardStyle += `--yc-bg-gradient:${gradient};`;
             } else if (bgPattern) {
                 const validPatterns = ['diagonal', 'dots', 'grid', 'grain'];
                 const pattern = validPatterns.includes(bgPattern) ? bgPattern : 'diagonal';
                 cardClasses.push('md-yc-has-pattern', `md-yc-pattern-${pattern}`);
             } else if (bgColor) {
                 cardClasses.push('md-yc-has-color');
-                cardStyle += `--yc-bg-color:${bgColor};`;
+                cardStyle += `--yc-bg-color:${resolveColor(bgColor)};`;
             }
 
             const textAttr = attrs.text || 'auto';
@@ -312,7 +317,7 @@ export function processCardDirective(node, options = {}) {
                 else if (bgColor) isLight = isLightBg(bgColor);
                 else isLight = true;
             } else if (/^#/.test(textAttr)) {
-                cardStyle += `--yc-text:${textAttr};`;
+                cardStyle += `--yc-text:${resolveColor(textAttr)};`;
                 isLight = true;
             } else {
                 isLight = true;
@@ -324,13 +329,13 @@ export function processCardDirective(node, options = {}) {
 
             const fontName = attrs['font-name'] || '';
             const fontBody = attrs['font-body'] || '';
-            if (fontName) cardStyle += `--yc-font-name:${fontName};`;
-            if (fontBody) cardStyle += `--yc-font-body:${fontBody};`;
+            if (safeCssValue(fontName)) cardStyle += `--yc-font-name:${safeCssValue(fontName)};`;
+            if (safeCssValue(fontBody)) cardStyle += `--yc-font-body:${safeCssValue(fontBody)};`;
 
             const nameColor = attrs['name-color'] || '';
             const roleColor = attrs['role-color'] || '';
-            if (nameColor) cardStyle += `--yc-name-color:${nameColor};`;
-            if (roleColor) cardStyle += `--yc-role-color:${roleColor};`;
+            if (nameColor) cardStyle += `--yc-name-color:${resolveColor(nameColor)};`;
+            if (roleColor) cardStyle += `--yc-role-color:${resolveColor(roleColor)};`;
 
             const qrAttr = attrs.qr || '';
             let qrHtml = '';
@@ -345,7 +350,7 @@ export function processCardDirective(node, options = {}) {
             }
 
             const accentColor = attrs.accent || '';
-            if (accentColor) cardStyle += `--yc-accent:${accentColor};`;
+            if (accentColor) cardStyle += `--yc-accent:${resolveColor(accentColor)};`;
 
             const iconAttr = attrs.icon || '';
             let accentHtml = '<span class="md-yc-accent-line"></span>';
