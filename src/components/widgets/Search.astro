@@ -60,6 +60,12 @@ const searchDataUrl = '/search-data.json';
     </dialog>
 </div>
 
+<script>
+    // Bundled by Vite so fuse.js is served from this site; the chunk is still
+    // fetched lazily, only when the search dialog is first used.
+    window.__loadFuse = () => import('fuse.js').then((m) => m.default);
+</script>
+
 <script is:inline data-search-url={searchDataUrl}>
 (function() {
     const script = document.currentScript;
@@ -114,7 +120,7 @@ const searchDataUrl = '/search-data.json';
         try {
             const response = await fetch(S.searchUrl);
             S.searchData = await response.json();
-            const Fuse = (await import('https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.mjs')).default;
+            const Fuse = await window.__loadFuse();
             S.fuse = new Fuse(S.searchData, {
                 keys: ['title', 'description', 'content', 'tags'],
                 threshold: 0.35,

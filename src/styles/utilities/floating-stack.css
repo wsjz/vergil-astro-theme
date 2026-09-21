@@ -1,0 +1,35 @@
+/**
+ * Floating stack — shared slots for the fixed elements in the bottom-right corner.
+ *
+ * Every floating control (back-to-top, floating audio player, mobile TOC trigger)
+ * claims one slot instead of hard-coding its own offset, so they can no longer
+ * land on top of each other when several features are enabled at once.
+ * Slot 1 is closest to the corner; each further slot clears the one below it.
+ */
+:root {
+    --floating-gutter-x: 1rem;
+    --floating-gutter-y: 1.5rem;
+    --floating-size: 2.5rem;
+    --floating-gap: 0.75rem;
+
+    --floating-slot-1: var(--floating-gutter-y);
+    --floating-slot-2: calc(var(--floating-gutter-y) + 1 * (var(--floating-size) + var(--floating-gap)));
+    --floating-slot-3: calc(var(--floating-gutter-y) + 2 * (var(--floating-size) + var(--floating-gap)));
+    --floating-slot-4: calc(var(--floating-gutter-y) + 3 * (var(--floating-size) + var(--floating-gap)));
+}
+
+.floating-slot-1 {
+    bottom: var(--floating-slot-1);
+}
+
+.floating-slot-2 {
+    bottom: var(--floating-slot-2);
+}
+
+.floating-slot-3 {
+    bottom: var(--floating-slot-3);
+}
+
+.floating-slot-4 {
+    bottom: var(--floating-slot-4);
+}

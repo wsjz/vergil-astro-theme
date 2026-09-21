@@ -5,10 +5,11 @@ const DOWNLOAD_ICON = `<svg class="icon" style="width:1em;height:1em;vertical-al
 function escapeHtml(text) {
     if (!text) return '';
     return String(text)
-        .replace(/&/g, '&')
-        .replace(/</g, '<')
-        .replace(/>/g, '>')
-        .replace(/"/g, '"');
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 function extractGalleryImages(children) {
