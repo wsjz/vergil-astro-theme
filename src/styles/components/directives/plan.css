@@ -918,7 +918,7 @@
 
 @keyframes plan-pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    50% { opacity: 0.72; }
 }
 
 /* ============================================================
@@ -1284,7 +1284,7 @@
 }
 
 .md-plan-ebbinghaus__node:hover {
-    transform: scale(1.15);
+    transform: scale(1.08);
 }
 
 /* Node statuses */

@@ -117,7 +117,7 @@ img {
 
 .md-directive-image .md-image-download:hover {
     background: rgba(0, 0, 0, 0.5);
-    transform: scale(1.1);
+    transform: scale(1.06);
 }
 
 .md-directive-image .md-image-download:active {
@@ -206,7 +206,7 @@ img {
 }
 
 .md-directive-gallery .md-gallery-cell:hover img {
-    transform: scale(1.1);
+    transform: scale(1.03);
 }
 
 .md-directive-gallery .md-gallery-meta {

@@ -87,11 +87,37 @@ html {
     scroll-behavior: smooth;
 }
 
-/* ── 按钮/链接按压反馈 ── */
+/* ── 按压反馈 ──
+   缩放只给真正的按钮。此前这条规则同时命中所有 <a>，
+   导致整块卡片链接和正文里的文字链接被点击时一起缩放、文字发虚。 */
 button:active,
+[role='button']:active,
+input[type='button']:active,
+input[type='submit']:active,
+input[type='reset']:active {
+    transform: scale(0.97);
+    transition: transform 0.08s ease-out;
+}
+
+/* 链接改用不会引起重排的透明度反馈，卡片和正文链接都能被确认点到 */
 a:active {
-    transform: scale(0.96);
-    transition: transform 0.1s ease;
+    opacity: 0.72;
+    transition: opacity 0.06s ease-out;
+}
+
+/* ── 可点击卡片 ──
+   Tailwind 的 -translate-y-* 走的是 translate 属性而非 transform，
+   必须显式列进 transition，否则悬停抬升和阴影会瞬间跳变。
+   按下时回落到原位，形成「抬起—按下」的完整反馈。 */
+.card-interactive {
+    transition:
+        translate 0.2s ease-out,
+        box-shadow 0.2s ease-out;
+}
+
+.card-interactive:active {
+    translate: 0 0;
+    transition-duration: 0.07s;
 }
 
 /* ── 图片懒加载淡入 ── */
@@ -106,33 +132,33 @@ img[loading="lazy"].img-loaded {
 /* ── 滚动显现（reveal）── */
 .reveal {
     opacity: 0;
-    transform: translateY(16px);
-    transition: all 0.2s ease-out;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
 }
 .reveal.visible {
     opacity: 1;
     transform: translateY(0);
 }
-.reveal-delay-1 { transition-delay: 0.06s; }
-.reveal-delay-2 { transition-delay: 0.12s; }
-.reveal-delay-3 { transition-delay: 0.18s; }
-.reveal-delay-4 { transition-delay: 0.24s; }
-.reveal-delay-5 { transition-delay: 0.30s; }
-.reveal-delay-6 { transition-delay: 0.36s; }
-.reveal-delay-7 { transition-delay: 0.42s; }
-.reveal-delay-8 { transition-delay: 0.48s; }
+.reveal-delay-1 { transition-delay: 0.02s; }
+.reveal-delay-2 { transition-delay: 0.04s; }
+.reveal-delay-3 { transition-delay: 0.06s; }
+.reveal-delay-4 { transition-delay: 0.08s; }
+.reveal-delay-5 { transition-delay: 0.10s; }
+.reveal-delay-6 { transition-delay: 0.12s; }
+.reveal-delay-7 { transition-delay: 0.14s; }
+.reveal-delay-8 { transition-delay: 0.16s; }
 
 /* nth-child 自动 stagger */
 .reveal:nth-child(1) { transition-delay: 0.00s; }
-.reveal:nth-child(2) { transition-delay: 0.06s; }
-.reveal:nth-child(3) { transition-delay: 0.12s; }
-.reveal:nth-child(4) { transition-delay: 0.18s; }
-.reveal:nth-child(5) { transition-delay: 0.24s; }
-.reveal:nth-child(6) { transition-delay: 0.30s; }
-.reveal:nth-child(7) { transition-delay: 0.36s; }
-.reveal:nth-child(8) { transition-delay: 0.42s; }
-.reveal:nth-child(9) { transition-delay: 0.48s; }
-.reveal:nth-child(10) { transition-delay: 0.54s; }
+.reveal:nth-child(2) { transition-delay: 0.02s; }
+.reveal:nth-child(3) { transition-delay: 0.04s; }
+.reveal:nth-child(4) { transition-delay: 0.06s; }
+.reveal:nth-child(5) { transition-delay: 0.08s; }
+.reveal:nth-child(6) { transition-delay: 0.10s; }
+.reveal:nth-child(7) { transition-delay: 0.12s; }
+.reveal:nth-child(8) { transition-delay: 0.14s; }
+.reveal:nth-child(9) { transition-delay: 0.16s; }
+.reveal:nth-child(10) { transition-delay: 0.18s; }
 
 /* ── 侧边栏标题滚动── */
 .title-scroll {
@@ -141,8 +167,13 @@ img[loading="lazy"].img-loaded {
     white-space: nowrap;
 }
 
+/* 只在悬停/聚焦时滚动，避免长标题在页面静止时一直跑 */
 .title-scroll-text {
     display: inline-block;
+}
+
+.title-scroll:hover .title-scroll-text,
+.title-scroll:focus-within .title-scroll-text {
     will-change: transform;
     animation: title-scroll-loop 5.5s linear infinite;
 }
@@ -164,4 +195,38 @@ img[loading="lazy"].img-loaded {
 @keyframes skeleton-shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* ── 减少动效 ──
+   系统开启「减少动态效果」时，关掉装饰性动画、过渡和平滑滚动。
+   保留内容可见性：reveal 直接落到终态，避免依赖 JS 才显示。 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0s !important;
+        scroll-behavior: auto !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+
+    .reveal,
+    .reveal.visible {
+        opacity: 1;
+        transform: none;
+    }
+
+    img[loading='lazy'] {
+        opacity: 1;
+    }
+
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none;
+    }
 }

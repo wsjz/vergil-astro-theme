@@ -15,7 +15,7 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
 
 <button
     id="back-to-top-btn"
-    class="floating-slot-1 fixed right-4 xl:right-6 z-50 flex items-center justify-center w-10 h-10 bg-card/90 backdrop-blur-sm border border-light/60 rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/40 hover:shadow-xl hover:scale-110 transition-all duration-300 opacity-0 invisible translate-y-3"
+    class="floating-slot-1 fixed right-4 xl:right-6 z-50 flex items-center justify-center w-10 h-10 bg-card/90 backdrop-blur-sm border border-light/60 rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/40 hover:shadow-md hover:scale-[1.04] transition-[transform,box-shadow,color,border-color] duration-150 opacity-0 invisible translate-y-3"
     aria-label="回到顶部"
     title="回到顶部"
 >
@@ -28,7 +28,7 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
     <>
         <button
             id="floating-toc-btn"
-            class="floating-slot-3 fixed right-4 xl:right-[max(1rem,calc(2%+320px))] z-40 xl:hidden flex items-center justify-center w-10 h-10 bg-card/90 backdrop-blur-sm border border-light/60 rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/40 hover:shadow-xl hover:scale-110 transition-all duration-300"
+            class="floating-slot-3 fixed right-4 xl:right-[max(1rem,calc(2%+320px))] z-40 xl:hidden flex items-center justify-center w-10 h-10 bg-card/90 backdrop-blur-sm border border-light/60 rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/40 hover:shadow-md hover:scale-[1.04] transition-[transform,box-shadow,color,border-color] duration-150"
             aria-label="Open TOC"
             aria-expanded="false"
         >

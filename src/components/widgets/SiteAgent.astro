@@ -22,7 +22,7 @@ const hasCharacter = hasModel;
         data-rive-src={riveSrc}
         data-live2d-model={live2dModelPath}
     >
-        <div id="agent-bubble" class="agent-bubble pointer-events-auto rounded-2xl rounded-br-sm bg-card/30 border border-light/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.12),0_2px_8px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.4),0_2px_8px_-2px_rgba(0,0,0,0.2)] opacity-0 translate-y-2 transition-all duration-500 scale-95 origin-bottom-right backdrop-blur-lg overflow-hidden">
+        <div id="agent-bubble" class="agent-bubble pointer-events-auto rounded-2xl rounded-br-sm bg-card/30 border border-light/60 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.12),0_2px_8px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.4),0_2px_8px_-2px_rgba(0,0,0,0.2)] opacity-0 translate-y-2 transition-[opacity,transform] duration-200 scale-[0.98] origin-bottom-right backdrop-blur-lg overflow-hidden">
             <!-- 头部横条 -->
             <div class="flex items-center gap-2 px-4 pt-3 pb-2 border-b border-light/40">
                 <span class="text-[11px] font-medium text-secondary tracking-wide select-none">{agentName}</span>
@@ -91,19 +91,19 @@ const hasCharacter = hasModel;
         }
         #agent-root[data-agent-collapsed="true"] .agent-bubble {
             opacity: 0;
-            transform: translateY(8px) scale(0.95);
+            transform: translateY(6px) scale(0.98);
             pointer-events: none;
         }
 
         #agent-character,
         #agent-mini-trigger {
-            animation: agent-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            animation: agent-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
             animation-delay: 0.8s;
         }
         @keyframes agent-enter {
             from {
                 opacity: 0;
-                transform: translateY(20px) scale(0.8);
+                transform: translateY(8px) scale(0.98);
             }
             to {
                 opacity: 1;
@@ -116,19 +116,12 @@ const hasCharacter = hasModel;
             display: none;
         }
 
+        /* 静态阴影：原先是 4s 常驻呼吸循环，且逐帧重绘 box-shadow 成本较高 */
         .agent-bubble {
-            animation: bubble-breathe 4s ease-in-out infinite;
-        }
-        @keyframes bubble-breathe {
-            0%, 100% { box-shadow: 0 8px 32px -8px rgba(0,0,0,0.12), 0 2px 8px -2px rgba(0,0,0,0.06); }
-            50% { box-shadow: 0 12px 40px -8px rgba(0,0,0,0.16), 0 4px 12px -2px rgba(0,0,0,0.08); }
+            box-shadow: 0 8px 32px -8px rgba(0,0,0,0.12), 0 2px 8px -2px rgba(0,0,0,0.06);
         }
         .dark .agent-bubble {
-            animation: bubble-breathe-dark 4s ease-in-out infinite;
-        }
-        @keyframes bubble-breathe-dark {
-            0%, 100% { box-shadow: 0 8px 32px -8px rgba(0,0,0,0.4), 0 2px 8px -2px rgba(0,0,0,0.2); }
-            50% { box-shadow: 0 12px 40px -8px rgba(0,0,0,0.5), 0 4px 12px -2px rgba(0,0,0,0.25); }
+            box-shadow: 0 8px 32px -8px rgba(0,0,0,0.4), 0 2px 8px -2px rgba(0,0,0,0.2);
         }
     </style>
 
