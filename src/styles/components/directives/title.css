@@ -59,13 +59,13 @@
 }
 
 .md-title-shadow:hover {
-    transform: translate(-3px, -3px);
+    transform: translate(-2px, -2px);
 }
 
 .md-title-shadow:hover .md-title-text::after {
     opacity: 0.5;
-    filter: blur(6px);
-    transform: translate(calc(-50% - 3px), -2px) scale(1.12, 1.3);
+    filter: blur(3px);
+    transform: translate(calc(-50% - 2px), -1px) scale(1.04);
 }
 
 /* quote style */
