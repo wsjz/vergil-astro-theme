@@ -17,9 +17,12 @@
         --tw-prose-td-borders:  var(--border-color-light);
     }
 
+    /* 正文字号。根元素被压到 90%，所以 1rem = 14.4px，
+       原先的 0.9375rem 只有 13.5px，中文长文读着吃力。
+       这里抬到约 15.3px / 16.2px。 */
     .prose {
         font-family: var(--font-body, var(--font-sans));
-        font-size: 0.9375rem;
+        font-size: 1.0625rem;
         line-height: 1.8;
         color: var(--text-main);
         overflow-x: auto;
@@ -27,12 +30,12 @@
 
     .prose.prose-lg,
     .sm\:prose-lg {
-        font-size: 0.9375rem;
+        font-size: 1.0625rem;
     }
 
     @media (min-width: 640px) {
         .sm\:prose-lg {
-            font-size: 1rem;
+            font-size: 1.125rem;
             line-height: 1.85;
         }
     }
@@ -219,5 +222,30 @@
         text-align: center;
         margin-top: 0.5rem;
         letter-spacing: 0.01em;
+    }
+}
+
+/* 标题锚点：平时不显形，hover 或键盘聚焦时出现 */
+@layer utilities {
+    .prose :is(h2, h3, h4) {
+        scroll-margin-top: 4.5rem;
+    }
+
+    .heading-anchor {
+        margin-left: 0.4em;
+        color: var(--text-muted);
+        opacity: 0;
+        text-decoration: none;
+        vertical-align: middle;
+        transition: opacity 0.15s ease-out, color 0.15s ease-out;
+    }
+
+    :is(h2, h3, h4):hover > .heading-anchor,
+    .heading-anchor:focus-visible {
+        opacity: 1;
+    }
+
+    .heading-anchor:hover {
+        color: var(--accent-color);
     }
 }

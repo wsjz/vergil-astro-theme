@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+@import './base/tokens.css';
 @import './base/theme.css';
 @import './base/typography.css';
 @import './components/directives.css';

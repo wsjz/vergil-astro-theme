@@ -69,6 +69,8 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
 </aside>
 
 <script>
+    import { createScrollSpy } from '../../scripts/toc-scrollspy.js';
+
     function initTocHighlight() {
         const headings = document.querySelectorAll('h2[id], h3[id], h4[id]');
         const tocLinks = document.querySelectorAll('.toc-sidebar a[href^="#"]');
@@ -103,50 +105,15 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
             });
         });
 
-        let lastActiveId: string | null = null;
 
-        function getScrollOffset() {
-            const header = document.getElementById('top-nav-header');
-            const toolbar = document.getElementById('floating-toolbar');
-            return (header ? header.offsetHeight : 56) + (toolbar ? toolbar.offsetHeight : 0) + 16;
-        }
-
-        function updateActiveHeading() {
-            if (isClickScrolling) return;
-
-            const offset = getScrollOffset();
-            let activeHeading: Element | null = null;
-            headings.forEach(heading => {
-                const rect = heading.getBoundingClientRect();
-                if (rect.top <= offset) {
-                    activeHeading = heading;
-                }
-            });
-
-            if (!activeHeading) return;
-            const id = activeHeading.getAttribute('id');
-            if (!id || id === lastActiveId) return;
-            lastActiveId = id;
-
-            tocLinks.forEach(l => l.classList.remove('toc-active'));
-            const activeLink = document.querySelector(`.toc-sidebar a[href="#${id}"]`);
-            if (!activeLink) return;
-            activeLink.classList.add('toc-active');
-            activeLink.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
-        let ticking = false;
-        const onScroll = () => {
-            if (!ticking) {
-                requestAnimationFrame(() => {
-                    updateActiveHeading();
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        updateActiveHeading();
+        createScrollSpy({
+            getHeadings: () => headings,
+            resolveLink: (id) => document.querySelector(`.toc-sidebar a[href="#${id}"]`),
+            activate: (link) => link.classList.add('toc-active'),
+            deactivateAll: () => tocLinks.forEach(l => l.classList.remove('toc-active')),
+            shouldSkip: () => isClickScrolling,
+            handlerKey: '_sidebarTocScrollHandler',
+        });
     }
 
     function initTocToggle() {
