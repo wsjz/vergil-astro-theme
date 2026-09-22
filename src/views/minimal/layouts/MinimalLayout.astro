@@ -37,11 +37,12 @@ const isArticle = head.pageType === 'article';
         <meta name="robots" content="noindex" />
     </head>
     <body class="bg-main text-main">
+        <a class="skip-link" href="#main-content">跳到主要内容</a>
         {isArticle && (
             <div id="reading-progress" class="fixed top-0 left-0 h-[2px] bg-accent z-[9999] w-0 transition-none"></div>
         )}
 
-        <main class="min-h-screen flex flex-col">
+        <main id="main-content" class="min-h-screen flex flex-col">
             <div class="flex-1 w-full max-w-3xl mx-auto px-6 pt-12 pb-20">
                 <!-- 顶部栏：返回链接 + ThemeToggle -->
                 <div class="flex items-center justify-between mb-6">

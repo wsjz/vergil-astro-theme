@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # 先只跑构建，把「改坏了能发现」这条底线拿到。
+      # prettier --check 目前会挂：147 个文件格式不合规，另有 8 个文件
+      # prettier 解析不了。等单独做一次格式化之后再加进来。
+      - run: pnpm build

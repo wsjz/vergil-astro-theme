@@ -584,6 +584,12 @@
     width: 100%;
 }
 
+/* 去掉的是鼠标点击的轮廓，键盘聚焦仍要看得见 */
+.md-plan-search__input:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
 .md-plan-search__input::placeholder {
     color: var(--text-muted);
 }

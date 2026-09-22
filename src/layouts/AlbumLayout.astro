@@ -85,6 +85,7 @@ const seoDesc = description || '';
         `} />
     </head>
     <body>
+        <a class="skip-link" href="#main-content">跳到主要内容</a>
         <div class="album-page" data-album-theme={theme} data-page-type={pageType}>
             {/* ── Atmosphere Layer ── */}
             <div class="album-atmosphere">
@@ -93,9 +94,9 @@ const seoDesc = description || '';
             </div>
 
             {/* ── Content ── */}
-            <div class="album-content">
+            <main id="main-content" class="album-content">
                 <slot />
-            </div>
+            </main>
 
             {/* ── Back Navigation ── */}
             {pageType === 'detail' ? (

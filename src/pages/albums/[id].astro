@@ -763,6 +763,7 @@ const isSeasons = theme === 'seasons';
     .time-slider-bar { position: relative; height: 2px; }
     .time-slider { position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); z-index: 10; width: 100%; height: 28px; -webkit-appearance: none; appearance: none; background: transparent; margin: 0; cursor: pointer; border: none; padding: 0; }
     .time-slider:focus { outline: none; }
+    .time-slider:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 4px; }
     .time-slider::-webkit-slider-runnable-track { -webkit-appearance: none; appearance: none; height: 2px; background: rgba(255, 255, 255, 0.08); border-radius: 0; border: none; }
     .time-slider::-moz-range-track { height: 2px; background: rgba(255, 255, 255, 0.08); border-radius: 0; border: none; }
     .time-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: transparent; border: none; box-shadow: none; cursor: pointer; margin-top: -7px; }

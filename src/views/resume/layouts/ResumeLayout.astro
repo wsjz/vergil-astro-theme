@@ -35,9 +35,10 @@ const { resume, headings, ...head } = Astro.props;
         <meta name="robots" content="noindex" />
     </head>
     <body class="bg-main text-main">
+        <a class="skip-link" href="#main-content">跳到主要内容</a>
         <ResumeSidebar resume={resume} headings={headings} />
 
-        <main class="ml-0 md:ml-72 min-h-screen">
+        <main id="main-content" class="ml-0 md:ml-72 min-h-screen">
             <div class="max-w-3xl mx-auto px-8 py-12 print:px-0 print:py-0">
                 <!-- ThemeToggle 放在文章右上角 -->
                 <div class="flex justify-end mb-6 print:hidden">
