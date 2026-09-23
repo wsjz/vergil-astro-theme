@@ -1,0 +1,58 @@
+/**
+ * 设计 token。
+ *
+ * 之前 @theme 里只有颜色一层，间距、圆角、阴影、层级、时长全靠手写魔法值：
+ * 圆角出现过 2/3/4/5/6/7/8/10/12/24px 十种，z-index 从 1 一路到 10000。
+ * 这里把它们收成一套有名字的标度，写组件时不用再猜。
+ */
+:root {
+    /* ── 圆角 ── */
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+
+    /* ── 阴影。层级越高抬得越远，不要在组件里另造。 ── */
+    --shadow-xs: 0 1px 2px -1px rgb(0 0 0 / 0.08);
+    --shadow-sm: 0 1px 4px -2px rgb(0 0 0 / 0.12);
+    --shadow-md: 0 4px 12px -4px rgb(0 0 0 / 0.12);
+    --shadow-lg: 0 8px 24px -8px rgb(0 0 0 / 0.16);
+    --shadow-xl: 0 16px 40px -12px rgb(0 0 0 / 0.20);
+
+    /* ── 动效时长。悬停用 fast，展开收起用 base，页面级转场才用 slow。 ── */
+    --duration-fast: 150ms;
+    --duration-base: 200ms;
+    --duration-slow: 300ms;
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* ── 层级。
+       0–9 留给组件内部的局部堆叠，不要在这里登记。
+       跨组件的层级一律从下面挑，别再写 9999。 ── */
+    --z-raised: 10;
+    --z-sticky: 30;
+    --z-sidebar: 40;
+    --z-floating: 50;
+    --z-panel: 60;
+    --z-overlay: 100;
+    --z-modal: 200;
+    --z-lightbox: 300;
+}
+
+/* 桥接给 Tailwind，这样 rounded-md / shadow-lg / duration-fast 直接可用 */
+@theme inline {
+    --radius-xs: var(--radius-xs);
+    --radius-sm: var(--radius-sm);
+    --radius-md: var(--radius-md);
+    --radius-lg: var(--radius-lg);
+    --radius-xl: var(--radius-xl);
+    --radius-2xl: var(--radius-2xl);
+
+    --shadow-xs: var(--shadow-xs);
+    --shadow-sm: var(--shadow-sm);
+    --shadow-md: var(--shadow-md);
+    --shadow-lg: var(--shadow-lg);
+    --shadow-xl: var(--shadow-xl);
+}

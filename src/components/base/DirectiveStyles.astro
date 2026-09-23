@@ -1,0 +1,53 @@
+---
+/**
+ * 按需加载重量级指令样式。
+ *
+ * 全站 CSS 有 88% 是 42 个指令的样式，但一篇文章通常只用到三五个。
+ * 这里把体积大、又只可能出现在 markdown 正文里的几个从全局包里拿出来，
+ * 只在真正用到的页面内联。检测依据是 markdown 源码里的 `:::name` 开标记，
+ * 和 remark 插件匹配 `node.name` 的依据完全一致。
+ *
+ * 判断不准时宁可多加载：漏判会导致样式丢失，误判只是多几 KB。
+ */
+import calendarCss from '../../styles/components/directives/calendar.css?raw';
+import deadlineCss from '../../styles/components/directives/deadline.css?raw';
+import mindCss from '../../styles/components/directives/mind.css?raw';
+import okrCss from '../../styles/components/directives/okr.css?raw';
+import planCss from '../../styles/components/directives/plan.css?raw';
+import postersCss from '../../styles/components/directives/posters.css?raw';
+import privateCss from '../../styles/components/directives/private.css?raw';
+import sitesCss from '../../styles/components/directives/sites.css?raw';
+import storyCss from '../../styles/components/directives/story.css?raw';
+import yoicardCss from '../../styles/components/directives/yoicard.css?raw';
+
+interface Props {
+    /** markdown 源码 */
+    content?: string;
+}
+
+const { content = '' } = Astro.props;
+
+/** `:::name` 出现在行首（允许缩进），与 remark-directive 的容器语法一致 */
+function uses(name: string): boolean {
+    return new RegExp(`^\\s*:::+${name}\\b`, 'm').test(content);
+}
+
+const LAZY: Array<[string, string]> = [
+    ['plan', planCss],
+    ['calendar', calendarCss],
+    ['okr', okrCss],
+    ['deadline', deadlineCss],
+    ['yoicard', yoicardCss],
+    ['private', privateCss],
+    ['story', storyCss],
+    ['sites', sitesCss],
+    ['posters', postersCss],
+    ['mind', mindCss],
+];
+
+const css = LAZY.filter(([name]) => uses(name))
+    .map(([, source]) => source)
+    .join('\n');
+---
+
+{css && <style is:inline set:html={css} />}

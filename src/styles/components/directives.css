@@ -1,3 +1,7 @@
+/* 下面这些指令的样式体积大、又只会出现在 markdown 正文里，
+   已移交 DirectiveStyles.astro 按页面用到与否内联：
+   plan / calendar / okr / deadline / yoicard / private / story / sites / posters / mind */
+
 @import './directives/vars.css';
 @import './directives/math.css';
 @import './directives/shared.css';
@@ -25,18 +29,8 @@
 @import './directives/paper.css';
 @import './directives/checkbox.css';
 @import './directives/ghcard.css';
-@import './directives/sites.css';
-@import './directives/posters.css';
 @import './directives/panel.css';
-@import './directives/private.css';
 @import './directives/audio.css';
 @import './directives/video.css';
 @import './directives/blockquote.css';
-@import './directives/yoicard.css';
-@import './directives/deadline.css';
 @import './directives/charts.css';
-@import './directives/okr.css';
-@import './directives/calendar.css';
-@import './directives/plan.css';
-@import './directives/story.css';
-@import './directives/mind.css';

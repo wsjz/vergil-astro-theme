@@ -1,4 +1,5 @@
 ---
+import DirectiveStyles from '../../../../../components/base/DirectiveStyles.astro';
 import { getCollection, render } from 'astro:content';
 import MinimalLayout from '../../../../../views/minimal/layouts/MinimalLayout.astro';
 import Breadcrumb from '../../../../../components/ui/Breadcrumb.astro';
@@ -72,6 +73,7 @@ crumbs.push({ text: entry.data.title as string });
             )}
         </header>
         <div class="prose sm:prose-lg max-w-none">
+            <DirectiveStyles content={entry.body || ''} />
             <Content />
         </div>
     </article>

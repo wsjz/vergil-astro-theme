@@ -186,11 +186,11 @@
 
 /* ── medium-zoom overrides for photo directive ── */
 .medium-zoom-overlay {
-    z-index: 9999 !important;
+    z-index: var(--z-lightbox) !important;
 }
 
 .medium-zoom-image--opened {
-    z-index: 10000 !important;
+    z-index: calc(var(--z-lightbox) + 1) !important;
     object-fit: contain !important;
     border-radius: 0 !important;
 }

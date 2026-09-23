@@ -1,4 +1,5 @@
 ---
+import DirectiveStyles from '../../components/base/DirectiveStyles.astro';
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
@@ -172,6 +173,7 @@ const postBreadcrumbs = [
         </header>
         {series && <SeriesNav currentPostId={post.id} series={series} />}
         <div class="prose sm:prose-lg max-w-none">
+            <DirectiveStyles content={post.body || ''} />
             <Content />
         </div>
         {siteConfig.copyright && (

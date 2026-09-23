@@ -1,4 +1,5 @@
 ---
+import DirectiveStyles from '../../components/base/DirectiveStyles.astro';
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import ProjectPreview from '../../components/content/ProjectPreview.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -36,6 +37,7 @@ const { Content } = await render(project);
             <h1 class="font-display text-2xl leading-tight font-medium sm:text-3xl sm:leading-tight">{title}</h1>
         </header>
         <div class="prose sm:prose-lg max-w-none">
+            <DirectiveStyles content={project.body || ''} />
             <Content />
         </div>
     </article>
