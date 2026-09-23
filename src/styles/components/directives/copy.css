@@ -25,6 +25,11 @@
     font-family: var(--font-mono);
 }
 
+.md-copy-input:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
 .md-copy-input {
     border: none;
     outline: none;

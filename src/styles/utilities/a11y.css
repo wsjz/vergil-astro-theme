@@ -1,0 +1,41 @@
+/**
+ * 键盘可达性。
+ *
+ * 之前全站没有任何 focus-visible 规则，用键盘 Tab 时看不出焦点落在哪。
+ * 这里给一条统一的焦点环，用 :where() 把优先级压到 0，组件想覆盖随时能盖。
+ * 只在 :focus-visible 下出现，所以鼠标点击不会看到轮廓。
+ */
+:where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent-color, #4a7c59);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+/* 跳过导航：默认藏在视口外，键盘聚焦时滑进来 */
+.skip-link {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    z-index: 200;
+    translate: -50% -120%;
+    padding: 0.6rem 1.1rem;
+    border: 1px solid var(--border-main, #ddd);
+    border-radius: 0 0 8px 8px;
+    background: var(--bg-card, #fff);
+    color: var(--text-main, #222);
+    font-size: 0.875rem;
+    text-decoration: none;
+    box-shadow: 0 4px 12px -4px rgb(0 0 0 / 0.2);
+    transition: translate 0.15s ease-out;
+}
+
+.skip-link:focus-visible {
+    translate: -50% 0;
+}
+
+/* 跳过去之后标题不要被吸顶导航挡住 */
+main:target,
+main:focus {
+    scroll-margin-top: 4rem;
+    outline: none;
+}

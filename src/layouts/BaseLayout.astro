@@ -18,7 +18,7 @@ const isArticle = head.pageType === 'article';
 ---
 
 <!doctype html>
-<html lang="en" class="wrap-break-words antialiased">
+<html lang="zh-CN" class="wrap-break-words antialiased">
     <head>
         <BaseHead {...head} />
         <script is:inline>
@@ -296,6 +296,7 @@ const isArticle = head.pageType === 'article';
         )}
     </head>
     <body class="bg-main text-main">
+        <a class="skip-link" href="#main-content">跳到主要内容</a>
         {isArticle && (
             <div id="reading-progress" class="fixed top-0 left-0 h-[2px] bg-accent z-[9999] w-0 transition-none"></div>
         )}
@@ -310,7 +311,7 @@ const isArticle = head.pageType === 'article';
                 <div class="w-full max-w-3xl flex-shrink-0">
                     <div class="flex flex-col min-h-screen px-3 lg:px-4">
                         {showTopNav && <FloatingToolbar showSidebar={showSidebar} showThemeToggle={showThemeToggle} />}
-                        <main class="mx-auto w-full max-w-3xl grow pt-2">
+                        <main id="main-content" class="mx-auto w-full max-w-3xl grow pt-2">
                             <slot />
                         </main>
                         <Footer />
