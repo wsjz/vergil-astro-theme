@@ -8,7 +8,7 @@
 :where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid var(--accent-color, #4a7c59);
     outline-offset: 2px;
-    border-radius: 3px;
+    border-radius: var(--radius-xs);
 }
 
 /* 跳过导航：默认藏在视口外，键盘聚焦时滑进来 */
@@ -16,17 +16,17 @@
     position: fixed;
     top: 0;
     left: 50%;
-    z-index: 200;
+    z-index: var(--z-modal);
     translate: -50% -120%;
     padding: 0.6rem 1.1rem;
     border: 1px solid var(--border-main, #ddd);
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
     background: var(--bg-card, #fff);
     color: var(--text-main, #222);
     font-size: 0.875rem;
     text-decoration: none;
-    box-shadow: 0 4px 12px -4px rgb(0 0 0 / 0.2);
-    transition: translate 0.15s ease-out;
+    box-shadow: var(--shadow-md);
+    transition: translate var(--duration-fast) var(--ease-out);
 }
 
 .skip-link:focus-visible {

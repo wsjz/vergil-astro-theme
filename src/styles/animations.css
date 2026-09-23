@@ -1,9 +1,9 @@
 ::view-transition-old(root) {
-    animation: fade-out 0.3s ease-out forwards;
+    animation: fade-out var(--duration-slow) ease-out forwards;
 }
 
 ::view-transition-new(root) {
-    animation: fade-in 0.3s ease-out forwards;
+    animation: fade-in var(--duration-slow) ease-out forwards;
 }
 
 @keyframes fade-out {
@@ -55,7 +55,7 @@
 }
 
 dialog[open] {
-    animation: dialog-in 0.3s ease;
+    animation: dialog-in var(--duration-slow) ease;
 }
 
 @keyframes dialog-in {
@@ -70,7 +70,7 @@ dialog[open] {
 }
 
 dialog::backdrop {
-    animation: backdrop-in 0.3s ease;
+    animation: backdrop-in var(--duration-slow) ease;
 }
 
 @keyframes backdrop-in {
@@ -111,8 +111,8 @@ a:active {
    按下时回落到原位，形成「抬起—按下」的完整反馈。 */
 .card-interactive {
     transition:
-        translate 0.2s ease-out,
-        box-shadow 0.2s ease-out;
+        translate var(--duration-base) ease-out,
+        box-shadow var(--duration-base) ease-out;
 }
 
 .card-interactive:active {
@@ -133,7 +133,7 @@ img[loading="lazy"].img-loaded {
 .reveal {
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    transition: opacity var(--duration-base) ease-out, transform var(--duration-base) ease-out;
 }
 .reveal.visible {
     opacity: 1;
