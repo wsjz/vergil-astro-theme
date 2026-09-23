@@ -1,7 +1,7 @@
 ---
 import DirectiveStyles from '../../components/base/DirectiveStyles.astro';
 import { type CollectionEntry, getCollection, render } from 'astro:content';
-import ProjectPreview from '../../components/content/ProjectPreview.astro';
+import PrevNext from '../../components/base/PrevNext.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Comments from '../../components/widgets/Comments.astro';
 import siteConfig from '../../data/site-config';
@@ -22,8 +22,8 @@ export async function getStaticPaths() {
 
 type Props = {
     project: CollectionEntry<'projects'>;
-    prevProject: CollectionEntry<'projects'>;
-    nextProject: CollectionEntry<'projects'>;
+    prevProject: CollectionEntry<'projects'> | null;
+    nextProject: CollectionEntry<'projects'> | null;
 };
 
 const { project, prevProject, nextProject } = Astro.props;
@@ -41,5 +41,11 @@ const { Content } = await render(project);
             <Content />
         </div>
     </article>
+    {(prevProject || nextProject) && (
+        <PrevNext
+            prev={prevProject ? { href: `/projects/${prevProject.id}/`, title: prevProject.data.title } : null}
+            next={nextProject ? { href: `/projects/${nextProject.id}/`, title: nextProject.data.title } : null}
+        />
+    )}
     {siteConfig.comments?.enabled && <Comments pageId={`/projects/${project.id}/`} pageTitle={title} />}
 </BaseLayout>

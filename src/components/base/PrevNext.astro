@@ -1,0 +1,61 @@
+---
+/**
+ * 文章 / 文档底部的上下篇导航。
+ *
+ * 原先文章和文档各写了一套：文章是浅色细分割线加纯文字，文档是深色虚线加卡片，
+ * 中间间距差了近一倍。统一成文章那一套，文档跟过来。
+ */
+import { ChevronLeft, ChevronRight } from '@lucide/astro';
+
+export interface PrevNextItem {
+    href: string;
+    title: string;
+    /** 覆盖默认的「上一篇」「下一篇」，比如跨专栏推荐时写「推荐」 */
+    label?: string;
+    /** 标题下面的补充说明，比如「来自专栏「x」」 */
+    note?: string;
+}
+
+interface Props {
+    prev?: PrevNextItem | null;
+    next?: PrevNextItem | null;
+    class?: string;
+}
+
+const { prev = null, next = null, class: className = '' } = Astro.props;
+---
+
+<nav class:list={['mt-10 sm:mt-12 border-t border-light pt-6', className]}>
+    <slot name="header" />
+    <div class="flex items-start justify-between gap-6">
+        {prev ? (
+            <a href={prev.href} class="group flex items-center gap-3 min-w-0">
+                <ChevronLeft class="w-5 h-5 text-muted group-hover:text-accent transition-colors shrink-0" />
+                <div class="flex flex-col min-w-0">
+                    <span class="text-[11px] text-muted tracking-wider">{prev.label ?? '上一篇'}</span>
+                    <span class="text-sm font-medium text-secondary group-hover:text-accent transition-colors truncate">
+                        {prev.title}
+                    </span>
+                    {prev.note && <span class="text-[11px] text-muted mt-0.5">{prev.note}</span>}
+                </div>
+            </a>
+        ) : (
+            <div class="w-5 shrink-0" />
+        )}
+
+        {next ? (
+            <a href={next.href} class="group flex items-center gap-3 min-w-0">
+                <div class="flex flex-col items-end min-w-0">
+                    <span class="text-[11px] text-muted tracking-wider">{next.label ?? '下一篇'}</span>
+                    <span class="text-sm font-medium text-secondary group-hover:text-accent transition-colors truncate">
+                        {next.title}
+                    </span>
+                    {next.note && <span class="text-[11px] text-muted mt-0.5">{next.note}</span>}
+                </div>
+                <ChevronRight class="w-5 h-5 text-muted group-hover:text-accent transition-colors shrink-0" />
+            </a>
+        ) : (
+            <div class="w-5 shrink-0" />
+        )}
+    </div>
+</nav>

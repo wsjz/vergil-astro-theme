@@ -4,12 +4,13 @@ import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
 import Button from '../../components/ui/Button.astro';
-import { ChevronLeft, ChevronRight, Link, Check, ExternalLink } from '@lucide/astro';
+import { Link, Check, ExternalLink } from '@lucide/astro';
 import { Icon } from 'astro-icon/components';
 import FormattedDate from '../../components/ui/FormattedDate.astro';
 import ReadingTime from '../../components/ui/ReadingTime.astro';
 import Comments from '../../components/widgets/Comments.astro';
 import FloatingToc from '../../components/widgets/FloatingToc.astro';
+import PrevNext from '../../components/base/PrevNext.astro';
 import SidebarToc from '../../components/widgets/SidebarToc.astro';
 import RelatedPosts from '../../components/widgets/RelatedPosts.astro';
 import FeaturedPosts from '../../components/widgets/FeaturedPosts.astro';
@@ -229,47 +230,30 @@ const postBreadcrumbs = [
         </div>
     </article>
     {hasNav && (
-        <nav class="mt-10 sm:mt-12 border-t border-light pt-6" data-post-id={post.id}>
+        <PrevNext
+            prev={navPrev ? { href: `/blog/${navPrev.id}/`, title: navPrev.data.title } : null}
+            next={
+                navNext
+                    ? { href: `/blog/${navNext.id}/`, title: navNext.data.title }
+                    : recommendNext
+                      ? {
+                            href: `/blog/${recommendNext.id}/`,
+                            title: recommendNext.data.title,
+                            label: '推荐',
+                            note: recommendNext.data.series ? `来自专栏「${recommendNext.data.series}」` : undefined,
+                        }
+                      : null
+            }
+        >
             {series && (
-                <div class="text-center mb-3">
+                <div slot="header" class="text-center mb-3">
                     <span class="text-[11px] text-muted tracking-wider uppercase">专栏</span>
                     <a href={`/series/${slugify(series)}/`} class="ml-1.5 text-sm font-medium text-accent hover:underline">
                         {series}
                     </a>
                 </div>
             )}
-            <div class="flex items-start justify-between gap-6">
-                {navPrev ? (
-                    <a href={`/blog/${navPrev.id}/`} class="group flex items-center gap-3 min-w-0">
-                        <ChevronLeft class="w-5 h-5 text-muted group-hover:text-accent transition-colors shrink-0" />
-                        <div class="flex flex-col min-w-0">
-                            <span class="text-[11px] text-muted tracking-wider">上一篇</span>
-                            <span class="text-sm font-medium text-secondary group-hover:text-accent transition-colors truncate">{navPrev.data.title}</span>
-                        </div>
-                    </a>
-                ) : <div class="w-5 shrink-0" />}
-                {navNext ? (
-                    <a href={`/blog/${navNext.id}/`} class="group flex items-center gap-3 min-w-0">
-                        <div class="flex flex-col items-end min-w-0">
-                            <span class="text-[11px] text-muted tracking-wider">下一篇</span>
-                            <span class="text-sm font-medium text-secondary group-hover:text-accent transition-colors truncate">{navNext.data.title}</span>
-                        </div>
-                        <ChevronRight class="w-5 h-5 text-muted group-hover:text-accent transition-colors shrink-0" />
-                    </a>
-                ) : recommendNext ? (
-                    <a href={`/blog/${recommendNext.id}/`} class="group flex items-center gap-3 min-w-0">
-                        <div class="flex flex-col items-end min-w-0">
-                            <span class="text-[11px] text-muted tracking-wider">推荐</span>
-                            <span class="text-sm font-medium text-secondary group-hover:text-accent transition-colors truncate">{recommendNext.data.title}</span>
-                            {recommendNext.data.series && (
-                                <span class="text-[11px] text-muted mt-0.5">来自专栏「{recommendNext.data.series}」</span>
-                            )}
-                        </div>
-                        <ChevronRight class="w-5 h-5 text-muted group-hover:text-accent transition-colors shrink-0" />
-                    </a>
-                ) : <div class="w-5 shrink-0" />}
-            </div>
-        </nav>
+        </PrevNext>
     )}
     <div slot="right-sidebar">
         <SidebarToc headings={headings} />
