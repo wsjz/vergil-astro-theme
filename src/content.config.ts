@@ -71,6 +71,8 @@ const photoSchema = (image: ImageFunction) =>
         featured: z.boolean().default(false),
         exif: z.object({
             camera: z.string().optional(),
+            /** 机型。演示内容一直在写这个字段，但 schema 里漏了，zod 会静默丢弃 */
+            model: z.string().optional(),
             lens: z.string().optional(),
             focal: z.string().optional(),
             aperture: z.string().optional(),

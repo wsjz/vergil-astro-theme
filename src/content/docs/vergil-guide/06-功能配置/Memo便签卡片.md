@@ -25,7 +25,7 @@ import type { MemoItem } from '../../types';
 
 export const welcome = {
     title: '欢迎来到 Vergil',
-    paragraphs: ['这里是我的数字花园，记录技术思考、生活碎片与偶然的灵光一现。'],
+    paragraphs: ['Vergil 是一套 Astro 建站框架，你正在看的就是它的演示站兼官方文档。'],
     quote: '在这个信息爆炸的时代，我希望能留下一些真正值得被阅读的东西。',
     actions: [
         { text: '看看我写的文章', href: '/blog', icon: 'globe' },

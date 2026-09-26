@@ -7,6 +7,7 @@ const en: typeof zhCN = {
         collapse: 'Collapse',
         close: 'Close',
         open: 'Open',
+        view: 'View',
         more: 'More',
         all: 'All',
         copy: 'Copy',
@@ -141,14 +142,19 @@ const en: typeof zhCN = {
     },
 
     search: {
-        placeholder: 'Search posts, projects, docs...',
+        placeholder: 'Search posts, docs, projects, thoughts…',
         hint: 'Type to start searching',
         empty: 'No results found',
+        failed: 'Could not load the search index. Try reloading the page.',
         loading: 'Loading...',
         results: (n: number) => `${n} result${n === 1 ? '' : 's'}`,
         kbdSelect: 'select',
         kbdOpen: 'open',
         kbdClose: 'close',
+        types: {
+            post: 'Post', doc: 'Doc', project: 'Project', thought: 'Thought',
+            moment: 'Moment', album: 'Album', series: 'Series', page: 'Page',
+        },
     },
 
     pagination: {
@@ -205,6 +211,7 @@ const en: typeof zhCN = {
     },
 
     album: {
+        title: 'Albums',
         backToList: 'Back to albums',
         nextLabel: 'Next Album',
         nextDesc: 'Keep exploring more visual stories',
@@ -226,6 +233,7 @@ const en: typeof zhCN = {
 
     page: {
         blog: { title: 'Blog', description: 'Notes on thinking and technical exploration' },
+        projects: { title: 'Projects', description: 'Things I have built. Open one to read the full write-up.' },
         archives: {
             title: 'Archives',
             description: 'Browse every post by year.',
@@ -260,6 +268,10 @@ const en: typeof zhCN = {
             emptyLead: 'No moments yet. Add a .json file in',
             emptyTail: 'to post one.',
             noMore: 'No more moments',
+            description: 'What I am working on, reading and thinking about right now.',
+            signature: 'Writing it down beats trying to remember it.',
+            aboutTitle: 'About moments',
+            aboutText: 'Moments are for things not worth a full post but worth keeping. They live in src/content/moments/, one JSON file each.',
         },
         thoughts: {
             title: 'Thoughts',

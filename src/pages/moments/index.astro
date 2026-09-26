@@ -9,7 +9,7 @@ import siteConfig from '../../data/site-config';
 import avatar from '../../assets/images/avatar.jpg';
 
 const avatarSrc = typeof avatar === 'string' ? avatar : avatar.src;
-const signature = '纵使生活有千般不如意，也不要自暴自弃！';
+const signature = t.page.moments.signature;
 const bannerUrl = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&h=400&fit=crop&q=80';
 
 interface MomentPost {
@@ -69,24 +69,11 @@ function formatRelativeTime(dateStr: string) {
     return t.time.year(date.getFullYear()) + t.time.month(date.getMonth() + 1);
 }
 
-// 注入给下面的内联脚本：带参数的条目按可能取值预先算好，脚本里直接查表
-const momentsI18n = {
-    today: t.time.today,
-    yesterday: t.time.yesterday,
-    dayBeforeYesterday: t.time.dayBeforeYesterday,
-    daysAgo: Array.from({ length: 7 }, (_, n) => t.time.daysAgo(n)),
-    oneWeekAgo: t.time.oneWeekAgo,
-    twoWeeksAgo: t.time.weeksAgo(2),
-    threeWeeksAgo: t.time.weeksAgo(3),
-    oneMonthAgo: t.time.oneMonthAgo,
-    monthsAgo: Array.from({ length: 13 }, (_, n) => t.time.monthsAgo(n)), // diffDays < 365 时下标最大 12
-    yearMonth: t.time.year('{y}') + t.time.month('{m}'),
-};
 ---
 
 <BaseLayout
-    title="Moments"
-    description="What I'm doing now - my current focus, projects, and activities."
+    title={t.page.moments.title}
+    description={t.page.moments.description}
     showHeader={false}
     showRightSidebar={false}
 >
@@ -121,18 +108,18 @@ const momentsI18n = {
     </div>
 
     <!-- 动态列表 -->
-    <div id="moments-feed" class="mt-12 space-y-0" data-all-posts={JSON.stringify(allPosts)} data-page-size={PAGE_SIZE} data-current-year={currentYear}>
+    <div id="moments-feed" class="mt-12" data-page-size={PAGE_SIZE}>
         {allPosts.length === 0 && (
             <div class="text-center py-12 text-[var(--text-muted)]">
                 <p>{t.page.moments.empty}</p>
             </div>
         )}
-        {initialPosts.map((post, index) => {
+        {allPosts.map((post, index) => {
             const postYear = getPostYear(post);
             const prevYear = index > 0 ? getPostYear(allPosts[index - 1]) : null;
             const showYearDivider = postYear < currentYear && postYear !== prevYear;
             return (
-                <>
+                <div class:list={['moment-entry', index >= PAGE_SIZE && 'is-hidden']} data-index={index}>
                     {showYearDivider && (
                         <div class="moment-year-divider flex items-center gap-3 my-6">
                             <span class="text-2xl font-bold text-[var(--text-main)]">{postYear}</span>
@@ -151,7 +138,7 @@ const momentsI18n = {
                             tags={post.tags}
                         />
                     </div>
-                </>
+                </div>
             );
         })}
     </div>
@@ -165,193 +152,74 @@ const momentsI18n = {
             <ChevronDown class="w-4 h-4" />
             <span>{t.common.loadMore}</span>
         </button>
-        <div id="moments-loading" class="hidden text-sm text-[var(--text-muted)] flex items-center justify-center gap-2">
-            <svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-            <span>{t.common.loadingDots}</span>
-        </div>
         <div id="moments-no-more" class="hidden text-sm text-[var(--text-muted)]">{t.page.moments.noMore}</div>
     </div>
 
-    <!-- 关于 Moments -->
+    <!-- 关于动态 -->
     <div class="mt-12 prose max-w-none">
-        <h2 class="font-display text-xl mb-4">关于 Moments</h2>
-        <p>
-            这里记录着我正在做的事情、感兴趣的话题，以及生活中的各种碎片。
-        </p>
-        <p>
-            如果你也有自己的网站，建议你也添加一个 /moments 页面！
-        </p>
+        <h2 class="font-display text-xl mb-4">{t.page.moments.aboutTitle}</h2>
+        <p>{t.page.moments.aboutText}</p>
     </div>
 
-    <script is:inline define:vars={{ i18n: momentsI18n }}>
-        (function() {
+    <script is:inline>
+        // 所有动态都在服务端渲染好了，这里只负责把多出来的那些显示出来。
+        // 之前是用 JS 再实现一遍渲染逻辑，两份实现很快就长歪了：
+        // 后面加载出来的条目没有 hover 效果、正文不走 Markdown、标签链接也没跟上改动。
+        (function () {
             var feed = document.getElementById('moments-feed');
             var loadBtn = document.getElementById('moments-load-btn');
-            var loading = document.getElementById('moments-loading');
             var noMore = document.getElementById('moments-no-more');
             if (!feed || !loadBtn) return;
 
-            var allPosts = JSON.parse(feed.dataset.allPosts || '[]');
             var pageSize = parseInt(feed.dataset.pageSize || '5', 10);
-            var currentYear = parseInt(feed.dataset.currentYear || '2026', 10);
-            var loadedCount = feed.querySelectorAll('.moment-post').length;
-            var loadingLock = false;
 
-            function getPostYear(post) {
-                return parseInt((post.date || '').slice(0, 4), 10) || 0;
+            function remaining() {
+                return feed.querySelectorAll('.moment-entry.is-hidden');
             }
 
-            function formatRelativeTime(dateStr) {
-                var now = new Date();
-                var date = new Date(dateStr + 'T00:00:00');
-                var diffMs = now.getTime() - date.getTime();
-                var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                if (diffDays <= 0) return i18n.today;
-                if (diffDays === 1) return i18n.yesterday;
-                if (diffDays === 2) return i18n.dayBeforeYesterday;
-                if (diffDays < 7) return i18n.daysAgo[diffDays];
-                if (diffDays < 14) return i18n.oneWeekAgo;
-                if (diffDays < 21) return i18n.twoWeeksAgo;
-                if (diffDays < 30) return i18n.threeWeeksAgo;
-                if (diffDays < 60) return i18n.oneMonthAgo;
-                if (diffDays < 365) return i18n.monthsAgo[Math.floor(diffDays / 30)];
-                return i18n.yearMonth.replace('{y}', String(date.getFullYear())).replace('{m}', String(date.getMonth() + 1));
-            }
-
-            function createPostHTML(post, prevYear) {
-                var year = getPostYear(post);
-                var yearHtml = '';
-                if (year && year < currentYear && year !== prevYear) {
-                    yearHtml = '<div class="moment-year-divider flex items-center gap-3 my-6">' +
-                        '<span class="text-2xl font-bold text-[var(--text-main)]">' + year + '</span>' +
-                        '<span class="flex-1 h-px bg-[var(--border-light)]"></span>' +
-                    '</div>';
-                }
-
-                var bubbleHtml = '';
-                if (post.content) {
-                    var contentHtml = '<div class="moment-text text-[var(--text-main)] text-[15px] leading-relaxed">' + escapeHtml(post.content) + '</div>';
-                    bubbleHtml = '<div class="moment-bubble relative inline-block max-w-full"><div class="moment-bubble-inner rounded-2xl rounded-tl-sm bg-[var(--bg-card)] border border-[var(--border-light)] px-4 py-3">' + contentHtml + '</div></div>';
-                }
-
-                var imagesHtml = '';
-                if (post.images && post.images.length) {
-                    var count = post.images.length;
-                    var cols = count === 1 ? 'grid-cols-1' : (count === 2 || count === 4) ? 'grid-cols-2' : 'grid-cols-3';
-                    var maxW = count === 1 ? 'max-w-[260px]' : (count === 2 || count === 4) ? 'max-w-[280px]' : 'max-w-[300px]';
-                    var aspect = count === 1 ? 'aspect-[4/3]' : 'aspect-square';
-                    imagesHtml = '<div class="mt-2 ' + maxW + '"><div class="grid gap-1 ' + cols + '">' + post.images.map(function(img) {
-                        return '<div class="relative overflow-hidden rounded-lg bg-[var(--bg-muted)] ' + aspect + '"><img src="' + escapeHtml(img) + '" alt="" class="w-full h-full object-cover" loading="lazy" data-zoomable="1"/></div>';
-                    }).join('') + '</div></div>';
-                }
-
-                var linkCardHtml = '';
-                if (post.linkCard) {
-                    var lc = post.linkCard;
-                    linkCardHtml = '<a href="' + escapeHtml(lc.url || '#') + '"' + (lc.url ? ' target="_blank" rel="noopener noreferrer"' : '') + ' class="flex gap-3 rounded-lg border border-[var(--border-light)] bg-[var(--bg-card)] p-2.5 mt-2 hover:shadow-sm transition-shadow">' +
-                        (lc.image ? '<div class="flex-shrink-0 w-14 h-14 rounded-md overflow-hidden bg-[var(--bg-muted)]"><img src="' + escapeHtml(lc.image) + '" alt="" class="w-full h-full object-cover" loading="lazy"/></div>' : '') +
-                        '<div class="flex-1 min-w-0"><div class="font-semibold text-[14px] text-[var(--accent-color)] truncate">' + escapeHtml(lc.title) + '</div><div class="text-[12px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">' + escapeHtml(lc.description) + '</div>' +
-                        (lc.rating || lc.category ? '<div class="text-[11px] text-[var(--text-muted)] mt-1 flex items-center gap-1.5">' + (lc.rating ? '<span>★ ' + escapeHtml(lc.rating) + '</span>' : '') + (lc.category ? '<span>' + escapeHtml(lc.category) + '</span>' : '') + '</div>' : '') +
-                        '</div></a>';
-                }
-
-                var forwardHtml = '';
-                if (post.forward) {
-                    var fw = post.forward;
-                    var fwLinkHtml = '';
-                    if (fw.linkCard) {
-                        var flc = fw.linkCard;
-                        fwLinkHtml = '<a href="' + escapeHtml(flc.url || '#') + '"' + (flc.url ? ' target="_blank" rel="noopener noreferrer"' : '') + ' class="flex gap-3 rounded-lg border border-[var(--border-light)] bg-[var(--bg-card)] p-2.5 mt-2 hover:shadow-sm transition-shadow">' +
-                            (flc.image ? '<div class="flex-shrink-0 w-14 h-14 rounded-md overflow-hidden bg-[var(--bg-muted)]"><img src="' + escapeHtml(flc.image) + '" alt="" class="w-full h-full object-cover" loading="lazy"/></div>' : '') +
-                            '<div class="flex-1 min-w-0"><div class="font-semibold text-[14px] text-[var(--accent-color)] truncate">' + escapeHtml(flc.title) + '</div><div class="text-[12px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">' + escapeHtml(flc.description) + '</div></div></a>';
-                    }
-                    forwardHtml = '<div class="rounded-xl border border-[var(--border-light)] bg-[var(--bg-muted)]/40 p-3 mt-2">' +
-                        '<div class="flex items-center gap-1.5 mb-1.5 text-[14px]"><span class="font-semibold text-[var(--text-main)]">' + escapeHtml(fw.author) + '</span>' + (fw.authorHandle ? '<span class="text-[var(--text-accent)]">@' + escapeHtml(fw.authorHandle) + ':</span>' : '') + '</div>' +
-                        '<div class="moment-text text-[var(--text-main)] text-[14px] leading-relaxed mb-2">' + escapeHtml(fw.content) + '</div>' +
-                        fwLinkHtml + '</div>';
-                }
-
-                var tagsHtml = '';
-                if (post.tags && post.tags.length) {
-                    tagsHtml = '<div class="flex flex-wrap gap-2 mt-2">' + post.tags.map(function(tag) {
-                        return '<a href="/tags/' + escapeHtml(tag) + '/" class="text-[var(--text-accent)] text-[14px] hover:underline">#' + escapeHtml(tag) + '</a>';
-                    }).join('') + '</div>';
-                }
-
-                var name = document.querySelector('[data-site-title]') ? document.querySelector('[data-site-title]').dataset.siteTitle : 'Vergil';
-                var avatarSrc = document.querySelector('[data-avatar-src]') ? document.querySelector('[data-avatar-src]').dataset.avatarSrc : '';
-
-                var postHtml = '<article class="moment-post"><div class="flex gap-3">' +
-                    (avatarSrc ? '<div class="flex-shrink-0"><img src="' + escapeHtml(avatarSrc) + '" alt="" class="w-10 h-10 rounded-md object-cover" loading="lazy"/></div>' : '') +
-                    '<div class="flex-1 min-w-0">' +
-                    '<div class="font-semibold text-[13px] text-[var(--text-main)] mb-1.5">' + escapeHtml(name) + '</div>' +
-                    bubbleHtml + imagesHtml + forwardHtml + linkCardHtml + tagsHtml +
-                    '<div class="text-[12px] text-[var(--text-muted)] mt-2">' + escapeHtml(formatRelativeTime(post.date)) + '</div>' +
-                    '</div></div></article>';
-
-                return yearHtml + postHtml;
-            }
-
-            function escapeHtml(str) {
-                if (!str) return '';
-                return String(str).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
+            function sync() {
+                var left = remaining().length;
+                loadBtn.classList.toggle('hidden', left === 0);
+                noMore.classList.toggle('hidden', left !== 0);
             }
 
             function loadMore() {
-                if (loadingLock) return;
-                loadingLock = true;
-                loadBtn.classList.add('hidden');
-                loading.classList.remove('hidden');
-
-                setTimeout(function() {
-                    var nextPosts = allPosts.slice(loadedCount, loadedCount + pageSize);
-                    if (nextPosts.length === 0) {
-                        loading.classList.add('hidden');
-                        noMore.classList.remove('hidden');
-                        loadingLock = false;
-                        return;
-                    }
-
-                    var lastPost = allPosts[loadedCount - 1];
-                    var prevYear = lastPost ? getPostYear(lastPost) : 0;
-                    var html = '';
-                    nextPosts.forEach(function(post) {
-                        html += createPostHTML(post, prevYear);
-                        prevYear = getPostYear(post);
-                    });
-
-                    var temp = document.createElement('div');
-                    temp.innerHTML = html;
-                    while (temp.firstChild) {
-                        feed.appendChild(temp.firstChild);
-                    }
-
-                    loadedCount += nextPosts.length;
-                    loading.classList.add('hidden');
-                    if (loadedCount >= allPosts.length) {
-                        noMore.classList.remove('hidden');
-                    } else {
-                        loadBtn.classList.remove('hidden');
-                    }
-                    loadingLock = false;
-                }, 400);
+                var hidden = remaining();
+                for (var i = 0; i < Math.min(pageSize, hidden.length); i++) {
+                    hidden[i].classList.remove('is-hidden');
+                }
+                sync();
             }
 
             loadBtn.addEventListener('click', loadMore);
+            window.addEventListener('scroll', function () {
+                if (remaining().length === 0) return;
+                if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 200) loadMore();
+            }, { passive: true });
 
-            var scrollHandler = function() {
-                if (loadedCount >= allPosts.length) return;
-                var scrollTop = window.scrollY || document.documentElement.scrollTop;
-                var docHeight = document.documentElement.scrollHeight;
-                var winHeight = window.innerHeight;
-                if (scrollTop + winHeight >= docHeight - 200) {
-                    loadMore();
-                }
-            };
-            window.addEventListener('scroll', scrollHandler, { passive: true });
+            sync();
         })();
     </script>
 
     <!-- 透传站点数据给 JS -->
     <div data-site-title={siteConfig.title || 'Vergil'} data-avatar-src={avatarSrc} class="hidden" />
 </BaseLayout>
+
+<style>
+    /* 超出首屏的条目先藏起来，「加载更多」把它们放出来 */
+    .moment-entry.is-hidden {
+        display: none;
+    }
+    /* 原来条目之间没有任何分隔，一条接一条看不出边界。
+       用一条淡分隔线把它们断开，比整条做成卡片轻一些。 */
+    .moment-entry + .moment-entry {
+        border-top: 1px solid var(--border-light);
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+    }
+    /* 年份分隔线自带留白，上面就不用再叠一条线了 */
+    .moment-entry:has(.moment-year-divider) {
+        border-top: none;
+    }
+</style>
+

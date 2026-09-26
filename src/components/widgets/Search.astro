@@ -15,7 +15,7 @@ const searchDataUrl = '/search-data.json';
 
     <dialog
         id="search-dialog"
-        class="m-auto max-h-[85vh] w-[92vw] max-w-2xl rounded-xl bg-main p-0 shadow-2xl backdrop:bg-black/50 border border-light/30"
+        class="max-h-[80vh] w-[92vw] max-w-2xl rounded-xl bg-main p-0 shadow-2xl backdrop:bg-black/50 border border-light/30"
     >
         <div class="flex flex-col">
             <!-- Search Input -->
@@ -68,7 +68,7 @@ const searchDataUrl = '/search-data.json';
     window.__loadFuse = () => import('fuse.js').then((m) => m.default);
 </script>
 
-<script is:inline data-search-url={searchDataUrl} define:vars={{ i18n: { loading: t.search.loading, hint: t.search.hint, empty: t.search.empty, resultsZero: t.search.results(0) } }}>
+<script is:inline data-search-url={searchDataUrl} define:vars={{ i18n: { loading: t.search.loading, hint: t.search.hint, empty: t.search.empty, resultsZero: t.search.results(0), types: t.search.types, failed: t.search.failed } }}>
 (function() {
     const script = document.currentScript;
     const searchUrl = script.dataset.searchUrl;
@@ -78,6 +78,7 @@ const searchDataUrl = '/search-data.json';
         fuse: null,
         searchData: [],
         isLoading: false,
+        error: null,
         searchUrl: searchUrl,
         listenersBound: false
     };
@@ -85,10 +86,18 @@ const searchDataUrl = '/search-data.json';
 
     let selectedIndex = -1;
 
+    const VIOLET = 'text-violet-600 bg-violet-50 border-violet-200 dark:text-violet-400 dark:bg-violet-900/20 dark:border-violet-800';
+    const EMERALD = 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/20 dark:border-emerald-800';
+    const SLATE = 'text-slate-600 bg-slate-100 border-slate-200 dark:text-slate-300 dark:bg-slate-800/40 dark:border-slate-700';
     const typeConfig = {
-        post:    { label: 'Post',    color: 'text-accent bg-accent/10 border-accent/20' },
-        project: { label: 'Project', color: 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/20 dark:border-emerald-800' },
-        doc:     { label: 'Doc',     color: 'text-violet-600 bg-violet-50 border-violet-200 dark:text-violet-400 dark:bg-violet-900/20 dark:border-violet-800' }
+        post:    { label: i18n.types.post,    color: 'text-accent bg-accent/10 border-accent/20' },
+        project: { label: i18n.types.project, color: EMERALD },
+        doc:     { label: i18n.types.doc,     color: VIOLET },
+        thought: { label: i18n.types.thought, color: SLATE },
+        moment:  { label: i18n.types.moment,  color: SLATE },
+        album:   { label: i18n.types.album,   color: SLATE },
+        series:  { label: i18n.types.series,  color: SLATE },
+        page:    { label: i18n.types.page,    color: SLATE }
     };
 
     function getEls() {
@@ -105,34 +114,46 @@ const searchDataUrl = '/search-data.json';
         if (els.status) els.status.textContent = text;
     }
 
+    function showMessage(text) {
+        const els = getEls();
+        if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">' + escapeHtml(text) + '</p>';
+        setStatus('');
+    }
+
     function setLoading(loading) {
         S.isLoading = loading;
-        const els = getEls();
-        if (S.isLoading) {
-            if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">' + escapeHtml(i18n.loading) + '</p>';
-            setStatus('');
-        } else {
-            if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">' + escapeHtml(i18n.hint) + '</p>';
-            setStatus('');
-        }
+        if (loading) { showMessage(i18n.loading); return; }
+        // 载入失败时不能把错误提示冲掉，否则界面看起来一切正常，
+        // 但输入什么都没有反应，根本看不出是索引没加载上。
+        showMessage(S.error ? i18n.failed : i18n.hint);
     }
 
     async function initSearch() {
         if (S.fuse) return;
         try {
+            S.error = null;
             const response = await fetch(S.searchUrl);
+            // 不检查状态码的话，404 返回的 HTML 会在 json() 里炸掉，
+            // 报出来的错跟真正的原因毫无关系。
+            if (!response.ok) throw new Error('search-data.json HTTP ' + response.status);
             S.searchData = await response.json();
+            if (!Array.isArray(S.searchData) || S.searchData.length === 0) {
+                throw new Error('search index is empty');
+            }
             const Fuse = await window.__loadFuse();
             S.fuse = new Fuse(S.searchData, {
                 keys: ['title', 'description', 'content', 'tags'],
                 threshold: 0.35,
+                // Fuse 默认只在字段开头 distance(100) 个字符内找匹配。正文动辄几千字，
+                // 不关掉位置权重的话，出现在文章中后段的词一律搜不到。
+                ignoreLocation: true,
                 includeScore: true,
                 includeMatches: true
             });
         } catch (error) {
-            console.error('Failed to initialize search:', error);
-            const els = getEls();
-            if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">Failed to load search data</p>';
+            S.error = error;
+            console.error('[search] 索引加载失败:', error);
+            showMessage(i18n.failed);
         }
     }
 
@@ -383,7 +404,20 @@ const searchDataUrl = '/search-data.json';
                 setStatus('');
                 return;
             }
-            if (!S.fuse) return;
+            if (!S.fuse) {
+                // 静默 return 会让人以为是「搜不到结果」，其实是索引压根没加载
+                if (S.error) { showMessage(i18n.failed); return; }
+                if (S.isLoading) { showMessage(i18n.loading); return; }
+                setLoading(true);
+                initSearch().then(() => {
+                    setLoading(false);
+                    // 载入期间用户已经打好的关键词，补跑一次；失败时不再重试，避免死循环
+                    if (S.error) return;
+                    const el = document.getElementById('search-input');
+                    if (el && el.value.trim()) el.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+                return;
+            }
             const results = S.fuse.search(query).slice(0, 10);
             renderResults(results);
         });
@@ -394,6 +428,16 @@ const searchDataUrl = '/search-data.json';
 </script>
 
 <style is:global>
+    /* 原来用 m-auto 垂直居中，结果条数一变，对话框高度跟着变，
+       居中又把它重新摆到中间，于是每敲一个字整个框都在上下跳。
+       改成钉在距顶部固定距离的位置，只往下长，顶边不动。 */
+    #search-dialog {
+        margin: 10vh auto auto;
+    }
+    @media (max-height: 640px) {
+        #search-dialog { margin-top: 4vh; }
+    }
+
     #search-results mark {
         background-color: var(--accent-color);
         color: #fff;

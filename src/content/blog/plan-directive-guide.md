@@ -1,10 +1,11 @@
 ---
 title: Plan 数据视图指令详解
 excerpt: Plan 指令将 Markdown 表格转换为多视图数据展示组件，支持看板、列表、表格、时间轴、里程碑、进度、艾宾浩斯复习七种视图。
-publishDate: '2026-05-28'
+publishDate: '2026-09-17'
 tags:
   - 使用指南
 categories: ["博客相关"]
+series: 博客搭建指南
 ---
 
 ## 核心概念

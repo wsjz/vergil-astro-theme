@@ -1,64 +1,54 @@
 ---
-title: 'TimeWarp - Travel Agency Website'
-description: Explore the possibilities of time travel through an immersive website for a fictional travel agency, complete with dynamic destination timelines and interactive historical events.
-publishDate: 'Oct 2 2023'
-isFeatured: true
+title: 城市骑行地图
+description: 把三年的骑行轨迹画在一张图上，按季节和路面类型筛选，顺便回答一个问题：到底哪条路最常走。
+publishDate: 'Mar 05 2026'
+isFeatured: false
 seo:
   image:
     src: '../../assets/images/project-2.jpg'
-    alt: Project preview
+    alt: 城市骑行地图预览
 ---
 
-![Project preview](../../assets/images/project-2.jpg)
+![城市骑行地图预览](../../assets/images/project-2.jpg)
 
-**Note:** This case study is entirely fictional and created for the purpose of showcasing [Vergil Astro.js theme functionality](https://github.com/wsjz/vergil-astro-theme).
+:::callout{type="note" title="示例项目"}
+这是一个虚构的项目，用来演示项目页面能承载什么样的内容。
+:::
 
-**Project Overview:**
-TimeWarp Travel Agency aims to redefine the travel experience by offering an innovative and immersive online platform that explores the concept of time travel. The website combines cutting-edge technology with captivating storytelling to provide users with a unique journey through time.
+## 起因
 
-> Working with Alex Chen was a game-changer for our online presence. Their innovative solutions and attention to detail turned our vision into a reality. The website not only looks fantastic but also functions seamlessly. A true professional who exceeded our expectations!
+骑了三年，手表里攒了四百多条轨迹，但它们躺在 App 里，除了单次的配速和爬升，看不出任何别的东西。
 
-## Objectives
+我想知道的是那些跨越时间的问题：哪条路走得最多，夏天和冬天的路线有什么不同，有没有哪片区域三年都没去过。
 
-1. Create a visually stunning and user-friendly website that captures the essence of time travel.
-2. Integrate interactive elements to engage users and make the experience memorable.
-3. Develop a responsive design to ensure a seamless user experience across various devices.
+## 数据
 
-## Features
+导出的是 GPX，一条轨迹一个文件。先解析成坐标点，按网格聚合，再按时间分桶。
 
-1. **Dynamic Destination Timelines:**
+:::tabs
+tab: 规模
 
-- Users can explore destinations through dynamic timelines, showcasing significant historical events, cultural developments, and architectural milestones.
-- Interactive sliders allow users to navigate through different eras, providing a visual representation of the historical evolution of each location.
+| | |
+|---|---|
+| 轨迹 | 412 条 |
+| 坐标点 | 约 180 万 |
+| 时间跨度 | 2023-04 至 2026-03 |
 
-2. **Interactive Historical Events:**
+tab: 处理
 
-- Users can click on specific points in the timeline to reveal detailed information about key historical events related to the chosen destination.
-- Rich multimedia content, including images, videos, and articles, provides a comprehensive understanding of each event.
+```bash
+# 解析 GPX 并聚合成热力网格
+python scripts/parse_gpx.py --input ~/rides --grid 50m
+python scripts/render.py --out map.geojson
+```
+:::
 
-3. **Personalized Time Travel Planner:**
+## 结果
 
-- A personalized planner feature enables users to create their time travel itineraries by selecting specific eras and destinations.
-- The system suggests thematic experiences, such as attending historical events or meeting famous personalities.
+最常走的不是任何一条风景路线，是家到公司那段三公里的河边道，占了总里程的四分之一。
 
-4. **Time-Port Virtual Reality Experience:**
+冬天的路线明显收缩，集中在有路灯的主干道上。夏天则散得很开，尤其是清晨。
 
-- For an extra layer of immersion, users can opt for the Time-Port VR experience, allowing them to virtually step into different time periods and explore the surroundings in 360 degrees.
-
-5. **Chronicle Explorer Blog:**
-
-- A blog section, "Chronicle Explorer," offers in-depth articles and stories about various historical periods and their impact on the destinations featured on the platform.
-- Users can engage with the content, comment, and share their own historical insights.
-
-## Technology Stack
-
-- **Frontend:** [Astro.js](https://astro.build/) for a dynamic and responsive user interface and [Tailwind CSS](https://tailwindcss.com/) for styling.
-- **Backend:** Node.js for handling server-side logic and API integration.
-- **Database:** MongoDB for efficient storage and retrieval of historical data.
-- **VR Integration:** A-Frame framework for creating immersive virtual reality experiences.
-
-## Outcome
-
-The TimeWarp Travel Agency Website successfully brings the concept of time travel to life, providing users with a captivating and educational experience. The website not only serves as a travel planning tool but also as an interactive platform that encourages users to explore and appreciate the rich tapestry of human history.
-
-**Note:** This case study is entirely fictional and created for the purpose of showcasing [Vergil Astro.js theme functionality](https://github.com/wsjz/vergil-astro-theme).
+:::quot
+数据没有告诉我什么新东西，它只是把我早就知道但说不清楚的事，变成了可以指着看的形状。
+:::

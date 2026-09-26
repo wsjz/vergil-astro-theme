@@ -1,6 +1,9 @@
 ---
 import { locale, t } from '../../i18n';
 import { marked } from 'marked';
+import { getCollection } from 'astro:content';
+import { getAllTags } from '../../utils/data-utils';
+import { slugify } from '../../utils/common-utils';
 
 interface LinkCard {
     title: string;
@@ -43,6 +46,19 @@ const {
     tags = [],
     href,
 } = Astro.props;
+
+/**
+ * 标签页只由博客文章生成。动态上的标签如果博客里没人用过，
+ * 链到 /tags/xxx/ 就是个 404，所以这里先判断有没有对应的标签页，
+ * 没有的话只显示成普通文字。
+ */
+const blogTagIds = new Set(
+    getAllTags(await getCollection('blog', ({ data }) => !data.draft)).map((tg) => tg.id)
+);
+const tagHref = (tag: string): string | undefined => {
+    const id = slugify(tag);
+    return blogTagIds.has(id) ? `/tags/${id}/` : undefined;
+};
 
 const renderMarkdown = async (text: string) => {
     return marked.parse(text, { async: false }) as string;
@@ -154,9 +170,11 @@ const isLongContent = plainTextLength > 300;
                     {forward.tags && forward.tags.length > 0 && (
                         <div class="flex flex-wrap gap-2 mb-2">
                             {forward.tags.map((tag) => (
-                                <a href={`/tags/${tag}/`} class="text-[var(--text-accent)] text-[14px] hover:underline">
-                                    #{tag}
-                                </a>
+                                tagHref(tag) ? (
+                                    <a href={tagHref(tag)} class="text-[var(--text-accent)] text-[14px] hover:underline">#{tag}</a>
+                                ) : (
+                                    <span class="text-[var(--text-accent)] text-[14px]">#{tag}</span>
+                                )
                             ))}
                         </div>
                     )}
@@ -232,9 +250,11 @@ const isLongContent = plainTextLength > 300;
             {tags.length > 0 && (
                 <div class="flex flex-wrap gap-2 mt-2">
                     {tags.map((tag) => (
-                        <a href={`/tags/${tag}/`} class="text-[var(--text-accent)] text-[14px] hover:underline">
-                            #{tag}
-                        </a>
+                        tagHref(tag) ? (
+                            <a href={tagHref(tag)} class="text-[var(--text-accent)] text-[14px] hover:underline">#{tag}</a>
+                        ) : (
+                            <span class="text-[var(--text-accent)] text-[14px]">#{tag}</span>
+                        )
                     ))}
                 </div>
             )}

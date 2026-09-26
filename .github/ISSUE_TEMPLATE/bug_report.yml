@@ -1,0 +1,46 @@
+name: Bug 反馈
+description: 某个功能没有按预期工作
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么
+      description: 你做了什么操作，看到了什么结果，期望的结果是什么
+      placeholder: |
+        我在文章里写了 :::timeline，构建之后页面上是原样的文本，没有变成时间线。
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: 怎么复现
+      description: 能贴出触发问题的 Markdown 或配置片段最好
+      render: markdown
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Vergil 版本或提交号
+      placeholder: v1.0.0，或者 git log 里的短 hash
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: 环境
+      description: Node 版本、操作系统、浏览器
+      placeholder: Node 22 / macOS 15 / Chrome 130
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 构建输出或控制台报错
+      description: 有报错就贴上，没有可以留空
+      render: shell

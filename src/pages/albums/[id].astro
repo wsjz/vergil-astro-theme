@@ -638,6 +638,15 @@ const isSeasons = theme === 'seasons';
     .g-overlay-caption { font-size: 0.75rem; line-height: 1.4; color: rgba(255,255,255,0.55); margin: 0; font-style: italic; }
     .g-exif { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.6875rem; letter-spacing: 0.05em; color: rgba(255,255,255,0.45); }
     .g-exif span:not(:last-child)::after { content: '\00b7'; margin-left: 0.5rem; opacity: 0.5; }
+    /* 触屏设备没有 hover，overlay 永远不会出现，拍摄参数等于完全看不到。
+       这些设备上直接常驻显示，遮罩调淡一点免得挡住照片。 */
+    @media (hover: none) {
+        .g-overlay { opacity: 1; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.15) 45%, transparent 75%); }
+        .g-arrow { opacity: 1; transform: translate(0, 0); }
+    }
+
+    .g-exif-lens { font-size: 0.5rem; color: rgba(255, 255, 255, 0.4); letter-spacing: 0.03em; }
+
     .g-arrow { position: absolute; top: 1rem; right: 1rem; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; color: rgba(255,255,255,0.4); opacity: 0; transform: translate(6px, -6px); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); background: rgba(0,0,0,0.25); backdrop-filter: blur(4px); }
     .adetail-g-item:hover .g-arrow { opacity: 1; transform: translate(0, 0); }
 

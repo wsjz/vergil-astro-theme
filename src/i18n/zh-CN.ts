@@ -13,6 +13,7 @@ export default {
         collapse: '收起',
         close: '关闭',
         open: '打开',
+        view: '查看',
         more: '更多',
         all: '全部',
         copy: '复制',
@@ -151,14 +152,19 @@ export default {
     },
 
     search: {
-        placeholder: '搜索文章、项目、文档...',
+        placeholder: '搜索文章、文档、项目、想法…',
         hint: '输入关键词，开始搜索',
         empty: '未找到相关结果',
+        failed: '搜索索引加载失败，请刷新页面重试',
         loading: '加载中...',
         results: (n: number) => `${n} 条结果`,
         kbdSelect: '选择',
         kbdOpen: '打开',
         kbdClose: '关闭',
+        types: {
+            post: '文章', doc: '文档', project: '项目', thought: '想法',
+            moment: '动态', album: '影集', series: '专栏', page: '页面',
+        },
     },
 
     pagination: {
@@ -215,6 +221,7 @@ export default {
     },
 
     album: {
+        title: '影集',
         backToList: '返回影集列表',
         nextLabel: 'Next Album · 下一期',
         nextDesc: '继续探索更多视觉故事',
@@ -237,6 +244,7 @@ export default {
 
     page: {
         blog: { title: '博客', description: '记录个人思考与技术探索的博客' },
+        projects: { title: '项目', description: '这里是做过的项目，点进去可以看完整的项目介绍。' },
         archives: {
             title: '归档',
             description: '按年份浏览所有博客文章，探索完整的文章归档。',
@@ -271,6 +279,10 @@ export default {
             emptyLead: '暂无动态，在',
             emptyTail: '目录下新建 .json 文件即可添加',
             noMore: '没有更多动态了',
+            description: '记录正在做的事、感兴趣的话题，以及生活里的碎片。',
+            signature: '写点什么，比记住什么更可靠。',
+            aboutTitle: '关于动态',
+            aboutText: '动态适合放那些不值得写成一篇文章、但又想留下来的东西。内容在 src/content/moments/ 目录下，一条一个 JSON 文件。',
         },
         thoughts: {
             title: '想法',

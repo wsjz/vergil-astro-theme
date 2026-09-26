@@ -1,0 +1,26 @@
+name: 功能建议
+description: 想要一个 Vergil 现在没有的能力
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你遇到的问题
+      description: 先说问题，不要直接说方案。你当时想做什么，被什么挡住了
+      placeholder: |
+        我想在文章里放一组前后对比图，现在只能用两张并排的图，读者不好比较细节。
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: 你设想的做法
+      description: 如果是新指令，写一段你希望能这么写的 Markdown
+      render: markdown
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 现在你是怎么绕过去的
+      description: 有没有别的写法能凑合达到目的

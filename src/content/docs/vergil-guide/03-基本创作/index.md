@@ -15,4 +15,4 @@ autoRender: true
 - [内容组织](/docs/vergil-guide/03-基本创作/内容组织/) — 专栏、分类、标签，三种方式的区别与用法
 - [内容字段参考](/docs/vergil-guide/03-基本创作/内容字段参考/) — 所有内容类型的 frontmatter 字段速查表
 
-如果你是第一次使用 Vergil，建议从 [博客写作](/docs/vergil-guide/博客写作/) 开始，写一篇文章熟悉流程后，再尝试内容指令。
+如果你是第一次使用 Vergil，建议从 [博客写作](/docs/vergil-guide/03-基本创作/内容形式/博客写作/) 开始，写一篇文章熟悉流程后，再尝试内容指令。

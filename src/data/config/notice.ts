@@ -1,13 +1,17 @@
 import type { MemoItem } from '../../types';
 
+/**
+ * 右侧栏的第二张 Memo 卡片。想加更多卡片，照这个文件新建一个即可，
+ * 再到 features.ts 的 sidebar.components 里注册。
+ */
 export const notice = {
-    title: '关于这个角落',
+    title: '怎么用',
     paragraphs: [
-        '这里是我的一方小天地，没有算法推荐，没有阅读量焦虑。',
-        '如果你偶然路过，欢迎坐下来喝杯茶，慢慢读。',
+        '写 Markdown，用 `:::` 指令插入提示框、时间线、图表、相册、看板。',
+        '不需要写组件，不需要碰样式。',
     ],
-    quote: '在互联网的喧嚣中，我们需要更多安静的角落。',
+    quote: '内容归你，呈现交给主题。',
     actions: [
-        { text: '随便逛逛', href: '/blog', icon: 'globe' },
+        { text: '内容指令', href: '/docs/vergil-guide/03-基本创作/内容指令/', icon: 'book-open' },
     ],
 } satisfies MemoItem;

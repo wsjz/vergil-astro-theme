@@ -1,12 +1,122 @@
 ---
-title: "Story Directive 演示"
-publishDate: '2026-05-30'
+title: 可视化叙事指令
+excerpt: 思维导图和分镜表。一个把嵌套列表变成可交互的图，一个把表格变成分镜脚本。
+publishDate: 'Aug 29 2026'
 tags:
-  - 演示
-categories: ["功能演示"]
+  - 使用指南
+categories: ["博客相关"]
+series: 内容指令示例
 ---
 
-# Story 分镜脚本指令
+这一类指令把结构化的文本变成图。写的还是列表和表格，渲染出来是导图和分镜表。
+
+---
+
+### Mind 思维导图
+
+将 Markdown 嵌套无序列表渲染为交互式 SVG 思维导图。支持缩放、拖拽、展开与折叠。
+
+将 Markdown 嵌套无序列表渲染为交互式 SVG 思维导图。支持缩放、拖拽、展开/折叠。
+
+---
+
+## 基础用法
+
+::::tabs
+tab: 演示效果
+
+:::mind
+- Vergil 主题设计
+  - 视觉系统
+    - 配色方案
+    - 字体层级
+    - 间距规范
+  - 交互系统
+    - 纯 CSS 视图切换
+    - 数据驱动渲染
+    - 悬停动画效果
+  - 指令生态
+    - :::plan 多视图计划
+    - :::timeline 时间轴
+    - :::story 分镜脚本
+:::
+
+tab: 示例代码
+
+`````markdown
+:::mind
+- Vergil 主题设计
+  - 视觉系统
+    - 配色方案
+    - 字体层级
+    - 间距规范
+  - 交互系统
+    - 纯 CSS 视图切换
+    - 数据驱动渲染
+    - 悬停动画效果
+  - 指令生态
+    - :::plan 多视图计划
+    - :::timeline 时间轴
+    - :::story 分镜脚本
+:::
+`````
+
+- 使用 Markdown 嵌套无序列表定义层级结构
+- 支持行内样式（粗体、斜体、代码等）
+- 鼠标滚轮缩放，拖拽平移，点击节点折叠/展开
+
+:::
+
+---
+
+## 技术栈示例
+
+::::tabs
+tab: 演示效果
+
+:::mind
+- 前端技术栈
+  - 构建工具
+    - Vite
+    - Webpack
+    - Rollup
+  - 框架
+    - React
+    - Vue
+    - Svelte
+  - 样式
+    - Tailwind CSS
+    - Sass
+    - CSS Modules
+:::
+
+tab: 示例代码
+
+`````markdown
+:::mind
+- 前端技术栈
+  - 构建工具
+    - Vite
+    - Webpack
+    - Rollup
+  - 框架
+    - React
+    - Vue
+    - Svelte
+  - 样式
+    - Tailwind CSS
+    - Sass
+    - CSS Modules
+:::
+`````
+
+::::
+
+---
+
+### Story 分镜脚本
+
+将 Markdown 表格渲染为行式分镜列表。每行一个镜头，支持图片、标签、台词、备注等字段。
 
 将 Markdown 表格渲染为行式分镜列表。每行一个镜头，支持图片、标签、台词、备注等字段。
 

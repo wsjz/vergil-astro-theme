@@ -11,6 +11,7 @@ import siteConfig from '../data/site-config';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Pagination from '../components/widgets/Pagination.astro';
 import { sortItemsByDateDesc } from '../utils/data-utils';
+import avatar from '../assets/images/avatar.jpg';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
 const pageSize = 7;
@@ -28,13 +29,18 @@ const page = {
     lastPage: totalPages
 };
 
+/** 字段要和 src/pages/moments/index.astro 保持一致，否则首页会少渲染内容 */
 interface MomentData {
     content: string;
     date: string;
     images?: string[];
+    linkCard?: Record<string, string>;
+    forward?: Record<string, unknown>;
+    tags?: string[];
 }
 
 const momentsDir = path.join(process.cwd(), 'src', 'content', 'moments');
+const avatarSrc = typeof avatar === 'string' ? avatar : avatar.src;
 let latestMoment: MomentData | null = null;
 if (fs.existsSync(momentsDir)) {
     const files = fs.readdirSync(momentsDir).filter(f => f.endsWith('.json'));
@@ -60,7 +66,13 @@ if (fs.existsSync(momentsDir)) {
         {latestMoment ? (
             <Moment
                 href="/moments"
+                name={siteConfig.title || 'Vergil'}
+                avatar={avatarSrc}
                 content={latestMoment.content}
+                images={latestMoment.images}
+                forward={latestMoment.forward as any}
+                linkCard={latestMoment.linkCard as any}
+                tags={latestMoment.tags}
                 date={(() => {
                     const now = new Date();
                     const date = new Date(latestMoment.date);

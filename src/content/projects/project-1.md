@@ -1,66 +1,58 @@
 ---
-title: 'EcoBuddy: Sustainable Living App'
-description: EcoBuddy is a mobile app that gamifies sustainable living. Users can set eco-friendly goals, track their carbon footprint, and earn virtual rewards for adopting environmentally conscious habits.
-publishDate: 'Jan 02 2024'
+title: Vergil 主题
+description: 一套基于 Astro 的内容站点框架，把排版组件做成了 Markdown 指令，写文章的人不用碰组件和 CSS。
+publishDate: 'Jun 18 2026'
+isFeatured: true
 seo:
   image:
     src: '../../assets/images/project-1.jpg'
-    alt: Project preview
+    alt: Vergil 主题预览
 ---
 
-![Project preview](../../assets/images/project-1.jpg)
+![Vergil 主题预览](../../assets/images/project-1.jpg)
 
-**Note:** This case study is entirely fictional and created for the purpose of showcasing [Vergil Astro.js theme functionality](https://github.com/wsjz/vergil-astro-theme).
+:::callout{type="tip" title="这是示例项目"}
+项目页面的内容就是普通 Markdown，支持全部指令。改 `src/content/projects/` 下的文件即可。
+:::
 
-**Project Overview:**
-EcoBuddy is a revolutionary mobile application designed to make sustainable living accessible, engaging, and rewarding. With a focus on gamification and real-world impact, EcoBuddy encourages users to adopt eco-friendly habits, reduce their carbon footprint, and contribute to a healthier planet.
+## 要解决的问题
 
-## Objectives
+大多数博客主题给你一套好看的默认排版，但一旦想在文章里放点别的东西——一个对比表、一条时间线、一张图表——就只能自己写 HTML，或者切到 MDX 去引组件。
 
-1. Develop a user-friendly mobile app that motivates individuals to adopt sustainable practices in their daily lives.
-2. Utilize gamification elements to make sustainable living fun and interactive.
-3. Provide educational resources and personalized challenges to empower users to make informed eco-conscious decisions.
+写作的节奏会被打断。你本来在想怎么把一件事说清楚，结果开始查 Tailwind 的类名。
 
-## Features
+## 做法
 
-1. **EcoScore and Challenges:**
+把这些东西全部做成 Markdown 指令，用 `:::` 包起来，解析在构建期完成，不往浏览器里塞运行时。
 
-- Users are assigned an EcoScore based on their sustainable activities and choices.
-- Daily and weekly challenges encourage users to adopt new habits and compete with friends or the community to earn EcoPoints.
+::::grid{cols="3" gap="12"}
+**指令**
 
-2. **Personalized Eco-Goals:**
+50 个，覆盖排版、卡片、图表、媒体、时间规划
 
-- Users can set and track personalized eco-goals, such as reducing plastic usage, conserving water, or choosing eco-friendly transportation.
-- The app provides tips and suggestions to help users achieve their goals.
+---
 
-3. **Green Rewards Marketplace:**
+**内容形态**
 
-- EcoPoints earned through challenges and sustainable actions can be redeemed in a virtual Green Rewards Marketplace.
-- The marketplace offers discounts on eco-friendly products, services, and even contributions to environmental causes.
+文章、专栏、文档、相册、动态、想法、项目
 
-4. **Community Hub:**
+---
 
-- A community feature allows users to connect, share their eco-friendly achievements, and inspire others.
-- Users can join local eco-groups, organize clean-up events, and collaborate on sustainability projects.
+**运行时**
 
-5. **EcoEducator AI Assistant:**
+零 JavaScript 框架，指令在构建期展开成静态 HTML
+::::
 
-- An AI-powered assistant, EcoEducator, provides personalized eco-tips, facts, and information based on users' preferences and habits.
-- Users can chat with EcoEducator for instant advice on sustainable living.
+## 进展
 
-## Technology Stack
+:::timeline
+- 2025-06 | 从 Dante 分叉 | 保留极简排版的底子，开始加内容指令
+- 2025-11 | 指令体系成型 | 容器指令和行内指令分开处理，支持嵌套
+- 2026-03 | 多视图 | 默认视图之外加了沉浸阅读和简历视图
+- 2026-06 | 界面语言 | 主题文案抽成字典，支持中英切换
+:::
 
-- Frontend: React Native for cross-platform mobile app development.
-- Backend: Firebase for real-time data synchronization and user authentication.
-- Database: Firestore for scalable and flexible data storage.
-- AI Integration: Dialogflow for natural language processing and conversation with EcoEducator.
+## 仓库
 
-## Outcome
-
-EcoBuddy has successfully created a community of environmentally conscious individuals who actively participate in sustainable living practices. The app not only educates and motivates users but also provides tangible rewards for their commitment to a greener lifestyle, fostering a positive impact on the environment.
-
-## Client Testimonial
-
-> We couldn't be happier with the results delivered by Alex Chen. From the initial concept discussions to the final product, their responsiveness and collaborative approach were impressive. Our startup's website now stands out, thanks to their creative input and commitment to excellence.
-
-**Note:** This case study is entirely fictional and created for the purpose of showcasing [Vergil Astro.js theme functionality](https://github.com/wsjz/vergil-astro-theme).
+:::ghcard{type="repo" repo="wsjz/vergil-astro-theme"}
+:::

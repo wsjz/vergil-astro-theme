@@ -1,13 +1,15 @@
 ---
 title: 个人简历
-name: Alex Chen
+name: 你的名字
 avatar: /avatar.jpg
 contact:
-  email: alex@example.com
+  email: you@example.com
   phone: +86 138 0000 0000
   location: 中国，上海
   website: https://example.com
 ---
+
+*这是一份示例简历，用来演示简历视图的排版。内容在 `src/content/resume/index.md`，换成你自己的即可。*
 
 ## 工作经历
 

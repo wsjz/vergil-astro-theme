@@ -13,6 +13,7 @@ interface Props {
         exif?: {
             camera?: string;
             model?: string;
+            lens?: string;
             focal?: string;
             aperture?: string;
             shutter?: string;
@@ -45,6 +46,7 @@ const { images, title, primaryTag, layout } = Astro.props;
                 <div class="g-exif-left">
                     {img.exif.camera ? <span class="g-exif-brand">{img.exif.camera}</span> : null}
                     {img.exif.model ? <span class="g-exif-model">{img.exif.model}</span> : null}
+                    {img.exif.lens ? <span class="g-exif-lens">{img.exif.lens}</span> : null}
                 </div>
                 <div class="g-exif-right">
                     {img.exif.focal ? <span>{img.exif.focal}</span> : null}

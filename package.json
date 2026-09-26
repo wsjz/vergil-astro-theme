@@ -6,6 +6,7 @@
         "dev": "astro dev",
         "start": "astro dev",
         "build": "astro build",
+        "reset": "node scripts/reset-content.mjs",
         "preview": "astro preview",
         "astro": "astro"
     },

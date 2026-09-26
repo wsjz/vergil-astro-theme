@@ -2,9 +2,9 @@
 
 # Vergil
 
-面向创作者的 Astro 建站框架 — 写 Markdown 就能搭建功能丰富的个人网站。 具有多视图架构、多主题相册、多维标签体系、内容指令扩展等丰富的个性化功能。
+**写 Markdown，剩下的交给主题。**
 
-Vergil 基于 [Dante](https://github.com/JustGoodUI/dante-astro-theme) 极简主题进行了大量定制化和本地化改造。名字致敬但丁的老对手，也代表了这个项目从极简出发、走向体系化的方向。
+一套基于 Astro 的内容站点框架。提示框、时间线、图表、相册、看板这些东西都做成了 Markdown 指令，不用写组件，不用碰 CSS。
 
 [![Astro](https://img.shields.io/badge/Astro-5.x-BC52EE?logo=astro&logoColor=white)](https://astro.build)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
@@ -12,176 +12,80 @@ Vergil 基于 [Dante](https://github.com/JustGoodUI/dante-astro-theme) 极简主
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/wsjz/vergil-astro-theme?style=social)](https://github.com/wsjz/vergil-astro-theme)
 
-[快速开始](#快速开始) · [核心系统](#核心系统) · [内容指令](#内容指令) · [生态工具](#生态工具) · [参与贡献](#参与贡献)
+![首页](.github/3.jpg)
+![文章页](.github/1.jpg)
+![文档目录](.github/2.jpg)
 
 </div>
 
----
+## 快速开始
 
-## 效果展示
+需要 Node.js 22（CI 上用的版本）和 pnpm。
 
-<div align="center">
+```bash
+git clone https://github.com/wsjz/vergil-astro-theme.git
+cd vergil-astro-theme
+pnpm install
+pnpm dev
+```
 
-![首页](/.github/3.jpg)
-![文章页 Banner](/.github/1.jpg)
-![文档目录](/.github/2.jpg)
+仓库自带的文章、相册、示例文档是演示内容。确认能跑起来之后，清掉它们：
 
-</div>
+```bash
+pnpm reset     # 加 --dry 先看会删什么
+```
 
-## 核心系统
+`pnpm reset` 会保留站内的 Vergil 使用文档，那是你之后要查的东西。想一起删掉加 `--all`。
 
-### 视图系统
+## 它能做什么
 
-Vergil 不是单一布局的主题，而是一套多视图架构。每个视图拥有独立的布局、导航和页面结构，通过配置自由切换：
-
-- **默认视图** — 完整的博客/作品集体验，侧边栏导航、精选文章、瀑布流相册
-- **沉浸阅读** — 极简阅读模式，去除干扰，专注内容
-- **简历模式** — 结构化简历展示，独立布局
-
-### 标签体系
-
-多维度的内容组织系统，灵感源于 [Hexo Stellar](https://github.com/xaoxuu/hexo-theme-stellar)：
-
-- **标签 (Tags)** — 细粒度的关键词标记，支持聚合页和筛选
-- **分类 (Categories)** — 内容的大类归属
-- **专栏 (Series)** — 有序的系列文章，带上下篇导航
-- **文档目录 (Docs)** — 层级化的知识库，侧边栏树形导航
-
-四种维度可以自由组合。
-
-### 内容指令
-
-通过自定义 Remark/Rehype 插件扩展 Markdown 语法，在普通的 `.md` 文件中直接用 `:::` / `:` 指令，无需 MDX。
-
-你可以在文章中插入提示块、选项卡、时间线、友链卡片、GitHub 卡片、视频/音频播放器、加密内容块等 30 余种组件。例如：
+写一段 `:::` 指令，得到一个组件：
 
 ```markdown
 :::callout{type="tip"}
 这是一条小技巧，读者一眼就能注意到。
 :::
 
-:::tabs
-tab: 效果
-（这里放内容）
-
-tab: 代码
-（这里放代码）
+:::timeline
+- 2024-01 | 项目启动
+- 2024-06 | 第一个版本
 :::
 
 :::video{bilibili="BV1xx411c7mD"}
 :::
 ```
 
-> 完整指令列表和用法详见 [内容指令演示](/blog/markdown-directives-demo/)。
+一共 50 个指令，按用途分为八类：结构排版、内容展示、媒体嵌入、卡片与链接、文字与交互、图表可视化、时间规划、可视化叙事。数学公式用 `$...$` 直接写，不需要指令。
 
-### 相册系统
+除了指令，Vergil 还提供这些：
 
-专为摄影作品设计的展示系统：
+| | |
+|---|---|
+| **多视图** | 默认视图、沉浸阅读、简历模式，各自独立的布局和导航 |
+| **内容组织** | 标签、分类、专栏、层级文档，四个维度自由组合 |
+| **相册** | Golden 与 Seasons 两套主题，Lightbox、EXIF 信息、季节过滤 |
+| **侧边栏** | 左右侧栏组件可插拔，热力图、标签云、目录、相关文章 |
+| **开箱即用** | 深色模式、全文搜索、评论、RSS、Sitemap、站点助理 |
+| **界面语言** | 主题文案支持中英切换，你写的内容不受影响 |
 
-- **Golden 主题** — 深色背景 + 金色点缀，适合艺术/商业摄影
-- **Seasons 主题** — 四季主题，支持季节过滤、诗歌卡片、时间控制台、粒子动画
-- **布局切换** — grid / masonry / timeline / carousel
-- **照片适配** — cover / contain / auto 三种填充模式
-- **Lightbox** — 点击放大，键盘/手势导航
-- **EXIF 展示** — 相机型号、焦距、光圈、快门、ISO
-
-### 图文动态
-
-轻量级短内容发布，独立于博客：
-
-- 纯 Markdown 编写，支持标签
-- 按时间流展示，适合日常想法、读书摘抄、技术随笔
-
-
-### 侧边栏系统
-
-高度可配置的侧边栏组件：
-
-- **左侧栏** — 最近文章、站点信息
-- **右侧栏** — 欢迎语、内容热力图、精选文章、标签云、GitHub 卡片
-- **文章页右侧** — 目录、相关文章、精选推荐
-- **文档页右侧** — 目录导航
-
-## 更多特性
-
-- **深色模式** — 亮色/暗色主题无缝切换
-- **开屏页** — 全屏轮播背景、渐变遮罩、自定义导航按钮
-- **全文搜索** — 基于 Fuse.js 的客户端搜索
-- **评论系统** — Giscus / Artalk，配置即用
-- **浮动音频播放器** — 全局背景音乐
-- **RSS 订阅** — 自动生成 Feed
-- **SEO** — Sitemap、OG 卡片
-- **自定义字体** — 字体注册表机制，声明式配置
-- **响应式** — 桌面端和移动端适配
-- **站点助理** — 配置即启用，按页面路由定制对话台词，打字机效果、空闲自动触发、拖拽定位，支持Rive和Live2D
-
-## 快速开始
-
-> 需要 Node.js 18+
-
-```bash
-# 克隆项目
-git clone https://github.com/wsjz/vergil-astro-theme.git
-cd vergil-astro-theme
-
-# 安装依赖
-pnpm install
-
-# 启动开发服务器
-pnpm dev
-```
+具体怎么配、怎么写，跑起来之后站内的 `/docs` 就是完整文档，源文件在 [`src/content/docs/vergil-guide/`](src/content/docs/vergil-guide)。
 
 ## 生态工具
 
-Vergil 正在从单一主题扩展为一整套建站工具链：
-
-### [vergil-writing-skills](https://github.com/vergil-astro/vergil-writing-skills)
-
-AI 写作增强技能。安装后，告诉你的 AI 助手 "Enhance my article with Vergil directives"，它会自动分析文章类型和风格偏好，用 Vergil 的 30 多种内容指令（callout、tabs、timeline、grid 等）来优化排版和表达。
-
-支持 Claude Code、Codex CLI、Cursor、Gemini CLI、OpenClaw。
-
-### [vergil-cli](https://github.com/vergil-astro/vergil-cli)
-
-命令行工具 `vg`，从终端管理整个 Vergil 站点：
-
-- `vg init` — 一键初始化项目
-- `vg new post "标题"` — 创建博客文章（支持 draft、tags、series、cover）
-- `vg new album "标题" --theme seasons` — 创建相册
-- `vg new thought "内容"` — 发布图文动态
-- `vg publish` — 一键发布草稿
-- `vg list` / `vg series` / `vg docs` — 内容管理和目录浏览
-- `vg skill install` — 将写作技能安装到 AI 助手
-
-然后编辑站点配置文件，在内容目录下写 Markdown 即可开始创作。
-
-## 内容类型
-
-Vergil 内置丰富的内容形态，创作者只需写 Markdown，其余交给主题：
-
-- **博客文章** — 长文写作，支持标签、分类、专栏归属、Banner 头图、自定义字体
-- **图文动态** — 短内容流，适合日常想法、读书摘抄、技术随笔，独立于博客
-- **项目展示** — 作品集页面，展示项目描述、技术栈、链接
-- **相册** — 摄影作品展示，支持 Golden/Seasons 双主题、季节过滤、EXIF 信息
-- **文档** — 层级化知识库，带侧边栏树形导航，适合教程和 Wiki
-- **简历** — 结构化个人简历，独立布局和样式
-- **独立页面** — 关于、联系、条款等自定义页面
-
-## 未来规划
-
-- 文档完善，降低上手门槛
-- 教程视图
-- AI 驱动的内容推荐、智能摘要、站点助理对话能力
-- 社交平台接入
-- Web3 化探索
-
-> 国际化已完成，界面文案支持中英切换，详见[界面语言](/docs/vergil-guide/06-功能配置/界面语言/)。
+- **[vergil-cli](https://github.com/vergil-astro/vergil-cli)** — 命令行工具 `vg`，初始化项目、新建文章相册动态、发布草稿
+- **[vergil-writing-skills](https://github.com/vergil-astro/vergil-writing-skills)** — AI 写作技能，让助手用 Vergil 指令帮你排版，支持 Claude Code、Codex CLI、Cursor、Gemini CLI
 
 ## 参与贡献
 
-Vergil 由个人在业余时间维护。欢迎以任何方式参与 — 提 Bug、聊想法、改文档、翻译界面文字，都是贡献。
+Vergil 由个人在业余时间维护，欢迎提 Bug、聊想法、改文档、翻译界面文字。
 
-提交代码请遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范。
+改代码之前建议先开一个 [issue](https://github.com/wsjz/vergil-astro-theme/issues) 聊聊思路，免得白写。提交信息遵循 [Conventional Commits](https://www.conventionalcommits.org/)。
+
+接下来要做什么、已经在做什么，都在 [issues](https://github.com/wsjz/vergil-astro-theme/issues) 里。
+
+## 关于名字
+
+Vergil 基于极简主题 [Dante](https://github.com/JustGoodUI/dante-astro-theme) 做了大量改造。名字致敬但丁的老对手，也代表这个项目从极简出发、走向体系化的方向。
 
 ## 致谢
 

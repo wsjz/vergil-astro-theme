@@ -1,0 +1,18 @@
+{
+    "date": "2026-09-01",
+    "tags": [
+        "相册"
+    ],
+    "images": [
+        "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=400&h=400&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&h=400&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=400&h=400&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=400&h=400&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1444927714506-8492d94b4e3d?w=400&h=400&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400&h=400&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=400&h=400&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=400&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=400&fit=crop&q=80"
+    ],
+    "content": "九张图排成九宫格。超过九张会折叠，点开看全部。"
+}

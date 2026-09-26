@@ -1,12 +1,13 @@
 ---
 title: 在 EdgeOne 上部署 Vergil 静态博客
 excerpt: 记录将 Vergil Astro 主题部署到腾讯云 EdgeOne 的全过程，从项目构建到域名配置，以及踩过的一些坑。
-publishDate: '2026-05-22'
+publishDate: '2026-09-06'
 tags:
   - 博客搭建
   - 部署
   - 腾讯云
   - 使用指南
+series: 博客搭建指南
 ---
 
 ## 什么是 EdgeOne

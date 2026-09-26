@@ -96,8 +96,13 @@ export function getAllSeries(posts: CollectionEntry<'blog'>[]) {
     return series.map((s) => ({ name: s, id: slugify(s) }));
 }
 
+/**
+ * 专栏是一个有顺序的阅读序列，所以按发布时间正序返回，第一篇在最前。
+ * 博客列表那种「最新在前」的排法用在这里会让教程倒着读，
+ * 连带专栏导航里的「第几篇 / 共几篇」也会反过来。
+ */
 export function getPostsBySeries(posts: CollectionEntry<'blog'>[], seriesId: string) {
     return posts
         .filter((p) => p.data.series && slugify(p.data.series) === seriesId)
-        .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime());
+        .sort((a, b) => new Date(a.data.publishDate).getTime() - new Date(b.data.publishDate).getTime());
 }

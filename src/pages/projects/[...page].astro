@@ -1,4 +1,5 @@
 ---
+import { t } from '../../i18n';
 import type { GetStaticPathsOptions, Page } from 'astro';
 import { type CollectionEntry, getCollection } from 'astro:content';
 import Pagination from '../../components/widgets/Pagination.astro';
@@ -18,8 +19,8 @@ const { page } = Astro.props;
 const portfolio = page.data;
 ---
 
-<BaseLayout title="Portfolio" description="Explore a diverse portfolio showcasing my passion and expertise" showHeader={false}>
-    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">Projects</h1>
+<BaseLayout title={t.page.projects.title} description={t.page.projects.description} showHeader={false}>
+    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">{t.page.projects.title}</h1>
     {portfolio.map((project) => (
         <div class="reveal rounded-xl bg-[var(--bg-card)] p-5 mb-6 sm:mb-8 hover:shadow-md card-interactive hover:-translate-y-0.5 transition-all duration-200">
             <ProjectPreview project={project} class="" />

@@ -1,0 +1,12 @@
+{
+    "date": "2026-09-21",
+    "tags": [
+        "文档",
+        "日常"
+    ],
+    "images": [
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&h=400&fit=crop&q=80"
+    ],
+    "content": "写文档的时候发现一个老问题：截图放两张并排，读者很难对照着看。于是把网格指令的列宽调了调。"
+}

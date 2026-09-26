@@ -1,5 +1,5 @@
 ---
-import { Sparkles, Github, Rss, Clock, Eye, Flag, Info, Award } from '@lucide/astro';
+import { Sparkles, Github, Rss, Clock, Flag, Info, Award } from '@lucide/astro';
 import { getCollection } from 'astro:content';
 import siteConfig from '../../data/site-config';
 import { lucideNavIcons } from '../../utils/lucide-icons';
@@ -58,6 +58,7 @@ function getLastActive(): string {
 const navItems = siteConfig.sidebar?.nav ?? [];
 
 const leftConfig = siteConfig.sidebar?.left ?? ['recentPosts', 'siteInfo'];
+const icpRecords = siteConfig.icp ?? [];
 
 // Component registry for left sidebar
 const leftComponents: Record<string, unknown> = {
@@ -102,17 +103,16 @@ function isActive(href: string): boolean {
       )}
 
       <div class="flex items-center justify-center gap-3">
-        <a href="https://github.com" class="text-accent hover:opacity-70 transition-opacity" aria-label="Github">
-          <Github class="w-4 h-4" />
-        </a>
+        {siteConfig.socials?.github && (
+          <a href={siteConfig.socials.github} target="_blank" rel="noopener noreferrer" class="text-accent hover:opacity-70 transition-opacity" aria-label="GitHub">
+            <Github class="w-4 h-4" />
+          </a>
+        )}
         <a href="/rss.xml" class="text-accent hover:opacity-70 transition-opacity" aria-label="RSS">
           <Rss class="w-4 h-4" />
         </a>
-        <a href="/moments" class="text-accent hover:opacity-70 transition-opacity" aria-label="Moments">
+        <a href="/moments" class="text-accent hover:opacity-70 transition-opacity" aria-label={t.nav.moments}>
           <Clock class="w-4 h-4" />
-        </a>
-        <a href="#" class="text-accent hover:opacity-70 transition-opacity" aria-label="Eye">
-          <Eye class="w-4 h-4" />
         </a>
       </div>
     </div>
@@ -180,16 +180,23 @@ function isActive(href: string): boolean {
           <span class="text-muted">{t.sidebar.lastActive}：</span>
           <span class="text-main">{getLastActive()}</span>
         </div>
+          {icpRecords.length > 0 && (
           <div class="bg-card rounded-xl mt-5">
               <div class="flex items-center gap-1.5 mb-2.5">
                   <Award class="w-3.5 h-3.5 text-accent" />
                   <h3 class="text-sm font-medium text-main">{t.sidebar.icp}</h3>
               </div>
               <div class="space-y-1 text-xs text-muted">
-                  <p>皖ICP备2021008088号-2</p>
-                  <p>辽公网安备21021702000331号</p>
+                  {icpRecords.map((record) => (
+                      record.href ? (
+                          <p><a href={record.href} target="_blank" rel="noopener noreferrer nofollow" class="hover:text-accent transition-colors">{record.text}</a></p>
+                      ) : (
+                          <p>{record.text}</p>
+                      )
+                  ))}
               </div>
           </div>
+          )}
       </div>
     </div>
     )}

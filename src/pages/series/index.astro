@@ -12,8 +12,9 @@ const allSeries = await getCollection('series');
 const seriesWithMeta = allSeries
     .map((s) => {
         const seriesPosts = getPostsBySeries(posts, s.id);
+        // getPostsBySeries 现在是正序，取最新要算最大值，不能再取第一个
         const latestDate = seriesPosts.length > 0
-            ? new Date(seriesPosts[0].data.publishDate).getTime()
+            ? Math.max(...seriesPosts.map((p) => new Date(p.data.publishDate).getTime()))
             : 0;
         return {
             ...s,
@@ -21,6 +22,9 @@ const seriesWithMeta = allSeries
             latestDate,
         };
     })
+    // 专栏详情页只为「有文章的专栏」生成，所以这里也必须过滤掉空专栏，
+    // 否则列表上会出现一个点进去 404 的入口。
+    .filter((s) => s.postCount > 0)
     .sort((a, b) => b.latestDate - a.latestDate);
 ---
 

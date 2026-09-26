@@ -1,0 +1,14 @@
+{
+    "date": "2026-09-17",
+    "tags": [
+        "技术"
+    ],
+    "content": "主题是基于 Astro 做的。静态站点这块，它把内容集合和构建期渲染做得很顺手。",
+    "linkCard": {
+        "title": "Astro",
+        "description": "面向内容驱动型网站的 Web 框架。",
+        "url": "https://astro.build",
+        "image": "https://astro.build/og/astro.jpg",
+        "category": "框架"
+    }
+}

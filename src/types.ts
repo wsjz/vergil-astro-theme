@@ -89,8 +89,15 @@ export type FontConfig = {
     mono?: string;
 };
 
+export type IcpRecord = {
+    text: string;
+    href?: string;
+};
+
 export type SiteConfig = {
     website: string;
+    /** 备案信息，留空则不显示 */
+    icp?: IcpRecord[];
     /** 主题界面文案语言，见 src/i18n */
     locale?: string;
     fonts: FontConfig;
@@ -134,6 +141,8 @@ export type SiteConfig = {
         resume: { name: string; path: string };
         minimal: { name: string; path: string; enabled?: boolean };
     };
+    /** 左侧栏底部的社交图标。留空则只显示 RSS 和动态。 */
+    socials?: { github?: string };
     links?: SiteConfigLinks;
     /** 网站卡片封面截图服务，默认 thumio */
     screenshotService?: 'thumio' | 'mshots';

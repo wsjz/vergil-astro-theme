@@ -26,11 +26,11 @@ import { links, screenshotService } from './config/links';
 
 const siteConfig: SiteConfig = {
     // ── 基础设置 ──
-    website: 'https://xxros.com',
+    website: 'https://example.com',
     fonts,
     avatar: {
         src: avatar,
-        alt: 'Alex'
+        alt: '站点头像'
     },
 
     // ── 版权提示 ──

@@ -6,7 +6,7 @@ export const comments = {
     enabled: true,
     provider: 'giscus' as const,
     giscus: {
-        repo: 'rox/issues',
+        repo: 'your-name/your-repo',
         repoId: '',
         category: 'General',
         categoryId: '',

@@ -18,7 +18,7 @@ interface Props {
         caption?: string;
         season?: string;
         exif?: {
-            camera?: string; model?: string; focal?: string;
+            camera?: string; model?: string; lens?: string; focal?: string;
             aperture?: string; shutter?: string; iso?: string;
         };
     }>;
@@ -51,6 +51,7 @@ const { images, title, layout } = Astro.props;
                     {img.exif ? (
                         <div class="g-exif">
                             {img.exif.camera ? <span>{img.exif.camera}</span> : null}
+                            {img.exif.lens ? <span>{img.exif.lens}</span> : null}
                             {img.exif.focal ? <span>{img.exif.focal}</span> : null}
                             {img.exif.aperture ? <span>{img.exif.aperture}</span> : null}
                         </div>
