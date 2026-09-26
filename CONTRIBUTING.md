@@ -25,13 +25,7 @@ pnpm dev
 pnpm build
 ```
 
-构建必须通过。改了指令相关的代码再跑一次指令计数校验：
-
-```bash
-node scripts/count-directives.mjs
-```
-
-它会对比代码里的指令数量和文档里写的数字，对不上就退出报错。
+构建必须通过。
 
 ## 提交信息
 

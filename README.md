@@ -12,9 +12,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/wsjz/vergil-astro-theme?style=social)](https://github.com/wsjz/vergil-astro-theme)
 
-![首页](.github/3.jpg)
-![文章页](.github/1.jpg)
-![文档目录](.github/2.jpg)
+![Vergil 深色文档页与浅色首页](public/vergil-preview.jpg)
 
 </div>
 
@@ -67,6 +65,10 @@ pnpm reset     # 加 --dry 先看会删什么
 | **侧边栏** | 左右侧栏组件可插拔，热力图、标签云、目录、相关文章 |
 | **开箱即用** | 深色模式、全文搜索、评论、RSS、Sitemap、站点助理 |
 | **界面语言** | 主题文案支持中英切换，你写的内容不受影响 |
+
+![四种页面的实际效果](.github/features.jpg)
+
+四格分别是：文章里的折叠块与时间线指令、Golden 主题的影集、带侧边目录树的知识库、按分类筛选的沉浸阅读视图。
 
 具体怎么配、怎么写，跑起来之后站内的 `/docs` 就是完整文档，源文件在 [`src/content/docs/vergil-guide/`](src/content/docs/vergil-guide)。
 

@@ -15,7 +15,9 @@ const blogItems = posts.map((p) => ({
     title: p.data.title,
     date: p.data.publishDate.toISOString(),
     href: `/views/minimal/blog/${p.id}/`,
-    categoryId: p.data.categories && p.data.categories.length > 0 ? slugify(p.data.categories[p.data.categories.length - 1]) : null
+    // 站点其他地方按「任意一级分类匹配」筛选，极简模式以前只取最后一级，
+    // 导致「技术」「前端」这类上级分类的标签点进去永远是空的
+    categoryIds: (p.data.categories || []).map((c) => slugify(c))
 }));
 
 // 序列化文档树数据（保留层级结构）
@@ -148,8 +150,13 @@ const docSetsMeta = sets.map((s) => ({ id: s.id, title: s.meta.data.title }));
                 var filterTabs = '<div class="flex items-center gap-1 flex-wrap">';
                 if (type === 'blog') {
                     filterTabs += '<button data-cat="all" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === 'all' ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">' + i18n.all + '</button>';
-                    for (var i = 0; i < this.categories.length; i++) {
-                        var c = this.categories[i];
+                    var blog = this.blog;
+                    // 即使数据形状以后再变，也不要渲染出点进去是空的标签
+                    var nonEmpty = this.categories.filter(function(c) {
+                        return blog.some(function(p) { return (p.categoryIds || []).indexOf(c.id) !== -1; });
+                    });
+                    for (var i = 0; i < nonEmpty.length; i++) {
+                        var c = nonEmpty[i];
                         filterTabs += '<button data-cat="' + c.id + '" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === c.id ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">' + c.name + '</button>';
                     }
                 } else {
@@ -166,7 +173,7 @@ const docSetsMeta = sets.map((s) => ({ id: s.id, title: s.meta.data.title }));
 
             renderList(type, cat) {
                 if (type === 'blog') {
-                    var items = cat === 'all' ? this.blog : this.blog.filter(function(p) { return p.categoryId === cat; });
+                    var items = cat === 'all' ? this.blog : this.blog.filter(function(p) { return (p.categoryIds || []).indexOf(cat) !== -1; });
                     if (items.length === 0) {
                         return '<div class="text-center py-12 text-muted text-sm">' + i18n.empty + '</div>';
                     }

@@ -1,9 +1,10 @@
 export const splash = {
     enabled: true,
+    /** 开屏背景。主题自带的门面图放在 public/demo/ 下，不走外部图床 */
     backgroundImage: [
-        'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1920&q=80',
-        'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80',
-        'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80'
+        '/demo/splash-01.webp',
+        '/demo/splash-02.webp',
+        '/demo/splash-03.webp'
     ],
     overlay: 'rgba(0,0,0,0.1)',
     textShadow: true,

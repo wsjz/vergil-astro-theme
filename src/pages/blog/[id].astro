@@ -92,10 +92,9 @@ const hasNav = !!(navPrev || navNext || recommendNext);
 
 function resolveBannerUrl(banner: string | undefined): string | null {
     if (!banner) return null;
-    if (banner.startsWith('http')) {
-        return banner;
-    }
-    return `https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1600&h=400&fit=crop&q=80`;
+    // 外链和站内路径都直接用；以前只认 http 开头，站内路径会被悄悄换成兜底图
+    if (banner.startsWith('http') || banner.startsWith('/')) return banner;
+    return '/demo/banner-01.webp';
 }
 
 const bannerUrl = resolveBannerUrl(banner);
