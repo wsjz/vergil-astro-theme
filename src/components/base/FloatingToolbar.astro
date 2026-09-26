@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from '../ui/ThemeToggle.astro';
+import { t } from '../../i18n';
 import siteConfig from '../../data/site-config';
 
 interface Props {
@@ -18,8 +19,8 @@ const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
         <button
             id={`sidebar-desktop-toggle-${sidebarToggleEvent}`}
             class="flex items-center text-muted hover:text-accent transition-colors duration-200 cursor-pointer shrink-0"
-            aria-label="收起侧边栏"
-            title="收起侧边栏"
+            aria-label={t.toolbar.collapseSidebar}
+            title={t.toolbar.collapseSidebar}
             data-event={sidebarToggleEvent}
         >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -39,14 +40,14 @@ const minimalEnabled = siteConfig.views?.minimal?.enabled === true;
                 href="/views/minimal/"
                 id="minimal-entry-btn"
                 class="text-xs text-secondary hover:text-accent transition-colors flex items-center gap-1 px-2 py-1 rounded-md hover:bg-card"
-                title="进入沉浸模式"
+                title={t.toolbar.enterImmersive}
             >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>
                     <path d="M8 7h6"/>
                     <path d="M8 11h8"/>
                 </svg>
-                <span>沉浸</span>
+                <span>{t.toolbar.immersive}</span>
             </a>
         )}
         {showThemeToggle && <ThemeToggle />}

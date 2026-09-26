@@ -2,6 +2,7 @@
 import { BookOpen } from '@lucide/astro';
 import { getDocTree, getDocHomepageSlug, type DocTreeNode } from '../../utils/docs-utils';
 import DocsTreeNode from './DocsTreeNode.astro';
+import { t } from '../../i18n';
 
 interface Props {
     docId: string;
@@ -21,14 +22,14 @@ const homepageSlug = await getDocHomepageSlug(docId);
         <slot name="title">
             <div class="flex items-center gap-2 mb-5 pb-3 px-1 border-b border-light">
                 <BookOpen class="w-[18px] h-[18px] text-accent" />
-                <span class="font-display text-[13px] font-semibold text-main tracking-wide">文档</span>
+                <span class="font-display text-[13px] font-semibold text-main tracking-wide">{t.sidebar.docs}</span>
             </div>
         </slot>
 
         {tree.length > 0 ? (
             <DocsTreeNode nodes={tree} currentSlug={currentSlug} docId={docId} homepageSlug={homepageSlug} />
         ) : (
-            <p class="text-xs text-muted px-2">暂无文档</p>
+            <p class="text-xs text-muted px-2">{t.sidebar.noDocs}</p>
         )}
     </div>
 </aside>

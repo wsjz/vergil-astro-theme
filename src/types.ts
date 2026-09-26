@@ -91,6 +91,8 @@ export type FontConfig = {
 
 export type SiteConfig = {
     website: string;
+    /** 主题界面文案语言，见 src/i18n */
+    locale?: string;
     fonts: FontConfig;
     avatar?: ImageInput;
     title: string;

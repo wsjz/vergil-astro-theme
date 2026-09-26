@@ -1,4 +1,5 @@
 ---
+import { locale, t } from '../../i18n';
 import { marked } from 'marked';
 
 interface LinkCard {
@@ -34,7 +35,7 @@ export interface Props {
 const {
     name = '',
     avatar = '',
-    date = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }),
+    date = new Date().toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' }),
     content = '',
     images = [],
     forward,
@@ -110,7 +111,7 @@ const isLongContent = plainTextLength > 300;
                         />
                         {isLongContent && (
                             <button type="button" class="moment-expand-btn text-[var(--accent-color)] text-[13px] mt-1.5 hover:underline cursor-pointer bg-transparent border-0 p-0">
-                                展开
+                                {t.common.expand}
                             </button>
                         )}
                     </div>
@@ -294,7 +295,7 @@ const isLongContent = plainTextLength > 300;
     }
 </style>
 
-<script is:inline>
+<script is:inline define:vars={{ i18n: { expand: t.common.expand, collapse: t.common.collapse } }}>
 (function() {
     if (window.__momentScriptLoaded) return;
     window.__momentScriptLoaded = true;
@@ -308,11 +309,11 @@ const isLongContent = plainTextLength > 300;
         if (content.classList.contains('moment-expanded')) {
             content.classList.remove('moment-expanded');
             content.classList.add('moment-text-clamped');
-            btn.textContent = '展开';
+            btn.textContent = i18n.expand;
         } else {
             content.classList.remove('moment-text-clamped');
             content.classList.add('moment-expanded');
-            btn.textContent = '收起';
+            btn.textContent = i18n.collapse;
         }
     });
 

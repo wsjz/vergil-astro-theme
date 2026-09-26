@@ -1,4 +1,6 @@
 ---
+import { t } from '../../i18n';
+
 interface Heading {
     depth: number;
     slug: string;
@@ -27,7 +29,7 @@ const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 4);
                     data-toc-toggle
                     aria-expanded="true"
                 >
-                    <h3 class="text-xs font-medium text-muted uppercase tracking-wider">文章目录</h3>
+                    <h3 class="text-xs font-medium text-muted uppercase tracking-wider">{t.sidebar.toc}</h3>
                     <span class="text-muted group-hover:text-accent transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-toc-icon>
                             <line x1="8" y1="6" x2="21" y2="6" />

@@ -1,4 +1,5 @@
 ---
+import { locale, t } from '../../i18n';
 import { type CollectionEntry, getCollection } from 'astro:content';
 import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
 import siteConfig from '../../data/site-config';
@@ -26,7 +27,7 @@ if (config) {
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sortItemsByDateDesc);
 
 // Heatmap data
-const days = ['一', '二', '三', '四', '五', '六', '日'];
+const days = t.time.weekdaysMonFirst;
 const today = new Date();
 const weeks: { date: Date; posts: CollectionEntry<'blog'>[]; count: number; totalWords: number }[][] = [];
 for (let w = 0; w < 8; w++) {
@@ -59,7 +60,7 @@ const getLevelColor = (count: number) => {
 const totalPosts = posts.length;
 
 function formatDate(date: Date): string {
-    return date.toLocaleDateString('zh-CN', {
+    return date.toLocaleDateString(locale, {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
@@ -92,7 +93,7 @@ function isMemoItemConfig(config: unknown): boolean {
             if (componentId === 'heatmap') {
                 return (
                     <div class="mb-6 px-4">
-                        <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">热力图</h3>
+                        <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">{t.sidebar.heatmap}</h3>
                         <div class="flex items-start gap-1">
                             <div class="flex gap-0.5">
                                 {weeks.map((week) => (
@@ -103,6 +104,7 @@ function isMemoItemConfig(config: unknown): boolean {
                                                 data-date={formatDate(day.date)}
                                                 data-count={day.count}
                                                 data-words={day.totalWords}
+                                                data-stats={t.sidebar.heatmapDay(day.count, day.totalWords.toLocaleString(locale))}
                                                 data-titles={day.posts.map(p => p.data.title).join('|')}
                                                 data-links={day.posts.map(p => `/blog/${p.id}/`).join('|')}
                                             />
@@ -118,7 +120,7 @@ function isMemoItemConfig(config: unknown): boolean {
                                 ))}
                             </div>
                         </div>
-                        <p class="text-xs text-secondary mt-4">写写停停，博主已记录 {totalPosts} 篇文章！</p>
+                        <p class="text-xs text-secondary mt-4">{t.sidebar.heatmapSummary(totalPosts)}</p>
                     </div>
                 );
             }
@@ -134,7 +136,7 @@ function isMemoItemConfig(config: unknown): boolean {
             }
             return null;
         })}
-    <div id="heatmap-tooltip" class="fixed hidden z-50 bg-card border border-light rounded-lg shadow-lg px-4 py-3 max-w-xs">
+    <div id="heatmap-tooltip" class="fixed hidden z-50 bg-card border border-light rounded-lg shadow-lg px-4 py-3 max-w-xs" data-i18n-no-posts={t.sidebar.noPosts}>
         <div class="text-sm">
             <p id="tooltip-date" class="text-muted mb-1 text-xs"></p>
             <p id="tooltip-stats" class="font-medium text-main"></p>
@@ -155,14 +157,13 @@ function isMemoItemConfig(config: unknown): boolean {
         cells.forEach(cell => {
             cell.addEventListener('mouseenter', () => {
                 const date = cell.getAttribute('data-date');
-                const count = parseInt(cell.getAttribute('data-count') || '0');
-                const words = parseInt(cell.getAttribute('data-words') || '0');
+                const stats = cell.getAttribute('data-stats') || '';
                 const titles = cell.getAttribute('data-titles') || '';
                 const links = cell.getAttribute('data-links') || '';
                 if (!date) return;
 
                 tooltipDate.textContent = date;
-                tooltipStats.textContent = `共 ${count} 篇，${words.toLocaleString()} 字`;
+                tooltipStats.textContent = stats;
                 tooltipTitles.innerHTML = '';
                 if (titles && titles !== '') {
                     const titleList = titles.split('|').filter(t => t);
@@ -176,7 +177,10 @@ function isMemoItemConfig(config: unknown): boolean {
                         tooltipTitles.appendChild(a);
                     });
                 } else {
-                    tooltipTitles.innerHTML = '<div class="text-muted">无文章</div>';
+                    const empty = document.createElement('div');
+                    empty.className = 'text-muted';
+                    empty.textContent = tooltip.dataset.i18nNoPosts || '';
+                    tooltipTitles.appendChild(empty);
                 }
                 tooltip.classList.remove('hidden');
             });

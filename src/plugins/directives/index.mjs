@@ -16,7 +16,6 @@ import { processStoryDirective } from './story.mjs';
 import { processMindDirective } from './mind.mjs';
 
 export function remarkContentDirectives(options = {}) {
-    const { links, screenshotService } = options;
     return (tree) => {
         visit(tree, 'textDirective', (node) => {
             processInlineDirective(node);
@@ -31,19 +30,19 @@ export function remarkContentDirectives(options = {}) {
             const planNames = ['calendar'];
 
             if (blockNames.includes(name)) {
-                processBlockDirective(node, { links, screenshotService });
+                processBlockDirective(node, options);
             } else if (name === 'okr') {
-                processOkrDirective(node);
+                processOkrDirective(node, options);
             } else if (cardNames.includes(name)) {
-                processCardDirective(node, { links, screenshotService });
+                processCardDirective(node, options);
             } else if (mediaNames.includes(name)) {
-                processMediaDirective(node);
+                processMediaDirective(node, options);
             } else if (chartNames.includes(name)) {
-                processChartDirective(node);
+                processChartDirective(node, options);
             } else if (planNames.includes(name)) {
-                processCalendarDirective(node);
+                processCalendarDirective(node, options);
             } else if (name === 'private') {
-                processPrivateDirective(node);
+                processPrivateDirective(node, options);
             } else if (name === 'story') {
                 processStoryDirective(node, options);
             } else if (name === 'mind') {

@@ -1,19 +1,20 @@
 ---
 import { Sun, Moon, Palette } from '@lucide/astro';
 import siteConfig from '../../data/site-config';
+import { t } from '../../i18n';
 
 const schemes = [
-  { id: 'A', name: '暖羊皮纸', color: '#4a7c59' },
-  { id: 'B', name: '石板蓝灰', color: '#4a6fa5' },
-  { id: 'C', name: '暖墨橙红', color: '#c0622a' },
-  { id: 'D', name: '乳油玫瑰', color: '#c06070' },
-  { id: 'E', name: '黄油琥珀', color: '#c07818' },
-  { id: 'F', name: '薄荷鼠尾', color: '#2a8c62' },
-  { id: 'G', name: '鸢尾紫藤', color: '#7848cc' },
-  { id: 'H', name: '午夜海军', color: '#1848cc' },
-  { id: 'I', name: '炭黑极简', color: '#141414' },
-  { id: 'J', name: '苔藓森林', color: '#507838' },
-  { id: 'K', name: '沙岩暖棕', color: '#b86030' },
+  { id: 'A', name: t.theme.schemes.A, color: '#4a7c59' },
+  { id: 'B', name: t.theme.schemes.B, color: '#4a6fa5' },
+  { id: 'C', name: t.theme.schemes.C, color: '#c0622a' },
+  { id: 'D', name: t.theme.schemes.D, color: '#c06070' },
+  { id: 'E', name: t.theme.schemes.E, color: '#c07818' },
+  { id: 'F', name: t.theme.schemes.F, color: '#2a8c62' },
+  { id: 'G', name: t.theme.schemes.G, color: '#7848cc' },
+  { id: 'H', name: t.theme.schemes.H, color: '#1848cc' },
+  { id: 'I', name: t.theme.schemes.I, color: '#141414' },
+  { id: 'J', name: t.theme.schemes.J, color: '#507838' },
+  { id: 'K', name: t.theme.schemes.K, color: '#b86030' },
 ];
 
 const floatingAudioEnabled = siteConfig.floatingAudio?.enabled === true;
@@ -29,8 +30,8 @@ const floatingAudioEnabled = siteConfig.floatingAudio?.enabled === true;
     <button
       id="scheme-trigger"
       class="flex h-7 w-7 items-center justify-center rounded-full transition-all duration-200 hover:bg-card hover:shadow-sm"
-      aria-label="选择配色方案"
-      title="选择配色方案"
+      aria-label={t.theme.pickScheme}
+      title={t.theme.pickScheme}
     >
       <span id="scheme-indicator-icon" class="text-accent transition-colors duration-200">
         <Palette class="h-4 w-4" />
@@ -43,7 +44,7 @@ const floatingAudioEnabled = siteConfig.floatingAudio?.enabled === true;
       class="absolute right-0 top-full mt-2 hidden z-50"
     >
       <div class="bg-card border border-light rounded-xl shadow-lg p-3 min-w-[200px]">
-        <p class="text-[11px] text-muted mb-2 px-1">配色方案</p>
+        <p class="text-[11px] text-muted mb-2 px-1">{t.theme.scheme}</p>
         <div id="theme-scheme-picker" class="grid grid-cols-4 gap-2">
           {schemes.map((s) => (
             <button
@@ -73,8 +74,8 @@ const floatingAudioEnabled = siteConfig.floatingAudio?.enabled === true;
   <button
     id="dark-mode-toggle"
     class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-all duration-200 hover:bg-card hover:shadow-sm text-secondary hover:text-accent"
-    aria-label="切换暗色模式"
-    title="切换暗色模式"
+    aria-label={t.theme.toggleDark}
+    title={t.theme.toggleDark}
   >
     <span id="dark-mode-icon-light"><Sun class="h-4 w-4" /></span>
     <span id="dark-mode-icon-dark" class="hidden"><Moon class="h-4 w-4" /></span>
@@ -86,8 +87,8 @@ const floatingAudioEnabled = siteConfig.floatingAudio?.enabled === true;
       <button
         id="fa-toggle-btn"
         class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition-all duration-200 hover:bg-card hover:shadow-sm text-muted opacity-50"
-        aria-label="浮动播放器"
-        title="浮动播放器"
+        aria-label={t.theme.floatingPlayer}
+        title={t.theme.floatingPlayer}
       >
         <span id="fa-toggle-icon-wrap" class="relative inline-flex h-4 w-4 items-center justify-center">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">

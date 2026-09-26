@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPathsOptions, Page } from 'astro';
 import { type CollectionEntry, getCollection } from 'astro:content';
+import { t } from '../../i18n';
 import Pagination from '../../components/widgets/Pagination.astro';
 import PostPreview from '../../components/content/PostPreview.astro';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
@@ -20,14 +21,14 @@ const { page } = Astro.props;
 const blog = page.data;
 ---
 
-<BaseLayout title="博客" description="记录个人思考与技术探索的博客" showHeader={false}>
+<BaseLayout title={t.page.blog.title} description={t.page.blog.description} showHeader={false}>
     <SectionNav
         items={[
-            { label: '近期发布', href: '/blog/', active: true },
-            { label: '分类', href: '/categories/' },
-            { label: '标签', href: '/tags/' },
-            { label: '专栏', href: '/series/' },
-            { label: '归档', href: '/archives/' }
+            { label: t.nav.recent, href: '/blog/', active: true },
+            { label: t.nav.categories, href: '/categories/' },
+            { label: t.nav.tags, href: '/tags/' },
+            { label: t.nav.series, href: '/series/' },
+            { label: t.nav.archives, href: '/archives/' }
         ]}
     />
     {blog.map((post) => {

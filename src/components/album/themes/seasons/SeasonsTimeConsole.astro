@@ -2,6 +2,7 @@
 /**
  * SeasonsTimeConsole — Time slider console with seasonal poems.
  */
+import { t } from '../../../../i18n';
 ---
 
 <div class="time-console" id="time-console"
@@ -9,7 +10,7 @@
     <div class="time-console-inner">
         <div class="time-display">
             <span class="time-value" id="time-value">12:00</span>
-            <span class="time-label" id="time-label">正午</span>
+            <span class="time-label" id="time-label">{t.album.timeOfDay.noon}</span>
         </div>
         <div class="time-poem" id="time-poem">
             <p class="time-poem-line" id="time-poem-ja">春の匂いが、風の中で踊る</p>
@@ -29,7 +30,7 @@
             </div>
         </div>
         <div class="time-season-pill" id="time-season-pill">
-            <span class="time-season-name" id="time-season-name">春 Spring</span>
+            <span class="time-season-name" id="time-season-name">{t.album.seasonLabel.spring}</span>
         </div>
     </div>
 </div>

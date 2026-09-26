@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { t } from '../../i18n';
 import PostPreview from '../../components/content/PostPreview.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/ui/Breadcrumb.astro';
@@ -29,14 +30,14 @@ const seriesEntries = await getCollection('series');
 const seriesMeta = seriesEntries.find((s) => s.id === id);
 ---
 
-<BaseLayout title={`专栏：${seriesName}`} description={seriesMeta?.data.description || `「${seriesName}」专栏全部文章`} showHeader={false}>
-    <Breadcrumb crumbs={[{ text: '首页', href: '/' }, { text: '专栏', href: '/series' }, { text: seriesName }]} />
+<BaseLayout title={t.page.series.titleOf(seriesName)} description={seriesMeta?.data.description || t.page.series.descriptionOf(seriesName)} showHeader={false}>
+    <Breadcrumb crumbs={[{ text: t.common.home, href: '/' }, { text: t.nav.series, href: '/series' }, { text: seriesName }]} />
 
     <h1 class="mb-2 font-display text-xl sm:text-2xl">{seriesMeta?.data.name || seriesName}</h1>
     {seriesMeta?.data.description && (
         <p class="text-sm text-secondary mb-6">{seriesMeta.data.description}</p>
     )}
-    <p class="text-sm text-muted mb-10">共 {seriesPosts.length} 篇文章</p>
+    <p class="text-sm text-muted mb-10">{t.page.series.postsCount(seriesPosts.length)}</p>
 
     {seriesPosts.map((post) => {
         const hasBanner = !!post.data.banner;

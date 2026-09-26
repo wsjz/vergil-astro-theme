@@ -115,6 +115,17 @@ a:active {
         box-shadow var(--duration-base) ease-out;
 }
 
+/* 同一张卡片常常同时带 .reveal 和 .card-interactive。
+   transition 是简写属性，后写的那条会把前一条整个重置掉，
+   所以这里必须把两边要过渡的属性合并声明，否则悬停抬升会变成瞬间跳变。 */
+.reveal.card-interactive {
+    transition:
+        opacity var(--duration-base) ease-out,
+        transform var(--duration-base) ease-out,
+        translate var(--duration-base) ease-out,
+        box-shadow var(--duration-base) ease-out;
+}
+
 .card-interactive:active {
     translate: 0 0;
     transition-duration: 0.07s;

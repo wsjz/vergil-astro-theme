@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry } from 'astro:content';
 import { marked } from 'marked';
+import { t } from '../../i18n';
 
 interface Props {
     thought: CollectionEntry<'thoughts'>;
@@ -34,14 +35,14 @@ function formatDate(dateValue: Date): string {
     const minutes = String(target.getMinutes()).padStart(2, '0');
     const timeStr = `${hours}:${minutes}`;
 
-    if (diffDays <= 0) return `今天 ${timeStr}`;
-    if (diffDays === 1) return `昨天 ${timeStr}`;
-    if (diffDays < 7) return `${diffDays}天前 ${timeStr}`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前 ${timeStr}`;
+    if (diffDays <= 0) return `${t.time.today} ${timeStr}`;
+    if (diffDays === 1) return `${t.time.yesterday} ${timeStr}`;
+    if (diffDays < 7) return `${t.time.daysAgo(diffDays)} ${timeStr}`;
+    if (diffDays < 30) return `${t.time.weeksAgo(Math.floor(diffDays / 7))} ${timeStr}`;
     if (target.getFullYear() === now.getFullYear()) {
-        return `${month}月${day}日 ${timeStr}`;
+        return `${t.time.md(month, day)} ${timeStr}`;
     }
-    return `${target.getFullYear()}年${month}月${day}日`;
+    return t.time.ymd(target.getFullYear(), month, day);
 }
 
 const formattedDate = formatDate(date);
@@ -81,7 +82,7 @@ const formattedDate = formatDate(date);
                 type="button"
                 class="thought-expand-btn text-[var(--accent-color)] text-sm mt-2 hover:underline bg-transparent border-0 p-0 cursor-pointer"
             >
-                展开
+                {t.common.expand}
             </button>
         )}
     </div>
@@ -125,7 +126,7 @@ const formattedDate = formatDate(date);
     }
 </style>
 
-<script is:inline>
+<script is:inline define:vars={{ i18n: { expand: t.common.expand, collapse: t.common.collapse } }}>
 (function() {
     if (window.__thoughtCardScriptLoaded) return;
     window.__thoughtCardScriptLoaded = true;
@@ -140,11 +141,11 @@ const formattedDate = formatDate(date);
         if (content.classList.contains('thought-expanded')) {
             content.classList.remove('thought-expanded');
             content.classList.add('thought-content-clamped');
-            btn.textContent = '展开';
+            btn.textContent = i18n.expand;
         } else {
             content.classList.remove('thought-content-clamped');
             content.classList.add('thought-expanded');
-            btn.textContent = '收起';
+            btn.textContent = i18n.collapse;
         }
     });
 

@@ -84,10 +84,10 @@ function parsePlanTable(node) {
 
 function getStatusInfo(status) {
     const s = (status || '').toLowerCase().trim();
-    if (s === 'done') return { dot: '&#9679;', label: '已完成', class: 'md-plan-status--done' };
-    if (s === 'doing') return { dot: '&#9673;', label: '进行中', class: 'md-plan-status--doing' };
-    if (s === 'todo') return { dot: '&#9675;', label: '待办', class: 'md-plan-status--todo' };
-    return { dot: '&#9675;', label: s || '未知', class: 'md-plan-status--todo' };
+    if (s === 'done') return { dot: '&#9679;', label: currentI18n.done, class: 'md-plan-status--done' };
+    if (s === 'doing') return { dot: '&#9673;', label: currentI18n.doing, class: 'md-plan-status--doing' };
+    if (s === 'todo') return { dot: '&#9675;', label: currentI18n.todo, class: 'md-plan-status--todo' };
+    return { dot: '&#9675;', label: s || currentI18n.unknown, class: 'md-plan-status--todo' };
 }
 
 function getPriorityInfo(priority) {
@@ -152,7 +152,7 @@ function calcAverageProgress(rows, progressCol = 'progress') {
 
 function renderPlanBoard(data, attrs, uid, mapping) {
     const { columns, rows, colTypes } = data;
-    if (rows.length === 0) return `<p class="md-plan-empty">暂无数据</p>`;
+    if (rows.length === 0) return `<p class="md-plan-empty">${escapeHtml(currentI18n.noData)}</p>`;
 
     const groupBy = (attrs.groupBy || columns[0]).toLowerCase();
     const groupCol = columns.find(c => c.toLowerCase() === groupBy) || columns[0];
@@ -166,7 +166,7 @@ function renderPlanBoard(data, attrs, uid, mapping) {
     // Group rows
     const groups = {};
     for (const row of rows) {
-        const key = (row[groupCol] || '未分类').toString().trim();
+        const key = (row[groupCol] || currentI18n.uncategorized).toString().trim();
         if (!groups[key]) groups[key] = [];
         groups[key].push(row);
     }
@@ -257,7 +257,7 @@ function renderPlanBoard(data, attrs, uid, mapping) {
 
 function renderPlanList(data, attrs, uid, mapping) {
     const { columns, rows, colTypes } = data;
-    if (rows.length === 0) return `<p class="md-plan-empty">暂无数据</p>`;
+    if (rows.length === 0) return `<p class="md-plan-empty">${escapeHtml(currentI18n.noData)}</p>`;
 
     const statusCol = mapping.status || null;
     const titleCol = mapping.title || columns[0];
@@ -294,7 +294,7 @@ function renderPlanList(data, attrs, uid, mapping) {
 
 function renderPlanTable(data, attrs, uid, mapping) {
     const { columns, rows, colTypes } = data;
-    if (rows.length === 0) return `<p class="md-plan-empty">暂无数据</p>`;
+    if (rows.length === 0) return `<p class="md-plan-empty">${escapeHtml(currentI18n.noData)}</p>`;
 
     const statusCol = mapping.status || '';
     const priorityCol = mapping.priority || '';
@@ -321,14 +321,14 @@ function renderPlanTable(data, attrs, uid, mapping) {
     let toolbarHtml = '';
     if (Object.keys(filterValues).length > 0) {
         toolbarHtml += `<div class="md-plan-toolbar">`;
-        toolbarHtml += `<div class="md-plan-search"><svg class="md-plan-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" class="md-plan-search__input" placeholder="搜索..." data-plan-search></div>`;
+        toolbarHtml += `<div class="md-plan-search"><svg class="md-plan-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" class="md-plan-search__input" placeholder="${escapeHtml(currentI18n.search)}..." data-plan-search></div>`;
 
         for (const [col, values] of Object.entries(filterValues)) {
             const label = col;
             toolbarHtml += `<div class="md-plan-filter-dropdown" data-filter-col="${escapeHtml(col)}">`;
-            toolbarHtml += `<button class="md-plan-filter-trigger" data-filter-val="">${escapeHtml(label)}: 全部 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>`;
+            toolbarHtml += `<button class="md-plan-filter-trigger" data-filter-val="">${escapeHtml(label)}: ${escapeHtml(currentI18n.all)} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>`;
             toolbarHtml += `<div class="md-plan-filter-menu">`;
-            toolbarHtml += `<div class="md-plan-filter-item active" data-filter-val="">全部</div>`;
+            toolbarHtml += `<div class="md-plan-filter-item active" data-filter-val="">${escapeHtml(currentI18n.all)}</div>`;
             for (const val of values) {
                 toolbarHtml += `<div class="md-plan-filter-item" data-filter-val="${escapeHtml(val)}">${escapeHtml(val)}</div>`;
             }
@@ -338,7 +338,7 @@ function renderPlanTable(data, attrs, uid, mapping) {
     } else {
         // No filters: just search box
         toolbarHtml += `<div class="md-plan-toolbar">`;
-        toolbarHtml += `<div class="md-plan-search"><svg class="md-plan-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" class="md-plan-search__input" placeholder="搜索..." data-plan-search></div>`;
+        toolbarHtml += `<div class="md-plan-search"><svg class="md-plan-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" class="md-plan-search__input" placeholder="${escapeHtml(currentI18n.search)}..." data-plan-search></div>`;
         toolbarHtml += `</div>`;
     }
 
@@ -370,6 +370,42 @@ function renderPlanTable(data, attrs, uid, mapping) {
     return `<div class="md-plan-table-wrap" data-plan-id="${uid}" data-plan-rows='${dataJson}' data-plan-cols='${colsJson}' data-plan-coltypes='${colTypesJson}' data-plan-status="${escapeHtml(statusCol)}" data-plan-priority="${escapeHtml(priorityCol)}">${toolbarHtml}${tableHtml}${js}</div>`;
 }
 
+// 当前指令的语言，processPlanDirective 入口处赋值。remark 是同步逐节点处理，不会串。
+let currentLocale = 'zh-CN';
+
+// 中文兜底文案，同样在 processPlanDirective 入口处按 options 覆盖。
+const PLAN_I18N_FALLBACK = {
+    all: '全部',
+    search: '搜索',
+    noMatch: '无匹配结果',
+    noData: '暂无数据',
+    noDateData: '暂无日期数据',
+    missingDateColumn: '缺少 date 列',
+    uncategorized: '未分类',
+    unknown: '未知',
+    todo: '待办',
+    doing: '进行中',
+    done: '已完成',
+    overall: '整体完成度',
+    statusDist: '状态分布',
+    priorityDist: '优先级分布',
+    summary: (total, done, doing, todo) => `${total} 个任务 · ${done} 已完成 · ${doing} 进行中 · ${todo} 待办`,
+    items: (n) => `${n} 个条目`,
+    nthReview: (n) => `第 ${n} 次复习`,
+    reviewToday: '今天该复习',
+    reviewPending: '待复习',
+};
+const PLAN_TIME_FALLBACK = {
+    month: (m) => `${m}月`,
+};
+let currentI18n = PLAN_I18N_FALLBACK;
+let currentTime = PLAN_TIME_FALLBACK;
+
+// 插进运行时脚本单引号字符串字面量里的文案：先做 HTML 转义（顺带处理引号），再转义反斜杠。
+function jsStr(text) {
+    return escapeHtml(text).replace(/\\/g, '\\\\');
+}
+
 function renderTableRow(row, columns, colTypes, statusCol, priorityCol) {
     let html = `<tr>`;
     for (const col of columns) {
@@ -393,7 +429,7 @@ function renderTableRow(row, columns, colTypes, statusCol, priorityCol) {
             html += renderProgressBar(val, 'small');
         } else if (type === 'number') {
             const num = parseFloat(val);
-            const display = !isNaN(num) ? num.toLocaleString('zh-CN') : escapeHtml(val);
+            const display = !isNaN(num) ? num.toLocaleString(currentLocale) : escapeHtml(val);
             html += `<span class="md-plan-number">${display}</span>`;
         } else if (type === 'date') {
             const d = new Date(val);
@@ -421,12 +457,12 @@ function renderTableRow(row, columns, colTypes, statusCol, priorityCol) {
 
 function buildTableRuntime(uid, columns, rows, colTypes, statusCol, priorityCol) {
     // Minified inline JS for table filter/sort/search
-    return `<script>(function(d){if(!d)return;var r=JSON.parse(d.dataset.planRows||'[]'),c=JSON.parse(d.dataset.planCols||'[]'),t=JSON.parse(d.dataset.planColtypes||'{}');var tbody=d.querySelector('[data-plan-tbody]');var searchInp=d.querySelector('[data-plan-search]');var filterDDs=d.querySelectorAll('.md-plan-filter-dropdown');var sortHeaders=d.querySelectorAll('[data-sort-col]');var curSort={col:'',dir:0};var filters={};function esc(s){return(s+'').replace(/\u0026/g,'\u0026amp;').replace(/\u003c/g,'\u0026lt;').replace(/\u003e/g,'\u0026gt;').replace(/"/g,'\u0026quot;');}function renderRows(rows){if(rows.length===0){tbody.innerHTML='\u003ctr\u003e\u003ctd colspan="'+c.length+'" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-size:0.85rem;"\u003e无匹配结果\u003c/td\u003e\u003c/tr\u003e';return;}tbody.innerHTML=rows.map(function(row){var h='\u003ctr\u003e';c.forEach(function(col){var v=row[col]||'',tp=t[col]||'text';h+='\u003ctd\u003e';if(tp==='status'){var s=v.toLowerCase().trim();var dot=s==='done'?'\u0026#9679;':s==='doing'?'\u0026#9673;':'\u0026#9675;';var cls=s==='done'?'md-plan-status--done':s==='doing'?'md-plan-status--doing':'md-plan-status--todo';h+='\u003cspan class="md-plan-status-dot '+cls+'"\u003e'+dot+'\u003c/span\u003e';}else if(tp==='priority'){var p=v.toUpperCase().trim();var pd=p==='P0'||p==='P1'?'\u0026#9679;':'\u0026#9675;';var pl=p||'-';var pcl=p==='P0'?'md-plan-priority--high':p==='P1'?'md-plan-priority--medium':'md-plan-priority--low';h+='\u003cspan class="md-plan-pill '+pcl+'"\u003e'+pd+' '+pl+'\u003c/span\u003e';}else if(tp==='checkbox'){var ch=v.toLowerCase()==='true'||v==='1'||v==='✓';var cd=ch?'\u0026#9679;':'\u0026#9675;';var ccl=ch?'md-plan-status--done':'md-plan-status--todo';h+='\u003cspan class="md-plan-status-dot '+ccl+'"\u003e'+cd+'\u003c/span\u003e';}else if(tp==='select'){h+='\u003cspan class="md-plan-pill"\u003e'+esc(v)+'\u003c/span\u003e';}else if(tp==='progress'||tp==='percent'){var m=(v+'').match(/(\\d+)/);var pct=m?Math.min(100,Math.max(0,parseInt(m[1]))):null;h+=pct!==null?'\u003cdiv class="md-plan-progress md-plan-progress--small"\u003e\u003cdiv class="md-plan-progress__track"\u003e\u003cdiv class="md-plan-progress__fill" style="width:'+pct+'%"\u003e\u003c/div\u003e\u003c/div\u003e\u003cspan class="md-plan-progress__text"\u003e'+pct+'%\u003c/span\u003e\u003c/div\u003e':esc(v);}else if(tp==='number'){var num=parseFloat(v);var dn=!isNaN(num)?num.toLocaleString('zh-CN'):esc(v);h+='\u003cspan class="md-plan-number"\u003e'+dn+'\u003c/span\u003e';}else if(tp==='date'){var d=new Date(v);var m=!isNaN(d)?d.getMonth()+1:0;var mc=m>0?' md-plan-date--m'+m:'';h+='\u003cspan class="md-plan-date'+mc+'"\u003e'+esc(v)+'\u003c/span\u003e';}else if(tp==='link'){var arr='\u003csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"md-plan-link-arrow\"\u003e\u003cpath fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 3h6v6m-11 5L21 3m-3 10v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\"\/\u003e\u003c\/svg\u003e';var mdl=v.match(/^\[(.+?)\]\((.+?)\)$/);if(mdl){h+='\u003ca href="'+esc(mdl[2])+'" target="_blank" rel="noopener noreferrer" class=\"md-plan-link\"\u003e'+esc(mdl[1])+arr+'\u003c/a\u003e';}else{var u=v.startsWith('http')?v:'https://'+v;h+='\u003ca href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" class=\"md-plan-link\"\u003e'+esc(v)+arr+'\u003c/a\u003e';}}else{h+=esc(v);}h+='\u003c/td\u003e';});h+='\u003c/tr\u003e';return h;}).join('');}function applyFilters(){var result=r.slice();var q=searchInp?searchInp.value.toLowerCase().trim():'';if(q){result=result.filter(function(row){return c.some(function(col){return(row[col]||'').toLowerCase().includes(q);});});}Object.keys(filters).forEach(function(col){var val=filters[col];if(val){result=result.filter(function(row){return(row[col]||'')===val;});}});if(curSort.col\u0026\u0026curSort.dir){result.sort(function(a,b){var av=a[curSort.col]||'',bv=b[curSort.col]||'';var an=isNaN(+av)?av:+av;var bn=isNaN(+bv)?bv:+bv;if(an\u003c bn)return-1*curSort.dir;if(an\u003e bn)return curSort.dir;return 0;});}renderRows(result);}if(searchInp){searchInp.addEventListener('input',function(){applyFilters();});}filterDDs.forEach(function(dd){var col=dd.dataset.filterCol;var trigger=dd.querySelector('.md-plan-filter-trigger');var items=dd.querySelectorAll('.md-plan-filter-item');trigger.addEventListener('click',function(e){e.stopPropagation();document.querySelectorAll('.md-plan-filter-dropdown.open').forEach(function(o){if(o!==dd)o.classList.remove('open');});dd.classList.toggle('open');});items.forEach(function(item){item.addEventListener('click',function(){items.forEach(function(i){i.classList.remove('active');});item.classList.add('active');filters[col]=item.dataset.filterVal;var label=trigger.textContent.split(':')[0];trigger.innerHTML=esc(label)+': '+(item.dataset.filterVal?esc(item.dataset.filterVal):'全部')+' \u003csvg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"\u003e\u003cpolyline points="6 9 12 15 18 9"\/\u003e\u003c/svg\u003e';dd.classList.remove('open');applyFilters();});});});document.addEventListener('click',function(){document.querySelectorAll('.md-plan-filter-dropdown.open').forEach(function(dd){dd.classList.remove('open');});});sortHeaders.forEach(function(th){th.addEventListener('click',function(){var col=th.dataset.sortCol;var icon=th.querySelector('.md-plan-sort-icon');if(curSort.col===col){curSort.dir=curSort.dir===1?-1:curSort.dir===-1?0:1;}else{curSort.col=col;curSort.dir=1;}sortHeaders.forEach(function(h){var ic=h.querySelector('.md-plan-sort-icon');if(ic)ic.removeAttribute('data-sort-dir');});if(curSort.dir\u0026\u0026icon){icon.dataset.sortDir=curSort.dir===1?'asc':'desc';}applyFilters();});});})(document.currentScript.parentElement);\u003c/script\u003e`;
+    return `<script>(function(d){if(!d)return;var r=JSON.parse(d.dataset.planRows||'[]'),c=JSON.parse(d.dataset.planCols||'[]'),t=JSON.parse(d.dataset.planColtypes||'{}');var tbody=d.querySelector('[data-plan-tbody]');var searchInp=d.querySelector('[data-plan-search]');var filterDDs=d.querySelectorAll('.md-plan-filter-dropdown');var sortHeaders=d.querySelectorAll('[data-sort-col]');var curSort={col:'',dir:0};var filters={};function esc(s){return(s+'').replace(/\u0026/g,'\u0026amp;').replace(/\u003c/g,'\u0026lt;').replace(/\u003e/g,'\u0026gt;').replace(/"/g,'\u0026quot;');}function renderRows(rows){if(rows.length===0){tbody.innerHTML='\u003ctr\u003e\u003ctd colspan="'+c.length+'" style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-size:0.85rem;"\u003e${jsStr(currentI18n.noMatch)}\u003c/td\u003e\u003c/tr\u003e';return;}tbody.innerHTML=rows.map(function(row){var h='\u003ctr\u003e';c.forEach(function(col){var v=row[col]||'',tp=t[col]||'text';h+='\u003ctd\u003e';if(tp==='status'){var s=v.toLowerCase().trim();var dot=s==='done'?'\u0026#9679;':s==='doing'?'\u0026#9673;':'\u0026#9675;';var cls=s==='done'?'md-plan-status--done':s==='doing'?'md-plan-status--doing':'md-plan-status--todo';h+='\u003cspan class="md-plan-status-dot '+cls+'"\u003e'+dot+'\u003c/span\u003e';}else if(tp==='priority'){var p=v.toUpperCase().trim();var pd=p==='P0'||p==='P1'?'\u0026#9679;':'\u0026#9675;';var pl=p||'-';var pcl=p==='P0'?'md-plan-priority--high':p==='P1'?'md-plan-priority--medium':'md-plan-priority--low';h+='\u003cspan class="md-plan-pill '+pcl+'"\u003e'+pd+' '+pl+'\u003c/span\u003e';}else if(tp==='checkbox'){var ch=v.toLowerCase()==='true'||v==='1'||v==='✓';var cd=ch?'\u0026#9679;':'\u0026#9675;';var ccl=ch?'md-plan-status--done':'md-plan-status--todo';h+='\u003cspan class="md-plan-status-dot '+ccl+'"\u003e'+cd+'\u003c/span\u003e';}else if(tp==='select'){h+='\u003cspan class="md-plan-pill"\u003e'+esc(v)+'\u003c/span\u003e';}else if(tp==='progress'||tp==='percent'){var m=(v+'').match(/(\\d+)/);var pct=m?Math.min(100,Math.max(0,parseInt(m[1]))):null;h+=pct!==null?'\u003cdiv class="md-plan-progress md-plan-progress--small"\u003e\u003cdiv class="md-plan-progress__track"\u003e\u003cdiv class="md-plan-progress__fill" style="width:'+pct+'%"\u003e\u003c/div\u003e\u003c/div\u003e\u003cspan class="md-plan-progress__text"\u003e'+pct+'%\u003c/span\u003e\u003c/div\u003e':esc(v);}else if(tp==='number'){var num=parseFloat(v);var dn=!isNaN(num)?num.toLocaleString('${currentLocale}'):esc(v);h+='\u003cspan class="md-plan-number"\u003e'+dn+'\u003c/span\u003e';}else if(tp==='date'){var d=new Date(v);var m=!isNaN(d)?d.getMonth()+1:0;var mc=m>0?' md-plan-date--m'+m:'';h+='\u003cspan class="md-plan-date'+mc+'"\u003e'+esc(v)+'\u003c/span\u003e';}else if(tp==='link'){var arr='\u003csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"md-plan-link-arrow\"\u003e\u003cpath fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15 3h6v6m-11 5L21 3m-3 10v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\"\/\u003e\u003c\/svg\u003e';var mdl=v.match(/^\[(.+?)\]\((.+?)\)$/);if(mdl){h+='\u003ca href="'+esc(mdl[2])+'" target="_blank" rel="noopener noreferrer" class=\"md-plan-link\"\u003e'+esc(mdl[1])+arr+'\u003c/a\u003e';}else{var u=v.startsWith('http')?v:'https://'+v;h+='\u003ca href="'+esc(u)+'" target="_blank" rel="noopener noreferrer" class=\"md-plan-link\"\u003e'+esc(v)+arr+'\u003c/a\u003e';}}else{h+=esc(v);}h+='\u003c/td\u003e';});h+='\u003c/tr\u003e';return h;}).join('');}function applyFilters(){var result=r.slice();var q=searchInp?searchInp.value.toLowerCase().trim():'';if(q){result=result.filter(function(row){return c.some(function(col){return(row[col]||'').toLowerCase().includes(q);});});}Object.keys(filters).forEach(function(col){var val=filters[col];if(val){result=result.filter(function(row){return(row[col]||'')===val;});}});if(curSort.col\u0026\u0026curSort.dir){result.sort(function(a,b){var av=a[curSort.col]||'',bv=b[curSort.col]||'';var an=isNaN(+av)?av:+av;var bn=isNaN(+bv)?bv:+bv;if(an\u003c bn)return-1*curSort.dir;if(an\u003e bn)return curSort.dir;return 0;});}renderRows(result);}if(searchInp){searchInp.addEventListener('input',function(){applyFilters();});}filterDDs.forEach(function(dd){var col=dd.dataset.filterCol;var trigger=dd.querySelector('.md-plan-filter-trigger');var items=dd.querySelectorAll('.md-plan-filter-item');trigger.addEventListener('click',function(e){e.stopPropagation();document.querySelectorAll('.md-plan-filter-dropdown.open').forEach(function(o){if(o!==dd)o.classList.remove('open');});dd.classList.toggle('open');});items.forEach(function(item){item.addEventListener('click',function(){items.forEach(function(i){i.classList.remove('active');});item.classList.add('active');filters[col]=item.dataset.filterVal;var label=trigger.textContent.split(':')[0];trigger.innerHTML=esc(label)+': '+(item.dataset.filterVal?esc(item.dataset.filterVal):'${jsStr(currentI18n.all)}')+' \u003csvg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"\u003e\u003cpolyline points="6 9 12 15 18 9"\/\u003e\u003c/svg\u003e';dd.classList.remove('open');applyFilters();});});});document.addEventListener('click',function(){document.querySelectorAll('.md-plan-filter-dropdown.open').forEach(function(dd){dd.classList.remove('open');});});sortHeaders.forEach(function(th){th.addEventListener('click',function(){var col=th.dataset.sortCol;var icon=th.querySelector('.md-plan-sort-icon');if(curSort.col===col){curSort.dir=curSort.dir===1?-1:curSort.dir===-1?0:1;}else{curSort.col=col;curSort.dir=1;}sortHeaders.forEach(function(h){var ic=h.querySelector('.md-plan-sort-icon');if(ic)ic.removeAttribute('data-sort-dir');});if(curSort.dir\u0026\u0026icon){icon.dataset.sortDir=curSort.dir===1?'asc':'desc';}applyFilters();});});})(document.currentScript.parentElement);\u003c/script\u003e`;
 }
 
 function renderPlanTimeline(data, attrs, uid, mapping) {
     const { columns, rows } = data;
-    if (rows.length === 0) return `<p class="md-plan-empty">暂无数据</p>`;
+    if (rows.length === 0) return `<p class="md-plan-empty">${escapeHtml(currentI18n.noData)}</p>`;
 
     const titleCol = mapping.title || columns[0];
     const statusCol = mapping.status || null;
@@ -463,7 +499,7 @@ function renderPlanTimeline(data, attrs, uid, mapping) {
     }
 
     if (entries.length === 0) {
-        return `<p class="md-plan-empty">暂无日期数据</p>`;
+        return `<p class="md-plan-empty">${escapeHtml(currentI18n.noDateData)}</p>`;
     }
 
     let minDate, maxDate;
@@ -489,7 +525,7 @@ function renderPlanTimeline(data, attrs, uid, mapping) {
         : entries.map(e => e.date);
     for (const date of allDates) {
         const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        if (!months.has(key)) months.set(key, { key, label: `${date.getMonth() + 1}月` });
+        if (!months.has(key)) months.set(key, { key, label: currentTime.month(date.getMonth() + 1) });
     }
 
     // Key ticks: minDate, maxDate, all task point dates
@@ -599,7 +635,7 @@ function renderPlanMilestone(data, attrs, uid, mapping) {
     const progressCol = mapping.progress || null;
 
     if (!dateCol) {
-        return `<p class="md-plan-empty">缺少 date 列</p>`;
+        return `<p class="md-plan-empty">${escapeHtml(currentI18n.missingDateColumn)}</p>`;
     }
 
     const datedRows = [];
@@ -647,7 +683,7 @@ function renderPlanMilestone(data, attrs, uid, mapping) {
 
 function renderPlanProgress(data, attrs, uid, mapping) {
     const { columns, rows } = data;
-    if (rows.length === 0) return `<p class="md-plan-empty">暂无数据</p>`;
+    if (rows.length === 0) return `<p class="md-plan-empty">${escapeHtml(currentI18n.noData)}</p>`;
 
     const titleCol = mapping.title || columns[0];
     const progressCol = mapping.progress || null;
@@ -671,15 +707,15 @@ function renderPlanProgress(data, attrs, uid, mapping) {
     html += `<circle class="md-plan-donut__bg" cx="50" cy="50" r="${radius}"/>`;
     html += `<circle class="md-plan-donut__fg" cx="50" cy="50" r="${radius}" stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}"/>`;
     html += `<text x="50" y="48" text-anchor="middle" class="md-plan-donut__text">${avgProgress}%</text>`;
-    html += `<text x="50" y="62" text-anchor="middle" class="md-plan-donut__label">整体完成度</text>`;
+    html += `<text x="50" y="62" text-anchor="middle" class="md-plan-donut__label">${escapeHtml(currentI18n.overall)}</text>`;
     html += `</svg>`;
     html += `</div>`;
     html += `<div class="md-plan-progress-view__summary">`;
-    html += `<div class="md-plan-progress-view__summary-title">整体完成度</div>`;
+    html += `<div class="md-plan-progress-view__summary-title">${escapeHtml(currentI18n.overall)}</div>`;
     if (statusCol) {
-        html += `<div class="md-plan-progress-view__summary-desc">${total} 个任务 · ${statusCounts.done} 已完成 · ${statusCounts.doing} 进行中 · ${statusCounts.todo} 待办</div>`;
+        html += `<div class="md-plan-progress-view__summary-desc">${escapeHtml(currentI18n.summary(total, statusCounts.done, statusCounts.doing, statusCounts.todo))}</div>`;
     } else {
-        html += `<div class="md-plan-progress-view__summary-desc">${total} 个条目</div>`;
+        html += `<div class="md-plan-progress-view__summary-desc">${escapeHtml(currentI18n.items(total))}</div>`;
     }
     html += `</div>`;
     html += `</div>`;
@@ -707,9 +743,9 @@ function renderPlanProgress(data, attrs, uid, mapping) {
 
         if (statusCol) {
             html += `<div class="md-plan-progress-view__stat-group">`;
-            html += `<div class="md-plan-progress-view__stat-title">状态分布</div>`;
+            html += `<div class="md-plan-progress-view__stat-title">${escapeHtml(currentI18n.statusDist)}</div>`;
             const statusOrder = ['done', 'doing', 'todo'];
-            const statusNames = { done: '已完成', doing: '进行中', todo: '待办' };
+            const statusNames = { done: currentI18n.done, doing: currentI18n.doing, todo: currentI18n.todo };
             const statusDots = { done: '&#9679;', doing: '&#9673;', todo: '&#9675;' };
             for (const key of statusOrder) {
                 const count = statusCounts[key];
@@ -717,7 +753,7 @@ function renderPlanProgress(data, attrs, uid, mapping) {
                 const barFilled = '█'.repeat(Math.round(pct / 10));
                 const barEmpty = '░'.repeat(10 - Math.round(pct / 10));
                 html += `<div class="md-plan-progress-view__stat-row">`;
-                html += `<span class="md-plan-progress-view__stat-label">${statusDots[key]} ${statusNames[key]}</span>`;
+                html += `<span class="md-plan-progress-view__stat-label">${statusDots[key]} ${escapeHtml(statusNames[key])}</span>`;
                 html += `<span class="md-plan-progress-view__stat-bar">${barFilled}${barEmpty}</span>`;
                 html += `<span class="md-plan-progress-view__stat-count">${count}</span>`;
                 html += `<span class="md-plan-progress-view__stat-pct">${pct}%</span>`;
@@ -728,7 +764,7 @@ function renderPlanProgress(data, attrs, uid, mapping) {
 
         if (priorityCol) {
             html += `<div class="md-plan-progress-view__stat-group">`;
-            html += `<div class="md-plan-progress-view__stat-title">优先级分布</div>`;
+            html += `<div class="md-plan-progress-view__stat-title">${escapeHtml(currentI18n.priorityDist)}</div>`;
             const priorityOrder = ['P0', 'P1', 'P2'];
             const priorityDots = { P0: '&#9679;', P1: '&#9679;', P2: '&#9675;' };
             const priorityTotal = priorityCounts.P0 + priorityCounts.P1 + priorityCounts.P2;
@@ -756,13 +792,13 @@ function renderPlanProgress(data, attrs, uid, mapping) {
 
 function renderPlanEbbinghaus(data, attrs, uid, mapping) {
     const { columns, rows } = data;
-    if (rows.length === 0) return `<p class="md-plan-empty">暂无数据</p>`;
+    if (rows.length === 0) return `<p class="md-plan-empty">${escapeHtml(currentI18n.noData)}</p>`;
 
     const titleCol = mapping.title || columns[0];
     const dateCol = mapping.date;
 
     if (!dateCol) {
-        return `<p class="md-plan-empty">缺少 date 列</p>`;
+        return `<p class="md-plan-empty">${escapeHtml(currentI18n.missingDateColumn)}</p>`;
     }
 
     // Parse custom steps from attrs, default to standard Ebbinghaus intervals
@@ -816,7 +852,7 @@ function renderPlanEbbinghaus(data, attrs, uid, mapping) {
     }
 
     if (entries.length === 0) {
-        return `<p class="md-plan-empty">暂无日期数据</p>`;
+        return `<p class="md-plan-empty">${escapeHtml(currentI18n.noDateData)}</p>`;
     }
 
     // Collect extra columns (excluding title and date) to show in hover cards
@@ -845,15 +881,15 @@ function renderPlanEbbinghaus(data, attrs, uid, mapping) {
             html += `<div class="md-plan-ebbinghaus__card">`;
             html += `<div class="md-plan-ebbinghaus__card-arrow"></div>`;
             html += `<div class="md-plan-ebbinghaus__card-body">`;
-            html += `<div class="md-plan-ebbinghaus__card-title">第 ${node.nth} 次复习</div>`;
+            html += `<div class="md-plan-ebbinghaus__card-title">${escapeHtml(currentI18n.nthReview(node.nth))}</div>`;
             html += `<div class="md-plan-ebbinghaus__card-date">${escapeHtml(node.dateStr)}</div>`;
             html += `<div class="md-plan-ebbinghaus__card-status">`;
             if (node.status === 'completed') {
-                html += `<span class="md-plan-ebbinghaus__card-status--completed">已完成</span>`;
+                html += `<span class="md-plan-ebbinghaus__card-status--completed">${escapeHtml(currentI18n.done)}</span>`;
             } else if (node.status === 'today') {
-                html += `<span class="md-plan-ebbinghaus__card-status--today">今天该复习</span>`;
+                html += `<span class="md-plan-ebbinghaus__card-status--today">${escapeHtml(currentI18n.reviewToday)}</span>`;
             } else {
-                html += `<span class="md-plan-ebbinghaus__card-status--pending">待复习</span>`;
+                html += `<span class="md-plan-ebbinghaus__card-status--pending">${escapeHtml(currentI18n.reviewPending)}</span>`;
             }
             html += `</div>`;
 
@@ -947,6 +983,9 @@ function filterViews(views, mapping) {
 
 export function processPlanDirective(node, options = {}) {
     try {
+        currentLocale = options.locale || 'zh-CN';
+        currentI18n = options.i18n?.plan ?? PLAN_I18N_FALLBACK;
+        currentTime = options.time ?? PLAN_TIME_FALLBACK;
         const attrs = node.attributes || {};
         const title = attrs.title || '';
         const viewsAttr = attrs.views || 'board,list,table,timeline,milestone,progress';

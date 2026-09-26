@@ -3,6 +3,7 @@ import { type CollectionEntry } from 'astro:content';
 import { Calendar, Clock } from '@lucide/astro';
 import FormattedDate from '../ui/FormattedDate.astro';
 import { slugify } from '../../utils/common-utils';
+import { t } from '../../i18n';
 
 type Props = { post: CollectionEntry<'blog'>; class?: string; headingLevel?: 'h2' | 'h3' };
 
@@ -72,7 +73,7 @@ const hasBanner = !!banner;
                     <FormattedDate date={publishDate} />
                 </span>
                 {updatedDate && (
-                    <span class="text-muted">更新于 <FormattedDate date={updatedDate} /></span>
+                    <span class="text-muted">{t.post.updatedAt} <FormattedDate date={updatedDate} /></span>
                 )}
                 {categories && categories.length > 0 ? (
                     <span class="flex items-center gap-1">

@@ -34,6 +34,25 @@ const WEEKDAYS   = ['日', '一', '二', '三', '四', '五', '六'];
 const NAV_RANGE  = 12;
 const GRID_CELLS = 42;
 
+/* 中文兜底文案；processCalendarDirective 入口处按 options 覆盖。remark 是同步逐节点处理，不会串。 */
+const I18N_FALLBACK = {
+    prev: '上月',
+    next: '下月',
+    today: '今天',
+    more: '更多',
+    workday: '班',
+    holiday: '休',
+    lunarFirst: '初一',
+    lunarMonthFirst: (month) => `${month}月初一`,
+};
+const TIME_FALLBACK = {
+    weekdaysSunFirst: WEEKDAYS,
+    day: (d) => `${d}日`,
+    md: (m, d) => `${m}月${d}日`,
+};
+let currentI18n = I18N_FALLBACK;
+let currentTime = TIME_FALLBACK;
+
 /* runtime cache: tag type → palette index */
 const tagColorMap = new Map();
 let tagColorIndex = 0;
@@ -110,7 +129,10 @@ function uid(prefix) {
     return `${prefix}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-export function processCalendarDirective(node) {
+export function processCalendarDirective(node, options = {}) {
+    currentI18n = options.i18n?.calendar ?? I18N_FALLBACK;
+    currentTime = options.time ?? TIME_FALLBACK;
+    const weekdays    = currentTime.weekdaysSunFirst || WEEKDAYS;
     const attrs       = node.attributes || {};
     const rawMonth    = attrs.month;
     const targetMonth = typeof rawMonth === 'string' && /^\d{4}-\d{2}$/.test(rawMonth)
@@ -136,17 +158,17 @@ export function processCalendarDirective(node) {
   <div class="md-calendar-header">
     <div class="md-calendar-title">${formatMonthLabel(targetMonth)}</div>
     <div class="md-calendar-controls">
-      <button type="button" class="md-calendar-btn md-calendar-btn--prev" data-action="prev" aria-label="上月"${prevDisabled}>
+      <button type="button" class="md-calendar-btn md-calendar-btn--prev" data-action="prev" aria-label="${escapeHtml(currentI18n.prev)}"${prevDisabled}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 2 4 7 9 12"/></svg>
       </button>
-      <button type="button" class="md-calendar-btn md-calendar-btn--today" data-action="today">今天</button>
-      <button type="button" class="md-calendar-btn md-calendar-btn--next" data-action="next" aria-label="下月"${nextDisabled}>
+      <button type="button" class="md-calendar-btn md-calendar-btn--today" data-action="today">${escapeHtml(currentI18n.today)}</button>
+      <button type="button" class="md-calendar-btn md-calendar-btn--next" data-action="next" aria-label="${escapeHtml(currentI18n.next)}"${nextDisabled}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 2 10 7 5 12"/></svg>
       </button>
     </div>
   </div>
   <div class="md-calendar-weekdays">
-    ${WEEKDAYS.map(d => `<div class="md-calendar-weekday">${d}</div>`).join('')}
+    ${weekdays.map(d => `<div class="md-calendar-weekday">${escapeHtml(d)}</div>`).join('')}
   </div>
   ${views.join('')}
 </div>${NAV_SCRIPT}`;
@@ -192,12 +214,12 @@ function collectAllEvents(userEvents, targetMonth) {
 
                 if (isWork) {
                     map[dk].push({
-                        content: holidayName + '（班）',
+                        content: holidayName + '（' + currentI18n.workday + '）',
                         auto: true, priority: 2, kind: 'work'
                     });
                 } else {
                     map[dk].push({
-                        content: holidayName + '（休）',
+                        content: holidayName + '（' + currentI18n.holiday + '）',
                         auto: true, priority: 0, kind: 'bar', barName: holidayName,
                         isHoliday: true, isWorkDay: false
                     });
@@ -290,7 +312,7 @@ function makeCell(year, month, day, isOther, isToday, events = []) {
     return {
         year, month, day, isOther, isToday,
         events: events || [],
-        lunarLabel: isFirst ? `${lunarMonth}月初一` : lunarDay,
+        lunarLabel: isFirst ? currentI18n.lunarMonthFirst(lunarMonth) : lunarDay,
         isFirstDay: isFirst,
     };
 }
@@ -300,7 +322,7 @@ function renderCell(c, barPos) {
 
     const otherClass = isOther ? ' md-calendar-cell--other' : '';
     const todayClass = isToday ? ' md-calendar-cell--today' : '';
-    const gregorian  = day === 1 ? `${month}月${day}日` : `${day}日`;
+    const gregorian  = day === 1 ? currentTime.md(month, day) : currentTime.day(day);
 
     const barEvent = events.find(e => e.kind === 'bar');
     const regular  = events.filter(e => e.kind !== 'bar');
@@ -325,7 +347,7 @@ function renderCell(c, barPos) {
 
     const more = regular.length > maxEvt ? regular.length - maxEvt : 0;
     const moreHtml = more > 0
-        ? `<div class="md-calendar-event md-calendar-event--more">+${more} 更多</div>`
+        ? `<div class="md-calendar-event md-calendar-event--more">+${more} ${escapeHtml(currentI18n.more)}</div>`
         : '';
 
     const tipHtml = events.length
@@ -342,8 +364,8 @@ function renderCell(c, barPos) {
 
     return `<div class="md-calendar-cell${otherClass}${todayClass}">
   <div class="md-calendar-cell-top">
-    <span class="md-calendar-lunar${lunarClass}">${lunarLabel}</span>
-    <span class="md-calendar-day-num">${gregorian}</span>
+    <span class="md-calendar-lunar${lunarClass}">${escapeHtml(lunarLabel)}</span>
+    <span class="md-calendar-day-num">${escapeHtml(gregorian)}</span>
   </div>
   ${barHtml}
   <div class="md-calendar-cell-events">${blocks}${moreHtml}</div>

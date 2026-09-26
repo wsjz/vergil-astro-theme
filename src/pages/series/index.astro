@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { BookOpen } from '@lucide/astro';
+import { t } from '../../i18n';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SectionNav from '../../components/ui/SectionNav.astro';
 import { getPostsBySeries, sortItemsByDateDesc } from '../../utils/data-utils';
@@ -23,19 +24,19 @@ const seriesWithMeta = allSeries
     .sort((a, b) => b.latestDate - a.latestDate);
 ---
 
-<BaseLayout title="专栏" description="专栏文章合集" showHeader={false}>
+<BaseLayout title={t.page.series.title} description={t.page.series.description} showHeader={false}>
     <SectionNav
         items={[
-            { label: '近期发布', href: '/blog/' },
-            { label: '分类', href: '/categories/' },
-            { label: '标签', href: '/tags/' },
-            { label: '专栏', href: '/series/', active: true },
-            { label: '归档', href: '/archives/' }
+            { label: t.nav.recent, href: '/blog/' },
+            { label: t.nav.categories, href: '/categories/' },
+            { label: t.nav.tags, href: '/tags/' },
+            { label: t.nav.series, href: '/series/', active: true },
+            { label: t.nav.archives, href: '/archives/' }
         ]}
     />
 
     {allSeries.length === 0 ? (
-        <p class="text-secondary">暂无专栏，在 <code>src/content/series/</code> 目录下新建 Markdown 文件即可创建。</p>
+        <p class="text-secondary">{t.page.series.emptyLead} <code>src/content/series/</code> {t.page.series.emptyTail}</p>
     ) : (
         <div class="grid grid-cols-1 gap-4">
             {seriesWithMeta.map((s) => (

@@ -7,6 +7,7 @@ import { defineConfig } from 'astro/config';
 import remarkDirective from 'remark-directive';
 import remarkMath from 'remark-math';
 import siteConfig from './src/data/site-config';
+import { locale, t } from './src/i18n';
 import { rehypeMathDispatcher } from './src/plugins/rehype-math-dispatcher.mjs';
 import { rehypeHeadingAnchors } from './src/plugins/rehype-heading-anchors.mjs';
 import { rehypeTitleHeadings } from './src/plugins/rehype-title-headings.mjs';
@@ -28,10 +29,10 @@ export default defineConfig({
     },
     integrations: [sitemap(), icon()],
     markdown: {
-        remarkPlugins: [remarkDirective, remarkMath, remarkImageDirectives, remarkPhotoDirectives, [remarkContentDirectives, { links: siteConfig.links, screenshotService: siteConfig.screenshotService }], remarkTerminal],
+        remarkPlugins: [remarkDirective, remarkMath, remarkImageDirectives, [remarkPhotoDirectives, { brands: t.directive.photo.brands }], [remarkContentDirectives, { links: siteConfig.links, screenshotService: siteConfig.screenshotService, locale, i18n: t.directive, time: t.time }], remarkTerminal],
         // rehypeHeadingIds 要显式排在前面：Astro 自己那一次在用户插件之后才跑，
         // 那时 rehypeHeadingAnchors 还读不到标题 id。这个插件是幂等的，跑两次无副作用。
-        rehypePlugins: [rehypeMathDispatcher, rehypeTitleHeadings, rehypeHeadingIds, rehypeHeadingAnchors],
+        rehypePlugins: [rehypeMathDispatcher, rehypeTitleHeadings, rehypeHeadingIds, [rehypeHeadingAnchors, { anchorTo: t.a11y.anchorTo, anchorToHeading: t.a11y.anchorToHeading }]],
         shikiConfig: {
             themes: {
                 light: 'github-light',

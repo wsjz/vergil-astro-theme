@@ -77,13 +77,13 @@ function parseStoryTable(node) {
     return { columns, rows };
 }
 
-function renderStoryHtml(data) {
+function renderStoryHtml(data, i18n) {
     const { columns, rows, error } = data;
     if (error) {
         return `<div class="md-directive md-directive-story"><p class="md-story-error">${escapeHtml(error)}</p></div>`;
     }
     if (rows.length === 0) {
-        return '<div class="md-directive md-directive-story"><p class="md-story-empty">暂无分镜内容</p></div>';
+        return `<div class="md-directive md-directive-story"><p class="md-story-empty">${escapeHtml(i18n.empty)}</p></div>`;
     }
 
     const tagCols = columns.filter(c => !KNOWN_COLS.has(c));
@@ -145,8 +145,9 @@ function renderStoryHtml(data) {
 }
 
 export function processStoryDirective(node, options = {}) {
+    const i18n = options.i18n?.story ?? { empty: '暂无分镜内容' };
     const data = parseStoryTable(node);
-    const html = renderStoryHtml(data);
+    const html = renderStoryHtml(data, i18n);
 
     node.data = { hName: 'div', hProperties: {} };
     node.children = [{ type: 'html', value: html }];

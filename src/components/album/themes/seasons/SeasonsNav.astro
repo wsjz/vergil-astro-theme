@@ -2,8 +2,10 @@
 /**
  * SeasonsNav — Season filter navigation.
  */
+import { t } from '../../../../i18n';
+
 const SEASONS = ['spring', 'summer', 'autumn', 'winter'] as const;
-const SEASON_LABELS: Record<string, string> = { spring: '春', summer: '夏', autumn: '秋', winter: '冬' };
+const SEASON_LABELS: Record<string, string> = t.album.seasons;
 
 export interface Props {
     hasSeasons: boolean;

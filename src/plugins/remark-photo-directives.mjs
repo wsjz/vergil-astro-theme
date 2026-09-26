@@ -35,28 +35,41 @@ const BRAND_LOGOS = {
     meizu: `<svg class="md-photo-logo" viewBox="0 0 85 22" xmlns="http://www.w3.org/2000/svg"><text x="0" y="17" font-family="system-ui, -apple-system, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="0.5" fill="currentColor">MEIZU</text></svg>`,
 };
 
-function getBrandLogo(brand) {
+// 中文兜底：厂商名 → 显示名。通过 options.brands 传入字典时按同样结构合并进别名表。
+const BRANDS_FALLBACK = {
+    Canon: '佳能',
+    Nikon: '尼康',
+    Sony: '索尼',
+    Fujifilm: '富士',
+    Leica: '徕卡',
+    Panasonic: '松下',
+    Olympus: '奥林巴斯',
+    Apple: '苹果',
+    Huawei: '华为',
+    Xiaomi: '小米',
+    OnePlus: '一加',
+    Google: '谷歌',
+    DJI: '大疆',
+    Honor: '荣耀',
+    Realme: '真我',
+    Meizu: '魅族',
+};
+
+function buildAliasMap(brands) {
+    const aliasMap = { 'fuji': 'fujifilm' };
+    // 先铺中文兜底，再叠加传入的字典，保证既有中文写法照旧可用
+    for (const dict of [BRANDS_FALLBACK, brands || {}]) {
+        for (const [key, name] of Object.entries(dict)) {
+            const alias = String(name || '').toLowerCase().trim();
+            if (alias) aliasMap[alias] = key.toLowerCase();
+        }
+    }
+    return aliasMap;
+}
+
+function getBrandLogo(brand, aliasMap) {
     if (!brand) return '';
     const key = brand.toLowerCase().trim();
-    const aliasMap = {
-        'fuji': 'fujifilm',
-        '富士': 'fujifilm',
-        '佳能': 'canon',
-        '尼康': 'nikon',
-        '索尼': 'sony',
-        '徕卡': 'leica',
-        '松下': 'panasonic',
-        '奥林巴斯': 'olympus',
-        '大疆': 'dji',
-        '苹果': 'apple',
-        '华为': 'huawei',
-        '谷歌': 'google',
-        '一加': 'oneplus',
-        '真我': 'realme',
-        '荣耀': 'honor',
-        '魅族': 'meizu',
-        '小米': 'xiaomi',
-    };
     const resolved = aliasMap[key] || key;
     return BRAND_LOGOS[resolved] || '';
 }
@@ -85,7 +98,7 @@ function extractGalleryImages(children) {
     return images;
 }
 
-function renderPhotoDirective(attrs) {
+function renderPhotoDirective(attrs, aliasMap) {
     const src = attrs.src || '';
     const alt = attrs.alt || '';
     const type = attrs.type || 'blur';
@@ -100,7 +113,7 @@ function renderPhotoDirective(attrs) {
     const fancybox = attrs.fancybox;
     const useZoom = fancybox !== 'false' && fancybox !== false;
     const zoomAttr = useZoom ? ' data-zoomable="1"' : '';
-    const logoSvg = getBrandLogo(logo || brand);
+    const logoSvg = getBrandLogo(logo || brand, aliasMap);
 
     const exifParts = [];
     if (focal) exifParts.push(escapeHtml(focal));
@@ -162,13 +175,14 @@ function renderPhotoDirective(attrs) {
     return html;
 }
 
-export function remarkPhotoDirectives() {
+export function remarkPhotoDirectives(options = {}) {
+    const aliasMap = buildAliasMap(options.brands);
     return (tree) => {
         // ── Leaf directive: photo ──
         visit(tree, 'leafDirective', (node) => {
             if (node.name !== 'photo') return;
             const attrs = node.attributes || {};
-            const html = renderPhotoDirective(attrs);
+            const html = renderPhotoDirective(attrs, aliasMap);
             node.data = { hName: 'div', hProperties: {} };
             node.children = [{ type: 'html', value: html }];
         });
@@ -185,7 +199,7 @@ export function remarkPhotoDirectives() {
                     attrs.src = first.src;
                 }
             }
-            const html = renderPhotoDirective(attrs);
+            const html = renderPhotoDirective(attrs, aliasMap);
             node.data = { hName: 'div', hProperties: {} };
             node.children = [{ type: 'html', value: html }];
         });

@@ -1,4 +1,5 @@
 ---
+import { locale, t } from '../i18n';
 import { ViewTransitions } from 'astro:transitions';
 import BaseHead, { type Props as HeadProps } from '../components/base/BaseHead.astro';
 import Footer from '../components/base/Footer.astro';
@@ -18,7 +19,7 @@ const isArticle = head.pageType === 'article';
 ---
 
 <!doctype html>
-<html lang="zh-CN" class="wrap-break-words antialiased">
+<html lang={locale} class="wrap-break-words antialiased">
     <head>
         <BaseHead {...head} />
         <script is:inline>
@@ -49,7 +50,7 @@ const isArticle = head.pageType === 'article';
             import '../scripts/private-decrypt.js';
             import '../scripts/audio-player.js';
         </script>
-        <script is:inline>
+        <script is:inline define:vars={{ pipLabels: t.pip }}>
         (function () {
             function formatTime(s) {
                 if (!isFinite(s) || s < 0) return '00:00';
@@ -82,15 +83,15 @@ const isArticle = head.pageType === 'article';
                 pipContainer.className = 'md-video-pip';
                 pipContainer.id = uid;
                 pipContainer.innerHTML = '<div class="md-pip-header" data-pip-drag="1">' +
-                    '<span class="md-pip-title">视频</span>' +
-                    '<button type="button" class="md-pip-back" title="回到原位" aria-label="回到原位">' + backIcon + '</button>' +
-                    '<button type="button" class="md-pip-close" title="关闭" aria-label="关闭">×</button>' +
+                    '<span class="md-pip-title">' + pipLabels.title + '</span>' +
+                    '<button type="button" class="md-pip-back" title="' + pipLabels.restore + '" aria-label="' + pipLabels.restore + '">' + backIcon + '</button>' +
+                    '<button type="button" class="md-pip-close" title="' + pipLabels.close + '" aria-label="' + pipLabels.close + '">×</button>' +
                     '</div>' +
                     '<div class="md-pip-video-wrap">' +
                     '<video class="md-pip-video" src="' + src + '" preload="auto" playsinline></video>' +
                     '</div>' +
                     '<div class="md-pip-controls">' +
-                    '<button type="button" class="md-pip-play-btn" aria-label="播放">' + (wasPaused ? playIcon : pauseIcon) + '</button>' +
+                    '<button type="button" class="md-pip-play-btn" aria-label="' + pipLabels.play + '">' + (wasPaused ? playIcon : pauseIcon) + '</button>' +
                     '<div class="md-pip-progress"><div class="md-pip-progress-fill"></div></div>' +
                     '<span class="md-pip-time">00:00 / 00:00</span>' +
                     '</div>';
@@ -296,7 +297,7 @@ const isArticle = head.pageType === 'article';
         )}
     </head>
     <body class="bg-main text-main">
-        <a class="skip-link" href="#main-content">跳到主要内容</a>
+        <a class="skip-link" href="#main-content">{t.a11y.skipToContent}</a>
         {isArticle && (
             <div id="reading-progress" class="fixed top-0 left-0 h-[2px] bg-accent z-[60] w-0 transition-none"></div>
         )}

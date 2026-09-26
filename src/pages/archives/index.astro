@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { t } from '../../i18n';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SectionNav from '../../components/ui/SectionNav.astro';
 import { sortItemsByDateDesc } from '../../utils/data-utils';
@@ -21,22 +22,22 @@ const sortedYears = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
 
 // Format month and day
 function formatDate(date: Date): string {
-    return `${date.getMonth() + 1}月${date.getDate()}日`;
+    return t.time.md(date.getMonth() + 1, date.getDate());
 }
 ---
 
 <BaseLayout
-    title="归档"
-    description="按年份浏览所有博客文章，探索完整的文章归档。"
+    title={t.page.archives.title}
+    description={t.page.archives.description}
     showHeader={false}
 >
     <SectionNav
         items={[
-            { label: '近期发布', href: '/blog/' },
-            { label: '分类', href: '/categories/' },
-            { label: '标签', href: '/tags/' },
-            { label: '专栏', href: '/series/' },
-            { label: '归档', href: '/archives/', active: true }
+            { label: t.nav.recent, href: '/blog/' },
+            { label: t.nav.categories, href: '/categories/' },
+            { label: t.nav.tags, href: '/tags/' },
+            { label: t.nav.series, href: '/series/' },
+            { label: t.nav.archives, href: '/archives/', active: true }
         ]}
     />
 
@@ -46,7 +47,7 @@ function formatDate(date: Date): string {
                 <h2 class="mb-2 flex items-baseline gap-1.5 font-display text-base font-medium sm:text-lg">
                     <span>{year}</span>
                     <span class="text-sm font-normal text-secondary">
-                        {postsByYear[year].length} 篇文章
+                        {t.page.archives.postsCount(postsByYear[year].length)}
                     </span>
                 </h2>
                 <div class="space-y-0.5">
