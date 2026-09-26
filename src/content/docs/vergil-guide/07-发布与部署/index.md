@@ -21,7 +21,9 @@ title: 文章标题
 seo:
   title: 分享时显示的标题
   description: 分享时显示的描述
-  image: /images/share-cover.jpg
+  image:
+    src: ../../assets/images/share-cover.jpg
+    alt: 分享卡片配图
 ---
 ```
 
@@ -43,7 +45,7 @@ image: {
 运行以下命令生成静态文件：
 
 ```bash
-npm run build
+pnpm build
 ```
 
 构建完成后，静态文件会输出到 `dist/` 目录。
@@ -69,7 +71,7 @@ tab: EdgeOne Pages（国内）
 3. 选择**导入 Git 仓库**，授权并选择你的代码仓库
 4. 填写构建设置：
    - **框架预设**：选择 **Astro**（或**静态网站**）
-   - **构建命令**：`npm run build`
+   - **构建命令**：`pnpm build`
    - **输出目录**：`dist`
 5. 点击**部署**，等待构建完成
 
@@ -88,7 +90,7 @@ tab: Netlify
 2. 选择 **Add new site** → **Import an existing project**
 3. 选择你的 GitHub 仓库
 4. 构建设置：
-   - Build command: `npm run build`
+   - Build command: `pnpm build`
    - Publish directory: `dist`
 5. 点击部署
 
@@ -101,5 +103,5 @@ tab: GitHub Pages
 ::::
 
 :::callout{type="tip"}
-如果部署后页面样式丢失，请检查 `astro.config.mjs` 中的 `base` 配置是否正确设置为你的仓库名。
+部署前务必把 `src/data/site-config.ts` 里的 `website` 改成你自己的站点地址。sitemap 和 RSS 生成的绝对 URL 都依赖它，不改的话这两项会指向错误的域名。
 :::

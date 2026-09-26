@@ -71,7 +71,7 @@ export const sidebar = {
 
 ## 配置多张卡片
 
-想加第二张卡片？新建一个配置文件，再注册一次即可。
+想加第二张卡片？自己**新建**一个配置文件（下面的 `about.ts` 仓库里没有，需要你创建），再注册一次即可。
 
 ```typescript
 // src/data/config/about.ts

@@ -1,6 +1,6 @@
 ---
 title: 内容指令
-order: 5
+order: 0
 ---
 
 # 内容指令
@@ -87,103 +87,103 @@ order: 5
 
 ## 指令分类
 
-Vergil 提供 36+ 个指令，按用途分为八类：
+Vergil 提供 50 个指令，按用途分为八类：
 
-### [结构排版（9个指令）](./结构排版)
+### [结构排版（9个指令）](/docs/vergil-guide/03-基本创作/内容指令/结构排版/)
 
 用于组织文章版面：
 
-- **[网格（grid）](./结构排版#网格grid)** — 多列布局
-- **[标签页（tabs）](./结构排版#标签页tabs)** — 切换面板
-- **[折叠面板（folding）](./结构排版#折叠面板folding)** — 可展开收起的内容
-- **[多级折叠（folders）](./结构排版#多级折叠folders)** — 多个可折叠的文件夹式分组
-- **[时间线（timeline）](./结构排版#时间线timeline)** — 时间顺序列表
-- **[横幅（banner）](./结构排版#横幅banner)** — 顶部大图
-- **[诗词排版（poetry）](./结构排版#诗词排版poetry)** — 传统诗词格式
-- **[信纸（paper）](./结构排版#信纸paper)** — 信纸样式
-- **[卷轴（reel）](./结构排版#卷轴reel)** — 垂直滚动文字
+- **[网格（grid）](/docs/vergil-guide/03-基本创作/内容指令/结构排版/#网格grid)** — 多列布局
+- **[标签页（tabs）](/docs/vergil-guide/03-基本创作/内容指令/结构排版/#标签页tabs)** — 切换面板
+- **[折叠面板（folding）](/docs/vergil-guide/03-基本创作/内容指令/结构排版/#折叠面板folding)** — 可展开收起的内容
+- **[多级折叠（folders）](/docs/vergil-guide/03-基本创作/内容指令/结构排版/#多级折叠folders)** — 多个可折叠的文件夹式分组
+- **[时间线（timeline）](/docs/vergil-guide/03-基本创作/内容指令/结构排版/#时间线timeline)** — 时间顺序列表
+- **[横幅（banner）](/docs/vergil-guide/03-基本创作/内容指令/结构排版/#横幅banner)** — 顶部大图
+- **[诗词排版（poetry）](/docs/vergil-guide/03-基本创作/内容指令/结构排版/#诗词排版poetry)** — 传统诗词格式
+- **[信纸（paper）](/docs/vergil-guide/03-基本创作/内容指令/结构排版/#信纸paper)** — 信纸样式
+- **[卷轴（reel）](/docs/vergil-guide/03-基本创作/内容指令/结构排版/#卷轴reel)** — 垂直滚动文字
 
-### [内容展示（9个指令）](./内容展示)
+### [内容展示（8个指令）](/docs/vergil-guide/03-基本创作/内容指令/内容展示/)
 
 用于插入提示信息、代码和私密内容：
 
-- **[提示框（callout）](./内容展示#提示框callout)** — 信息/警告/提示
-- **[高亮块（note）](./内容展示#高亮块note)** — 主题色高亮
-- **[引用卡片（quot）](./内容展示#引用卡片quot)** — 引用展示
-- **[标题装饰 / 强调引用（title）](./内容展示#标题装饰--强调引用title)** — 引号或徽章样式的装饰标题
-- **[段落引号（blockquote）](./内容展示#段落引号blockquote)** — 带引号的段落
-- **[终端块（terminal）](./内容展示#终端块terminal)** — 终端样式代码块
-- **[代码面板（panel）](./内容展示#代码面板panel)** — 多段并列展示
-- **[复制块（copy）](./内容展示#复制块copy)** — 一键复制代码
-- **[私密内容（private）](./内容展示#私密内容private)** — 加密容器
+- **[提示框（callout）](/docs/vergil-guide/03-基本创作/内容指令/内容展示/#提示框callout)** — 信息/警告/提示
+- **[高亮块（note）](/docs/vergil-guide/03-基本创作/内容指令/内容展示/#高亮块note)** — 主题色高亮
+- **[引用卡片（quot）](/docs/vergil-guide/03-基本创作/内容指令/内容展示/#引用卡片quot)** — 引用展示
+- **[标题装饰 / 强调引用（title）](/docs/vergil-guide/03-基本创作/内容指令/内容展示/#标题装饰--强调引用title)** — 引号或徽章样式的装饰标题
+- **[段落引号（blockquote）](/docs/vergil-guide/03-基本创作/内容指令/内容展示/#段落引号blockquote)** — 带引号的段落
+- **[终端块（terminal）](/docs/vergil-guide/03-基本创作/内容指令/内容展示/#终端块terminal)** — 终端样式代码块
+- **[代码面板（panel）](/docs/vergil-guide/03-基本创作/内容指令/内容展示/#代码面板panel)** — 多段并列展示
+- **[复制块（copy）](/docs/vergil-guide/03-基本创作/内容指令/内容展示/#复制块copy)** — 一键复制代码
+- **[私密内容（private）](/docs/vergil-guide/03-基本创作/内容指令/内容展示/#私密内容private)** — 加密容器
 
-### [媒体嵌入（5个指令）](./媒体嵌入)
+### [媒体嵌入（5个指令）](/docs/vergil-guide/03-基本创作/内容指令/媒体嵌入/)
 
 用于插入图片、画廊、视频和音频：
 
-- **[增强图片（image）](./媒体嵌入#增强图片image)** — 带说明和下载的图片
-- **[画廊（gallery）](./媒体嵌入#画廊gallery)** — 图片网格或瀑布流
-- **[摄影框（photo）](./媒体嵌入#摄影框photo)** — 带水印的摄影展示
-- **[视频播放器（video）](./媒体嵌入#视频播放器video)** — 本地/Bilibili/YouTube
-- **[音频播放器（audio）](./媒体嵌入#音频播放器audio)** — 本地/网易云/语音
+- **[增强图片（image）](/docs/vergil-guide/03-基本创作/内容指令/媒体嵌入/#增强图片image)** — 带说明和下载的图片
+- **[画廊（gallery）](/docs/vergil-guide/03-基本创作/内容指令/媒体嵌入/#画廊gallery)** — 图片网格或瀑布流
+- **[摄影框（photo）](/docs/vergil-guide/03-基本创作/内容指令/媒体嵌入/#摄影框photo)** — 带水印的摄影展示
+- **[视频播放器（video）](/docs/vergil-guide/03-基本创作/内容指令/媒体嵌入/#视频播放器video)** — 本地/Bilibili/YouTube
+- **[音频播放器（audio）](/docs/vergil-guide/03-基本创作/内容指令/媒体嵌入/#音频播放器audio)** — 本地/网易云/语音
 
-### [卡片与链接（6个指令）](./卡片与链接)
+### [卡片与链接（6个指令）](/docs/vergil-guide/03-基本创作/内容指令/卡片与链接/)
 
 用于展示外部信息和交互链接：
 
-- **[GitHub 卡片（ghcard）](./卡片与链接#github-卡片ghcard)** — 展示 GitHub 仓库或用户
-- **[数字名片（yoicard）](./卡片与链接#数字名片yoicard)** — 作者署名/关于我
-- **[网站卡片（sites）](./卡片与链接#网站卡片sites)** — 网站收藏网格展示
-- **[海报墙（posters）](./卡片与链接#海报卡片posters)** — 竖向海报/封面网格
-- **[标签链接（hashtag）](./卡片与链接#标签链接hashtag)** — 带样式的标签
-- **[按钮（button）](./卡片与链接#按钮button)** — 链接按钮
+- **[GitHub 卡片（ghcard）](/docs/vergil-guide/03-基本创作/内容指令/卡片与链接/#github-卡片ghcard)** — 展示 GitHub 仓库或用户
+- **[数字名片（yoicard）](/docs/vergil-guide/03-基本创作/内容指令/卡片与链接/#数字名片yoicard)** — 作者署名/关于我
+- **[网站卡片（sites）](/docs/vergil-guide/03-基本创作/内容指令/卡片与链接/#网站卡片sites)** — 网站收藏网格展示
+- **[海报墙（posters）](/docs/vergil-guide/03-基本创作/内容指令/卡片与链接/#海报卡片posters)** — 竖向海报/封面网格
+- **[标签链接（hashtag）](/docs/vergil-guide/03-基本创作/内容指令/卡片与链接/#标签链接hashtag)** — 带样式的标签
+- **[按钮（button）](/docs/vergil-guide/03-基本创作/内容指令/卡片与链接/#按钮button)** — 链接按钮
 
-### [文字与交互（14个指令）](./文字与交互)
+### [文字与交互（14个指令）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/)
 
 用于美化文字和增加互动性：
 
-- **[高亮（mark）](./文字与交互#高亮mark)** — 文字高亮
-- **[下划线（u）](./文字与交互#下划线u)** — 下划线
-- **[着重号（emp）](./文字与交互#着重号emp)** — 着重号
-- **[波浪线（wavy）](./文字与交互#波浪线wavy)** — 波浪下划线
-- **[删除线（del）](./文字与交互#删除线del)** — 删除线
-- **[上标 / 下标（sup/sub）](./文字与交互#上标下标supsub)** — 上下标
-- **[键盘按键（kbd）](./文字与交互#键盘按键kbd)** — 键盘按键样式
-- **[模糊显示（blur）](./文字与交互#模糊显示blur)** — 点击显示隐藏内容
-- **[密码遮罩（psw）](./文字与交互#密码遮罩psw)** — 点击显示密码
-- **[复选框（checkbox）](./文字与交互#复选框checkbox)** — 可勾选列表
-- **[单选框（radio）](./文字与交互#单选框radio)** — 单选列表
-- **[步骤标记（step-brackets）](./文字与交互#步骤标记step-brackets)** — 步骤编号
-- **[表情包（emoji）](./文字与交互#表情包emoji)** — 插入各种表情包
+- **[高亮（mark）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#高亮mark)** — 文字高亮
+- **[下划线（u）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#下划线u)** — 下划线
+- **[着重号（emp）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#着重号emp)** — 着重号
+- **[波浪线（wavy）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#波浪线wavy)** — 波浪下划线
+- **[删除线（del）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#删除线del)** — 删除线
+- **[上标 / 下标（sup/sub）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#上标下标supsub)** — 上下标
+- **[键盘按键（kbd）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#键盘按键kbd)** — 键盘按键样式
+- **[模糊显示（blur）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#模糊显示blur)** — 点击显示隐藏内容
+- **[密码遮罩（psw）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#密码遮罩psw)** — 点击显示密码
+- **[复选框（checkbox）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#复选框checkbox)** — 可勾选列表
+- **[单选框（radio）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#单选框radio)** — 单选列表
+- **[步骤标记（step-brackets）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#步骤标记step-brackets)** — 步骤编号
+- **[表情包（emoji）](/docs/vergil-guide/03-基本创作/内容指令/文字与交互/#表情包emoji)** — 插入各种表情包
 
-### [图表可视化（2个指令）](./图表可视化)
+### [图表可视化（2个指令）](/docs/vergil-guide/03-基本创作/内容指令/图表可视化/)
 
 用于插入流程图和数据可视化图表：
 
-- **[Mermaid 图表（mermaid）](./图表可视化#mermaid-图表mermaid)** — 流程图、时序图等
-- **[ECharts 图表（echart）](./图表可视化#echarts-图表echart)** — 数据可视化图表
+- **[Mermaid 图表（mermaid）](/docs/vergil-guide/03-基本创作/内容指令/图表可视化/#mermaid-图表mermaid)** — 流程图、时序图等
+- **[ECharts 图表（echart）](/docs/vergil-guide/03-基本创作/内容指令/图表可视化/#echarts-图表echart)** — 数据可视化图表
 
-### [时间规划（4个指令）](./时间规划)
+### [时间规划（4个指令）](/docs/vergil-guide/03-基本创作/内容指令/时间规划/)
 
 用于时间管理、任务规划和目标跟踪：
 
-- **[倒计时（deadline）](./时间规划#倒计时deadline)** — 翻牌式倒计时器
-- **[日历（calendar）](./时间规划#日历calendar)** — macOS 风格日历，支持农历和节假日
-- **[任务规划（plan）](./时间规划#任务规划plan)** — 多视图任务看板（7种视图）
-- **[OKR 目标管理（okr）](./时间规划#okr-目标管理okr)** — 目标与关键结果追踪
+- **[倒计时（deadline）](/docs/vergil-guide/03-基本创作/内容指令/时间规划/#倒计时deadline)** — 翻牌式倒计时器
+- **[日历（calendar）](/docs/vergil-guide/03-基本创作/内容指令/时间规划/#日历calendar)** — macOS 风格日历，支持农历和节假日
+- **[任务规划（plan）](/docs/vergil-guide/03-基本创作/内容指令/时间规划/#任务规划plan)** — 多视图任务看板（7种视图）
+- **[OKR 目标管理（okr）](/docs/vergil-guide/03-基本创作/内容指令/时间规划/#okr-目标管理okr)** — 目标与关键结果追踪
 
-### [可视化叙事（2个指令）](./可视化叙事)
+### [可视化叙事（2个指令）](/docs/vergil-guide/03-基本创作/内容指令/可视化叙事/)
 
 用于故事叙述和思维整理：
 
-- **[故事板（story）](./可视化叙事#故事板story)** — 分镜式图文展示
-- **[思维导图（mind）](./可视化叙事#思维导图mind)** — 交互式 SVG 脑图
+- **[故事板（story）](/docs/vergil-guide/03-基本创作/内容指令/可视化叙事/#故事板story)** — 分镜式图文展示
+- **[思维导图（mind）](/docs/vergil-guide/03-基本创作/内容指令/可视化叙事/#思维导图mind)** — 交互式 SVG 脑图
 
-### [数学公式](./数学公式)
+### [数学公式](/docs/vergil-guide/03-基本创作/内容指令/数学公式/)
 
 LaTeX 数学公式渲染，通过 frontmatter 选择引擎：
 
-- **[引擎选择](./数学公式#引擎选择)** — KaTeX 与 MathJax 的对比与选择
+- **[引擎选择](/docs/vergil-guide/03-基本创作/内容指令/数学公式/#引擎选择)** — KaTeX 与 MathJax 的对比与选择
 
 ## 使用建议
 

@@ -1,6 +1,6 @@
 ---
 title: 功能配置
-order: 5
+order: 0
 ---
 
 # 功能配置
@@ -9,15 +9,15 @@ order: 5
 
 ## 本章内容
 
-- [全文搜索](./全文搜索) — 启用和配置站内搜索
-- [评论系统](./评论系统) — 接入 Giscus 或 Artalk 评论
-- [RSS 订阅](./RSS订阅) — 生成 RSS feed，方便读者订阅
-- [数据统计](./数据统计) — 接入 Umami Analytics 查看站点访问数据
-- [开屏页](./开屏页) — 全屏轮播背景与自定义导航
-- [虚拟角色](./虚拟角色) — 配置 Rive 或 Live2D 站点助理
-- [浮动音频播放器](./浮动音频播放器) — 全局背景音乐配置
-- [边栏配置](./边栏配置) — 自定义左右侧边栏组件
-- [Memo 便签卡片](./Memo便签卡片) — 配置欢迎语、通知等富文本卡片
-- [词云星球](./词云星球) — 标签页 3D 交互式标签展示
+- [全文搜索](/docs/vergil-guide/06-功能配置/全文搜索/) — 启用和配置站内搜索
+- [评论系统](/docs/vergil-guide/06-功能配置/评论系统/) — 接入 Giscus 或 Artalk 评论
+- [RSS 订阅](/docs/vergil-guide/06-功能配置/rss订阅/) — 生成 RSS feed，方便读者订阅
+- [数据统计](/docs/vergil-guide/06-功能配置/数据统计/) — 接入 Umami Analytics 查看站点访问数据
+- [开屏页](/docs/vergil-guide/06-功能配置/开屏页/) — 全屏轮播背景与自定义导航
+- [虚拟角色](/docs/vergil-guide/06-功能配置/虚拟角色/) — 配置 Rive 或 Live2D 站点助理
+- [浮动音频播放器](/docs/vergil-guide/06-功能配置/浮动音频播放器/) — 全局背景音乐配置
+- [边栏配置](/docs/vergil-guide/06-功能配置/边栏配置/) — 自定义左右侧边栏组件
+- [Memo 便签卡片](/docs/vergil-guide/06-功能配置/memo便签卡片/) — 配置欢迎语、通知等富文本卡片
+- [词云星球](/docs/vergil-guide/06-功能配置/词云星球/) — 标签页 3D 交互式标签展示
 
 大部分功能通过修改 `src/data/config/features.ts` 即可启用或关闭（数据统计在 `analytics.ts`，开屏页在 `splash.ts`，网站卡片数据在 `links.ts`）。

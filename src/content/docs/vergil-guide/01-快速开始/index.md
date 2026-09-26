@@ -22,20 +22,20 @@ order: 1
 打开终端，运行以下命令：
 
 ```bash
-git clone https://github.com/justgoodui/vergil-astro-theme.git my-blog
+git clone https://github.com/wsjz/vergil-astro-theme.git my-blog
 cd my-blog
 ```
 
 ### 2. 安装依赖
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 3. 启动开发服务器
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 命令执行后，终端会显示本地访问地址，通常是 `http://localhost:4321/`。用浏览器打开即可看到网站。
@@ -186,5 +186,5 @@ export default defineConfig({
 ## 下一步
 
 - 了解如何[配置站点信息](/docs/vergil-guide/02-站点配置/)
-- 了解有哪些[内容形式](/docs/vergil-guide/03-基本创作/内容形式/)可供选择
+- 了解有哪些[内容形式](/docs/vergil-guide/)可供选择
 - 学习使用[内容指令](/docs/vergil-guide/03-基本创作/内容指令/)美化文章
