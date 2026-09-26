@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { t } from '../../i18n';
 import SectionNav from '../../components/ui/SectionNav.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getAllTags, getPostsByTag, sortItemsByDateDesc } from '../../utils/data-utils';
@@ -13,21 +14,21 @@ const tagsWithCount = tags.map((tag) => {
     return { ...tag, count };
 }).sort((a, b) => b.count - a.count);
 
-const tagListJson = JSON.stringify(tagsWithCount.map((t) => ({ name: t.name, id: t.id, count: t.count })));
+const tagListJson = JSON.stringify(tagsWithCount.map((tag) => ({ name: tag.name, id: tag.id, count: tag.count })));
 ---
 
 <BaseLayout
-    title="标签"
-    description="浏览所有标签，发现感兴趣的内容"
+    title={t.page.tags.title}
+    description={t.page.tags.description}
     showHeader={false}
 >
     <SectionNav
         items={[
-            { label: '近期发布', href: '/blog/' },
-            { label: '分类', href: '/categories/' },
-            { label: '标签', href: '/tags/', active: true },
-            { label: '专栏', href: '/series/' },
-            { label: '归档', href: '/archives/' }
+            { label: t.nav.recent, href: '/blog/' },
+            { label: t.nav.categories, href: '/categories/' },
+            { label: t.nav.tags, href: '/tags/', active: true },
+            { label: t.nav.series, href: '/series/' },
+            { label: t.nav.archives, href: '/archives/' }
         ]}
     />
 
@@ -37,7 +38,7 @@ const tagListJson = JSON.stringify(tagsWithCount.map((t) => ({ name: t.name, id:
                 <a
                     href={`/tags/${tag.id}`}
                     class="group inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-muted/40 text-sm hover:bg-accent/10 transition-colors duration-200"
-                    title={`${tag.name} · ${tag.count} 篇`}
+                    title={`${tag.name} · ${t.page.tags.count(tag.count)}`}
                 >
                     <span class="text-muted group-hover:text-accent/70 transition-colors">#</span>
                     <span class="text-secondary group-hover:text-accent transition-colors">{tag.name} ({tag.count})</span>

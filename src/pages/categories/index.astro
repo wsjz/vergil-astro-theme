@@ -1,4 +1,5 @@
 ---
+import { t } from '../../i18n';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SectionNav from '../../components/ui/SectionNav.astro';
 import CategoryTreeNode from '../../components/widgets/CategoryTreeNode.astro';
@@ -9,19 +10,19 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(sort
 const tree = buildCategoryTree(posts);
 ---
 
-<BaseLayout title="分类" description="浏览所有文章分类" showHeader={false}>
+<BaseLayout title={t.page.categories.title} description={t.page.categories.description} showHeader={false}>
     <SectionNav
         items={[
-            { label: '近期发布', href: '/blog/' },
-            { label: '分类', href: '/categories/', active: true },
-            { label: '标签', href: '/tags/' },
-            { label: '专栏', href: '/series/' },
-            { label: '归档', href: '/archives/' }
+            { label: t.nav.recent, href: '/blog/' },
+            { label: t.nav.categories, href: '/categories/', active: true },
+            { label: t.nav.tags, href: '/tags/' },
+            { label: t.nav.series, href: '/series/' },
+            { label: t.nav.archives, href: '/archives/' }
         ]}
     />
 
     {tree.length === 0 ? (
-        <p class="text-secondary">暂无分类</p>
+        <p class="text-secondary">{t.page.categories.empty}</p>
     ) : (
         <div class="reveal bg-card rounded-xl p-5 sm:p-6">
             <div class="space-y-0.5">

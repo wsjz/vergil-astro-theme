@@ -1,4 +1,5 @@
 ---
+import { locale, t } from '../../../i18n';
 import { ViewTransitions } from 'astro:transitions';
 import BaseHead, { type Props as HeadProps } from '../../../components/base/BaseHead.astro';
 import ResumeSidebar from '../components/ResumeSidebar.astro';
@@ -13,7 +14,7 @@ const { resume, headings, ...head } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="zh-CN" class="wrap-break-words antialiased">
+<html lang={locale} class="wrap-break-words antialiased">
     <head>
         <BaseHead {...head} />
         <script is:inline>
@@ -35,7 +36,7 @@ const { resume, headings, ...head } = Astro.props;
         <meta name="robots" content="noindex" />
     </head>
     <body class="bg-main text-main">
-        <a class="skip-link" href="#main-content">跳到主要内容</a>
+        <a class="skip-link" href="#main-content">{t.a11y.skipToContent}</a>
         <ResumeSidebar resume={resume} headings={headings} />
 
         <main id="main-content" class="ml-0 md:ml-72 min-h-screen">

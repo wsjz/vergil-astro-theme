@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { getCollection } from 'astro:content';
+import { t } from '../i18n';
 import Hero from '../components/content/Hero.astro';
 import HeroSplash from '../components/content/HeroSplash.astro';
 import Moment from '../components/content/Moment.astro';
@@ -54,7 +55,7 @@ if (fs.existsSync(momentsDir)) {
     <!-- Now Section -->
     <div class="mb-8 sm:mb-12">
         <a href="/moments" class="inline-block">
-            <h2 class="font-sans text-xl font-medium mb-6 sm:text-2xl text-accent hover:opacity-80 transition-opacity">动态</h2>
+            <h2 class="font-sans text-xl font-medium mb-6 sm:text-2xl text-accent hover:opacity-80 transition-opacity">{t.nav.moments}</h2>
         </a>
         {latestMoment ? (
             <Moment
@@ -65,19 +66,19 @@ if (fs.existsSync(momentsDir)) {
                     const date = new Date(latestMoment.date);
                     const diffMs = now.getTime() - date.getTime();
                     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                    if (diffDays <= 0) return '今天';
-                    if (diffDays === 1) return '昨天';
-                    if (diffDays === 2) return '前天';
-                    if (diffDays < 7) return diffDays + '天前';
-                    if (diffDays < 30) return '1周前';
-                    if (diffDays < 60) return '1个月前';
-                    if (diffDays < 365) return Math.floor(diffDays / 30) + '个月前';
-                    return date.getFullYear() + '年' + (date.getMonth() + 1) + '月';
+                    if (diffDays <= 0) return t.time.today;
+                    if (diffDays === 1) return t.time.yesterday;
+                    if (diffDays === 2) return t.time.dayBeforeYesterday;
+                    if (diffDays < 7) return t.time.daysAgo(diffDays);
+                    if (diffDays < 30) return t.time.oneWeekAgo;
+                    if (diffDays < 60) return t.time.oneMonthAgo;
+                    if (diffDays < 365) return t.time.monthsAgo(Math.floor(diffDays / 30));
+                    return t.time.ym(date.getFullYear(), date.getMonth() + 1);
                 })()}
             />
         ) : (
             <div class="text-sm text-[var(--text-muted)]">
-                暂无动态，在 <code class="bg-[var(--bg-muted)] px-1.5 py-0.5 rounded text-[var(--text-secondary)]">src/content/moments/</code> 目录下新建 .json 文件即可添加
+                {t.page.moments.emptyLead} <code class="bg-[var(--bg-muted)] px-1.5 py-0.5 rounded text-[var(--text-secondary)]">src/content/moments/</code> {t.page.moments.emptyTail}
             </div>
         )}
     </div>
@@ -86,7 +87,7 @@ if (fs.existsSync(momentsDir)) {
         pagePosts?.length > 0 && (
             <div class="mb-4 sm:mb-12">
                 <a href="/blog" class="inline-block">
-                    <h2 class="font-sans text-xl font-medium mb-4 sm:text-2xl text-accent hover:opacity-80 transition-opacity">文章</h2>
+                    <h2 class="font-sans text-xl font-medium mb-4 sm:text-2xl text-accent hover:opacity-80 transition-opacity">{t.nav.posts}</h2>
                 </a>
                 {pagePosts.map((post) => {
                     const hasBanner = !!post.data.banner;

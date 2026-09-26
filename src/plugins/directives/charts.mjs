@@ -30,7 +30,8 @@ function normalizeQuotes(text) {
 }
 
 /** Process chart directives (mermaid / echart) */
-export function processChartDirective(node) {
+export function processChartDirective(node, options = {}) {
+    const i18n = options.i18n?.charts ?? { echartParseError: 'ECharts 配置解析失败' };
     const name = node.name;
     const attrs = node.attributes || {};
     const rawText = extractRawContent(node.children).trim();
@@ -70,7 +71,7 @@ export function processChartDirective(node) {
                 node.children = [
                     {
                         type: 'html',
-                        value: `<div class="md-echart-error-msg">ECharts 配置解析失败: ${escapeHtml(e.message)}</div>`,
+                        value: `<div class="md-echart-error-msg">${escapeHtml(i18n.echartParseError)}: ${escapeHtml(e.message)}</div>`,
                     },
                 ];
                 return;

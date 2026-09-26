@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { t } from '../../i18n';
 import PostPreview from '../../components/content/PostPreview.astro';
 import SectionNav from '../../components/ui/SectionNav.astro';
 import CategoryTreeNav from '../../components/widgets/CategoryTreeNav.astro';
@@ -55,17 +56,17 @@ const siblingTree = getSiblingTree(buildCategoryTree(allPosts), path);
 ---
 
 <BaseLayout
-    title={`分类：${fullPath}`}
-    description={`浏览「${fullPath}」分类下的所有文章`}
+    title={t.page.categories.titleOf(fullPath)}
+    description={t.page.categories.descriptionOf(fullPath)}
     showHeader={false}
 >
     <SectionNav
         items={[
-            { label: '近期发布', href: '/blog/' },
-            { label: `分类：${categoryName}`, href: parentNode ? `/categories/${parentNode.id}` : '/categories/', active: true },
-            { label: '标签', href: '/tags/' },
-            { label: '专栏', href: '/series/' },
-            { label: '归档', href: '/archives/' }
+            { label: t.nav.recent, href: '/blog/' },
+            { label: t.page.categories.titleOf(categoryName), href: parentNode ? `/categories/${parentNode.id}` : '/categories/', active: true },
+            { label: t.nav.tags, href: '/tags/' },
+            { label: t.nav.series, href: '/series/' },
+            { label: t.nav.archives, href: '/archives/' }
         ]}
     />
     <div class="reveal bg-card rounded-xl p-5 sm:p-6 mb-8">

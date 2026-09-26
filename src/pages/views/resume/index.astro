@@ -1,4 +1,5 @@
 ---
+import { t } from '../../../i18n';
 import { getCollection, render } from 'astro:content';
 import ResumeLayout from '../../../views/resume/layouts/ResumeLayout.astro';
 
@@ -22,7 +23,7 @@ const { Content, headings } = await render(resume);
 
 <ResumeLayout
     title={resume.data.title}
-    description={`${resume.data.name} 的个人简历`}
+    description={t.page.resume.description(resume.data.name)}
     pageType="website"
     resume={resume}
     headings={headings}

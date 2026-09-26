@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { getPostsBySeries } from '../../utils/data-utils';
 import { slugify } from '../../utils/common-utils';
 import { ChevronDown } from '@lucide/astro';
+import { t } from '../../i18n';
 
 interface Props {
     currentPostId: string;
@@ -29,7 +30,7 @@ for (let i = visibleStart; i <= visibleEnd; i++) {
 <div class="my-6 rounded-xl border border-accent/20 bg-accent/5 p-4" data-series-nav data-current-post-id={currentPostId}>
     <div class="flex items-center justify-between mb-3">
         <a href={`/series/${seriesId}/`} class="text-xs font-medium text-accent hover:underline">
-            专栏：{series}
+            {t.page.series.titleOf(series)}
         </a>
         <span class="text-xs text-secondary">{currentIndex + 1} / {total}</span>
     </div>
@@ -62,8 +63,10 @@ for (let i = visibleStart; i <= visibleEnd; i++) {
             class="series-toggle mt-2 w-full flex items-center justify-center gap-1 text-[11px] text-secondary hover:text-accent transition-colors py-1"
             data-expanded="false"
             data-total={total}
+            data-i18n-expand={t.seriesNav.expandAllN(total)}
+            data-i18n-collapse={t.seriesNav.collapse}
         >
-            <span class="toggle-text">展开全部 {total} 篇</span>
+            <span class="toggle-text">{t.seriesNav.expandAllN(total)}</span>
             <ChevronDown class="w-3.5 h-3.5 toggle-icon transition-transform duration-200" />
         </button>
     )}
@@ -129,7 +132,7 @@ for (let i = visibleStart; i <= visibleEnd; i++) {
                         }
                     });
                     btn.setAttribute('data-expanded', 'false');
-                    if (textEl) textEl.textContent = `展开全部 ${total} 篇`;
+                    if (textEl) textEl.textContent = btn.getAttribute('data-i18n-expand') || '';
                     iconEl?.classList.remove('rotate-180');
                 } else {
                     // 展开：显示全部
@@ -137,7 +140,7 @@ for (let i = visibleStart; i <= visibleEnd; i++) {
                         item.classList.remove('hidden');
                     });
                     btn.setAttribute('data-expanded', 'true');
-                    if (textEl) textEl.textContent = '收起';
+                    if (textEl) textEl.textContent = btn.getAttribute('data-i18n-collapse') || '';
                     iconEl?.classList.add('rotate-180');
                 }
             });

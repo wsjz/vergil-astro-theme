@@ -14,7 +14,8 @@ import { getIconSvg } from './shared.mjs';
  *   | ...        | ...    | ...     | ...         | 正常   |
  *   :::
  */
-export function processOkrDirective(node) {
+export function processOkrDirective(node, options = {}) {
+    const i18n = options.i18n?.okr ?? { overall: '整体完成度', normal: '正常' };
     const attrs = node.attributes || {};
     const title = attrs.title || '';
     const period = attrs.period || '';
@@ -33,7 +34,7 @@ export function processOkrDirective(node) {
             const current = parseFloat(kr.current) || 0;
             const pct = target > 0 ? Math.min((current / target) * 100, 100) : 0;
             const desc = kr.description || '';
-            const status = kr.status || '正常';
+            const status = kr.status || i18n.normal;
             const statusClass = getStatusClass(status);
             const link = kr.link || '';
             totalKRs++;
@@ -68,7 +69,7 @@ export function processOkrDirective(node) {
 
         const objPct = obj.krs.length > 0 ? (objProgressSum / obj.krs.length) : 0;
         const objDesc = obj.desc || '';
-        const objStatus = obj.status || '正常';
+        const objStatus = obj.status || i18n.normal;
         const objStatusClass = getStatusClass(objStatus);
 
         return `
@@ -108,7 +109,7 @@ export function processOkrDirective(node) {
             ` : ''}
             ${totalKRs > 0 ? `
                 <div class="md-okr-overall">
-                    <span class="md-okr-overall-label">整体完成度</span>
+                    <span class="md-okr-overall-label">${escapeHtml(i18n.overall)}</span>
                     <span class="md-okr-pct">${Math.round(overallPct)}%</span>
                     <div class="md-okr-progress-track md-okr-progress-track--overall">
                         <div class="md-okr-progress-fill" style="width:${overallPct}%"></div>
@@ -219,7 +220,7 @@ function parseKRFromParagraph(node) {
             target: targetIdx >= 0 ? cells[targetIdx] || '0' : '0',
             current: currentIdx >= 0 ? cells[currentIdx] || '0' : '0',
             description: descIdx >= 0 ? cells[descIdx] || '' : '',
-            status: statusIdx >= 0 ? cells[statusIdx] || '正常' : '正常',
+            status: statusIdx >= 0 ? cells[statusIdx] || '' : '',
             link: linkIdx >= 0 ? cells[linkIdx] || '' : '',
         };
         krs.push(kr);
@@ -251,7 +252,7 @@ function parseKRTable(tableNode) {
             target: targetIdx >= 0 ? extractText(cells[targetIdx]).trim() : '0',
             current: currentIdx >= 0 ? extractText(cells[currentIdx]).trim() : '0',
             description: descIdx >= 0 ? extractText(cells[descIdx]).trim() : '',
-            status: statusIdx >= 0 ? extractText(cells[statusIdx]).trim() : '正常',
+            status: statusIdx >= 0 ? extractText(cells[statusIdx]).trim() : '',
             link: linkIdx >= 0 ? extractText(cells[linkIdx]).trim() : '',
         };
         krs.push(kr);

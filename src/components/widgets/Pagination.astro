@@ -1,29 +1,30 @@
 ---
 import { ChevronLeft, ChevronRight } from '@lucide/astro';
 import IconButton from '../ui/IconButton.astro';
+import { t } from '../../i18n';
 
 const { page, class: className } = Astro.props;
 ---
 
-<nav aria-label="分页" class:list={['relative px-12 py-2 text-center', className]}>
+<nav aria-label={t.pagination.label} class:list={['relative px-12 py-2 text-center', className]}>
     {
         page.url.prev && (
             <IconButton
                 class="absolute top-1/2 left-0 -translate-y-1/2"
                 href={page.url.prev}
-                aria-label={`前往第 ${page.currentPage - 1} 页，共 ${page.lastPage} 页`}
+                aria-label={t.pagination.goTo(page.currentPage - 1, page.lastPage)}
             >
                 <ChevronLeft class="h-5 w-5" />
             </IconButton>
         )
     }
-    <span class="text-sm" aria-current="page">第 {page.currentPage} 页 / 共 {page.lastPage} 页</span>
+    <span class="text-sm" aria-current="page">{t.pagination.status(page.currentPage, page.lastPage)}</span>
     {
         page.url.next && (
             <IconButton
                 class="absolute top-1/2 right-0 -translate-y-1/2"
                 href={page.url.next}
-                aria-label={`前往第 ${page.currentPage + 1} 页，共 ${page.lastPage} 页`}
+                aria-label={t.pagination.goTo(page.currentPage + 1, page.lastPage)}
             >
                 <ChevronRight class="h-5 w-5" />
             </IconButton>

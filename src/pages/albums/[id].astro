@@ -1,4 +1,5 @@
 ---
+import { locale, t } from '../../i18n';
 /**
  * Album detail page
  *
@@ -51,7 +52,7 @@ const hasSeasons = Object.values(seasonImages).some(arr => arr.length > 0);
 
 const coverSrc = cover ? (typeof cover === 'string' ? cover : cover.src) : null;
 const imageCount = images.length;
-const yearMonth = date ? new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' }) : '';
+const yearMonth = date ? new Date(date).toLocaleDateString(locale, { year: 'numeric', month: 'long' }) : '';
 
 const isSeasons = theme === 'seasons';
 ---
@@ -95,7 +96,7 @@ const isSeasons = theme === 'seasons';
     </AlbumRenderer>
 </AlbumLayout>
 
-<script is:inline define:vars={{ imageData: allImages, isSeasonsTheme: isSeasons, defaultSeason: defaultSeason }}>
+<script is:inline define:vars={{ imageData: allImages, isSeasonsTheme: isSeasons, defaultSeason: defaultSeason, i18nSeasons: t.album.seasonLabel, i18nTime: t.album.timeOfDay }}>
     (function() {
         const lightbox = document.getElementById('alb-lightbox');
         if (!lightbox) return;
@@ -216,7 +217,7 @@ const isSeasons = theme === 'seasons';
             autumn: { main: '#FF7F50', glow: 'rgba(255, 127, 80, 0.4)', glowSoft: 'rgba(255, 127, 80, 0.15)' },
             winter: { main: '#F0F8FF', glow: 'rgba(240, 248, 255, 0.4)', glowSoft: 'rgba(240, 248, 255, 0.15)' }
         };
-        const seasonNames = { spring: '春 Spring', summer: '夏 Summer', autumn: '秋 Autumn', winter: '冬 Winter' };
+        const seasonNames = i18nSeasons;
 
         if (seasonNav) {
             const ds = seasonNav.dataset.defaultSeason;
@@ -358,14 +359,14 @@ const isSeasons = theme === 'seasons';
             function getTimeLabel(v) {
                 var totalMinutes = 240 + parseInt(v, 10);
                 var hours = Math.floor(totalMinutes / 60);
-                if (hours >= 4 && hours < 6) return '黎明';
-                if (hours >= 6 && hours < 9) return '朝';
-                if (hours >= 9 && hours < 12) return '午前';
-                if (hours >= 12 && hours < 14) return '正午';
-                if (hours >= 14 && hours < 17) return '午後';
-                if (hours >= 17 && hours < 19) return '黄昏';
-                if (hours >= 19 && hours < 21) return '夜';
-                return '深夜';
+                if (hours >= 4 && hours < 6) return i18nTime.dawn;
+                if (hours >= 6 && hours < 9) return i18nTime.morning;
+                if (hours >= 9 && hours < 12) return i18nTime.forenoon;
+                if (hours >= 12 && hours < 14) return i18nTime.noon;
+                if (hours >= 14 && hours < 17) return i18nTime.afternoon;
+                if (hours >= 17 && hours < 19) return i18nTime.dusk;
+                if (hours >= 19 && hours < 21) return i18nTime.night;
+                return i18nTime.lateNight;
             }
             function getTimeFilter(value) {
                 var t = value / 1200;

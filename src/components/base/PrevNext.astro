@@ -1,4 +1,5 @@
 ---
+import { t } from '../../i18n';
 /**
  * 文章 / 文档底部的上下篇导航。
  *
@@ -32,7 +33,7 @@ const { prev = null, next = null, class: className = '' } = Astro.props;
             <a href={prev.href} class="group flex items-center gap-3 min-w-0">
                 <ChevronLeft class="w-5 h-5 text-muted group-hover:text-accent transition-colors shrink-0" />
                 <div class="flex flex-col min-w-0">
-                    <span class="text-[11px] text-muted tracking-wider">{prev.label ?? '上一篇'}</span>
+                    <span class="text-[11px] text-muted tracking-wider">{prev.label ?? t.nav.prev}</span>
                     <span class="text-sm font-medium text-secondary group-hover:text-accent transition-colors truncate">
                         {prev.title}
                     </span>
@@ -46,7 +47,7 @@ const { prev = null, next = null, class: className = '' } = Astro.props;
         {next ? (
             <a href={next.href} class="group flex items-center gap-3 min-w-0">
                 <div class="flex flex-col items-end min-w-0">
-                    <span class="text-[11px] text-muted tracking-wider">{next.label ?? '下一篇'}</span>
+                    <span class="text-[11px] text-muted tracking-wider">{next.label ?? t.nav.next}</span>
                     <span class="text-sm font-medium text-secondary group-hover:text-accent transition-colors truncate">
                         {next.title}
                     </span>

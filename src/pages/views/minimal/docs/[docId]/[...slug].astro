@@ -1,4 +1,5 @@
 ---
+import { t } from '../../../../../i18n';
 import DirectiveStyles from '../../../../../components/base/DirectiveStyles.astro';
 import { getCollection, render } from 'astro:content';
 import MinimalLayout from '../../../../../views/minimal/layouts/MinimalLayout.astro';
@@ -36,7 +37,7 @@ const slugParts = slug.split('/');
 const tree = await getDocTree(docId);
 
 const crumbs: { text: string; href?: string }[] = [
-    { text: '文档', href: '/views/minimal/?type=docs' },
+    { text: t.page.minimal.docs, href: '/views/minimal/?type=docs' },
     { text: metaTitle, href: `/views/minimal/?type=docs&cat=${docId}` }
 ];
 

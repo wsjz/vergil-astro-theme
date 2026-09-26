@@ -1,4 +1,5 @@
 ---
+import { locale, t } from '../../i18n';
 import { getCollection } from 'astro:content';
 import { ChevronRight } from '@lucide/astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -9,7 +10,7 @@ const albums = await getCollection('albums');
 const sortedAlbums = albums.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 
 const title = `Albums · ${siteConfig.title}`;
-const description = 'A curated collection of visual stories. 视觉故事的策展。';
+const description = t.album.description;
 const totalCount = sortedAlbums.length;
 ---
 
@@ -17,11 +18,11 @@ const totalCount = sortedAlbums.length;
     <!-- ── HERO ── -->
     <section class="albums-hero">
         <div class="albums-hero-inner">
-            <span class="albums-hero-label reveal">Selected Works · 精选影集</span>
+            <span class="albums-hero-label reveal">{t.album.selectedWorks}</span>
             <h1 class="albums-hero-title reveal" style="--delay: 0.1s">Albums</h1>
             <div class="albums-hero-line reveal" style="--delay: 0.2s"></div>
             <p class="albums-hero-desc reveal" style="--delay: 0.3s">
-                视觉故事的策展。每一个影集都是一段独立的旅程，承载着不同的氛围、节奏与时间。
+                {t.album.descriptionLong}
             </p>
         </div>
     </section>
@@ -29,7 +30,7 @@ const totalCount = sortedAlbums.length;
     <!-- ── GRID ── -->
     <section class="albums-section">
         <div class="albums-section-header reveal">
-            <span class="albums-section-label">Index · 目录</span>
+            <span class="albums-section-label">{t.album.index}</span>
             <div class="albums-section-line"></div>
         </div>
 
@@ -41,7 +42,7 @@ const totalCount = sortedAlbums.length;
                 const displayCover = coverSrc || (typeof firstImg === 'string' ? firstImg : firstImg?.src);
                 const count = images?.length || 0;
                 const num = String(i + 1).padStart(2, '0');
-                const yearMonth = new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+                const yearMonth = new Date(date).toLocaleDateString(locale, { year: 'numeric', month: 'long' });
                 const themeLabel = theme === 'seasons' ? 'Seasons' : 'Golden';
                 const itemDelay = 0.05 + i * 0.08;
                 return (
@@ -79,7 +80,7 @@ const totalCount = sortedAlbums.length;
                             </div>
                             <h2 class="albums-item-title">{albumTitle}</h2>
                             <div class="albums-item-meta">
-                                <span class="albums-item-count">{count} 张</span>
+                                <span class="albums-item-count">{t.album.photos(count)}</span>
                                 {tags && tags.length > 0 ? (
                                     <span class="albums-item-tags">{tags.slice(0, 2).join(' · ')}</span>
                                 ) : null}
@@ -97,7 +98,7 @@ const totalCount = sortedAlbums.length;
                     <circle cx="9" cy="9" r="2"/>
                     <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
                 </svg>
-                <p>暂无影集</p>
+                <p>{t.album.empty}</p>
             </div>
         ) : null}
     </section>

@@ -1,4 +1,5 @@
 ---
+import { locale, t } from '../i18n';
 import type { CollectionEntry } from 'astro:content';
 import { ChevronLeft } from '@lucide/astro';
 import BaseHead from '../components/base/BaseHead.astro';
@@ -53,7 +54,7 @@ const seoDesc = description || '';
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang={locale}>
     <head>
         <BaseHead title={seoTitle} description={seoDesc} />
         {fontsUrl ? <link rel="stylesheet" href={fontsUrl} /> : null}
@@ -85,7 +86,7 @@ const seoDesc = description || '';
         `} />
     </head>
     <body>
-        <a class="skip-link" href="#main-content">跳到主要内容</a>
+        <a class="skip-link" href="#main-content">{t.a11y.skipToContent}</a>
         <div class="album-page" data-album-theme={theme} data-page-type={pageType}>
             {/* ── Atmosphere Layer ── */}
             <div class="album-atmosphere">
@@ -100,10 +101,10 @@ const seoDesc = description || '';
 
             {/* ── Back Navigation ── */}
             {pageType === 'detail' ? (
-                <nav class="album-back" aria-label="返回影集列表">
+                <nav class="album-back" aria-label={t.album.backToList}>
                     <a href="/albums/" class="album-back-link">
                         <ChevronLeft class="w-3.5 h-3.5" style="stroke-width: 1.5" />
-                        <span>返回影集列表</span>
+                        <span>{t.album.backToList}</span>
                     </a>
                 </nav>
             ) : null}
@@ -114,8 +115,8 @@ const seoDesc = description || '';
                     <div class="album-footer-line" />
                     <div class="album-footer-inner">
                         <div class="album-footer-left">
-                            <span class="album-footer-label">Next Album · 下一期</span>
-                            <p class="album-footer-desc">继续探索更多视觉故事</p>
+                            <span class="album-footer-label">{t.album.nextLabel}</span>
+                            <p class="album-footer-desc">{t.album.nextDesc}</p>
                         </div>
                         <div class="album-footer-right">
                             <AlbumCard

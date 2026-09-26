@@ -1,5 +1,6 @@
 ---
 import siteConfig from '../../data/site-config';
+import { t } from '../../i18n';
 const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false };
 ---
 <div class="md-floating-audio" id="mdFloatingAudio" data-state="hidden" data-autoplay={faConfig.autoplay ? '1' : '0'}>
@@ -23,17 +24,17 @@ const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false }
                     </div>
                 </div>
                 <div class="md-fa-meta">
-                    <div class="md-fa-title" id="mdFaTitle">未知标题</div>
+                    <div class="md-fa-title" id="mdFaTitle">{t.audio.unknownTitle}</div>
                     <div class="md-fa-artist" id="mdFaArtist"></div>
                 </div>
                 <div class="md-fa-header-actions">
-                    <button type="button" class="md-fa-btn-list" id="mdFaBtnList" title="播放列表" aria-label="播放列表">
+                    <button type="button" class="md-fa-btn-list" id="mdFaBtnList" title={t.audio.playlist} aria-label={t.audio.playlist}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
                     </button>
-                    <button type="button" class="md-fa-btn-pin" id="mdFaBtnPin" title="固定" aria-label="固定">
+                    <button type="button" class="md-fa-btn-pin" id="mdFaBtnPin" title={t.audio.pin} aria-label={t.audio.pin}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="17" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
                     </button>
-                    <button type="button" class="md-fa-btn-close" id="mdFaBtnClose" title="关闭" aria-label="关闭">&times;</button>
+                    <button type="button" class="md-fa-btn-close" id="mdFaBtnClose" title={t.audio.close} aria-label={t.audio.close}>&times;</button>
                 </div>
             </div>
 
@@ -47,21 +48,21 @@ const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false }
                 </div>
 
                 <div class="md-fa-controls">
-                    <button type="button" class="md-fa-btn-prev" id="mdFaBtnPrev" aria-label="上一首">
+                    <button type="button" class="md-fa-btn-prev" id="mdFaBtnPrev" aria-label={t.audio.prev}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
                     </button>
-                    <button type="button" class="md-fa-btn-play" id="mdFaBtnPlay" aria-label="播放">
+                    <button type="button" class="md-fa-btn-play" id="mdFaBtnPlay" aria-label={t.audio.play}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" id="mdFaIconPlay"><path d="M8 5v14l11-7z"/></svg>
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" id="mdFaIconPause" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                     </button>
-                    <button type="button" class="md-fa-btn-next" id="mdFaBtnNext" aria-label="下一首">
+                    <button type="button" class="md-fa-btn-next" id="mdFaBtnNext" aria-label={t.audio.next}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="m6 18 8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                     </button>
                 </div>
             </div>
 
             <div class="md-fa-playlist" id="mdFaPlaylist">
-                <div class="md-fa-playlist-header">播放列表</div>
+                <div class="md-fa-playlist-header">{t.audio.playlist}</div>
                 <div class="md-fa-playlist-items" id="mdFaPlaylistItems"></div>
             </div>
         </div>
@@ -70,7 +71,7 @@ const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false }
     <audio id="mdFloatingAudioEl" preload="metadata" style="display:none"></audio>
 </div>
 
-<script is:inline data-astro-rerun>
+<script is:inline data-astro-rerun define:vars={{ i18n: { unknownTitle: t.audio.unknownTitle, neteaseMusic: t.audio.neteaseMusic, empty: t.audio.empty, netease: t.audio.netease } }}>
 (function () {
     var STORAGE_KEY = 'md-floating-audio-state';
 
@@ -193,7 +194,7 @@ const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false }
                 src: src,
                 neteaseId: '',
                 cover: coverEl ? coverEl.src : '',
-                title: titleEl2 ? titleEl2.textContent.trim() : '未知标题',
+                title: titleEl2 ? titleEl2.textContent.trim() : i18n.unknownTitle,
                 artist: artistEl2 ? artistEl2.textContent.trim() : ''
             });
         });
@@ -203,7 +204,7 @@ const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false }
             var neteaseId = el.dataset.netease;
             if (!neteaseId || seen.has(neteaseId)) return;
             seen.add(neteaseId);
-            var title = el.dataset.title || '网易云音乐';
+            var title = el.dataset.title || i18n.neteaseMusic;
             var artist = el.dataset.artist || '';
 
             S.playlist.push({
@@ -222,7 +223,7 @@ const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false }
     function renderPlaylist() {
         if (!E.playlistItems) return;
         if (S.playlist.length === 0) {
-            E.playlistItems.innerHTML = '<div style="padding:12px 8px;text-align:center;color:var(--text-secondary);font-size:0.8125rem;">暂无音频</div>';
+            E.playlistItems.innerHTML = '<div style="padding:12px 8px;text-align:center;color:var(--text-secondary);font-size:0.8125rem;">' + escapeHtml(i18n.empty) + '</div>';
             return;
         }
         var html = '';
@@ -235,7 +236,7 @@ const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false }
             var iconSvg = isNetease
                 ? '<svg class="md-fa-pl-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>'
                 : '<svg class="md-fa-pl-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-            var neteaseBadge = isNetease ? '<span style="font-size:10px;color:var(--text-secondary);margin-left:4px;">网易</span>' : '';
+            var neteaseBadge = isNetease ? '<span style="font-size:10px;color:var(--text-secondary);margin-left:4px;">' + escapeHtml(i18n.netease) + '</span>' : '';
             html += '<div class="md-fa-pl-item' + (isActive ? ' is-active' : '') + (isNetease ? ' is-netease' : '') + '" data-idx="' + idx + '">' +
                 '<div class="md-fa-pl-cover">' + coverHtml + '</div>' +
                 '<div class="md-fa-pl-info">' +
@@ -277,7 +278,7 @@ const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false }
         E.audioEl.src = track.src;
         E.audioEl.load();
         updateCover(track.cover);
-        if (E.titleEl) E.titleEl.textContent = track.title || '未知标题';
+        if (E.titleEl) E.titleEl.textContent = track.title || i18n.unknownTitle;
         if (E.artistEl) E.artistEl.textContent = track.artist || '';
         renderPlaylist();
         E.progressFill.style.width = '0%';
@@ -364,7 +365,7 @@ const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false }
                 } else {
                     E.audioEl.src = state.src;
                     updateCover(state.cover);
-                    if (E.titleEl) E.titleEl.textContent = state.title || '未知标题';
+                    if (E.titleEl) E.titleEl.textContent = state.title || i18n.unknownTitle;
                     if (E.artistEl) E.artistEl.textContent = state.artist || '';
                 }
             }
@@ -603,7 +604,7 @@ const faConfig = siteConfig.floatingAudio || { enabled: false, autoplay: false }
                     S.currentIndex = idx;
                     var track = S.playlist[idx];
                     updateCover(track.cover);
-                    if (E.titleEl) E.titleEl.textContent = track.title || '未知标题';
+                    if (E.titleEl) E.titleEl.textContent = track.title || i18n.unknownTitle;
                     if (E.artistEl) E.artistEl.textContent = track.artist || '';
                     renderPlaylist();
                 }

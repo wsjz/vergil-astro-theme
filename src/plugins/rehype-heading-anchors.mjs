@@ -36,7 +36,9 @@ function textOf(node) {
     return out.trim();
 }
 
-export function rehypeHeadingAnchors() {
+export function rehypeHeadingAnchors(options = {}) {
+    const anchorTo = options.anchorTo ?? '链接到：';
+    const anchorToHeading = options.anchorToHeading ?? '链接到此标题';
     return (tree) => {
         visit(tree, 'element', (node) => {
             if (!/^h[2-4]$/.test(node.tagName)) return;
@@ -56,7 +58,7 @@ export function rehypeHeadingAnchors() {
                 properties: {
                     href: `#${id}`,
                     className: ['heading-anchor'],
-                    'aria-label': label ? `链接到：${label}` : '链接到此标题',
+                    'aria-label': label ? `${anchorTo}${label}` : anchorToHeading,
                 },
                 children: [structuredClone(LINK_ICON)],
             });

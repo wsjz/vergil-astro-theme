@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPathsOptions, Page } from 'astro';
 import { type CollectionEntry, getCollection } from 'astro:content';
+import { t } from '../../i18n';
 import Pagination from '../../components/widgets/Pagination.astro';
 import PostPreview from '../../components/content/PostPreview.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -18,8 +19,8 @@ const blog = page.data;
 const currentPage = page.currentPage;
 ---
 
-<BaseLayout title={currentPage > 1 ? `第 ${currentPage} 页` : undefined} showHeader={false}>
-    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">文章</h1>
+<BaseLayout title={currentPage > 1 ? t.pagination.pageN(currentPage) : undefined} showHeader={false}>
+    <h1 class="mb-12 font-display text-xl leading-tight sm:mb-16 sm:text-2xl">{t.nav.posts}</h1>
     {
         blog.map((post) => {
             const hasBanner = !!post.data.banner;

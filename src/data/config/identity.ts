@@ -1,5 +1,7 @@
 export const siteInfo = {
     title: 'Vergil',
+    /** 主题界面文案的语言，也决定 <html lang> 和日期格式。可选 'zh-CN' | 'en' */
+    locale: 'zh-CN',
     subtitle: 'Astro Framework for Content Creators',
     description: 'A content-driven Astro framework for building personal websites with Markdown',
     image: {

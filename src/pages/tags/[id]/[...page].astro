@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPathsOptions, Page } from 'astro';
 import { type CollectionEntry, getCollection } from 'astro:content';
+import { t } from '../../../i18n';
 import Pagination from '../../../components/widgets/Pagination.astro';
 import PostPreview from '../../../components/content/PostPreview.astro';
 import SectionNav from '../../../components/ui/SectionNav.astro';
@@ -32,16 +33,17 @@ const allTags = getAllTags(allPosts);
 const currentTag = allTags.find((tag) => {
     return tag.id === params.id;
 });
+const tagName = currentTag?.name ?? params.id ?? '';
 ---
 
-<BaseLayout title={`标签：${currentTag?.name}`} description={`「${currentTag?.name}」标签下的所有文章`} showHeader={false}>
+<BaseLayout title={t.page.tags.titleOf(tagName)} description={t.page.tags.descriptionOf(tagName)} showHeader={false}>
     <SectionNav
         items={[
-            { label: '近期发布', href: '/blog/' },
-            { label: '分类', href: '/categories/' },
-            { label: `标签：${currentTag?.name ?? params.id}`, href: '/tags/', active: true },
-            { label: '专栏', href: '/series/' },
-            { label: '归档', href: '/archives/' }
+            { label: t.nav.recent, href: '/blog/' },
+            { label: t.nav.categories, href: '/categories/' },
+            { label: t.page.tags.titleOf(tagName), href: '/tags/', active: true },
+            { label: t.nav.series, href: '/series/' },
+            { label: t.nav.archives, href: '/archives/' }
         ]}
     />
     {blog.map((post) => {

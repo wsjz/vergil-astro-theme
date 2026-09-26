@@ -1,4 +1,5 @@
 ---
+import { t } from '../../i18n';
 import DirectiveStyles from '../../components/base/DirectiveStyles.astro';
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -107,7 +108,7 @@ const qrCodeSvg = qrCode.svg();
 
 const leafCategory = categories && categories.length > 0 ? categories[categories.length - 1] : null;
 const postBreadcrumbs = [
-    { text: '博客', href: '/blog/' },
+    { text: t.nav.blog, href: '/blog/' },
     ...(leafCategory ? [{ text: leafCategory, href: `/categories/${slugify(leafCategory)}/` }] : []),
     { text: title }
 ];
@@ -195,23 +196,23 @@ const postBreadcrumbs = [
                     <div class="relative">
                         <button
                             class="share-menu-trigger w-4 h-4 text-muted hover:text-accent transition-colors cursor-pointer"
-                            aria-label="分享"
-                            title="分享"
+                            aria-label={t.post.share}
+                            title={t.post.share}
                         >
                             <ExternalLink class="w-4 h-4" />
                         </button>
                         <div class="share-menu hidden absolute right-1 top-6 bg-card rounded-lg shadow-md p-2 z-10 min-w-[80px]">
                             <button class="share-wechat relative w-full flex items-center gap-2 px-2 py-1 text-sm text-secondary hover:text-[#07C160] hover:bg-muted/50 rounded transition-colors group">
                                 <Icon name="simple-icons:wechat" class="w-4 h-4" />
-                                <span>微信</span>
+                                <span>{t.post.wechat}</span>
                                 <div class="wechat-qrcode-tooltip hidden group-hover:flex absolute right-full top-1/2 -translate-y-1/2 mr-2 bg-card rounded-lg shadow-md p-2 z-20 flex-col items-center gap-1 w-[180px]">
                                     <div class="wechat-qrcode-image w-[160px] h-[160px]" set:html={qrCodeSvg} />
-                                    <span class="text-[10px] text-muted">扫码分享</span>
+                                    <span class="text-[10px] text-muted">{t.post.scanToShare}</span>
                                 </div>
                             </button>
                             <button class="share-weibo w-full flex items-center gap-2 px-2 py-1 text-sm text-secondary hover:text-[#E6162D] hover:bg-muted/50 rounded transition-colors">
                                 <Icon name="simple-icons:sinaweibo" class="w-4 h-4" />
-                                <span>微博</span>
+                                <span>{t.post.weibo}</span>
                             </button>
                         </div>
                     </div>
@@ -223,7 +224,7 @@ const postBreadcrumbs = [
                         <Link class="copy-url-icon absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4" />
                         <Check class="copy-url-check absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 text-accent hidden" />
                         <span class="copy-url-tooltip absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] text-accent bg-card px-2 py-0.5 rounded shadow-sm opacity-0 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
-                            data-show="false">已复制</span>
+                            data-show="false">{t.post.copied}</span>
                     </button>
                 </div>
             )}
@@ -239,15 +240,15 @@ const postBreadcrumbs = [
                       ? {
                             href: `/blog/${recommendNext.id}/`,
                             title: recommendNext.data.title,
-                            label: '推荐',
-                            note: recommendNext.data.series ? `来自专栏「${recommendNext.data.series}」` : undefined,
+                            label: t.nav.recommend,
+                            note: recommendNext.data.series ? t.nav.fromSeries(recommendNext.data.series) : undefined,
                         }
                       : null
             }
         >
             {series && (
                 <div slot="header" class="text-center mb-3">
-                    <span class="text-[11px] text-muted tracking-wider uppercase">专栏</span>
+                    <span class="text-[11px] text-muted tracking-wider uppercase">{t.nav.series}</span>
                     <a href={`/series/${slugify(series)}/`} class="ml-1.5 text-sm font-medium text-accent hover:underline">
                         {series}
                     </a>
@@ -266,7 +267,7 @@ const postBreadcrumbs = [
     <!-- 微信分享二维码弹窗 -->
     <div class="wechat-qrcode-modal hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" data-url={pageUrl}>
         <div class="wechat-qrcode-card bg-card rounded-xl shadow-xl p-5 w-[200px] mx-4 text-center relative">
-            <button class="wechat-qrcode-close absolute top-2 right-2 text-muted hover:text-main transition-colors" aria-label="关闭">
+            <button class="wechat-qrcode-close absolute top-2 right-2 text-muted hover:text-main transition-colors" aria-label={t.post.close}>
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"/>
                     <line x1="6" y1="6" x2="18" y2="18"/>

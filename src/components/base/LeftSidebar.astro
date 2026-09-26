@@ -5,6 +5,7 @@ import siteConfig from '../../data/site-config';
 import { lucideNavIcons } from '../../utils/lucide-icons';
 import CustomImage from '../ui/CustomImage.astro';
 import SidebarRecentPosts from '../widgets/SidebarRecentPosts.astro';
+import { t } from '../../i18n';
 
 const currentPath = Astro.url.pathname;
 
@@ -26,7 +27,7 @@ function formatNumber(num: number): string {
 }
 
 function getRunningTime(): string {
-  if (posts.length === 0) return '0 天';
+  if (posts.length === 0) return t.sidebar.runningDays(0);
   const sortedPosts = [...posts].sort((a, b) =>
     new Date(a.data.publishDate).getTime() - new Date(b.data.publishDate).getTime()
   );
@@ -40,7 +41,7 @@ function getRunningTime(): string {
 }
 
 function getLastActive(): string {
-  if (posts.length === 0) return '从未';
+  if (posts.length === 0) return t.time.never;
   const sortedPosts = [...posts].sort((a, b) =>
     new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
   );
@@ -49,9 +50,9 @@ function getLastActive(): string {
   const now = new Date();
   const diffTime = now.getTime() - lastDate.getTime();
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return '今天';
-  if (diffDays === 1) return '昨天';
-  return diffDays + ' 天前';
+  if (diffDays === 0) return t.time.today;
+  if (diffDays === 1) return t.time.yesterday;
+  return t.sidebar.daysAgo(diffDays);
 }
 
 const navItems = siteConfig.sidebar?.nav ?? [];
@@ -119,7 +120,7 @@ function isActive(href: string): boolean {
     <div class="bg-card rounded-xl p-3">
       <div class="flex items-center gap-1.5 mb-3">
         <Flag class="w-3.5 h-3.5 text-red-500" />
-        <h3 class="text-sm font-medium text-main">站内导航</h3>
+        <h3 class="text-sm font-medium text-main">{t.sidebar.siteNav}</h3>
       </div>
 
       <nav class="grid grid-cols-3 gap-1.5">
@@ -159,30 +160,30 @@ function isActive(href: string): boolean {
     <div class="bg-card rounded-xl p-3 mt-3">
       <div class="flex items-center gap-1.5 mb-2.5">
         <Info class="w-3.5 h-3.5 text-accent" />
-        <h3 class="text-sm font-medium text-main">站点信息</h3>
+        <h3 class="text-sm font-medium text-main">{t.sidebar.siteInfo}</h3>
       </div>
 
       <div class="space-y-1.5 text-xs">
         <div class="flex justify-between">
-          <span class="text-muted">文章数目：</span>
-          <span class="text-main">{totalPosts} 篇</span>
+          <span class="text-muted">{t.sidebar.postCount}：</span>
+          <span class="text-main">{t.sidebar.posts(totalPosts)}</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-muted">已运行时间：</span>
+          <span class="text-muted">{t.sidebar.running}：</span>
           <span class="text-main">{getRunningTime()}</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-muted">本站总字数：</span>
+          <span class="text-muted">{t.sidebar.totalWords}：</span>
           <span class="text-main">{formatNumber(totalWords)}</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-muted">最后活动时间：</span>
+          <span class="text-muted">{t.sidebar.lastActive}：</span>
           <span class="text-main">{getLastActive()}</span>
         </div>
           <div class="bg-card rounded-xl mt-5">
               <div class="flex items-center gap-1.5 mb-2.5">
                   <Award class="w-3.5 h-3.5 text-accent" />
-                  <h3 class="text-sm font-medium text-main">备案信息</h3>
+                  <h3 class="text-sm font-medium text-main">{t.sidebar.icp}</h3>
               </div>
               <div class="space-y-1 text-xs text-muted">
                   <p>皖ICP备2021008088号-2</p>
@@ -198,7 +199,7 @@ function isActive(href: string): boolean {
 <!-- Overlay -->
 <div id="sidebar-overlay" class="fixed inset-0 z-[40] hidden opacity-0 transition-opacity duration-300 bg-black/20 backdrop-blur-sm"></div>
 
-<script is:inline>
+<script is:inline define:vars={{ i18n: { expand: t.sidebar.expand, collapse: t.sidebar.collapse } }}>
   (function() {
     var wasMobile = window.innerWidth < 1024;
     var isCollapsed = wasMobile;
@@ -230,14 +231,14 @@ function isActive(href: string): boolean {
 
       if (collapsed) {
         sb && (sb.style.transform = 'translateX(-100vw)');
-        desktopToggle?.setAttribute('aria-label', '展开侧边栏');
+        desktopToggle?.setAttribute('aria-label', i18n.expand);
         overlay?.classList.add('hidden', 'opacity-0');
         floatingTocBtn?.classList.remove('hidden');
         // Unlock scroll
         document.documentElement.classList.remove('sidebar-locked');
       } else {
         sb && (sb.style.transform = '');
-        desktopToggle?.setAttribute('aria-label', '收起侧边栏');
+        desktopToggle?.setAttribute('aria-label', i18n.collapse);
         if (isMobile) {
           overlay?.classList.remove('hidden');
           setTimeout(function() { overlay?.classList.remove('opacity-0'); }, 10);

@@ -1,4 +1,5 @@
 ---
+import { t } from '../../../i18n';
 import DirectiveStyles from '../../../components/base/DirectiveStyles.astro';
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
@@ -72,7 +73,7 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
             backgroundImage={splashConfig?.backgroundImage}
             overlay={splashConfig?.overlay}
             textShadow={splashConfig?.textShadow !== false}
-            buttonText={splashConfig?.buttonText || '开始阅读'}
+            buttonText={splashConfig?.buttonText || t.page.docs.startReading}
             fallbackBg={splashConfig?.fallbackBg}
             gradientColor={splashConfig?.gradientColor}
             gradientHeight={splashConfig?.gradientHeight || 'h-56'}
@@ -105,8 +106,8 @@ const metaTitle = (meta?.data?.title as string) ?? docId;
 
     {!entry && (
         <div class="flex flex-col items-center justify-center min-h-[40vh] text-secondary">
-            <p>该知识库暂无文章</p>
-            <a href="/docs/" class="mt-4 text-accent hover:underline">返回文档列表</a>
+            <p>{t.page.docs.empty}</p>
+            <a href="/docs/" class="mt-4 text-accent hover:underline">{t.page.docs.backToList}</a>
         </div>
     )}
 

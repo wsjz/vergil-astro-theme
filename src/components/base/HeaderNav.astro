@@ -2,6 +2,7 @@
 import { ChevronDown, Search, Menu, X, MessageSquare } from '@lucide/astro';
 import siteConfig from '../../data/site-config';
 import { lucideNavIcons } from '../../utils/lucide-icons';
+import { t } from '../../i18n';
 
 interface Props {
     articleTitle?: string;
@@ -121,7 +122,7 @@ function hasActiveChild(children?: { href: string }[]): boolean {
                     aria-label="Search"
                 >
                     <Search class="w-4 h-4" />
-                <span class="hidden sm:inline">搜索</span>
+                <span class="hidden sm:inline">{t.header.search}</span>
                     <kbd class="hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-[var(--bg-muted)] rounded text-muted">
                         ⌘ K
                     </kbd>

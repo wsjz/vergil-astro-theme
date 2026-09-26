@@ -1,4 +1,5 @@
 ---
+import { t } from '../../../i18n';
 import DirectiveStyles from '../../../components/base/DirectiveStyles.astro';
 import { getCollection, render } from 'astro:content';
 import DocsLayout from '../../../layouts/DocsLayout.astro';
@@ -126,7 +127,7 @@ const showAutoRender = autoRender && groupChildren.length > 0;
                 <>
                     <Breadcrumb
                         crumbs={[
-                            { text: '文档', href: '/docs/' },
+                            { text: t.page.docs.title, href: '/docs/' },
                             { text: metaTitle, href: `/docs/${docId}/` },
                             { text: String(entry.data.title) }
                         ]}
@@ -158,7 +159,7 @@ const showAutoRender = autoRender && groupChildren.length > 0;
                                 </span>
                                 {isGroup && childCount > 0 && (
                                     <span class="block text-xs text-muted mt-0.5">
-                                        {childCount} 个子项
+                                        {t.page.docs.children(childCount)}
                                     </span>
                                 )}
                             </span>

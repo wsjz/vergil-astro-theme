@@ -1,4 +1,5 @@
 ---
+import { locale, t } from '../../../i18n';
 import { getCollection } from 'astro:content';
 import { getDocSets, type DocTreeNode } from '../../../utils/docs-utils';
 import { getAllCategories } from '../../../utils/data-utils';
@@ -56,7 +57,7 @@ const docSetsMeta = sets.map((s) => ({ id: s.id, title: s.meta.data.title }));
     <div id="mc-list" class="mt-4"></div>
 </minimal-client-view>
 
-<script is:inline>
+<script is:inline define:vars={{ locale, i18n: { all: t.page.minimal.all, blog: t.page.minimal.blog, docs: t.page.minimal.docs, empty: t.page.minimal.empty } }}>
     (function() {
         if (customElements.get('minimal-client-view')) return;
 
@@ -140,19 +141,19 @@ const docSetsMeta = sets.map((s) => ({ id: s.id, title: s.meta.data.title }));
 
             renderTabs(type, cat) {
                 var typeTabs = '<div class="flex items-center gap-1 mb-4">' +
-                    '<button data-type="blog" class="px-4 py-1.5 rounded-full text-sm font-medium transition-all ' + (type === 'blog' ? 'bg-accent text-white' : 'text-secondary hover:bg-hover hover:text-accent') + '">博客</button>' +
-                    '<button data-type="docs" class="px-4 py-1.5 rounded-full text-sm font-medium transition-all ' + (type === 'docs' ? 'bg-accent text-white' : 'text-secondary hover:bg-hover hover:text-accent') + '">文档</button>' +
+                    '<button data-type="blog" class="px-4 py-1.5 rounded-full text-sm font-medium transition-all ' + (type === 'blog' ? 'bg-accent text-white' : 'text-secondary hover:bg-hover hover:text-accent') + '">' + i18n.blog + '</button>' +
+                    '<button data-type="docs" class="px-4 py-1.5 rounded-full text-sm font-medium transition-all ' + (type === 'docs' ? 'bg-accent text-white' : 'text-secondary hover:bg-hover hover:text-accent') + '">' + i18n.docs + '</button>' +
                     '</div>';
 
                 var filterTabs = '<div class="flex items-center gap-1 flex-wrap">';
                 if (type === 'blog') {
-                    filterTabs += '<button data-cat="all" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === 'all' ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">全部</button>';
+                    filterTabs += '<button data-cat="all" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === 'all' ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">' + i18n.all + '</button>';
                     for (var i = 0; i < this.categories.length; i++) {
                         var c = this.categories[i];
                         filterTabs += '<button data-cat="' + c.id + '" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === c.id ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">' + c.name + '</button>';
                     }
                 } else {
-                    filterTabs += '<button data-cat="all" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === 'all' ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">全部</button>';
+                    filterTabs += '<button data-cat="all" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === 'all' ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">' + i18n.all + '</button>';
                     for (var j = 0; j < this.docsets.length; j++) {
                         var s = this.docsets[j];
                         filterTabs += '<button data-cat="' + s.id + '" class="px-3 py-1 rounded-lg text-xs transition-all ' + (cat === s.id ? 'bg-accent/10 text-accent font-medium' : 'text-muted hover:text-accent hover:bg-hover') + '">' + s.title + '</button>';
@@ -167,12 +168,12 @@ const docSetsMeta = sets.map((s) => ({ id: s.id, title: s.meta.data.title }));
                 if (type === 'blog') {
                     var items = cat === 'all' ? this.blog : this.blog.filter(function(p) { return p.categoryId === cat; });
                     if (items.length === 0) {
-                        return '<div class="text-center py-12 text-muted text-sm">暂无内容</div>';
+                        return '<div class="text-center py-12 text-muted text-sm">' + i18n.empty + '</div>';
                     }
                     var html = '<div class="space-y-1">';
                     for (var i = 0; i < items.length; i++) {
                         var item = items[i];
-                        var dateStr = item.date ? new Date(item.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+                        var dateStr = item.date ? new Date(item.date).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' }) : '';
                         html += '<a href="' + item.href + '" class="group flex items-center justify-between py-3 px-4 rounded-lg transition-all hover:bg-hover">' +
                             '<span class="text-sm text-main group-hover:text-accent transition-colors line-clamp-1">' + item.title + '</span>' +
                             (dateStr ? '<span class="text-xs text-muted shrink-0 ml-4">' + dateStr + '</span>' : '') +
@@ -188,7 +189,7 @@ const docSetsMeta = sets.map((s) => ({ id: s.id, title: s.meta.data.title }));
                 }
 
                 if (trees.length === 0) {
-                    return '<div class="text-center py-12 text-muted text-sm">暂无内容</div>';
+                    return '<div class="text-center py-12 text-muted text-sm">' + i18n.empty + '</div>';
                 }
 
                 var html = '<div class="space-y-4">';

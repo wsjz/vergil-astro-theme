@@ -1,4 +1,5 @@
 ---
+import { t } from '../i18n';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import siteConfig from '../data/site-config';
 
@@ -19,23 +20,38 @@ const configJson = JSON.stringify({
 ---
 
 <BaseLayout
-    title="站点数据"
-    description="站点访问统计"
+    title={t.stats.siteData}
+    description={t.stats.title}
     showSidebar={false}
     showRightSidebar={false}
 >
-    <div class="stats-page" data-config={configJson}>
+    <!-- 下面的脚本是打包脚本，拿不到 t，运行时用到的文案通过 data-i18n-* 透传；带参数的是模板串 -->
+    <div
+        class="stats-page"
+        data-config={configJson}
+        data-i18n-pageviews={t.stats.pageviews}
+        data-i18n-visitors={t.stats.visitors}
+        data-i18n-visits={t.stats.visits}
+        data-i18n-bounce-rate={t.stats.bounceRate}
+        data-i18n-avg-duration={t.stats.avgDuration}
+        data-i18n-no-data={t.stats.noData}
+        data-i18n-hint-one-hour={t.stats.hintOneHour}
+        data-i18n-hint-one-month={t.stats.hintOneMonth}
+        data-i18n-hint-one-day={t.stats.hintOneDay}
+        data-i18n-month={t.time.month('{m}')}
+        data-i18n-md={t.time.md('{m}', '{d}')}
+    >
         <!-- 配置缺失提示 -->
         <div id="stats-config-error" class="hidden config-error">
             <div class="config-error-inner">
-                <h2>站点分析未配置</h2>
-                <p>请在 <code>src/data/config/analytics.ts</code> 中配置 Umami 参数：</p>
+                <h2>{t.stats.notConfigured}</h2>
+                <p>{t.stats.configLead} <code>src/data/config/analytics.ts</code> {t.stats.configTail}</p>
                 <ul>
-                    <li><code>websiteId</code> — 在 Umami Cloud 后台获取</li>
-                    <li><code>apiToken</code> — 在 Umami Cloud 后台生成 API Key</li>
-                    <li>将 <code>enabled</code> 设为 <code>true</code></li>
+                    <li><code>websiteId</code> {t.stats.getFromHint}</li>
+                    <li><code>apiToken</code> {t.stats.apiKeyHint}</li>
+                    <li>{t.stats.setLead} <code>enabled</code> {t.stats.setTail} <code>true</code></li>
                 </ul>
-                <p class="config-hint">配置完成后重新构建站点即可看到数据。</p>
+                <p class="config-hint">{t.stats.rebuildHint}</p>
             </div>
         </div>
 
@@ -43,28 +59,28 @@ const configJson = JSON.stringify({
         <div id="stats-content" class="hidden">
             <header class="stats-header">
                 <div class="stats-header-left">
-                    <h1 class="stats-title">站点数据</h1>
+                    <h1 class="stats-title">{t.stats.siteData}</h1>
                     <p class="stats-subtitle">Powered by Umami Analytics</p>
                 </div>
                 <div class="range-switcher" id="range-switcher">
-                    <button class="range-btn" data-range="today">今日</button>
-                    <button class="range-btn active" data-range="7d">7 天</button>
-                    <button class="range-btn" data-range="30d">30 天</button>
-                    <button class="range-btn" data-range="year">今年</button>
+                    <button class="range-btn" data-range="today">{t.stats.today}</button>
+                    <button class="range-btn active" data-range="7d">{t.stats.days7}</button>
+                    <button class="range-btn" data-range="30d">{t.stats.days30}</button>
+                    <button class="range-btn" data-range="year">{t.stats.thisYear}</button>
                 </div>
             </header>
 
             <!-- 加载状态 -->
             <div id="stats-loading" class="stats-loading">
                 <div class="loading-spinner"></div>
-                <span>正在加载数据...</span>
+                <span>{t.stats.loading}...</span>
             </div>
 
             <!-- 错误状态 -->
             <div id="stats-error" class="hidden stats-error">
-                <p>数据加载失败，请检查 API Token 是否有效。</p>
+                <p>{t.stats.loadFailed}</p>
                 <p id="stats-error-detail" class="stats-error-detail"></p>
-                <button id="retry-btn" class="retry-btn">重试</button>
+                <button id="retry-btn" class="retry-btn">{t.stats.retry}</button>
             </div>
 
             <!-- 数据内容 -->
@@ -76,7 +92,7 @@ const configJson = JSON.stringify({
 
                 <!-- Trend Chart -->
                 <section data-module="trends" class="stats-section">
-                    <h2 class="section-title">流量趋势</h2>
+                    <h2 class="section-title">{t.stats.traffic}</h2>
                     <div class="chart-frame">
                         <svg id="trend-chart" class="chart-svg" viewBox="0 0 800 220" preserveAspectRatio="none"></svg>
                     </div>
@@ -85,11 +101,11 @@ const configJson = JSON.stringify({
                 <!-- Two column: Top Pages + Referrers -->
                 <div class="data-grid">
                     <section data-module="pages" class="stats-section">
-                        <h2 class="section-title">热门页面</h2>
+                        <h2 class="section-title">{t.stats.topPages}</h2>
                         <ul class="data-list" id="top-pages"></ul>
                     </section>
                     <section data-module="referrers" class="stats-section">
-                        <h2 class="section-title">来源分析</h2>
+                        <h2 class="section-title">{t.stats.sources}</h2>
                         <ul class="data-list" id="referrers"></ul>
                     </section>
                 </div>
@@ -98,19 +114,19 @@ const configJson = JSON.stringify({
                 <div class="dist-strip">
                     <section data-module="devices" class="dist-section">
                         <div class="dist-group">
-                            <h3 class="dist-title">浏览器</h3>
+                            <h3 class="dist-title">{t.stats.browser}</h3>
                             <div class="dist-tags" id="browsers-list"></div>
                         </div>
                     </section>
                     <section data-module="devices" class="dist-section">
                         <div class="dist-group">
-                            <h3 class="dist-title">设备</h3>
+                            <h3 class="dist-title">{t.stats.device}</h3>
                             <div class="dist-tags" id="devices-list"></div>
                         </div>
                     </section>
                     <section data-module="locations" class="dist-section">
                         <div class="dist-group">
-                            <h3 class="dist-title">地区</h3>
+                            <h3 class="dist-title">{t.stats.region}</h3>
                             <div class="dist-tags" id="locations-list"></div>
                         </div>
                     </section>
@@ -121,7 +137,7 @@ const configJson = JSON.stringify({
                     <div class="realtime-strip">
                         <span class="pulse-dot"></span>
                         <span class="realtime-text">
-                            <span class="realtime-count" id="realtime-count">--</span> 人正在浏览
+                            <span class="realtime-count" id="realtime-count">--</span> {t.stats.online}
                         </span>
                     </div>
                 </section>
@@ -159,6 +175,13 @@ const configJson = JSON.stringify({
 
     interface UmamiActive {
         x: number;
+    }
+
+    // ── i18n ──
+    // 打包脚本拿不到 t，文案从 .stats-page 的 data-i18n-* 读；用时再读，兼容视图切换后重新进入本页
+    function tr(key: string): string {
+        const el = document.querySelector('.stats-page') as HTMLElement | null;
+        return el?.dataset[key] ?? '';
     }
 
     // ── Helpers ──
@@ -296,11 +319,11 @@ const configJson = JSON.stringify({
         const tt = getStatValue(stats.totaltime);
 
         const items = [
-            { label: '浏览量', value: formatNumber(pv), change: calcChange(pv, getStatPrev(stats.pageviews)) },
-            { label: '访客数', value: formatNumber(uv), change: calcChange(uv, getStatPrev(stats.visitors)) },
-            { label: '访问次数', value: formatNumber(vi), change: calcChange(vi, getStatPrev(stats.visits)) },
-            { label: '跳出率', value: vi ? `${Math.min((bo / vi) * 100, 100).toFixed(1)}%` : '--', change: '' },
-            { label: '平均停留', value: vi ? formatDuration(Math.round(tt / vi)) : '--', change: '' },
+            { label: tr('i18nPageviews'), value: formatNumber(pv), change: calcChange(pv, getStatPrev(stats.pageviews)) },
+            { label: tr('i18nVisitors'), value: formatNumber(uv), change: calcChange(uv, getStatPrev(stats.visitors)) },
+            { label: tr('i18nVisits'), value: formatNumber(vi), change: calcChange(vi, getStatPrev(stats.visits)) },
+            { label: tr('i18nBounceRate'), value: vi ? `${Math.min((bo / vi) * 100, 100).toFixed(1)}%` : '--', change: '' },
+            { label: tr('i18nAvgDuration'), value: vi ? formatDuration(Math.round(tt / vi)) : '--', change: '' },
         ];
 
         container.innerHTML = items.map(item => {
@@ -322,7 +345,7 @@ const configJson = JSON.stringify({
 
         const points = data.pageviews;
         if (!points.length) {
-            svg.innerHTML = '<text x="400" y="110" text-anchor="middle" fill="var(--text-muted)" font-size="14">暂无数据</text>';
+            svg.innerHTML = `<text x="400" y="110" text-anchor="middle" fill="var(--text-muted)" font-size="14">${tr('i18nNoData')}</text>`;
             return;
         }
 
@@ -334,13 +357,13 @@ const configJson = JSON.stringify({
             let hintText: string;
             if (range === 'today') {
                 dateStr = `${date.getHours().toString().padStart(2, '0')}:00`;
-                hintText = '今日仅有一个小时有数据';
+                hintText = tr('i18nHintOneHour');
             } else if (range === 'year') {
-                dateStr = `${date.getMonth() + 1}月`;
-                hintText = '今年仅有1个月的数据';
+                dateStr = tr('i18nMonth').replace('{m}', String(date.getMonth() + 1));
+                hintText = tr('i18nHintOneMonth');
             } else {
-                dateStr = `${date.getMonth() + 1}月${date.getDate()}日`;
-                hintText = '该时段仅有一天有数据';
+                dateStr = tr('i18nMd').replace('{m}', String(date.getMonth() + 1)).replace('{d}', String(date.getDate()));
+                hintText = tr('i18nHintOneDay');
             }
             svg.innerHTML = `
                 <text x="400" y="95" text-anchor="middle" fill="var(--text-secondary)" font-size="20" font-weight="600" font-family="var(--font-sans, sans-serif)">${p.y}</text>
@@ -379,7 +402,7 @@ const configJson = JSON.stringify({
         function formatXLabel(dateStr: string, r: TimeRange): string {
             const date = new Date(dateStr);
             if (r === 'today') return `${date.getHours().toString().padStart(2, '0')}:00`;
-            if (r === 'year') return `${date.getMonth() + 1}月`;
+            if (r === 'year') return tr('i18nMonth').replace('{m}', String(date.getMonth() + 1));
             return `${date.getMonth() + 1}/${date.getDate()}`;
         }
 
@@ -439,7 +462,7 @@ const configJson = JSON.stringify({
 
         const sliced = items.slice(0, maxItems);
         if (!sliced.length) {
-            container.innerHTML = '<li class="data-row data-row-empty"><span class="data-empty-text">暂无数据</span></li>';
+            container.innerHTML = `<li class="data-row data-row-empty"><span class="data-empty-text">${tr('i18nNoData')}</span></li>`;
             return;
         }
 
@@ -465,7 +488,7 @@ const configJson = JSON.stringify({
 
         const sliced = items.slice(0, 5);
         if (!sliced.length) {
-            container.innerHTML = '<span class="dist-empty-text">暂无数据</span>';
+            container.innerHTML = `<span class="dist-empty-text">${tr('i18nNoData')}</span>`;
             return;
         }
 

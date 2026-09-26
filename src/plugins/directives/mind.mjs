@@ -4,7 +4,7 @@
  * Renders nested Markdown lists as interactive SVG mindmaps.
  */
 
-import { serializeToHtml } from './shared.mjs';
+import { serializeToHtml, escapeHtml } from './shared.mjs';
 
 let uidCounter = 0;
 function generateUid() {
@@ -32,7 +32,8 @@ function listToMarkdown(node, indent = 0) {
     return md;
 }
 
-export function processMindDirective(node) {
+export function processMindDirective(node, options = {}) {
+    const i18n = options.i18n?.mind ?? { empty: '思维导图内容为空' };
     let listNode = null;
     for (const child of node.children || []) {
         if (child.type === 'list') { listNode = child; break; }
@@ -40,7 +41,7 @@ export function processMindDirective(node) {
 
     if (!listNode) {
         node.data = { hName: 'div', hProperties: {} };
-        node.children = [{ type: 'html', value: '<div class="md-directive md-directive-mind"><p class="md-mind-empty">思维导图内容为空</p></div>' }];
+        node.children = [{ type: 'html', value: `<div class="md-directive md-directive-mind"><p class="md-mind-empty">${escapeHtml(i18n.empty)}</p></div>` }];
         return;
     }
 

@@ -1,4 +1,5 @@
 ---
+import { t } from '../../../i18n';
 import { ChevronLeft, Printer, Mail, Phone, MapPin, Globe } from '@lucide/astro';
 import siteConfig from '../../../data/site-config';
 import type { CollectionEntry } from 'astro:content';
@@ -19,7 +20,7 @@ const h2Headings = headings.filter((h) => h.depth === 2);
         <!-- 返回站点 -->
         <a href="/" class="inline-flex items-center gap-1.5 text-xs text-muted hover:text-accent transition-colors mb-6">
             <ChevronLeft class="w-3.5 h-3.5" />
-            <span>返回站点</span>
+            <span>{t.page.resume.backToSite}</span>
         </a>
 
         <!-- 基础信息卡片 -->
@@ -74,7 +75,7 @@ const h2Headings = headings.filter((h) => h.depth === 2);
         <!-- 目录 -->
         {h2Headings.length > 0 && (
             <div class="mb-6">
-                <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">目录</h3>
+                <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">{t.page.resume.toc}</h3>
                 <nav class="space-y-1">
                     {h2Headings.map((h) => (
                         <a
@@ -96,7 +97,7 @@ const h2Headings = headings.filter((h) => h.depth === 2);
             class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity"
         >
             <Printer class="w-4 h-4" />
-            <span>打印简历</span>
+            <span>{t.page.resume.print}</span>
         </button>
     </div>
 </aside>

@@ -1,4 +1,5 @@
 ---
+import { t } from '../../i18n';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getDocSets } from '../../utils/docs-utils';
 import { Image } from 'astro:assets';
@@ -26,10 +27,10 @@ function getTagClass(tag: string) {
 }
 ---
 
-<BaseLayout title="文档" description="所有知识库列表">
+<BaseLayout title={t.page.docs.title} description={t.page.docs.listTitle}>
     <div class="mb-6">
-        <h1 class="font-display text-2xl font-medium mb-2">文档</h1>
-        <p class="text-sm text-secondary">共 {docSets.length} 个知识库</p>
+        <h1 class="font-display text-2xl font-medium mb-2">{t.page.docs.title}</h1>
+        <p class="text-sm text-secondary">{t.page.docs.count(docSets.length)}</p>
     </div>
 
     {
@@ -39,7 +40,7 @@ function getTagClass(tag: string) {
                     class="doc-filter-btn active px-3 py-1 text-sm rounded-full border border-accent bg-accent text-white transition-all"
                     data-filter="all"
                 >
-                    全部
+                    {t.common.all}
                 </button>
                 {allTags.map((tag) => (
                     <button

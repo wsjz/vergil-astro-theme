@@ -1,4 +1,6 @@
 ---
+import { t } from '../../i18n';
+
 const searchDataUrl = '/search-data.json';
 ---
 
@@ -35,7 +37,7 @@ const searchDataUrl = '/search-data.json';
                     <input
                         type="text"
                         id="search-input"
-                        placeholder="搜索文章、项目、文档..."
+                        placeholder={t.search.placeholder}
                         class="w-full rounded-lg bg-card py-3 pl-11 pr-4 text-main outline-none placeholder:text-muted/60 transition-colors focus:bg-card/80"
                         autocomplete="off"
                     />
@@ -44,16 +46,16 @@ const searchDataUrl = '/search-data.json';
 
             <!-- Results -->
             <div id="search-results" class="max-h-[62vh] overflow-y-auto px-2 py-2">
-                <p class="text-center text-secondary text-sm py-8">输入关键词，开始搜索</p>
+                <p class="text-center text-secondary text-sm py-8">{t.search.hint}</p>
             </div>
 
             <!-- Footer -->
             <div class="border-t border-light/40 px-4 py-2.5 flex items-center justify-between text-[11px] text-muted">
                 <span id="search-status"></span>
                 <div class="flex items-center gap-3">
-                    <span class="flex items-center gap-1"><kbd class="rounded bg-card px-1 py-0.5 border border-light/30">↑↓</kbd> 选择</span>
-                    <span class="flex items-center gap-1"><kbd class="rounded bg-card px-1 py-0.5 border border-light/30">↵</kbd> 打开</span>
-                    <span class="flex items-center gap-1"><kbd class="rounded bg-card px-1 py-0.5 border border-light/30">esc</kbd> 关闭</span>
+                    <span class="flex items-center gap-1"><kbd class="rounded bg-card px-1 py-0.5 border border-light/30">↑↓</kbd> {t.search.kbdSelect}</span>
+                    <span class="flex items-center gap-1"><kbd class="rounded bg-card px-1 py-0.5 border border-light/30">↵</kbd> {t.search.kbdOpen}</span>
+                    <span class="flex items-center gap-1"><kbd class="rounded bg-card px-1 py-0.5 border border-light/30">esc</kbd> {t.search.kbdClose}</span>
                 </div>
             </div>
         </div>
@@ -66,7 +68,7 @@ const searchDataUrl = '/search-data.json';
     window.__loadFuse = () => import('fuse.js').then((m) => m.default);
 </script>
 
-<script is:inline data-search-url={searchDataUrl}>
+<script is:inline data-search-url={searchDataUrl} define:vars={{ i18n: { loading: t.search.loading, hint: t.search.hint, empty: t.search.empty, resultsZero: t.search.results(0) } }}>
 (function() {
     const script = document.currentScript;
     const searchUrl = script.dataset.searchUrl;
@@ -107,10 +109,10 @@ const searchDataUrl = '/search-data.json';
         S.isLoading = loading;
         const els = getEls();
         if (S.isLoading) {
-            if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">加载中...</p>';
+            if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">' + escapeHtml(i18n.loading) + '</p>';
             setStatus('');
         } else {
-            if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">输入关键词，开始搜索</p>';
+            if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">' + escapeHtml(i18n.hint) + '</p>';
             setStatus('');
         }
     }
@@ -239,9 +241,9 @@ const searchDataUrl = '/search-data.json';
         if (!els.results) return;
 
         if (!results.length) {
-            els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">未找到相关结果</p>';
+            els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">' + escapeHtml(i18n.empty) + '</p>';
             selectedIndex = -1;
-            setStatus('0 条结果');
+            setStatus(i18n.resultsZero);
             return;
         }
         selectedIndex = -1;
@@ -376,7 +378,7 @@ const searchDataUrl = '/search-data.json';
             const els = getEls();
             const query = e.target.value.trim();
             if (!query) {
-                if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">输入关键词，开始搜索</p>';
+                if (els.results) els.results.innerHTML = '<p class="text-center text-secondary text-sm py-8">' + escapeHtml(i18n.hint) + '</p>';
                 selectedIndex = -1;
                 setStatus('');
                 return;

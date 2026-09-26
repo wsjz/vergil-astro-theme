@@ -3,7 +3,7 @@ import { getIconSvg, resolveColor, escapeHtml, escapeUrl, safeCssValue, h, seria
 import { processPlanDirective } from './plan.mjs';
 
 export function processBlockDirective(node, options = {}) {
-    const { links, screenshotService } = options;
+    const { links, screenshotService, locale = 'zh-CN' } = options;
     const name = node.name;
     const attrs = node.attributes || {};
 
@@ -465,16 +465,17 @@ export function processBlockDirective(node, options = {}) {
             const title = attrs.title || '';
             const description = attrs.description || '';
             const showSeconds = attrs.showSeconds !== 'false';
-            const expiredText = attrs.expiredText || '已截止';
+            const i18n = options.i18n?.deadline ?? { day: '天', hour: '时', minute: '分', second: '秒', target: '目标日期', expired: '已截止' };
+            const expiredText = attrs.expiredText || i18n.expired;
             const units = showSeconds
-                ? ['天', '时', '分', '秒']
-                : ['天', '时', '分'];
+                ? [i18n.day, i18n.hour, i18n.minute, i18n.second]
+                : [i18n.day, i18n.hour, i18n.minute];
             const uid = `dl-${Math.random().toString(36).slice(2, 7)}`;
 
             // Build flip-clock panels with colon separators
             const parts = [];
             units.forEach((u, i) => {
-                parts.push(`<div class="md-deadline-unit-box"><div class="md-deadline-panel" data-unit="${i}"><div class="md-deadline-static-top"><span>00</span></div><div class="md-deadline-static-bottom"><span>00</span></div><div class="md-deadline-flip-top"><span>00</span></div><div class="md-deadline-flip-bottom"><span>00</span></div></div><span class="md-deadline-label">${u}</span></div>`);
+                parts.push(`<div class="md-deadline-unit-box"><div class="md-deadline-panel" data-unit="${i}"><div class="md-deadline-static-top"><span>00</span></div><div class="md-deadline-static-bottom"><span>00</span></div><div class="md-deadline-flip-top"><span>00</span></div><div class="md-deadline-flip-bottom"><span>00</span></div></div><span class="md-deadline-label">${escapeHtml(u)}</span></div>`);
                 if (i < units.length - 1) {
                     parts.push('<span class="md-deadline-sep">:</span>');
                 }
@@ -482,7 +483,7 @@ export function processBlockDirective(node, options = {}) {
             const unitHtml = parts.join('');
 
             const dateObj = new Date(date);
-            const dateStr = dateObj.toLocaleDateString('zh-CN', {
+            const dateStr = dateObj.toLocaleDateString(locale, {
                 year: 'numeric', month: '2-digit', day: '2-digit'
             });
 
@@ -492,7 +493,7 @@ export function processBlockDirective(node, options = {}) {
             const html = `<div class="md-directive md-directive-deadline" id="${uid}" data-date="${escapeHtml(date)}" data-expired="${escapeHtml(expiredText)}">` +
                 `${title ? `<div class="md-deadline-title"><span>${escapeHtml(title)}</span></div>` : ''}` +
                 `<div class="md-deadline-display">${unitHtml}</div>` +
-                `<div class="md-deadline-meta">目标日期 ${dateStr}</div>` +
+                `<div class="md-deadline-meta">${escapeHtml(i18n.target)} ${dateStr}</div>` +
                 `${description ? `<div class="md-deadline-desc">${escapeHtml(description)}</div>` : ''}` +
                 `</div>${js}`;
 

@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import { sortItemsByDateDesc } from '../../utils/data-utils';
 import { slugify } from '../../utils/common-utils';
+import { t } from '../../i18n';
 
 interface Props {
     currentPostId: string;
@@ -20,7 +21,7 @@ const related = allPosts
 
 {related.length > 0 && (
     <div class="px-4 py-4">
-        <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">相关文章</h3>
+        <h3 class="text-xs font-medium text-muted uppercase tracking-wider mb-3">{t.sidebar.related}</h3>
         <ul class="space-y-2">
             {related.map((post) => (
                 <li>

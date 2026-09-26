@@ -1,4 +1,5 @@
 ---
+import { locale, t } from '../../../i18n';
 import { ViewTransitions } from 'astro:transitions';
 import { ChevronLeft } from '@lucide/astro';
 import BaseHead, { type Props as HeadProps } from '../../../components/base/BaseHead.astro';
@@ -15,7 +16,7 @@ const isArticle = head.pageType === 'article';
 ---
 
 <!doctype html>
-<html lang="zh-CN" class="wrap-break-words antialiased">
+<html lang={locale} class="wrap-break-words antialiased">
     <head>
         <BaseHead {...head} />
         <script is:inline>
@@ -37,7 +38,7 @@ const isArticle = head.pageType === 'article';
         <meta name="robots" content="noindex" />
     </head>
     <body class="bg-main text-main">
-        <a class="skip-link" href="#main-content">跳到主要内容</a>
+        <a class="skip-link" href="#main-content">{t.a11y.skipToContent}</a>
         {isArticle && (
             <div id="reading-progress" class="fixed top-0 left-0 h-[2px] bg-accent z-[60] w-0 transition-none"></div>
         )}
@@ -70,8 +71,8 @@ const isArticle = head.pageType === 'article';
         <button
             id="minimal-back-to-top"
             class="floating-slot-1 fixed right-4 xl:right-6 z-50 flex items-center justify-center w-10 h-10 bg-card/90 backdrop-blur-sm border border-light/60 rounded-full shadow-lg text-secondary hover:text-accent hover:border-accent/40 hover:shadow-md hover:scale-[1.04] transition-[transform,box-shadow,color,border-color] duration-150 opacity-0 invisible translate-y-3"
-            aria-label="回到顶部"
-            title="回到顶部"
+            aria-label={t.nav.backToTop}
+            title={t.nav.backToTop}
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
@@ -83,7 +84,7 @@ const isArticle = head.pageType === 'article';
                 id="minimal-back-btn"
                 class="px-4 py-2 rounded-full bg-card/90 backdrop-blur-sm border border-light/60 shadow-lg text-sm text-secondary hover:text-accent hover:border-accent/40 hover:shadow-md hover:scale-[1.04] transition-[transform,box-shadow,color,border-color] duration-150 cursor-pointer pointer-events-auto"
             >
-                返回
+                {t.common.back}
             </button>
         </div>
         <script is:inline>
